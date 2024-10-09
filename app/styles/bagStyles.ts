@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
     },
     itemTextContainer: {
       padding: 5,
-      backgroundColor: '#ffffffb9',
       borderRadius: 8,
     },
     itemText: {
@@ -54,13 +53,14 @@ const styles = StyleSheet.create({
     },
     quantityContainer: {
       padding: 5,
-      backgroundColor: '#f0f0f0',
+      backgroundColor: 'rgba(255, 255, 255, 0.5)',
       borderRadius: 8,
     },
     quantityText: {
       fontSize: 12,
-      color: '#6d6d6d',
+      color: 'black',
       textAlign: 'center',
+      fontWeight: 'bold',
     },
     addItemContainer: {
       flex: 1,
@@ -68,7 +68,16 @@ const styles = StyleSheet.create({
       aspectRatio: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: '#ccc',
+      borderRadius: 8,
+    },
+    addItemButton: {
+      flex: 1,
+      aspectRatio: 1,
+      width: '100%',
+      height: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       borderRadius: 8,
     },
     modalOverlay: {
@@ -236,6 +245,20 @@ const styles = StyleSheet.create({
     modalOverlayTouchable: {
       flex: 1,
     },
+    detailsInput: {
+      height: 100,
+      textAlignVertical: 'top',
+    },
+    itemModalDetails: {
+      fontSize: 14,
+      marginBottom: 20,
+    },
+    headerTextContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+    },
+
   });
 
   export default styles;

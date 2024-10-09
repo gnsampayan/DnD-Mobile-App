@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   FlatList,
   Modal,
@@ -11,12 +10,24 @@ import {
   TouchableWithoutFeedback,
   Image,
   Keyboard,
-  ImageBackground, // Import ImageBackground
+  ImageBackground,
+  ImageSourcePropType,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
-import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
+
+import defaultAttackImage from '@actions/default-attack-image.png';
+import defaultThrowImage from '@actions/default-throw-image.png';
+import defaultPushImage from '@actions/default-push-image.png';
+import defaultJumpImage from '@actions/default-jump-image.png';
+import defaultHideImage from '@actions/default-hide-image.png';
+import defaultSprintImage from '@actions/default-sprint-image.png';
+import addActionImage from '@actions/add-action-image.png';
+import endActionImage from '@actions/end-action-image-v3.png';
+const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
+const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 // Define the base Action interface
 interface BaseAction {
   id: string;
@@ -26,28 +37,27 @@ interface BaseAction {
   image?: string; // Add optional image property
 }
 
-
 // Define specific action types if needed
 interface DefaultActionBlock extends BaseAction {
   // Additional properties specific to default actions
 }
 
+
 interface CustomActionBlock extends BaseAction {
   // Additional properties specific to custom actions
 }
-
 
 // Create a union type for Action
 type ActionBlock = DefaultActionBlock | CustomActionBlock;
 
 // Default actions that cannot be deleted
 const defaultActions: ActionBlock[] = [
-  { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 0 } },
-  { id: '1', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 } },
-  { id: '2', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 } },
-  { id: '3', name: 'Push', details: 'Move an object or creature forward', cost: { actions: 0, bonus: 1 } },
-  { id: '4', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 } },
-  { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 } },
+  { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 0 }, image: defaultSprintImage },
+  { id: '1', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+  { id: '2', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
+  { id: '3', name: 'Push', details: 'Move an object or creature forward', cost: { actions: 0, bonus: 1 }, image: defaultPushImage },
+  { id: '4', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
+  { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultAttackImage },
 ];
 
 
@@ -61,7 +71,7 @@ export default function ActionsScreen() {
   const [selectedAction, setSelectedAction] = useState<ActionBlock | null>(null);
   const [newActionImage, setNewActionImage] = useState<string | undefined>(undefined); // State for the new action image
   const [newActionDetails, setNewActionDetails] = useState<string>(''); // State for the new action details
-  const [editedActionName, setEditedActionName] = useState<string>(''); // State for the new action name
+  const [editedActionName, setEditedActionName] = useState<string>(''); // State for the edited action name
   const [editingField, setEditingField] = useState<'title' | 'details' | null>(null); // Track which field is being edited
 
   // State for new action cost
@@ -71,22 +81,25 @@ export default function ActionsScreen() {
   const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
   const [currentBonusActionsAvailable, setCurrentBonusActionsAvailable] = useState<number>(1);
 
-  // Load actions from local storage when the component mounts
+  // Path to the actions.json file
+  const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
+
+  // Load actions from file system when the component mounts
   useEffect(() => {
     loadActions();
   }, []);
 
 
-  // Function to load actions from local storage
+  // Function to load actions from file system
   const loadActions = async () => {
     try {
-      const storedActions = await SecureStore.getItemAsync('actions');
-      if (storedActions) {
-        let parsedActions: ActionBlock[] = JSON.parse(storedActions);
+      const fileInfo = await FileSystem.getInfoAsync(ACTIONS_FILE_PATH);
+      if (fileInfo.exists) {
+        const jsonString = await FileSystem.readAsStringAsync(ACTIONS_FILE_PATH);
+        let parsedActions: ActionBlock[] = JSON.parse(jsonString);
 
         // Optional: Migrate cost from array to object if necessary
         const needsMigration = parsedActions.some(action => Array.isArray(action.cost));
-
         if (needsMigration) {
           parsedActions = parsedActions.map(action => {
             if (Array.isArray(action.cost)) {
@@ -103,6 +116,7 @@ export default function ActionsScreen() {
           await saveActions(parsedActions);
         }
 
+
         const isValid = parsedActions.every(action => {
           return (
             action.cost &&
@@ -110,6 +124,7 @@ export default function ActionsScreen() {
             typeof action.cost.bonus === 'number'
           );
         });
+
 
         if (isValid) {
           setActions(parsedActions);
@@ -131,10 +146,11 @@ export default function ActionsScreen() {
   };
 
 
-  // Function to save actions to local storage
+  // Function to save actions to file system
   const saveActions = async (actionsToSave: ActionBlock[]) => {
     try {
-      await SecureStore.setItemAsync('actions', JSON.stringify(actionsToSave));
+      const jsonString = JSON.stringify(actionsToSave);
+      await FileSystem.writeAsStringAsync(ACTIONS_FILE_PATH, jsonString);
     } catch (error) {
       console.error('Failed to save actions:', error);
     }
@@ -144,7 +160,6 @@ export default function ActionsScreen() {
     // Cycle through column numbers from 2 to 4
     setNumColumns((prevColumns) => (prevColumns % 3) + 2);
   };
-
 
   const addAction = () => {
     if (newActionName) {
@@ -186,11 +201,17 @@ export default function ActionsScreen() {
       return;
     }
 
+    // Delete associated image file if it exists
+    if (actionToDelete && actionToDelete.image) {
+      FileSystem.deleteAsync(actionToDelete.image, { idempotent: true }).catch(error => {
+        console.error('Failed to delete image file:', error);
+      });
+    }
+
     const updatedActions = actions.filter((action) => action.id !== actionId);
     setActions(updatedActions);
     saveActions(updatedActions);
   };
-
 
   const handleLongPress = (actionId: string) => {
     // Check if the action is a default action
@@ -209,10 +230,23 @@ export default function ActionsScreen() {
     ]);
   };
 
+
   // Function to reset custom actions
   const resetActions = async () => {
     try {
-      // Keep default actions only
+      // Delete the actions.json file
+      await FileSystem.deleteAsync(ACTIONS_FILE_PATH, { idempotent: true });
+
+      // Delete any images associated with custom actions
+      const imageDeletionPromises = actions.map(action => {
+        if (!defaultActions.some(defaultAction => defaultAction.id === action.id) && action.image) {
+          return FileSystem.deleteAsync(action.image, { idempotent: true });
+        }
+        return Promise.resolve();
+      });
+      await Promise.all(imageDeletionPromises);
+
+      // Reset actions to default
       setActions(defaultActions);
       saveActions(defaultActions);
       setResetModalVisible(false);
@@ -220,7 +254,6 @@ export default function ActionsScreen() {
       console.error('Failed to reset actions:', error);
     }
   };
-
 
   const pickImage = async (forNewAction: boolean = false) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -238,19 +271,34 @@ export default function ActionsScreen() {
 
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
+      const fileName = imageUri.split('/').pop();
+      const newPath = `${FileSystem.documentDirectory}${fileName}`;
+
+      try {
+        await FileSystem.copyAsync({ from: imageUri, to: newPath });
+      } catch (error) {
+        console.error('Failed to copy image:', error);
+      }
+
       if (forNewAction) {
-        setNewActionImage(imageUri);
+        setNewActionImage(newPath);
       } else {
         if (selectedAction) {
           const updatedActions = actions.map(action => {
             if (action.id === selectedAction.id) {
-              return { ...action, image: imageUri };
+              // Delete previous image if it exists
+              if (action.image) {
+                FileSystem.deleteAsync(action.image, { idempotent: true }).catch(error => {
+                  console.error('Failed to delete old image:', error);
+                });
+              }
+              return { ...action, image: newPath };
             }
             return action;
           });
           setActions(updatedActions);
           saveActions(updatedActions);
-          setSelectedAction(prev => (prev ? { ...prev, image: imageUri } : null));
+          setSelectedAction(prev => (prev ? { ...prev, image: newPath } : null));
         }
       }
     }
@@ -330,6 +378,7 @@ export default function ActionsScreen() {
     }
   };
 
+
   const saveActionDetails = () => {
     if (selectedAction) {
       const updatedActions = actions.map(action => {
@@ -343,30 +392,45 @@ export default function ActionsScreen() {
 
       // Update the selectedAction to reflect the new details
       setSelectedAction(prev => (prev ? { ...prev, details: newActionDetails } : null));
+      setEditingField(null); // Exit editing mode
     }
   };
 
-
   const handleImageLongPress = () => {
     if (selectedAction) {
+      if (isDefaultAction(selectedAction.id)) {
+        Alert.alert('Information', 'You cannot edit the image of default actions.');
+        return;
+      }
+
       Alert.alert(
         'Image Options',
         selectedAction.image ? 'What would you like to do with the image?' : 'You can add an image.',
         [
-          ...(selectedAction.image ? [{
-            text: 'Remove Image',
-            onPress: () => {
-              const updatedActions = actions.map(action => {
-                if (action.id === selectedAction.id) {
-                  return { ...action, image: undefined }; // Set image to undefined
-                }
-                return action;
-              });
-              setActions(updatedActions); // Update actions state
-              saveActions(updatedActions); // Save the updated actions
-              setSelectedAction({ ...selectedAction, image: undefined }); // Update selected action
-            },
-          }] : []), // Only include if there is an image
+          ...(selectedAction.image
+            ? [
+              {
+                text: 'Remove Image',
+                onPress: () => {
+                  // Delete the image file
+                  if (selectedAction.image) {
+                    FileSystem.deleteAsync(selectedAction.image, { idempotent: true }).catch(error => {
+                      console.error('Failed to delete image file:', error);
+                    });
+                  }
+                  const updatedActions = actions.map(action => {
+                    if (action.id === selectedAction.id) {
+                      return { ...action, image: undefined }; // Set image to undefined
+                    }
+                    return action;
+                  });
+                  setActions(updatedActions); // Update actions state
+                  saveActions(updatedActions); // Save the updated actions
+                  setSelectedAction({ ...selectedAction, image: undefined }); // Update selected action
+                },
+              },
+            ]
+            : []), // Only include if there is an image
           {
             text: selectedAction.image ? 'Replace Image' : 'Add Image',
             onPress: () => pickImage(false), // Call pickImage for existing action
@@ -401,13 +465,13 @@ export default function ActionsScreen() {
     }
   };
 
+
   const endTurn = () => {
     setCurrentActionsAvailable(1);
     setCurrentBonusActionsAvailable(1);
   };
 
-
-  const renderActionBlocks = ({ item, index }: { item: ActionBlock | null; index: number }) => {
+  const renderActionBlocks = ({ item }: { item: ActionBlock | null }) => {
     if (item) {
       const affordable =
         currentActionsAvailable >= item.cost.actions &&
@@ -415,10 +479,16 @@ export default function ActionsScreen() {
 
       return (
         <ImageBackground
-          source={{ uri: item.image || 'https://via.placeholder.com/150?text=&bg=EEEEEE' }}
+          source={
+            item?.image
+              ? typeof item.image === 'number'
+                ? item.image // Local image imported via require/import
+                : { uri: item.image } // URI from file system or remote
+              : { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }
+          }
           style={[
             styles.itemContainer,
-            { opacity: affordable ? 1 : 0.5 }
+            { opacity: affordable ? 1 : 0.2 }
           ]}
           imageStyle={{ borderRadius: 8 }}
         >
@@ -431,19 +501,28 @@ export default function ActionsScreen() {
             onLongPress={() => handleLongPress(item.id)}
             disabled={!affordable}
           >
-            <Text style={styles.itemText}>{item.name}</Text>
+            {!item.image && (
+              <View style={styles.itemTextContainer}>
+                <Text style={styles.itemText}>{item.name}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </ImageBackground>
       );
     } else {
       // Render the plus icon as a button
       return (
-        <TouchableOpacity
+        <ImageBackground
+          source={addActionImageTyped}
           style={styles.addItemContainer}
-          onPress={() => setModalVisible(true)}
         >
-          <Ionicons name="add" size={48} color="white" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addItemButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <Ionicons name="add" size={48} color="white" />
+          </TouchableOpacity>
+        </ImageBackground>
       );
     }
   };
@@ -460,8 +539,18 @@ export default function ActionsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerText}>Actions: {currentActionsAvailable}</Text>
-          <Text style={styles.headerText}>Bonus Actions: {currentBonusActionsAvailable}</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>
+              Actions: {currentActionsAvailable}
+            </Text>
+            <Ionicons name="ellipse" size={16} color="green" />
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>
+              Bonus Actions: {currentBonusActionsAvailable}
+            </Text>
+            <Ionicons name="triangle" size={16} color="#FF8C00" />
+          </View>
         </View>
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={changeNumColumns}>
@@ -474,10 +563,10 @@ export default function ActionsScreen() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setResetModalVisible(true)}>
             <Ionicons
-              name="refresh-circle"
-              size={32}
-              color="red" // Corrected color prop
-              style={[styles.headerIcon, { color: '#ff6e6e' }]}
+              name="warning"
+              size={24}
+              color="red"
+              style={[styles.headerIcon, { color: 'white' }]}
             />
           </TouchableOpacity>
         </View>
@@ -487,17 +576,19 @@ export default function ActionsScreen() {
       <FlatList
         data={dataWithAddButton}
         renderItem={renderActionBlocks}
-        keyExtractor={(item, index) => (item ? item.id : 'add-button')}
+        keyExtractor={(item) => (item ? item.id : 'add-button')}
         key={numColumns} // Important for resetting the layout
         numColumns={numColumns}
         contentContainerStyle={styles.grid}
       />
 
       {/* Footer Button */}
-      <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
-        <Ionicons name="flag-outline" size={48} color="white" />
-        <Text style={styles.footerButtonText}>End Turn</Text>
-      </TouchableOpacity>
+      <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
+        <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
+          <Text style={styles.footerButtonText}>Next Turn</Text>
+          <Ionicons name="refresh" size={28} color="white" style={{ marginLeft: 5 }} />
+        </TouchableOpacity>
+      </ImageBackground>
 
       {/* Action Details Modal */}
       <Modal
@@ -511,34 +602,16 @@ export default function ActionsScreen() {
               <View style={styles.modalContainer}>
                 {selectedAction && (
                   <>
-                    {/* Title Section */}
-                    {editingField === 'title' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
-                      <TextInput
-                        style={styles.modalInput}
-                        value={editedActionName}
-                        onChangeText={setEditedActionName}
-                        keyboardType="default"
-                        onBlur={() => {
-                          saveActionName();
-                          setEditingField(null);
-                        }}
-                        onSubmitEditing={() => {
-                          saveActionName();
-                          setEditingField(null);
-                        }}
-                        autoFocus={true}
-                      />
-                    ) : (
-                      <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
-                        <Text style={styles.modalTitle}>{selectedAction?.name}</Text>
-                      </TouchableWithoutFeedback>
-                    )}
 
                     {/* Image Section */}
-                    <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
-                      {selectedAction.image ? (
+                    <TouchableWithoutFeedback onLongPress={handleImageLongPress} style={styles.itemModalImageContainer}>
+                      {selectedAction?.image ? (
                         <Image
-                          source={{ uri: selectedAction.image }}
+                          source={
+                            typeof selectedAction.image === 'number'
+                              ? selectedAction.image
+                              : { uri: selectedAction.image }
+                          }
                           style={styles.itemModalImage}
                         />
                       ) : (
@@ -548,6 +621,23 @@ export default function ActionsScreen() {
                       )}
                     </TouchableWithoutFeedback>
 
+                    {/* Title Section */}
+                    {editingField === 'title' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
+                      <TextInput
+                        style={styles.modalInput}
+                        value={editedActionName}
+                        onChangeText={setEditedActionName}
+                        keyboardType="default"
+                        onBlur={saveActionName}
+                        onSubmitEditing={saveActionName}
+                        autoFocus={true}
+                      />
+                    ) : (
+                      <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
+                        <Text style={styles.modalTitle}>{selectedAction?.name}</Text>
+                      </TouchableWithoutFeedback>
+                    )}
+
                     {/* Details Section */}
                     {editingField === 'details' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
                       <TextInput
@@ -555,14 +645,8 @@ export default function ActionsScreen() {
                         value={newActionDetails}
                         onChangeText={setNewActionDetails}
                         keyboardType="default"
-                        onBlur={() => {
-                          saveActionDetails();
-                          setEditingField(null);
-                        }}
-                        onSubmitEditing={() => {
-                          saveActionDetails();
-                          setEditingField(null);
-                        }}
+                        onBlur={saveActionDetails}
+                        onSubmitEditing={saveActionDetails}
                         multiline={true}
                         textAlignVertical="top"
                         autoFocus={true}
@@ -576,13 +660,30 @@ export default function ActionsScreen() {
                     )}
 
                     {/* Cost Section */}
-                    <Text>Cost: {selectedAction.cost.actions} Actions, {selectedAction.cost.bonus} Bonus Actions</Text>
+                    <View style={styles.modalCostContainer}>
+                      <Text>Cost: </Text>
+                      {selectedAction.cost.actions === 0 ? null : (
+                        <View style={styles.costTextContainer}>
+                          <Text>{selectedAction.cost.actions}</Text>
+                          <Ionicons name="ellipse" size={16} color="green" />
+                        </View>
+                      )}
+                      {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
+                        <Text>, </Text>
+                      )}
+                      {selectedAction.cost.bonus === 0 ? null : (
+                        <View style={styles.costTextContainer}>
+                          <Text>{selectedAction.cost.bonus}</Text>
+                          <Ionicons name="triangle" size={16} color="#FF8C00" />
+                        </View>
+                      )}
+                    </View>
 
                     {/* Modal Buttons */}
                     <View style={styles.modalButtons}>
                       <TouchableOpacity
                         style={[
-                          styles.modalButtonUse,
+                          styles.modalButtonCommit,
                           selectedAction &&
                           (currentActionsAvailable < selectedAction.cost.actions ||
                             currentBonusActionsAvailable < selectedAction.cost.bonus) && { opacity: 0.5 }
@@ -594,7 +695,24 @@ export default function ActionsScreen() {
                           currentBonusActionsAvailable < selectedAction.cost.bonus
                         }
                       >
-                        <Text style={styles.modalButtonText}>Commit</Text>
+                        <View style={styles.modalButtonTextContainer}>
+                          <Text>Commit: </Text>
+                          {selectedAction.cost.actions === 0 ? null : (
+                            <View style={styles.costTextContainer}>
+                              <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.actions}</Text>
+                              <Ionicons name="ellipse" size={16} color="green" />
+                            </View>
+                          )}
+                          {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
+                            <Text>, </Text>
+                          )}
+                          {selectedAction.cost.bonus === 0 ? null : (
+                            <View style={styles.costTextContainer}>
+                              <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.bonus}</Text>
+                              <Ionicons name="triangle" size={16} color="#FF8C00" />
+                            </View>
+                          )}
+                        </View>
                       </TouchableOpacity>
                     </View>
                   </>
@@ -687,14 +805,26 @@ export default function ActionsScreen() {
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>Reset Actions</Text>
               <Text style={styles.modalText}>
-                Are you sure you want to reset all custom actions? This action cannot be undone.
+                Are you sure? This will delete all custom actions. This cannot be undone.
               </Text>
               <View style={styles.modalButtons}>
                 <TouchableOpacity
-                  style={styles.modalButtonAdd}
+                  style={styles.modalButton}
+                  onPress={() => setResetModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonReset}
                   onPress={resetActions}
                 >
-                  <Text style={styles.modalButtonText}>Reset</Text>
+                  <Ionicons
+                    name="nuclear"
+                    size={24}
+                    color="red"
+                    style={[styles.headerIcon, { color: 'white' }]}
+                  />
+                  <Text style={styles.modalButtonText}>Reset to Default</Text>
                 </TouchableOpacity>
               </View>
             </View>

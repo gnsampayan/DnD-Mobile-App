@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   FlatList,
   Modal,
@@ -12,11 +11,19 @@ import {
   TouchableWithoutFeedback,
   Image,
   ImageBackground,
+  AlertButton,
+  ImageSourcePropType,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
+
+import bedrollImage from '@items/default-item-bedroll.png';
+import campingSuppliesImage from '@items/default-item-camping-supplies.png';
+import coinPouchImage from '@items/default-item-coin-pouch.png';
+import addItemImage from '@items/add-item-image.png';
+const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
 
 // Define the base Item interface
 interface BaseItem {
@@ -24,7 +31,7 @@ interface BaseItem {
   name: string;
   quantity: number;
   image?: string; // Optional image property
-  // You can add common properties here
+  details?: string; // **Add the details property**
 }
 
 
@@ -36,6 +43,7 @@ interface Food extends BaseItem {
 interface Weapon extends BaseItem {
   // Additional properties specific to Weapon
 }
+
 
 interface Wares extends BaseItem {
   // Additional properties specific to Wares
@@ -56,25 +64,28 @@ interface Misc extends BaseItem {
 // Create a union type for Item
 type Item = Food | Weapon | Wares | MagicItem | Special | Misc;
 
-// Default starting items
+// **Default starting items with details**
 const defaultItems: Item[] = [
   {
     id: '0',
     name: 'Bed Roll',
     quantity: 1,
-    image: 'https://via.placeholder.com/150', // Replace with your image URI
+    image: bedrollImage,
+    details: 'A simple bed roll for resting.',
   },
   {
     id: '1',
     name: 'Camping Supplies',
     quantity: 4,
-    image: 'https://via.placeholder.com/150', // Replace with your image URI
+    image: campingSuppliesImage,
+    details: 'Supplies needed for camping in the wilderness.',
   },
   {
     id: '2',
-    name: 'Coin Purse',
+    name: 'Coin Pouch',
     quantity: 1,
-    image: 'https://via.placeholder.com/150', // Replace with your image URI
+    image: coinPouchImage,
+    details: 'A small pouch containing coins.',
   },
 ];
 
@@ -83,14 +94,17 @@ export default function BagScreen() {
   const [numColumns, setNumColumns] = useState(4);
   const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [newItem, setNewItem] = useState<{ name: string; quantity: number; image?: string }>({
+  const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [newItem, setNewItem] = useState<{ name: string; quantity: number; image?: string; details?: string }>({
     name: '',
     quantity: 1,
     image: undefined,
+    details: '',
   });
 
-  // New state for reset confirmation modal
-  const [resetModalVisible, setResetModalVisible] = useState(false);
+
+  // Path to the items.json file
+  const ITEMS_FILE_PATH = `${FileSystem.documentDirectory}items.json`;
 
   // Load items from local storage when the component mounts
   useEffect(() => {
@@ -98,12 +112,15 @@ export default function BagScreen() {
   }, []);
 
 
-  // Function to load items from local storage
+  // Function to load items from file system
   const loadItems = async () => {
     try {
-      const storedItems = await SecureStore.getItemAsync('items');
-      if (storedItems) {
-        setItems(JSON.parse(storedItems));
+      const fileInfo = await FileSystem.getInfoAsync(ITEMS_FILE_PATH);
+      if (fileInfo.exists) {
+        const jsonString = await FileSystem.readAsStringAsync(ITEMS_FILE_PATH);
+        const parsedItems: Item[] = JSON.parse(jsonString);
+
+        setItems(parsedItems);
       } else {
         // If no items in storage, initialize with default items
         setItems(defaultItems);
@@ -120,21 +137,26 @@ export default function BagScreen() {
   // Function to save items to local storage
   const saveItems = async (itemsToSave: Item[]) => {
     try {
-      // Convert items to a format that only includes URIs
-      const itemsWithUris = itemsToSave.map(item => ({
-        ...item,
-        image: item.image, // Ensure only the URI is stored
-      }));
-      await SecureStore.setItemAsync('items', JSON.stringify(itemsWithUris));
+      const jsonString = JSON.stringify(itemsToSave);
+      await FileSystem.writeAsStringAsync(ITEMS_FILE_PATH, jsonString);
     } catch (error) {
       console.error('Failed to save items:', error);
     }
   };
 
+
   // Function to clear items and reset to default
   const resetItems = async () => {
     try {
-      await SecureStore.deleteItemAsync('items');
+      await FileSystem.deleteAsync(ITEMS_FILE_PATH, { idempotent: true });
+      // Delete custom item images
+      for (const item of items) {
+        if (!isDefaultItem(item.id) && item.image) {
+          await FileSystem.deleteAsync(item.image, { idempotent: true }).catch((error) => {
+            console.error('Failed to delete image file:', error);
+          });
+        }
+      }
       setItems(defaultItems);
       saveItems(defaultItems);
       setResetModalVisible(false);
@@ -143,11 +165,14 @@ export default function BagScreen() {
     }
   };
 
+
   const changeNumColumns = () => {
     // Cycle through column numbers from 2 to 4
     setNumColumns((prevColumns) => (prevColumns % 3) + 2);
   };
 
+
+  // Function to pick an image from the media library
   async function pickImage(forNewItem: boolean = false) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -161,24 +186,47 @@ export default function BagScreen() {
       quality: 1,
     });
 
+
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
+      const fileName = imageUri.split('/').pop();
+      const newPath = `${FileSystem.documentDirectory}${fileName}`;
+
+      try {
+        await FileSystem.copyAsync({ from: imageUri, to: newPath });
+      } catch (error) {
+        console.error('Failed to copy image:', error);
+      }
+
       if (forNewItem) {
-        setNewItem(prev => ({ ...prev, image: imageUri }));
+        setNewItem((prev) => ({ ...prev, image: newPath }));
       } else if (selectedItem) {
-        const updatedItems = items.map(item => {
+        const updatedItems = items.map((item) => {
           if (item.id === selectedItem.id) {
-            return { ...item, image: imageUri };
+            return { ...item, image: newPath };
           }
           return item;
         });
         setItems(updatedItems);
-        saveItems(updatedItems); // Save only the URI
-        setSelectedItem(prev => (prev ? { ...prev, image: imageUri } : null));
+        saveItems(updatedItems); // Save updated items
+        setSelectedItem((prev) => (prev ? { ...prev, image: newPath } : null));
       }
     }
   }
 
+  // Function to check if an item is a default item
+  const isDefaultItem = (itemId: string) => {
+    return defaultItems.some((item) => item.id === itemId);
+  };
+
+  // Function to find a default item by ID
+  function getDefaultItemImage(itemId: string): ImageSourcePropType | undefined {
+    const defaultItem = defaultItems.find(item => item.id === itemId);
+    return defaultItem ? { uri: defaultItem.image } : undefined;
+  }
+
+
+  // Function to add a new item to the items array
   function addItem() {
     if (newItem.name) {
       // Generate new id based on maximum existing id
@@ -186,31 +234,48 @@ export default function BagScreen() {
       const maxId = existingIds.length > 0 ? Math.max(...existingIds) : -1;
       const newId = String(maxId + 1);
 
-      const updatedItems = [
-        ...items,
-        {
-          id: newId,
-          name: newItem.name,
-          quantity: Number(newItem.quantity),
-          image: newItem.image,
-        },
-      ];
+      const newItemToAdd: Item = {
+        id: newId,
+        name: newItem.name,
+        quantity: Number(newItem.quantity),
+        image: newItem.image,
+        details: newItem.details,
+      };
+
+      const updatedItems = [...items, newItemToAdd];
       setItems(updatedItems);
       saveItems(updatedItems);
-      setNewItem({ name: '', quantity: 1, image: undefined });
+      setNewItem({ name: '', quantity: 1, image: undefined, details: '' });
       setModalVisible(false);
     } else {
       Alert.alert('Error', 'Please enter the Name of the item.');
     }
   }
 
+
+  // Function to delete an item from the items array
   const deleteItem = (itemId: string) => {
+    const itemToDelete = items.find((item) => item.id === itemId);
+    if (itemToDelete && itemToDelete.image) {
+      FileSystem.deleteAsync(itemToDelete.image, { idempotent: true }).catch((error) => {
+        console.error('Failed to delete image file:', error);
+      });
+    }
+
     const updatedItems = items.filter((item) => item.id !== itemId);
     setItems(updatedItems);
     saveItems(updatedItems);
   };
 
+
+  // Function to handle long press on the item
   const handleLongPress = (itemId: string) => {
+    // Check if the item is a default item
+    if (isDefaultItem(itemId)) {
+      Alert.alert('Information', 'Default items cannot be deleted.');
+      return;
+    }
+
     Alert.alert('Delete Item', 'Are you sure you want to delete this item?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -221,7 +286,10 @@ export default function BagScreen() {
     ]);
   };
 
-  const renderItem = ({ item, index }: { item: Item | null; index: number }) => {
+
+
+  // Function to render each item in the grid
+  const renderItem = ({ item }: { item: Item | null }) => {
     if (item) {
       return (
         <TouchableOpacity
@@ -234,14 +302,22 @@ export default function BagScreen() {
         >
           {/* Display the item as an ImageBackground */}
           <ImageBackground
-            source={{ uri: item.image || 'https://via.placeholder.com/150' }}
+            source={
+              item?.image
+                ? typeof item.image === 'number'
+                  ? item.image // Local image imported via require/import
+                  : { uri: item.image } // URI from file system or remote
+                : { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }
+            }
             style={styles.itemImageBackground}
             imageStyle={{ borderRadius: 8 }}
-            resizeMode="contain"
+            resizeMode="cover"
           >
             <View style={styles.itemContent}>
               <View style={styles.itemTextContainer}>
-                <Text style={styles.itemText}>{item.name}</Text>
+                {!item.image && (
+                  <Text style={styles.itemText}>{item.name}</Text>
+                )}
               </View>
               {item.quantity > 1 && (
                 <View style={styles.quantityContainer}>
@@ -255,20 +331,23 @@ export default function BagScreen() {
     } else {
       // Render the plus icon as a button
       return (
-        <TouchableOpacity
-          style={styles.addItemContainer}
-          onPress={() => setModalVisible(true)}
-        >
-          <Ionicons name="add" size={48} color="white" />
-        </TouchableOpacity>
+        <ImageBackground source={addItemImageTyped} style={styles.addItemContainer}>
+          <TouchableOpacity
+            style={styles.addItemButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <Ionicons name="add" size={48} color="white" />
+          </TouchableOpacity>
+        </ImageBackground>
       );
     }
   };
 
+
   // Prepare data by adding a null item to represent the add button
   const dataWithAddButton = [...items, null];
 
-  // ... existing state variables
+  // Existing state variables
   const [itemModalVisible, setItemModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
@@ -286,6 +365,7 @@ export default function BagScreen() {
     }
   }, [selectedItem]);
 
+
   // Function to update the item's quantity in the items array
   const updateItemQuantity = (itemId: string, newQuantity: number) => {
     const updatedItems = items.map((item) => {
@@ -298,6 +378,7 @@ export default function BagScreen() {
     saveItems(updatedItems);
   };
 
+
   // Increment quantity by 1
   const incrementQuantity = () => {
     const newQuantity = modalQuantity + 1;
@@ -307,6 +388,7 @@ export default function BagScreen() {
       updateItemQuantity(selectedItem.id, newQuantity);
     }
   };
+
 
   // Decrement quantity by 1, minimum of 1
   const decrementQuantity = () => {
@@ -320,10 +402,12 @@ export default function BagScreen() {
     }
   };
 
+
   // Update the quantity input as the user types
   const handleQuantityChange = (text: string) => {
     setModalQuantityInput(text);
   };
+
 
   // Handle when the user finishes editing the quantity input
   const handleQuantityEndEditing = () => {
@@ -339,56 +423,78 @@ export default function BagScreen() {
     }
   };
 
+
   // Function to handle long press on the item image
   const handleImageLongPress = () => {
     if (selectedItem) {
+      if (isDefaultItem(selectedItem.id)) {
+        Alert.alert('Information', 'You cannot edit the image of default items.');
+        return;
+      }
+
+      const buttons: AlertButton[] = [];
+
+      // If the item has an image, include the "Remove Image" button
+      if (selectedItem.image) {
+        buttons.push({
+          text: 'Remove Image',
+          onPress: () => {
+            if (selectedItem.image) {
+              const updatedItems = items.map((item) => {
+                if (item.id === selectedItem.id) {
+                  return { ...item, image: undefined };
+                }
+                return item;
+              });
+              setItems(updatedItems);
+              saveItems(updatedItems);
+              setSelectedItem({ ...selectedItem, image: undefined });
+            } else {
+              pickImage();
+            }
+          },
+        });
+      }
+
+      // Include the "Replace Image" or "Add Image" button
+      buttons.push({
+        text: selectedItem.image ? 'Replace Image' : 'Add Image',
+        onPress: () => {
+          pickImage();
+        },
+      });
+
+      // Include the "Cancel" button with a valid 'style' property
+      buttons.push({
+        text: 'Cancel',
+        style: 'cancel',
+      });
+
+
+      // Show the alert with the constructed buttons
       Alert.alert(
         'Image Options',
-        selectedItem.image ? 'What would you like to do with the image?' : 'You can add an image.',
-        [
-          // Conditionally render the "Remove Image" button
-          ...(selectedItem.image ? [{
-            text: 'Remove Image',
-            onPress: () => {
-              if (selectedItem.image) {
-                // Remove the image by setting it to undefined
-                const updatedItems = items.map((item) => {
-                  if (item.id === selectedItem.id) {
-                    return { ...item, image: undefined }; // Set image to undefined
-                  }
-                  return item;
-                });
-                setItems(updatedItems);
-                saveItems(updatedItems);
-                setSelectedItem({ ...selectedItem, image: undefined }); // Update selected item
-              } else {
-                // If there's no image, call the pickImage function
-                pickImage();
-              }
-            },
-          }] : []), // Only include if there is an image
-          {
-            text: selectedItem.image ? 'Replace Image' : 'Add Image',
-            onPress: () => {
-              pickImage(); // Call the existing pickImage function
-            },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ],
+        selectedItem.image
+          ? 'What would you like to do with the image?'
+          : 'You can add an image.',
+        buttons,
         { cancelable: true }
       );
     }
   };
+
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState<string>('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null); // Track which item is being edited
 
   const handleTitleLongPress = (itemId: string) => {
-    const itemToEdit = items.find(item => item.id === itemId);
+    if (isDefaultItem(itemId)) {
+      Alert.alert('Information', 'You cannot edit the name of default items.');
+      return;
+    }
+
+    const itemToEdit = items.find((item) => item.id === itemId);
     if (itemToEdit) {
       Alert.alert(
         'Rename Item',
@@ -412,6 +518,37 @@ export default function BagScreen() {
     }
   };
 
+
+  // Function to handle long press on item details
+  const handleDetailsLongPress = () => {
+    if (selectedItem) {
+      if (isDefaultItem(selectedItem.id)) {
+        Alert.alert('Information', 'You cannot edit the details of default items.');
+        return;
+      }
+
+      Alert.alert(
+        'Edit Details',
+        'Do you want to edit the details of this item?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Edit',
+            onPress: () => {
+              setEditingField('details');
+              setEditedDetails(selectedItem.details || '');
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+
   const updateItemName = (itemId: string, newName: string) => {
     const updatedItems = items.map((item) => {
       if (item.id === itemId) {
@@ -420,16 +557,57 @@ export default function BagScreen() {
       return item;
     });
     setItems(updatedItems);
-    saveItems(updatedItems); // Save the updated items to secure storage
+    saveItems(updatedItems); // Save the updated items to the file system
   };
+
+
+  const updateItemDetails = (itemId: string, newDetails: string) => {
+    const updatedItems = items.map((item) => {
+      if (item.id === itemId) {
+        return { ...item, details: newDetails }; // Update the details
+      }
+      return item;
+    });
+    setItems(updatedItems);
+    saveItems(updatedItems); // Save the updated items to the file system
+  };
+
+
+  const [editingField, setEditingField] = useState<'details' | null>(null);
+  const [editedDetails, setEditedDetails] = useState<string>('');
+
+  const saveItemName = () => {
+    if (selectedItem && editingItemId) {
+      updateItemName(editingItemId, editedName);
+      setSelectedItem((prev) => (prev ? { ...prev, name: editedName } : null));
+      setIsEditing(false);
+      setEditingItemId(null);
+    }
+  };
+
+
+  const saveItemDetails = () => {
+    if (selectedItem) {
+      updateItemDetails(selectedItem.id, editedDetails);
+      setSelectedItem((prev) => (prev ? { ...prev, details: editedDetails } : null));
+      setEditingField(null);
+    }
+  };
+
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerText}>Gold: 100</Text>
-          <Text style={styles.headerText}>Total Weight: 50 lbs</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>Money: 100</Text>
+            <Ionicons name="diamond" size={14} color="gold" />
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>Carrying: 50</Text>
+            <Ionicons name="barbell" size={18} color="#84b8e3" />
+          </View>
         </View>
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={changeNumColumns}>
@@ -487,36 +665,32 @@ export default function BagScreen() {
                   placeholderTextColor="gray"
                   keyboardType="number-pad"
                   onChangeText={(text) =>
-                    setNewItem({
-                      ...newItem,
-                      quantity: Number(text),
-                    })
+                    setNewItem({ ...newItem, quantity: Number(text) || 1 })
                   }
-                  value={String(newItem.quantity)}
+                  value={newItem.quantity.toString()}
                 />
-                {/* Image Picker Button */}
+                {/* Add details input */}
+                <TextInput
+                  style={[styles.modalInput, styles.detailsInput]}
+                  placeholder="Item Details"
+                  placeholderTextColor="gray"
+                  onChangeText={(text) => setNewItem({ ...newItem, details: text })}
+                  value={newItem.details}
+                  multiline={true}
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+
                 <TouchableOpacity style={styles.imagePickerButton} onPress={() => pickImage(true)}>
                   <Text style={styles.imagePickerButtonText}>Select Image</Text>
                 </TouchableOpacity>
-
-                {/* Display Selected Image */}
                 {newItem.image && (
                   <Image
                     source={{ uri: newItem.image }}
                     style={styles.selectedImage}
                   />
                 )}
-
                 <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.modalButtonCancel}
-                    onPress={() => {
-                      setModalVisible(false);
-                      setNewItem({ name: '', quantity: 1, image: undefined });
-                    }}
-                  >
-                    <Text style={styles.modalButtonText}>Cancel</Text>
-                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.modalButtonAdd}
                     onPress={addItem}
@@ -530,7 +704,7 @@ export default function BagScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Reset Confirmation Modal */}
+      {/* Reset Items Modal */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -579,22 +753,9 @@ export default function BagScreen() {
                       style={styles.modalInput}
                       value={editedName}
                       onChangeText={setEditedName}
-                      onBlur={() => {
-                        if (editingItemId) {
-                          updateItemName(editingItemId, editedName); // Update the item's name
-                          setSelectedItem((prev) => prev ? { ...prev, name: editedName } : null); // Update selected item with new name
-                          setIsEditing(false); // Exit editing mode
-                          setEditingItemId(null); // Clear the editing item ID
-                        }
-                      }}
-                      onSubmitEditing={() => {
-                        if (editingItemId) {
-                          updateItemName(editingItemId, editedName); // Update the item's name
-                          setSelectedItem((prev) => prev ? { ...prev, name: editedName } : null); // Update selected item with new name
-                          setIsEditing(false); // Exit editing mode
-                          setEditingItemId(null); // Clear the editing item ID
-                        }
-                      }}
+                      onBlur={saveItemName}
+                      onSubmitEditing={saveItemName}
+                      autoFocus={true}
                     />
                   ) : (
                     <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
@@ -606,7 +767,11 @@ export default function BagScreen() {
                     <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
                       {selectedItem.image ? (
                         <Image
-                          source={{ uri: selectedItem.image }}
+                          source={
+                            typeof selectedItem.image === 'number'
+                              ? selectedItem.image
+                              : { uri: selectedItem.image }
+                          }
                           style={styles.itemModalImage}
                         />
                       ) : (
@@ -615,6 +780,27 @@ export default function BagScreen() {
                         </View>
                       )}
                     </TouchableWithoutFeedback>
+
+                    {/* Details Section */}
+                    {editingField === 'details' && !isDefaultItem(selectedItem.id) ? (
+                      <TextInput
+                        style={[styles.modalInput, styles.detailsInput]}
+                        value={editedDetails}
+                        onChangeText={setEditedDetails}
+                        keyboardType="default"
+                        onBlur={saveItemDetails}
+                        onSubmitEditing={saveItemDetails}
+                        multiline={true}
+                        textAlignVertical="top"
+                        autoFocus={true}
+                      />
+                    ) : (
+                      <TouchableWithoutFeedback onLongPress={handleDetailsLongPress}>
+                        <Text style={styles.itemModalDetails}>
+                          {selectedItem.details || 'No details available.'}
+                        </Text>
+                      </TouchableWithoutFeedback>
+                    )}
 
                     {/* Quantity Row */}
                     <View style={styles.quantityRow}>
@@ -652,6 +838,8 @@ export default function BagScreen() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+
     </View>
   );
 }
