@@ -191,15 +191,6 @@ const styles = StyleSheet.create({
         padding: 10,
         gap: 10,
     },
-    headerButton: {
-        backgroundColor: '#4A90E2', // Subtle blue for button
-        borderRadius: 5,
-        padding: 10,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 10,
-    },
     hpContainer: {
         flexDirection: 'row',
         justifyContent: 'center',

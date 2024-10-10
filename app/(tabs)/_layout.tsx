@@ -16,15 +16,6 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="bag"
-        options={{
-          title: 'Bag',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'bag' : 'bag-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: 'Actions',
@@ -34,11 +25,29 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="me"
+        name="bag"
         options={{
-          title: 'Me',
+          title: 'Bag',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+            <TabBarIcon name={focused ? 'bag' : 'bag-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: 'Stats',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="character"
+        options={{
+          title: 'Character',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'shirt' : 'shirt-outline'} color={color} />
           ),
         }}
       />

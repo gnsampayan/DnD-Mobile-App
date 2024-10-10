@@ -18,8 +18,6 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system'; // Import FileSystem
 import styles from '../styles/meStyles';
 import { Ionicons } from '@expo/vector-icons';
-import CharacterStatsScreen from '@/components/CharacterStatsScreen'; // Correct import path
-import abilities from '../../app/data/abilities.json';
 
 // Import default images
 import defaultHelmetImage from '@equipment/default-helmet.png';
@@ -32,6 +30,7 @@ import defaultRingImage from '@equipment/default-ring.png';
 import defaultMeleeWeaponImage from '@equipment/default-melee.png';
 import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface EquipmentItem {
     id: string;
@@ -46,7 +45,6 @@ export default function MeScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [imageUri, setImageUri] = useState<string | null>(null);
-    const [showCharacterStats, setShowCharacterStats] = useState(false); // State for Screen Toggle
 
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -249,12 +247,29 @@ export default function MeScreen() {
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
 
-    // 3. Conditional Rendering Based on Screen Toggle
-    if (showCharacterStats) {
-        return <CharacterStatsScreen onBack={() => setShowCharacterStats(false)} />;
-    }
+    const [ac, setAc] = useState(10);
 
-    const ac = (abilities[1].value - 10) / 2;
+    useEffect(() => {
+        const loadAcData = async () => {
+            try {
+                const dataString = await AsyncStorage.getItem('statsData');
+                if (dataString) {
+                    const data = JSON.parse(dataString);
+                    if (Array.isArray(data.abilities)) {
+                        const dexterity = data.abilities.find((ability: { name: string }) => ability.name === 'Dexterity');
+                        if (dexterity && 'value' in dexterity) {
+                            const dexModifier = Math.floor((dexterity.value - 10) / 2);
+                            setAc(10 + dexModifier);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading AC data:', error);
+            }
+        };
+
+        loadAcData();
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -303,7 +318,7 @@ export default function MeScreen() {
                 </View>
 
                 {/* Section 3 */}
-                <TouchableOpacity onLongPress={handleImagePress} onPress={() => setShowCharacterStats(true)}>
+                <TouchableOpacity onLongPress={handleImagePress}>
                     <View style={[styles.imageContainer, { width: section3Width }]}>
                         {imageUri ? (
                             <Image
