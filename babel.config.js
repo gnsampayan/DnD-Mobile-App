@@ -12,10 +12,10 @@ module.exports = function(api) {
             '@images': './assets/images',
             '@items': './assets/images/items',
             '@actions': './assets/images/actions',
+            '@equipment': './assets/images/equipment',
           },
         },
       ],
     ],
   };
-  
 };

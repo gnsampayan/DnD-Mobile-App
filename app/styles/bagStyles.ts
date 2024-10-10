@@ -12,7 +12,8 @@ const styles = StyleSheet.create({
       marginTop: 50,
     },
     headerLeft: {
-      flexDirection: 'column',
+      flexDirection: 'row',
+      gap: 5,
     },
     headerText: {
       fontSize: 16,
@@ -112,16 +113,27 @@ const styles = StyleSheet.create({
     },
     modalButtons: {
       flexDirection: 'row',
-      justifyContent: 'flex-end',
-    },
-    modalButtonCancel: {
-      marginRight: 10,
+      justifyContent: 'center',
+      paddingTop: 20,
+      gap: 10,
     },
     modalButtonReset: {
-      backgroundColor: '#ff0000',
+      backgroundColor: 'darkred',
       borderRadius: 4,
       paddingHorizontal: 15,
       paddingVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+    },
+    modalButton: {
+      backgroundColor: 'gray',
+      borderRadius: 4,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
     },
     modalButtonAdd: {
       backgroundColor: '#007AFF',

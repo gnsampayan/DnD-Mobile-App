@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Strength",
+    "value": 8
+  },
+  {
+    "id": 2,
+    "name": "Dexterity",
+    "value": 8
+  },
+  {
+    "id": 3,
+    "name": "Constitution",
+    "value": 8
+  },
+  {
+    "id": 4,
+    "name": "Intelligence",
+    "value": 8
+  },
+  {
+    "id": 5,
+    "name": "Wisdom",
+    "value": 8
+  },
+  {
+    "id": 6,
+    "name": "Charisma",
+    "value": 8
+  }
+]

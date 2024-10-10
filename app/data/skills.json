@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "name": "Acrobatics",
+    "isProficient": false,
+    "dependency": "Dexterity"
+  },
+  {
+    "id": 2,
+    "name": "Animal Handling",
+    "isProficient": false,
+    "dependency": "Wisdom"
+  },
+  {
+    "id": 3,
+    "name": "Arcana",
+    "isProficient": false,
+    "dependency": "Intelligence"
+  },
+  {
+    "id": 4,
+    "name": "Athletics",
+    "isProficient": false,
+    "dependency": "Strength"
+  },
+  {
+    "id": 5,
+    "name": "Deception",
+    "isProficient": false,
+    "dependency": "Charisma"
+  },
+  {
+    "id": 6,
+    "name": "History",
+    "isProficient": false,
+    "dependency": "Intelligence"
+  },
+  {
+    "id": 7,
+    "name": "Insight",
+    "isProficient": false,
+    "dependency": "Wisdom"
+  },
+  {
+    "id": 8,
+    "name": "Intimidation",
+    "isProficient": false,
+    "dependency": "Charisma"
+  },
+  {
+    "id": 9,
+    "name": "Investigation",
+    "isProficient": false,
+    "dependency": "Intelligence"
+  },
+  {
+    "id": 10,
+    "name": "Medicine",
+    "isProficient": false,
+    "dependency": "Wisdom"
+  },
+  {
+    "id": 11,
+    "name": "Nature",
+    "isProficient": false,
+    "dependency": "Intelligence"
+  },
+  {
+    "id": 12,
+    "name": "Perception",
+    "isProficient": false,
+    "dependency": "Wisdom"
+  },
+  {
+    "id": 13,
+    "name": "Performance",
+    "isProficient": false,
+    "dependency": "Charisma"
+  },
+  {
+    "id": 14,
+    "name": "Persuasion",
+    "isProficient": false,
+    "dependency": "Charisma"
+  },
+  {
+    "id": 15,
+    "name": "Religion",
+    "isProficient": false,
+    "dependency": "Intelligence"
+  },
+  {
+    "id": 16,
+    "name": "Sleight of Hand",
+    "isProficient": false,
+    "dependency": "Dexterity"
+  },
+  {
+    "id": 17,
+    "name": "Stealth",
+    "isProficient": false,
+    "dependency": "Dexterity"
+  },
+  {
+    "id": 18,
+    "name": "Survival",
+    "isProficient": false,
+    "dependency": "Wisdom"
+  }
+]

@@ -14,7 +14,7 @@ import {
   AlertButton,
   ImageSourcePropType,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
@@ -594,6 +594,9 @@ export default function BagScreen() {
     }
   };
 
+  // Money and Carrying Capacity -- Move to a different file later
+  const money = 100;
+  const carryingCapacity = 50;
 
   return (
     <View style={styles.container}>
@@ -601,12 +604,12 @@ export default function BagScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>Money: 100</Text>
-            <Ionicons name="diamond" size={14} color="gold" />
+            <MaterialCommunityIcons name="weight-pound" size={18} color="#a8a8a8" />
+            <Text style={styles.headerText}>{carryingCapacity}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>Carrying: 50</Text>
-            <Ionicons name="barbell" size={18} color="#84b8e3" />
+            <Ionicons name="diamond" size={14} color="gold" />
+            <Text style={styles.headerText}>{money}</Text>
           </View>
         </View>
         <View style={styles.headerIcons}>
@@ -620,10 +623,10 @@ export default function BagScreen() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setResetModalVisible(true)}>
             <Ionicons
-              name="refresh-circle"
-              size={32}
+              name="warning"
+              size={24}
               color="red"
-              style={[styles.headerIcon, { color: '#ff6e6e' }]}
+              style={[styles.headerIcon, { color: 'white' }]}
             />
           </TouchableOpacity>
         </View>
@@ -704,7 +707,7 @@ export default function BagScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Reset Items Modal */}
+      {/* Reset Confirmation Modal */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -713,14 +716,13 @@ export default function BagScreen() {
         <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Items</Text>
+              <Text style={styles.modalTitle}>Reset Actions</Text>
               <Text style={styles.modalText}>
-                Are you sure you want to reset all items to default? This
-                action cannot be undone.
+                Are you sure? This will delete all custom actions. This cannot be undone.
               </Text>
               <View style={styles.modalButtons}>
                 <TouchableOpacity
-                  style={styles.modalButtonCancel}
+                  style={styles.modalButton}
                   onPress={() => setResetModalVisible(false)}
                 >
                   <Text style={styles.modalButtonText}>Cancel</Text>
@@ -729,7 +731,157 @@ export default function BagScreen() {
                   style={styles.modalButtonReset}
                   onPress={resetItems}
                 >
-                  <Text style={styles.modalButtonText}>Reset</Text>
+                  <Ionicons
+                    name="nuclear"
+                    size={24}
+                    color="red"
+                    style={[styles.headerIcon, { color: 'white' }]}
+                  />
+                  <Text style={styles.modalButtonText}>Reset to Default</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>{/* Reset Confirmation Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={resetModalVisible}
+      >
+        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Reset Actions</Text>
+              <Text style={styles.modalText}>
+                Are you sure? This will delete all custom actions. This cannot be undone.
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setResetModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonReset}
+                  onPress={resetItems}
+                >
+                  <Ionicons
+                    name="nuclear"
+                    size={24}
+                    color="red"
+                    style={[styles.headerIcon, { color: 'white' }]}
+                  />
+                  <Text style={styles.modalButtonText}>Reset to Default</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>{/* Reset Confirmation Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={resetModalVisible}
+      >
+        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Reset Actions</Text>
+              <Text style={styles.modalText}>
+                Are you sure? This will delete all custom actions. This cannot be undone.
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setResetModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonReset}
+                  onPress={resetItems}
+                >
+                  <Ionicons
+                    name="nuclear"
+                    size={24}
+                    color="red"
+                    style={[styles.headerIcon, { color: 'white' }]}
+                  />
+                  <Text style={styles.modalButtonText}>Reset to Default</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>{/* Reset Confirmation Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={resetModalVisible}
+      >
+        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Reset Actions</Text>
+              <Text style={styles.modalText}>
+                Are you sure? This will delete all custom actions. This cannot be undone.
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setResetModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonReset}
+                  onPress={resetItems}
+                >
+                  <Ionicons
+                    name="nuclear"
+                    size={24}
+                    color="red"
+                    style={[styles.headerIcon, { color: 'white' }]}
+                  />
+                  <Text style={styles.modalButtonText}>Reset to Default</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>{/* Reset Confirmation Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={resetModalVisible}
+      >
+        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Reset Actions</Text>
+              <Text style={styles.modalText}>
+                Are you sure? This will delete all custom actions. This cannot be undone.
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setResetModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonReset}
+                  onPress={resetItems}
+                >
+                  <Ionicons
+                    name="nuclear"
+                    size={24}
+                    color="red"
+                    style={[styles.headerIcon, { color: 'white' }]}
+                  />
+                  <Text style={styles.modalButtonText}>Reset to Default</Text>
                 </TouchableOpacity>
               </View>
             </View>

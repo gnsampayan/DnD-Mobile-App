@@ -12,12 +12,19 @@ const styles = StyleSheet.create({
       marginTop: 50,
     },
     headerLeft: {
-      flexDirection: 'column',
+      flexDirection: 'row',
+      gap: 5,
+    },
+    headerTextBox: {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: 8,
+      padding: 5,
     },
     headerText: {
-      fontSize: 16,
-      fontWeight: 'bold',
+      fontSize: 12,
       color: 'white',
+      textAlign: 'center',
+      fontWeight: 'bold',
     },
     headerTextContainer: {
       flexDirection: 'row',

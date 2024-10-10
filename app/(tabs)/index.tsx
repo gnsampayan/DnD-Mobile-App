@@ -540,16 +540,34 @@ export default function ActionsScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>
-              Actions: {currentActionsAvailable}
-            </Text>
-            <Ionicons name="ellipse" size={16} color="green" />
+            <Ionicons
+              name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
+              size={16}
+              color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
+            />
+            <View style={styles.headerTextBox}>
+              <Text style={[
+                styles.headerText,
+                currentActionsAvailable === 0 && { color: 'black' }
+              ]}>
+                x{currentActionsAvailable}
+              </Text>
+            </View>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>
-              Bonus Actions: {currentBonusActionsAvailable}
-            </Text>
-            <Ionicons name="triangle" size={16} color="#FF8C00" />
+            <Ionicons
+              name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
+              size={16}
+              color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
+            />
+            <View style={styles.headerTextBox}>
+              <Text style={[
+                styles.headerText,
+                currentBonusActionsAvailable === 0 && { color: 'black' }
+              ]}>
+                x{currentBonusActionsAvailable}
+              </Text>
+            </View>
           </View>
         </View>
         <View style={styles.headerIcons}>
