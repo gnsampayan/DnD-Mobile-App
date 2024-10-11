@@ -12,6 +12,7 @@ import {
   Keyboard,
   ImageBackground,
   ImageSourcePropType,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -471,6 +472,9 @@ export default function ActionsScreen() {
     setCurrentBonusActionsAvailable(1);
   };
 
+  const windowWidth = Dimensions.get('window').width;
+  const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns; // 20 for horizontal padding, 10 for gap between items
+
   const renderActionBlocks = ({ item }: { item: ActionBlock | null }) => {
     if (item) {
       const affordable =
@@ -488,7 +492,7 @@ export default function ActionsScreen() {
           }
           style={[
             styles.itemContainer,
-            { opacity: affordable ? 1 : 0.2 }
+            { width: itemWidth, opacity: affordable ? 1 : 0.2 }
           ]}
           imageStyle={{ borderRadius: 8 }}
         >
@@ -514,7 +518,8 @@ export default function ActionsScreen() {
       return (
         <ImageBackground
           source={addActionImageTyped}
-          style={styles.addItemContainer}
+          style={[styles.addItemContainer, { width: itemWidth }]}
+          imageStyle={{ borderRadius: 8 }}
         >
           <TouchableOpacity
             style={styles.addItemButton}

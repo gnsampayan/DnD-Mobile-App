@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     View,
     Text,
@@ -31,6 +31,7 @@ import defaultMeleeWeaponImage from '@equipment/default-melee.png';
 import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import StatsDataContext from '../context/StatsDataContext';
 
 interface EquipmentItem {
     id: string;
@@ -40,11 +41,36 @@ interface EquipmentItem {
     section: number;
 }
 
+interface Ability {
+    id: number;
+    name: string;
+    value: number;
+}
+
+interface AllocationHistory {
+    [level: number]: {
+        [abilityId: number]: number;
+    };
+}
+
+interface StatsData {
+    xp: number;
+    level: number;
+    abilities: Ability[];
+    allocationsPerLevel: AllocationHistory;
+}
+
 export default function MeScreen() {
-    const [hp, setHp] = useState(20);
+    const [hitDice, setHitDice] = useState(10);
     const [modalVisible, setModalVisible] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
+    const [characterModalVisible, setCharacterModalVisible] = useState(false);
+    const [maxHp, setMaxHp] = useState(hitDice);
+    const [hpIncreases, setHpIncreases] = useState<{ [level: number]: number }>({});
+    const [hp, setHp] = useState(10);
+    const [tempHp, setTempHp] = useState(0);
 
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -64,8 +90,55 @@ export default function MeScreen() {
         { id: 'mainRanged', name: 'Main Ranged', defaultImage: defaultRangedWeaponImage as ImageSourcePropType, section: 5 },
     ];
 
-
     const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
+
+    useEffect(() => {
+        const totalIncrease = Object.values(hpIncreases).reduce((sum, inc) => sum + inc, 0);
+        setMaxHp(hitDice + totalIncrease);
+    }, [hitDice, hpIncreases]);
+
+    // Load stored hitDice and hp when component mounts
+    useEffect(() => {
+        const loadHitDiceAndHp = async () => {
+            try {
+                const storedHitDice = await AsyncStorage.getItem('hitDice');
+                const storedHp = await AsyncStorage.getItem('hp');
+                if (storedHitDice !== null) {
+                    const parsedHitDice = parseInt(storedHitDice);
+                    setHitDice(parsedHitDice);
+                    // Initialize hp to hitDice if hp is not stored
+                    if (storedHp === null) {
+                        setHp(parsedHitDice);
+                    }
+                } else {
+                    // Set defaults if no data is found
+                    setHitDice(20);
+                    setHp(hitDice);
+                }
+                if (storedHp !== null) {
+                    setHp(parseInt(storedHp));
+                }
+            } catch (error) {
+                console.error('Error loading hitDice and hp:', error);
+            }
+        };
+        loadHitDiceAndHp();
+    }, []);
+
+    // Save hitDice whenever it changes
+    useEffect(() => {
+        AsyncStorage.setItem('hitDice', hitDice.toString());
+    }, [hitDice]);
+
+    // Save hp whenever it changes
+    useEffect(() => {
+        AsyncStorage.setItem('hp', hp.toString());
+    }, [hp]);
+
+    // Function to update hp and save to AsyncStorage
+    const updateHp = (value: number) => {
+        setHp(value);
+    };
 
     useEffect(() => {
         // Load custom images for equipment items
@@ -104,12 +177,12 @@ export default function MeScreen() {
         loadImageUri();
     }, []);
 
-    const handleHpChange = (operation: 'add' | 'subtract') => {
+    const handleHpChange = (operation: 'replenish' | 'subtract') => {
         const changeValue = parseInt(inputValue) || 0;
-        if (operation === 'add') {
-            setHp((prevHp) => Math.max(prevHp + changeValue, 0));
+        if (operation === 'replenish') {
+            updateHp(maxHp);
         } else if (operation === 'subtract') {
-            setHp((prevHp) => Math.max(prevHp - changeValue, 0));
+            updateHp(Math.max(hp - changeValue, 0));
         }
         setInputValue('');
         setModalVisible(false);
@@ -250,26 +323,16 @@ export default function MeScreen() {
     const [ac, setAc] = useState(10);
 
     useEffect(() => {
-        const loadAcData = async () => {
-            try {
-                const dataString = await AsyncStorage.getItem('statsData');
-                if (dataString) {
-                    const data = JSON.parse(dataString);
-                    if (Array.isArray(data.abilities)) {
-                        const dexterity = data.abilities.find((ability: { name: string }) => ability.name === 'Dexterity');
-                        if (dexterity && 'value' in dexterity) {
-                            const dexModifier = Math.floor((dexterity.value - 10) / 2);
-                            setAc(10 + dexModifier);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading AC data:', error);
+        if (statsData.abilities) {
+            const dexterity = statsData.abilities.find(
+                (ability) => ability.name === 'Dexterity'
+            );
+            if (dexterity) {
+                const dexModifier = Math.floor((dexterity.value - 10) / 2);
+                setAc(10 + dexModifier);
             }
-        };
-
-        loadAcData();
-    }, []);
+        }
+    }, [statsData]);
 
     return (
         <View style={styles.container}>
@@ -277,7 +340,7 @@ export default function MeScreen() {
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.hpContainer}>
                     <Ionicons name="heart" size={24} color="red" />
-                    <Text style={styles.hpText}>{hp > 0 ? `${hp}` : 'Death Saving Throw'}</Text>
+                    <Text style={styles.hpText}>{hp > 0 ? `(+${tempHp}) ${maxHp} = ${hp}` : `(${maxHp}) Death Saving Throw`}</Text>
                 </TouchableOpacity>
                 <View>
                     <Ionicons name="shield" size={24} color="white" />
@@ -318,7 +381,7 @@ export default function MeScreen() {
                 </View>
 
                 {/* Section 3 */}
-                <TouchableOpacity onLongPress={handleImagePress}>
+                <TouchableOpacity onLongPress={handleImagePress} onPress={() => setCharacterModalVisible(true)}>
                     <View style={[styles.imageContainer, { width: section3Width }]}>
                         {imageUri ? (
                             <Image
@@ -411,23 +474,27 @@ export default function MeScreen() {
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <View style={styles.modalContainer}>
                                 <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Current HP: {hp}</Text>
+                                    <View style={styles.modalHeaderText}>
+                                        <Text style={styles.modalLabel}>Max HP: {maxHp}</Text>
+                                        <Text style={styles.modalLabel}>Temp HP: {tempHp}</Text>
+                                        <Text style={styles.modalTitle}>Current HP: {hp}</Text>
+                                    </View>
                                     <TouchableOpacity
                                         style={styles.modalResetButton}
                                         onPress={() => {
                                             Alert.alert(
-                                                "Reset HP",
-                                                "Are you sure you want to reset your HP to 20?",
+                                                'Reset HP',
+                                                `Are you sure you want to reset your HP to ${maxHp}?`,
                                                 [
                                                     {
-                                                        text: "Cancel",
-                                                        style: "cancel"
+                                                        text: 'Cancel',
+                                                        style: 'cancel',
                                                     },
                                                     {
-                                                        text: "Reset",
-                                                        style: "destructive",
-                                                        onPress: () => setHp(20)
-                                                    }
+                                                        text: 'Reset',
+                                                        style: 'destructive',
+                                                        onPress: () => updateHp(maxHp),
+                                                    },
                                                 ]
                                             );
                                         }}
@@ -435,28 +502,93 @@ export default function MeScreen() {
                                         <Text style={styles.modalResetButtonText}>Reset</Text>
                                     </TouchableOpacity>
                                 </View>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Enter number"
-                                    keyboardType="number-pad"
-                                    placeholderTextColor="gray"
-                                    onChangeText={setInputValue}
-                                    value={inputValue}
-                                />
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                                    {Array.from({ length: statsData.level - 1 }, (_, index) => {
+                                        const level = index + 2;
+                                        return (
+                                            <View key={level} style={{ flexDirection: 'column', alignItems: 'flex-start', margin: 5, gap: 5 }}>
+                                                <Text style={styles.modalInputLabel}>Level {level} Increase:</Text>
+                                                <TextInput
+                                                    style={styles.modalInput}
+                                                    placeholder="Enter increase"
+                                                    keyboardType="number-pad"
+                                                    placeholderTextColor="gray"
+                                                    value={hpIncreases[level]?.toString() || ''}
+                                                    onChangeText={(text) => {
+                                                        const number = parseInt(text);
+                                                        if (!isNaN(number) && number >= 0 && number <= hitDice) {
+                                                            setHpIncreases((prev) => ({
+                                                                ...prev,
+                                                                [level]: number,
+                                                            }));
+                                                        } else if (text === '') {
+                                                            // If the input is cleared, remove the level from hpIncreases
+                                                            setHpIncreases((prev) => {
+                                                                const updated = { ...prev };
+                                                                delete updated[level];
+                                                                return updated;
+                                                            });
+                                                        } else {
+                                                            Alert.alert('Invalid input', `Please enter a number between 0 and ${hitDice}.`);
+                                                        }
+                                                    }}
+                                                />
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                                <View>
+                                    <Text style={styles.modalSubtitle}>Damage Taken</Text>
+                                    <TextInput
+                                        style={styles.modalInput}
+                                        placeholder="Enter number"
+                                        keyboardType="number-pad"
+                                        placeholderTextColor="gray"
+                                        onChangeText={setInputValue}
+                                        value={inputValue}
+                                    />
+                                </View>
                                 <View style={styles.modalButtons}>
+                                    <TouchableOpacity
+                                        style={styles.modalButtonReplenish}
+                                        onPress={() => handleHpChange('replenish')}
+                                    >
+                                        <Text style={styles.modalButtonText}>Replenish</Text>
+                                    </TouchableOpacity>
                                     <TouchableOpacity
                                         style={styles.modalButtonSubtract}
                                         onPress={() => handleHpChange('subtract')}
                                     >
                                         <Text style={styles.modalButtonText}>Subtract</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={styles.modalButtonAdd}
-                                        onPress={() => handleHpChange('add')}
-                                    >
-                                        <Text style={styles.modalButtonText}>Add</Text>
-                                    </TouchableOpacity>
                                 </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+            {/* Character Modal */}
+            <Modal animationType="fade" transparent={true} visible={characterModalVisible}>
+                <TouchableWithoutFeedback onPress={() => setCharacterModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <View style={styles.modalContainer}>
+                                <Text style={styles.modalTitle}>Character Settings</Text>
+                                <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    keyboardType="number-pad"
+                                    placeholder="Enter hit dice (1-20)"
+                                    placeholderTextColor="gray"
+                                    onChangeText={(text) => {
+                                        const number = parseInt(text);
+                                        if (!isNaN(number) && number >= 1 && number <= 20) {
+                                            setHitDice(number);
+                                        } else {
+                                            Alert.alert('Invalid input', 'Please enter a number between 1 and 20.');
+                                        }
+                                    }}
+                                />
                             </View>
                         </TouchableWithoutFeedback>
                     </View>

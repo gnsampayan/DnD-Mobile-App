@@ -38,12 +38,13 @@ const styles = StyleSheet.create({
       marginBottom: 10,
     },
     itemContainer: {
-      flex: 1,
       margin: 5,
       aspectRatio: 1,
       backgroundColor: '#ffffff',
       borderRadius: 8,
       overflow: 'hidden',
+      flexGrow: 0,
+      flexShrink: 0,
     },
     itemTextContainer: {
       padding: 5,
@@ -64,12 +65,12 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
     },
     addItemContainer: {
-      flex: 1,
       margin: 5,
       aspectRatio: 1,
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 8,
+      overflow: 'hidden',
     },
     addItemButton: {
       flex: 1,
@@ -157,6 +158,10 @@ const styles = StyleSheet.create({
       flexDirection: 'column',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
+      borderWidth: 2,
+      borderColor: 'darkgoldenrod',
+      borderStyle: 'solid',
+      borderRadius: 8,
     },
     itemModalContainer: {
       width: '80%',

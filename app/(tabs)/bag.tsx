@@ -13,6 +13,7 @@ import {
   ImageBackground,
   AlertButton,
   ImageSourcePropType,
+  Dimensions,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -287,13 +288,15 @@ export default function BagScreen() {
   };
 
 
+  const windowWidth = Dimensions.get('window').width;
+  const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns; // 20 for horizontal padding, 10 for gap between items
 
   // Function to render each item in the grid
   const renderItem = ({ item }: { item: Item | null }) => {
     if (item) {
       return (
         <TouchableOpacity
-          style={styles.itemContainer}
+          style={[styles.itemContainer, { width: itemWidth }]}
           onPress={() => {
             setSelectedItem(item);
             setItemModalVisible(true);
@@ -331,7 +334,7 @@ export default function BagScreen() {
     } else {
       // Render the plus icon as a button
       return (
-        <ImageBackground source={addItemImageTyped} style={styles.addItemContainer}>
+        <ImageBackground source={addItemImageTyped} style={[styles.addItemContainer, { width: itemWidth }]}>
           <TouchableOpacity
             style={styles.addItemButton}
             onPress={() => setModalVisible(true)}

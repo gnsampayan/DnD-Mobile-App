@@ -45,13 +45,14 @@ const styles = StyleSheet.create({
       paddingVertical: 10,
     },
     itemContainer: {
-      flex: 1,
       margin: 5,
       aspectRatio: 1, // Ensure the item is square
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: '#eee',
       borderRadius: 8,
+      flexGrow: 0,
+      flexShrink: 0,
     },
     itemTextContainer: {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -65,7 +66,6 @@ const styles = StyleSheet.create({
     },
     // Styles for the add item container (plus icon button)
     addItemContainer: {
-      flex: 1,
       margin: 5,
       aspectRatio: 1,
       alignItems: 'center',
@@ -215,6 +215,10 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       width: '100%',
       height: '100%',
+      borderWidth: 2,
+      borderColor: 'darkgoldenrod',
+      borderStyle: 'solid',
+      borderRadius: 8,
     },
     itemModalImageContainer: {
       aspectRatio: 1,
@@ -285,6 +289,9 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       padding: 10,
       backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      borderWidth: 2,
+      borderColor: 'darkgoldenrod',
+      borderStyle: 'solid',
     },
     footerButtonText: {
       color: 'white',

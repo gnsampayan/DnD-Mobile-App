@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList, ImageBackground } from 'react-native';
 import styles from '../styles/meStyles'; // Adjust the path if necessary
-import abilitiesData from '../data/abilities.json';
 import skillsData from '../data/skills.json';
 import xpThresholds from '../data/xpThresholds.json';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import StatsDataContext from '../context/StatsDataContext';
+
+import strengthImage from '@images/abilities/strength.png';
+import dexterityImage from '@images/abilities/dexterity.png';
+import constitutionImage from '@images/abilities/constitution.png';
+import intelligenceImage from '@images/abilities/intelligence.png';
+import wisdomImage from '@images/abilities/wisdom.png';
+import charismaImage from '@images/abilities/charisma.png';
+import { Ionicons } from '@expo/vector-icons';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
 }
-
 
 // Define the ability type
 interface Ability {
@@ -32,6 +38,13 @@ interface AllocationHistory {
     };
 }
 
+interface StatsData {
+    xp: number;
+    level: number;
+    abilities: Ability[];
+    allocationsPerLevel: AllocationHistory;
+}
+
 // Functions to get level and proficiency bonus
 const getLevelFromXp = (xp: number): number => {
     let level = 1;
@@ -45,11 +58,9 @@ const getLevelFromXp = (xp: number): number => {
     return level;
 };
 
-
 const getAbilityPointsFromLevel = (level: number): number => {
     return level === 1 ? 14 : 14 + (level - 1) * 2;
 };
-
 
 // Add Proficiency Bonus Function
 const getProficiencyBonus = (level: number): number => {
@@ -60,128 +71,18 @@ const getProficiencyBonus = (level: number): number => {
     return 2;
 };
 
-
-const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) => {
-    const [level, setLevel] = useState<number>(1);
-    const [xp, setXp] = useState<number>(0);
+const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
-    // Load abilities and skills from JSON data
-    const [abilities, setAbilities] = useState<Ability[]>(abilitiesData.map(ability => ({ ...ability, value: 8 })));
     const [skills, setSkills] = useState<Skill[]>(skillsData);
 
     // States for Ability Modification Modal
     const [abilityModalVisible, setAbilityModalVisible] = useState<boolean>(false);
     const [selectedAbility, setSelectedAbility] = useState<Ability | null>(null);
 
-    // Allocation History
-    const [allocationsPerLevel, setAllocationsPerLevel] = useState<AllocationHistory>({ 1: {} });
-
-    // Function to initialize default data
-    const initializeDefaultData = async () => {
-        const initialAbilities = abilitiesData.map(ability => ({ ...ability, value: 8 }));
-        const initialAllocations: AllocationHistory = { 1: {} };
-        setXp(0);
-        setLevel(1);
-        setAbilities(initialAbilities);
-        setAllocationsPerLevel(initialAllocations);
-        await saveStatsData(0, 1, initialAbilities, initialAllocations);
-    };
-
-    // Function to load XP data
-    const loadStatsData = async () => {
-        try {
-            const dataString = await AsyncStorage.getItem('statsData');
-            if (dataString) {
-                const data = JSON.parse(dataString);
-                if (
-                    typeof data.xp === 'number' &&
-                    typeof data.level === 'number' &&
-                    Array.isArray(data.abilities) &&
-                    typeof data.allocationsPerLevel === 'object'
-                ) {
-                    setXp(data.xp);
-                    setLevel(data.level);
-                    setAbilities(data.abilities);
-                    setAllocationsPerLevel(data.allocationsPerLevel || { 1: {} });
-                } else {
-                    throw new Error('Invalid data structure in statsData');
-                }
-            } else {
-                // Initialize with defaults if no data is found
-                initializeDefaultData();
-            }
-        } catch (error) {
-            console.error('Error loading stats data:', error);
-            Alert.alert('Error', 'Failed to load character data. Initializing with defaults.');
-            initializeDefaultData();
-        }
-    };
-    // Function to save stats data
-    const saveStatsData = async (
-        currentXp: number,
-        currentLevel: number,
-        currentAbilities: Ability[],
-        allocations: AllocationHistory
-    ) => {
-        try {
-            const data = {
-                xp: currentXp,
-                level: currentLevel,
-                abilities: currentAbilities,
-                allocationsPerLevel: allocations,
-            };
-            await AsyncStorage.setItem('statsData', JSON.stringify(data));
-        } catch (error) {
-            console.error('Error saving stats data:', error);
-            Alert.alert('Error', 'Failed to save character data.');
-        }
-    };
-    // Load stats data on component mount
-    useEffect(() => {
-        loadStatsData();
-    }, []);
-    // Save data whenever xp, level, abilities, or allocationsPerLevel change
-    useEffect(() => {
-        saveStatsData(xp, level, abilities, allocationsPerLevel);
-    }, [xp, level, abilities, allocationsPerLevel]);
-
-
-    // Update level and initialize allocations for new level
-    useEffect(() => {
-        const newLevel = getLevelFromXp(xp);
-        if (newLevel !== level) {
-            setLevel(newLevel);
-            setAllocationsPerLevel((prev) => ({
-                ...prev,
-                [newLevel]: {},
-            }));
-            saveStatsData(xp, newLevel, abilities, {
-                ...allocationsPerLevel,
-                [newLevel]: {},
-            });
-        }
-    }, [xp]);
-
-    // Save abilities and allocations data whenever they change
-    useEffect(() => {
-        saveStatsData(xp, level, abilities, allocationsPerLevel);
-    }, [abilities, allocationsPerLevel]);
-
-    // Handle XP changes
-    const handleXpChange = (operation: 'add' | 'subtract') => {
-        const changeValue = parseInt(inputValue) || 0;
-        if (operation === 'add') {
-            setXp((prevXp) => prevXp + changeValue);
-        } else if (operation === 'subtract') {
-            setXp((prevXp) => Math.max(prevXp - changeValue, 0));
-        }
-        setInputValue('');
-        setModalVisible(false);
-    };
-
-    // Prepare data for the Ability Grid
-    const gridData = abilities;
+    // Use context for statsData
+    const { statsData, updateStatsData } = useContext(StatsDataContext) as { statsData: StatsData, updateStatsData: (data: StatsData) => void };
+    const { xp, level, abilities, allocationsPerLevel } = statsData;
 
     // Calculate Available Ability Points
     const getAvailableAbilityPoints = (): number => {
@@ -193,20 +94,53 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
 
     const availableAbilityPoints = getAvailableAbilityPoints();
 
+    // Function to handle XP changes
+    const handleXpChange = (operation: 'add' | 'subtract') => {
+        const changeValue = parseInt(inputValue) || 0;
+        let newXp = xp;
+        if (operation === 'add') {
+            newXp = xp + changeValue;
+        } else if (operation === 'subtract') {
+            newXp = Math.max(xp - changeValue, 0);
+        }
+        // Update level based on new XP
+        const newLevel = getLevelFromXp(newXp);
+
+        // If level changes, initialize allocations for new level
+        let newAllocationsPerLevel = { ...allocationsPerLevel };
+        if (newLevel !== level) {
+            newAllocationsPerLevel = {
+                ...allocationsPerLevel,
+                [newLevel]: {},
+            };
+        }
+
+        // Update statsData
+        updateStatsData({
+            ...statsData,
+            xp: newXp,
+            level: newLevel,
+            allocationsPerLevel: newAllocationsPerLevel,
+        });
+
+        setInputValue('');
+        setModalVisible(false);
+    };
+
     // Function to handle ability increment
     const incrementAbility = () => {
         if (!selectedAbility) return;
 
-        // Fetch the latest ability details from state
-        const currentAbility = abilities.find(a => a.id === selectedAbility.id);
+        // Fetch the latest ability details from context
+        const currentAbility = abilities.find((a) => a.id === selectedAbility.id);
         if (!currentAbility) {
-            Alert.alert("Error", "Selected ability not found.");
+            Alert.alert('Error', 'Selected ability not found.');
             return;
         }
 
         // Check available points
         if (availableAbilityPoints <= 0) {
-            Alert.alert("No Available Points", "You have no available ability points to allocate.");
+            Alert.alert('No More Ability Points', 'Gain XP to level up and get more ability points.');
             return;
         }
 
@@ -216,11 +150,12 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
 
         if (currentAllocation >= maxIncrement) {
             Alert.alert(
-                "Max Increment Reached",
+                'Max Increment Reached',
                 `You cannot increase ${selectedAbility.name} more than ${maxIncrement} points this level.`
             );
             return;
         }
+
 
         // Update allocations
         const updatedAllocations = {
@@ -230,7 +165,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
                 [selectedAbility.id]: currentAllocation + 1,
             },
         };
-        setAllocationsPerLevel(updatedAllocations);
 
         // Update abilities
         const updatedAbilities = abilities.map((ability) => {
@@ -239,23 +173,27 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
             }
             return ability;
         });
-        setAbilities(updatedAbilities);
 
-        // Persist changes
-        saveStatsData(xp, level, updatedAbilities, updatedAllocations);
+        // Update statsData
+        updateStatsData({
+            ...statsData,
+            abilities: updatedAbilities,
+            allocationsPerLevel: updatedAllocations,
+        });
 
         // Check if available points reached 0
         if (availableAbilityPoints - 1 === 0) {
-            Alert.alert("No More Points", "You have allocated all available ability points.");
+            Alert.alert('No More Points', 'You have allocated all available ability points.');
         }
     };
+
 
     // Function to handle ability decrement
     const decrementAbility = () => {
         if (!selectedAbility) return;
 
-        // Fetch the latest ability details from state
-        const currentAbility = abilities.find(a => a.id === selectedAbility.id);
+        // Fetch the latest ability details from context
+        const currentAbility = abilities.find((a) => a.id === selectedAbility.id);
         if (!currentAbility) {
             Alert.alert('Error', 'Selected ability not found.');
             return;
@@ -272,7 +210,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
         if (availableAbilityPoints >= maxAvailablePoints) {
             Alert.alert(
                 'Maximum Available Points',
-                'You cannot decrement further as you\'ve reached the maximum available points.'
+                "You cannot decrement further as you've reached the maximum available points."
             );
             return;
         }
@@ -298,7 +236,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
                 [selectedAbility.id]: Math.max(currentAllocation - 1, 0),
             },
         };
-        setAllocationsPerLevel(updatedAllocations);
 
         // Update abilities
         const updatedAbilities = abilities.map((ability) => {
@@ -307,82 +244,39 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
             }
             return ability;
         });
-        setAbilities(updatedAbilities);
 
-        // Persist changes
-        saveStatsData(xp, level, updatedAbilities, updatedAllocations);
-    };
 
-    // Function to reset ability
-    const resetAbility = () => {
-        if (!selectedAbility) return;
-        const currentLevelAllocations = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
-        if (currentLevelAllocations > 0) {
-            Alert.alert(
-                "Reset Allocation",
-                `Are you sure you want to reset ${selectedAbility.name} to base value?`,
-                [
-                    { text: "Cancel", style: "cancel" },
-                    {
-                        text: "Reset",
-                        style: "destructive",
-                        onPress: () => {
-                            // Remove all allocations for this ability at current level
-                            const updatedAllocations = {
-                                ...allocationsPerLevel,
-                                [level]: {
-                                    ...allocationsPerLevel[level],
-                                    [selectedAbility.id]: 0,
-                                },
-                            };
-                            setAllocationsPerLevel(updatedAllocations);
-
-                            // Set ability value to base (8)
-                            const updatedAbilities = abilities.map((ability) => {
-                                if (ability.id === selectedAbility.id) {
-                                    return { ...ability, value: 8 };
-                                }
-                                return ability;
-                            });
-                            setAbilities(updatedAbilities);
-
-                            // Save changes
-                            saveStatsData(xp, level, updatedAbilities, updatedAllocations);
-                        },
-                    },
-                ]
-            );
-        } else {
-            // Simply reset the ability to base value
-            const updatedAbilities = abilities.map((ability) => {
-                if (ability.id === selectedAbility.id) {
-                    return { ...ability, value: 8 };
-                }
-                return ability;
-            });
-            setAbilities(updatedAbilities);
-            saveStatsData(xp, level, updatedAbilities, allocationsPerLevel);
-        }
+        // Update statsData
+        updateStatsData({
+            ...statsData,
+            abilities: updatedAbilities,
+            allocationsPerLevel: updatedAllocations,
+        });
     };
 
     // Function to reset XP and level
     const resetXpAndLevel = () => {
         // Reset XP and level
-        setXp(0);
-        setLevel(1);
+        const resetXp = 0;
+        const resetLevel = 1;
 
         // Reset abilities to base values
         const resetAbilities = abilities.map((ability) => ({
             ...ability,
             value: 8,
         }));
-        setAbilities(resetAbilities);
+
 
         // Reset allocations
-        setAllocationsPerLevel({ 1: {} });
+        const resetAllocations: AllocationHistory = { 1: {} };
 
-        // Save changes
-        saveStatsData(0, 1, resetAbilities, { 1: {} });
+        // Update statsData
+        updateStatsData({
+            xp: resetXp,
+            level: resetLevel,
+            abilities: resetAbilities,
+            allocationsPerLevel: resetAllocations,
+        });
     };
 
     // Function to open Ability Modal
@@ -394,22 +288,41 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
     // Render Ability Grid Item
     const renderGridItem = ({ item }: { item: Ability }) => {
         const modifier = Math.floor((item.value - 10) / 2);
+
+        // Map ability names to their corresponding images
+        const abilityImages: { [key: string]: any } = {
+            Strength: strengthImage,
+            Dexterity: dexterityImage,
+            Constitution: constitutionImage,
+            Intelligence: intelligenceImage,
+            Wisdom: wisdomImage,
+            Charisma: charismaImage,
+        };
+
         return (
             <TouchableOpacity
                 style={styles.abilityContainer}
                 onPress={() => openAbilityModal(item)}
             >
-                <Text style={styles.abilityName}>{item.name}</Text>
-                <View style={styles.abilityValueContainer}>
-                    <Text style={styles.abilityValue}>{item.value}</Text>
-                </View>
-                <View style={styles.abilityModifierFooter}>
-                    <View style={styles.abilityModifierContainer}>
-                        <Text style={styles.abilityModifier}>
-                            {modifier >= 0 ? `+${modifier}` : modifier}
-                        </Text>
+                <ImageBackground
+                    source={abilityImages[item.name]}
+                    style={styles.abilityBackgroundImage}
+                    imageStyle={{ borderRadius: 8 }}
+                >
+                    <View style={styles.abilityOverlay}>
+                        <Text style={styles.abilityName}>{item.name}</Text>
+                        <View style={styles.abilityValueContainer}>
+                            <Text style={styles.abilityValue}>{item.value}</Text>
+                        </View>
+                        <View style={styles.abilityModifierFooter}>
+                            <View style={styles.abilityModifierContainer}>
+                                <Text style={styles.abilityModifier}>
+                                    {modifier >= 0 ? `+${modifier}` : modifier}
+                                </Text>
+                            </View>
+                        </View>
                     </View>
-                </View>
+                </ImageBackground>
             </TouchableOpacity>
         );
     };
@@ -430,8 +343,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
         const proficiencyBonus = getProficiencyBonus(level);
 
         // Calculate the skill value
-        const skillValue =
-            abilityModifier + (item.isProficient ? proficiencyBonus : 0);
+        const skillValue = abilityModifier + (item.isProficient ? proficiencyBonus : 0);
 
         return (
             <View style={styles.skillContainer}>
@@ -446,27 +358,40 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>Character Stats</Text>
-                <View style={styles.headerButtons}>
-                    {/* Placeholder for alignment */}
+            <View style={styles.statsHeader}>
+                {/* Character Stats Content */}
+                <View style={styles.firstRow}>
+                    <View style={styles.levelContainer}>
+                        <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
+                        <Text style={styles.firstRowText}>Level: {level}</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.firstRowContents}
+                        onPress={() => {
+                            if (availableAbilityPoints === 0) {
+                                setModalVisible(true);
+                            } else {
+                                Alert.alert(
+                                    "Spend Ability Points First",
+                                    "You cannot gain XP when there are ability points available to allocate.",
+                                    [{ text: "OK" }]
+                                );
+                            }
+                        }}
+                    >
+                        <Text style={styles.firstRowText}>XP: {xp}</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Character Stats Content */}
-            <View style={styles.firstRow}>
-                <TouchableOpacity
-                    style={styles.firstRowContents}
-                    onPress={() => setModalVisible(true)}
-                >
-                    <Text style={styles.firstRowText}>Level: {level}</Text>
-                    <Text style={styles.firstRowText}>XP: {xp}</Text>
-                </TouchableOpacity>
-            </View>
+
 
             {/* Saving Throws */}
             <View style={styles.savingThrowsContainer}>
-                <Text style={styles.savingThrowsTitle}>Saving Throws</Text>
+                <View style={styles.rowIconTitle}>
+                    <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
+                    <Text style={styles.savingThrowsTitle}>Saving Throws</Text>
+                </View>
                 <View style={styles.savingThrowsGrid}>
                     {abilities.map((ability) => {
                         const modifier = Math.floor((ability.value - 10) / 2);
@@ -488,10 +413,10 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
             <View style={styles.characterStatsContainer}>
                 <Text style={styles.characterStatsTitle}>Abilities</Text>
                 <Text style={styles.availableAbilityPoints}>
-                    Available Ability Points: {availableAbilityPoints}
+                    Available: {availableAbilityPoints}
                 </Text>
                 <FlatList
-                    data={gridData}
+                    data={abilities}
                     renderItem={renderGridItem}
                     keyExtractor={(item) => item.id.toString()}
                     numColumns={3}
@@ -502,7 +427,10 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
 
             {/* Skills */}
             <View style={styles.skillsContainer}>
-                <Text style={styles.skillsTitle}>Skills</Text>
+                <View style={styles.rowIconTitle}>
+                    <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
+                    <Text style={styles.skillsTitle}>Skills</Text>
+                </View>
                 <FlatList
                     data={skills}
                     renderItem={renderSkillItem}
@@ -532,18 +460,18 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
                                         style={styles.modalResetButton}
                                         onPress={() => {
                                             Alert.alert(
-                                                "Reset XP",
-                                                "Are you sure you want to reset your XP to 0?",
+                                                'Reset XP',
+                                                'Are you sure you want to reset your XP to 0?',
                                                 [
                                                     {
-                                                        text: "Cancel",
-                                                        style: "cancel"
+                                                        text: 'Cancel',
+                                                        style: 'cancel',
                                                     },
                                                     {
-                                                        text: "Reset",
-                                                        style: "destructive",
-                                                        onPress: () => resetXpAndLevel()
-                                                    }
+                                                        text: 'Reset',
+                                                        style: 'destructive',
+                                                        onPress: () => resetXpAndLevel(),
+                                                    },
                                                 ]
                                             );
                                         }}
@@ -597,9 +525,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = ({ onBack }) =
                                     <>
                                         <View style={styles.modalHeader}>
                                             <Text style={styles.modalTitle}>{selectedAbility.name}</Text>
-                                            <TouchableOpacity onPress={resetAbility}>
-                                                <Text style={styles.modalResetButton}>Reset</Text>
-                                            </TouchableOpacity>
                                         </View>
                                         <Text style={styles.modalSubtitle}>
                                             Current Value: {selectedAbility.value}
