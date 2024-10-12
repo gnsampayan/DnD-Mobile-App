@@ -20,7 +20,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Actions',
+            title: 'Combat',
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'flash' : 'flash-outline'} color={color} />
             ),
@@ -29,7 +29,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="bag"
           options={{
-            title: 'Bag',
+            title: 'Inventory',
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon name={focused ? 'bag' : 'bag-outline'} color={color} />
             ),

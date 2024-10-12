@@ -12,12 +12,13 @@ import {
     Dimensions,
     ImageBackground,
     ImageSourcePropType,
-    FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system'; // Import FileSystem
+import * as FileSystem from 'expo-file-system';
 import styles from '../styles/meStyles';
 import { Ionicons } from '@expo/vector-icons';
+import StatsDataContext from '../context/StatsDataContext';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 // Import default images
 import defaultHelmetImage from '@equipment/default-helmet.png';
@@ -30,8 +31,6 @@ import defaultRingImage from '@equipment/default-ring.png';
 import defaultMeleeWeaponImage from '@equipment/default-melee.png';
 import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import StatsDataContext from '../context/StatsDataContext';
 
 interface EquipmentItem {
     id: string;
@@ -58,19 +57,107 @@ interface StatsData {
     level: number;
     abilities: Ability[];
     allocationsPerLevel: AllocationHistory;
+    race?: string;
+    class?: string;
+    hpIncreases: { [level: number]: number };
+    hitDice: number;
 }
 
 export default function MeScreen() {
-    const [hitDice, setHitDice] = useState(10);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [inputValue, setInputValue] = useState('');
+    // State variables
     const [imageUri, setImageUri] = useState<string | null>(null);
-    const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
     const [characterModalVisible, setCharacterModalVisible] = useState(false);
-    const [maxHp, setMaxHp] = useState(hitDice);
-    const [hpIncreases, setHpIncreases] = useState<{ [level: number]: number }>({});
-    const [hp, setHp] = useState(10);
-    const [tempHp, setTempHp] = useState(0);
+
+    // Use context for statsData
+    const { statsData, updateStatsData } = useContext(StatsDataContext) as {
+        statsData: StatsData;
+        updateStatsData: (data: StatsData) => void;
+    };
+
+    if (!statsData) {
+        // Render a loading indicator or return null
+        return null;
+    }
+
+    const { hitDice = 0 } = statsData || {};
+
+    // State variables for DropDownPicker
+    const [openRace, setOpenRace] = useState(false);
+    const [openClass, setOpenClass] = useState(false);
+    const [raceValue, setRaceValue] = useState<string | null>(statsData.race || null);
+    const [classValue, setClassValue] = useState<string | null>(statsData.class || null);
+
+    // Define race items
+    const raceItems = [
+        { label: 'Human', value: 'Human' },
+        { label: 'Elf', value: 'Elf' },
+        { label: 'Dwarf', value: 'Dwarf' },
+        { label: 'Halfling', value: 'Halfling' },
+        { label: 'Gnome', value: 'Gnome' },
+        { label: 'Half-Elf', value: 'Half-Elf' },
+        { label: 'Half-Orc', value: 'Half-Orc' },
+        { label: 'Tiefling', value: 'Tiefling' },
+        { label: 'Dragonborn', value: 'Dragonborn' },
+    ];
+
+    // Define class items with hitDice
+    const classItems = [
+        { label: 'Artificer', value: 'Artificer', hitDice: 8 },
+        { label: 'Barbarian', value: 'Barbarian', hitDice: 12 },
+        { label: 'Bard', value: 'Bard', hitDice: 8 },
+        { label: 'Cleric', value: 'Cleric', hitDice: 8 },
+        { label: 'Druid', value: 'Druid', hitDice: 8 },
+        { label: 'Fighter', value: 'Fighter', hitDice: 10 },
+        { label: 'Monk', value: 'Monk', hitDice: 8 },
+        { label: 'Paladin', value: 'Paladin', hitDice: 10 },
+        { label: 'Ranger', value: 'Ranger', hitDice: 10 },
+        { label: 'Rogue', value: 'Rogue', hitDice: 8 },
+        { label: 'Sorcerer', value: 'Sorcerer', hitDice: 6 },
+        { label: 'Warlock', value: 'Warlock', hitDice: 8 },
+        { label: 'Wizard', value: 'Wizard', hitDice: 6 },
+    ];
+
+    // Update statsData.race when raceValue changes
+    useEffect(() => {
+        if (raceValue !== statsData.race) {
+            updateStatsData({
+                ...statsData,
+                race: raceValue || '',
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [raceValue]);
+
+    // Update statsData.class and hitDice when classValue changes
+    useEffect(() => {
+        if (classValue !== statsData.class) {
+            // Find the selected class item
+            const selectedClass = classItems.find((item) => item.value === classValue);
+            const newHitDice = selectedClass ? selectedClass.hitDice : 0;
+
+            updateStatsData({
+                ...statsData,
+                class: classValue || '',
+                hitDice: newHitDice,
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classValue]);
+
+    // Initialize classValue and hitDice when statsData.class changes (e.g., on load)
+    useEffect(() => {
+        if (statsData.class) {
+            setClassValue(statsData.class);
+            const selectedClass = classItems.find((item) => item.value === statsData.class);
+            if (selectedClass) {
+                updateStatsData({
+                    ...statsData,
+                    hitDice: selectedClass.hitDice
+                });
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statsData.class]);
 
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -91,54 +178,6 @@ export default function MeScreen() {
     ];
 
     const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
-
-    useEffect(() => {
-        const totalIncrease = Object.values(hpIncreases).reduce((sum, inc) => sum + inc, 0);
-        setMaxHp(hitDice + totalIncrease);
-    }, [hitDice, hpIncreases]);
-
-    // Load stored hitDice and hp when component mounts
-    useEffect(() => {
-        const loadHitDiceAndHp = async () => {
-            try {
-                const storedHitDice = await AsyncStorage.getItem('hitDice');
-                const storedHp = await AsyncStorage.getItem('hp');
-                if (storedHitDice !== null) {
-                    const parsedHitDice = parseInt(storedHitDice);
-                    setHitDice(parsedHitDice);
-                    // Initialize hp to hitDice if hp is not stored
-                    if (storedHp === null) {
-                        setHp(parsedHitDice);
-                    }
-                } else {
-                    // Set defaults if no data is found
-                    setHitDice(20);
-                    setHp(hitDice);
-                }
-                if (storedHp !== null) {
-                    setHp(parseInt(storedHp));
-                }
-            } catch (error) {
-                console.error('Error loading hitDice and hp:', error);
-            }
-        };
-        loadHitDiceAndHp();
-    }, []);
-
-    // Save hitDice whenever it changes
-    useEffect(() => {
-        AsyncStorage.setItem('hitDice', hitDice.toString());
-    }, [hitDice]);
-
-    // Save hp whenever it changes
-    useEffect(() => {
-        AsyncStorage.setItem('hp', hp.toString());
-    }, [hp]);
-
-    // Function to update hp and save to AsyncStorage
-    const updateHp = (value: number) => {
-        setHp(value);
-    };
 
     useEffect(() => {
         // Load custom images for equipment items
@@ -176,17 +215,6 @@ export default function MeScreen() {
         };
         loadImageUri();
     }, []);
-
-    const handleHpChange = (operation: 'replenish' | 'subtract') => {
-        const changeValue = parseInt(inputValue) || 0;
-        if (operation === 'replenish') {
-            updateHp(maxHp);
-        } else if (operation === 'subtract') {
-            updateHp(Math.max(hp - changeValue, 0));
-        }
-        setInputValue('');
-        setModalVisible(false);
-    };
 
     const handleImagePress = () => {
         if (imageUri) {
@@ -320,32 +348,10 @@ export default function MeScreen() {
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
 
-    const [ac, setAc] = useState(10);
-
-    useEffect(() => {
-        if (statsData.abilities) {
-            const dexterity = statsData.abilities.find(
-                (ability) => ability.name === 'Dexterity'
-            );
-            if (dexterity) {
-                const dexModifier = Math.floor((dexterity.value - 10) / 2);
-                setAc(10 + dexModifier);
-            }
-        }
-    }, [statsData]);
-
     return (
         <View style={styles.container}>
             {/* Section 1: Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.hpContainer}>
-                    <Ionicons name="heart" size={24} color="red" />
-                    <Text style={styles.hpText}>{hp > 0 ? `(+${tempHp}) ${maxHp} = ${hp}` : `(${maxHp}) Death Saving Throw`}</Text>
-                </TouchableOpacity>
-                <View>
-                    <Ionicons name="shield" size={24} color="white" />
-                    <Text style={styles.acText}>{ac}</Text>
-                </View>
                 <View style={styles.headerButtons}>
                     <TouchableOpacity style={styles.userAccountButton}>
                         <Ionicons name="settings" size={24} color="white" />
@@ -466,107 +472,6 @@ export default function MeScreen() {
                         </TouchableOpacity>
                     ))}
             </View>
-
-            {/* HP Change Modal */}
-            <Modal animationType="fade" transparent={true} visible={modalVisible}>
-                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.modalHeader}>
-                                    <View style={styles.modalHeaderText}>
-                                        <Text style={styles.modalLabel}>Max HP: {maxHp}</Text>
-                                        <Text style={styles.modalLabel}>Temp HP: {tempHp}</Text>
-                                        <Text style={styles.modalTitle}>Current HP: {hp}</Text>
-                                    </View>
-                                    <TouchableOpacity
-                                        style={styles.modalResetButton}
-                                        onPress={() => {
-                                            Alert.alert(
-                                                'Reset HP',
-                                                `Are you sure you want to reset your HP to ${maxHp}?`,
-                                                [
-                                                    {
-                                                        text: 'Cancel',
-                                                        style: 'cancel',
-                                                    },
-                                                    {
-                                                        text: 'Reset',
-                                                        style: 'destructive',
-                                                        onPress: () => updateHp(maxHp),
-                                                    },
-                                                ]
-                                            );
-                                        }}
-                                    >
-                                        <Text style={styles.modalResetButtonText}>Reset</Text>
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-                                    {Array.from({ length: statsData.level - 1 }, (_, index) => {
-                                        const level = index + 2;
-                                        return (
-                                            <View key={level} style={{ flexDirection: 'column', alignItems: 'flex-start', margin: 5, gap: 5 }}>
-                                                <Text style={styles.modalInputLabel}>Level {level} Increase:</Text>
-                                                <TextInput
-                                                    style={styles.modalInput}
-                                                    placeholder="Enter increase"
-                                                    keyboardType="number-pad"
-                                                    placeholderTextColor="gray"
-                                                    value={hpIncreases[level]?.toString() || ''}
-                                                    onChangeText={(text) => {
-                                                        const number = parseInt(text);
-                                                        if (!isNaN(number) && number >= 0 && number <= hitDice) {
-                                                            setHpIncreases((prev) => ({
-                                                                ...prev,
-                                                                [level]: number,
-                                                            }));
-                                                        } else if (text === '') {
-                                                            // If the input is cleared, remove the level from hpIncreases
-                                                            setHpIncreases((prev) => {
-                                                                const updated = { ...prev };
-                                                                delete updated[level];
-                                                                return updated;
-                                                            });
-                                                        } else {
-                                                            Alert.alert('Invalid input', `Please enter a number between 0 and ${hitDice}.`);
-                                                        }
-                                                    }}
-                                                />
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-                                <View>
-                                    <Text style={styles.modalSubtitle}>Damage Taken</Text>
-                                    <TextInput
-                                        style={styles.modalInput}
-                                        placeholder="Enter number"
-                                        keyboardType="number-pad"
-                                        placeholderTextColor="gray"
-                                        onChangeText={setInputValue}
-                                        value={inputValue}
-                                    />
-                                </View>
-                                <View style={styles.modalButtons}>
-                                    <TouchableOpacity
-                                        style={styles.modalButtonReplenish}
-                                        onPress={() => handleHpChange('replenish')}
-                                    >
-                                        <Text style={styles.modalButtonText}>Replenish</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={styles.modalButtonSubtract}
-                                        onPress={() => handleHpChange('subtract')}
-                                    >
-                                        <Text style={styles.modalButtonText}>Subtract</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
             {/* Character Modal */}
             <Modal animationType="fade" transparent={true} visible={characterModalVisible}>
                 <TouchableWithoutFeedback onPress={() => setCharacterModalVisible(false)}>
@@ -574,21 +479,40 @@ export default function MeScreen() {
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <View style={styles.modalContainer}>
                                 <Text style={styles.modalTitle}>Character Settings</Text>
-                                <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    keyboardType="number-pad"
-                                    placeholder="Enter hit dice (1-20)"
-                                    placeholderTextColor="gray"
-                                    onChangeText={(text) => {
-                                        const number = parseInt(text);
-                                        if (!isNaN(number) && number >= 1 && number <= 20) {
-                                            setHitDice(number);
-                                        } else {
-                                            Alert.alert('Invalid input', 'Please enter a number between 1 and 20.');
-                                        }
-                                    }}
-                                />
+                                <View style={[styles.modalRowContainer, { zIndex: 3000 }]}>
+                                    <Text style={styles.modalLabel}>Race: {statsData.race ? statsData.race : 'None'}</Text>
+                                    <DropDownPicker
+                                        open={openRace}
+                                        value={raceValue}
+                                        items={raceItems}
+                                        setOpen={setOpenRace}
+                                        setValue={setRaceValue}
+                                        placeholder="Select a race"
+                                        containerStyle={{ height: 40, width: 200 }}
+                                        style={{ backgroundColor: '#fafafa' }}
+                                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                        zIndex={3000}
+                                    />
+                                </View>
+                                <View style={[styles.modalRowContainer, { zIndex: 2000 }]}>
+                                    <Text style={styles.modalLabel}>Class: {statsData.class ? statsData.class : 'None'}</Text>
+                                    <DropDownPicker
+                                        open={openClass}
+                                        value={classValue}
+                                        items={classItems}
+                                        setOpen={setOpenClass}
+                                        setValue={setClassValue}
+                                        placeholder="Select a class"
+                                        containerStyle={{ height: 40, width: 200 }}
+                                        style={{ backgroundColor: '#fafafa' }}
+                                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                        zIndex={2000}
+                                    />
+                                </View>
+                                <View style={[styles.modalRowContainer, { zIndex: 1000 }]}>
+                                    <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
+                                </View>
+
                             </View>
                         </TouchableWithoutFeedback>
                     </View>

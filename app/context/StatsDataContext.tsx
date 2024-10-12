@@ -19,25 +19,49 @@ interface StatsData {
     level: number;
     abilities: Ability[];
     allocationsPerLevel: AllocationHistory;
+    race?: string;
+    class?: string;
+    hpIncreases: { [level: number]: number };
+    hitDice: number;
 }
 
 // Define context types
 interface StatsDataContextProps {
     statsData: StatsData;
-    updateStatsData: (newStatsData: StatsData) => void;
+    updateStatsData: (data: Partial<StatsData>) => void;
 }
 
+// Define initial abilities
+const initialAbilities: Ability[] = [
+    { id: 1, name: 'Strength', value: 8 },
+    { id: 2, name: 'Dexterity', value: 8 },
+    { id: 3, name: 'Constitution', value: 8 },
+    { id: 4, name: 'Intelligence', value: 8 },
+    { id: 5, name: 'Wisdom', value: 8 },
+    { id: 6, name: 'Charisma', value: 8 },
+];
+
+// Initial stats data
+const initialStatsData: StatsData = {
+    xp: 0,
+    level: 1,
+    abilities: initialAbilities,
+    allocationsPerLevel: { 1: {} },
+    race: '',
+    class: '',
+    hpIncreases: {},
+    hitDice: 0,
+};
+
 // Create context
-const StatsDataContext = createContext<StatsDataContextProps | undefined>(undefined);
+const StatsDataContext = createContext<StatsDataContextProps>({
+    statsData: initialStatsData,
+    updateStatsData: () => { },
+});
 
 // Create provider component
 export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [statsData, setStatsData] = useState<StatsData>({
-        xp: 0,
-        level: 1,
-        abilities: [],
-        allocationsPerLevel: { 1: {} },
-    });
+    const [statsData, setStatsData] = useState<StatsData>(initialStatsData);
 
     // Load statsData from AsyncStorage
     const loadStatsData = async () => {
@@ -47,8 +71,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 const data = JSON.parse(dataString);
                 setStatsData(data);
             } else {
-                // Initialize default data if none exists
-                // You can define a function to initialize default data here
+                setStatsData(initialStatsData);
             }
         } catch (error) {
             console.error('Error loading stats data:', error);
@@ -65,9 +88,12 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     // Update statsData and save to AsyncStorage
-    const updateStatsData = (newStatsData: StatsData) => {
-        setStatsData(newStatsData);
-        saveStatsData(newStatsData);
+    const updateStatsData = (newData: Partial<StatsData>) => {
+        setStatsData((prev) => {
+            const updatedData = { ...prev, ...newData };
+            saveStatsData(updatedData);
+            return updatedData;
+        });
     };
 
     // Load statsData on mount

@@ -116,6 +116,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
         padding: 20,
+        gap: 10,
+        maxHeight: '50%',
     },
     modalTitle: {
         fontSize: 18,
@@ -134,17 +136,32 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 10,
     },
+    modalButtonsColumn: {
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        gap: 20,
+    },
+    modalSideBySide: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 10,
+    },
     modalButtonAdd: {
         backgroundColor: '#007AFF',
         borderRadius: 4,
         padding: 10,
         flex: 1,
     },
+    modalColumn: {
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        gap: 10,
+    },
     modalButtonReplenish: {
         backgroundColor: '#007AFF',
         borderRadius: 4,
         padding: 10,
-        marginLeft: 5,
     },
     modalButtonSubtract: {
         backgroundColor: '#8b00a0',
@@ -244,6 +261,10 @@ const styles = StyleSheet.create({
         padding: 10,
         gap: 5,
     },
+    levelContainerHighlighted: {
+        borderWidth: 2,
+        borderColor: 'darkgoldenrod',
+    },
     firstRowText: {
         fontSize: 18,
         color: 'white',
@@ -273,6 +294,9 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         alignItems: 'center',
         marginBottom: 10,
+    },
+    headerIcon: {
+        color: 'white',
     },
     abilityContainer: {
         flex: 1,
@@ -461,7 +485,27 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: 'white',
         fontWeight: 'bold',
-        marginBottom: 5,
+    },
+    availableAbilityPointsContainer: {
+        marginBottom: 10,
+    },
+    availableAbilityPointsHighlighted: {
+        borderWidth: 2,
+        borderColor: 'darkgoldenrod',
+        padding: 5,
+        alignSelf: 'flex-start',
+        borderRadius: 8,
+        paddingLeft: 10,
+        paddingRight: 10,
+    },
+    availableAbilityPointsNotHighlighted: {
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        padding: 5,
+        alignSelf: 'flex-start',
+        borderRadius: 8,
+        paddingLeft: 10,
+        paddingRight: 10,
     },
     modalConfirmButton: {
         backgroundColor: '#007AFF',
@@ -483,6 +527,12 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: 'black',
         fontWeight: 'normal',
+    },
+    modalRowContainer: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        gap: 10,
     },
 });
 

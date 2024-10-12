@@ -27,7 +27,6 @@ interface Ability {
 interface Skill {
     id: number;
     name: string;
-    isProficient: boolean;
     dependency: string;
 }
 
@@ -43,9 +42,13 @@ interface StatsData {
     level: number;
     abilities: Ability[];
     allocationsPerLevel: AllocationHistory;
+    race?: string;
+    class?: string;
+    hpIncreases: { [level: number]: number };
+    hitDice: number;
 }
 
-// Functions to get level and proficiency bonus
+// Functions to get level  bonus
 const getLevelFromXp = (xp: number): number => {
     let level = 1;
     for (let i = 0; i < xpThresholds.length; i++) {
@@ -62,27 +65,41 @@ const getAbilityPointsFromLevel = (level: number): number => {
     return level === 1 ? 14 : 14 + (level - 1) * 2;
 };
 
-// Add Proficiency Bonus Function
-const getProficiencyBonus = (level: number): number => {
-    if (level >= 17) return 6;
-    if (level >= 13) return 5;
-    if (level >= 9) return 4;
-    if (level >= 5) return 3;
-    return 2;
-};
 
 const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
     const [skills, setSkills] = useState<Skill[]>(skillsData);
+    const [hasUnfilledHpIncreases, setHasUnfilledHpIncreases] = useState(false);
 
     // States for Ability Modification Modal
     const [abilityModalVisible, setAbilityModalVisible] = useState<boolean>(false);
     const [selectedAbility, setSelectedAbility] = useState<Ability | null>(null);
+    const [levelModalVisible, setLevelModalVisible] = useState<boolean>(false);
 
     // Use context for statsData
     const { statsData, updateStatsData } = useContext(StatsDataContext) as { statsData: StatsData, updateStatsData: (data: StatsData) => void };
-    const { xp, level, abilities, allocationsPerLevel } = statsData;
+
+    if (!statsData) {
+        // Render a loading indicator or return null
+        return null;
+    }
+
+    useEffect(() => {
+        const unfilledLevels = Array.from({ length: statsData.level - 1 }, (_, index) => index + 2).filter(
+            (lvl) => statsData.hpIncreases[lvl] === undefined || statsData.hpIncreases[lvl] === null || statsData.hpIncreases[lvl] === 0
+        );
+        setHasUnfilledHpIncreases(unfilledLevels.length > 0);
+    }, [statsData?.hpIncreases, statsData?.level]);
+
+    const {
+        xp = 0,
+        level = getLevelFromXp(xp),
+        abilities = [],
+        allocationsPerLevel = {},
+        hpIncreases = {},
+        hitDice = 0,
+    } = statsData || {};
 
     // Calculate Available Ability Points
     const getAvailableAbilityPoints = (): number => {
@@ -95,14 +112,10 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const availableAbilityPoints = getAvailableAbilityPoints();
 
     // Function to handle XP changes
-    const handleXpChange = (operation: 'add' | 'subtract') => {
+    const handleXpChange = () => {
         const changeValue = parseInt(inputValue) || 0;
         let newXp = xp;
-        if (operation === 'add') {
-            newXp = xp + changeValue;
-        } else if (operation === 'subtract') {
-            newXp = Math.max(xp - changeValue, 0);
-        }
+        newXp = xp + changeValue;
         // Update level based on new XP
         const newLevel = getLevelFromXp(newXp);
 
@@ -270,12 +283,14 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         // Reset allocations
         const resetAllocations: AllocationHistory = { 1: {} };
 
-        // Update statsData
+        // Update statsData without resetting hitDice
         updateStatsData({
             xp: resetXp,
             level: resetLevel,
             abilities: resetAbilities,
             allocationsPerLevel: resetAllocations,
+            hpIncreases: {},
+            hitDice: statsData.hitDice,
         });
     };
 
@@ -339,11 +354,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             ? Math.floor((relatedAbility.value - 10) / 2)
             : 0;
 
-        // Get the proficiency bonus based on the current level
-        const proficiencyBonus = getProficiencyBonus(level);
-
-        // Calculate the skill value
-        const skillValue = abilityModifier + (item.isProficient ? proficiencyBonus : 0);
+        const skillValue = abilityModifier;
 
         return (
             <View style={styles.skillContainer}>
@@ -361,10 +372,16 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             <View style={styles.statsHeader}>
                 {/* Character Stats Content */}
                 <View style={styles.firstRow}>
-                    <View style={styles.levelContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.levelContainer,
+                            hasUnfilledHpIncreases && styles.levelContainerHighlighted,
+                        ]}
+                        onPress={() => setLevelModalVisible(true)}
+                    >
                         <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
                         <Text style={styles.firstRowText}>Level: {level}</Text>
-                    </View>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.firstRowContents}
                         onPress={() => {
@@ -380,6 +397,33 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         }}
                     >
                         <Text style={styles.firstRowText}>XP: {xp}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.modalResetButton}
+                        onPress={() => {
+                            Alert.alert(
+                                'Reset XP',
+                                'Are you sure you want to reset your XP to 0?',
+                                [
+                                    {
+                                        text: 'Cancel',
+                                        style: 'cancel',
+                                    },
+                                    {
+                                        text: 'Reset',
+                                        style: 'destructive',
+                                        onPress: () => resetXpAndLevel(),
+                                    },
+                                ]
+                            );
+                        }}
+                    >
+                        <Ionicons
+                            name="warning"
+                            size={24}
+                            color="red"
+                            style={[styles.headerIcon, { color: 'white' }]}
+                        />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -411,10 +455,17 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
             {/* Ability Grid */}
             <View style={styles.characterStatsContainer}>
-                <Text style={styles.characterStatsTitle}>Abilities</Text>
-                <Text style={styles.availableAbilityPoints}>
-                    Available: {availableAbilityPoints}
-                </Text>
+                <View style={styles.rowIconTitle}>
+                    <Ionicons name="key" size={20} color="white" />
+                    <Text style={styles.characterStatsTitle}>Abilities</Text>
+                </View>
+                <View style={styles.availableAbilityPointsContainer}>
+                    <View style={availableAbilityPoints > 0 ? styles.availableAbilityPointsHighlighted : styles.availableAbilityPointsNotHighlighted}>
+                        <Text style={styles.availableAbilityPoints}>
+                            Available: {availableAbilityPoints}
+                        </Text>
+                    </View>
+                </View>
                 <FlatList
                     data={abilities}
                     renderItem={renderGridItem}
@@ -456,28 +507,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                             <View style={styles.modalContainer}>
                                 <View style={styles.modalHeader}>
                                     <Text style={styles.modalTitle}>Current XP: {xp}</Text>
-                                    <TouchableOpacity
-                                        style={styles.modalResetButton}
-                                        onPress={() => {
-                                            Alert.alert(
-                                                'Reset XP',
-                                                'Are you sure you want to reset your XP to 0?',
-                                                [
-                                                    {
-                                                        text: 'Cancel',
-                                                        style: 'cancel',
-                                                    },
-                                                    {
-                                                        text: 'Reset',
-                                                        style: 'destructive',
-                                                        onPress: () => resetXpAndLevel(),
-                                                    },
-                                                ]
-                                            );
-                                        }}
-                                    >
-                                        <Text style={styles.modalResetButtonText}>Reset</Text>
-                                    </TouchableOpacity>
                                 </View>
                                 <TextInput
                                     style={styles.modalInput}
@@ -489,14 +518,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 />
                                 <View style={styles.modalButtons}>
                                     <TouchableOpacity
-                                        style={styles.modalButtonSubtract}
-                                        onPress={() => handleXpChange('subtract')}
-                                    >
-                                        <Text style={styles.modalButtonText}>Subtract</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
                                         style={styles.modalButtonAdd}
-                                        onPress={() => handleXpChange('add')}
+                                        onPress={() => handleXpChange()}
                                     >
                                         <Text style={styles.modalButtonText}>Add</Text>
                                     </TouchableOpacity>
@@ -548,6 +571,66 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                         </View>
                                     </>
                                 )}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Level Modal */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={levelModalVisible}
+                onRequestClose={() => {
+                    setLevelModalVisible(false);
+                }}
+            >
+                <TouchableWithoutFeedback onPress={() => setLevelModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <View style={styles.modalContainer}>
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Level: {level}</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                                    {Array.from({ length: statsData.level - 1 }, (_, index) => {
+                                        const level = index + 2;
+                                        return (
+                                            <View key={level} style={{ flexDirection: 'column', alignItems: 'flex-start', margin: 5, gap: 5 }}>
+                                                <Text style={styles.modalInputLabel}>Level {level} Increase:</Text>
+                                                <TextInput
+                                                    style={styles.modalInput}
+                                                    placeholder="Enter increase"
+                                                    keyboardType="number-pad"
+                                                    placeholderTextColor="gray"
+                                                    value={hpIncreases[level]?.toString() || ''}
+                                                    onChangeText={(text) => {
+                                                        const number = parseInt(text);
+                                                        if (!isNaN(number) && number >= 0 && number <= hitDice) {
+                                                            updateStatsData({
+                                                                ...statsData,
+                                                                hpIncreases: {
+                                                                    ...(hpIncreases || {}),
+                                                                    [level]: number,
+                                                                },
+                                                            });
+                                                        } else if (text === '') {
+                                                            const updatedIncreases = { ...(hpIncreases || {}) };
+                                                            delete updatedIncreases[level];
+                                                            updateStatsData({
+                                                                ...statsData,
+                                                                hpIncreases: updatedIncreases,
+                                                            });
+                                                        } else {
+                                                            Alert.alert('Invalid input', `Please enter a number between 0 and ${hitDice}.`);
+                                                        }
+                                                    }}
+                                                />
+                                            </View>
+                                        );
+                                    })}
+                                </View>
                             </View>
                         </TouchableWithoutFeedback>
                     </View>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,8 @@ import defaultHideImage from '@actions/default-hide-image.png';
 import defaultSprintImage from '@actions/default-sprint-image.png';
 import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import StatsDataContext from '../context/StatsDataContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 // Define the base Action interface
@@ -36,6 +38,30 @@ interface BaseAction {
   cost: { actions: number; bonus: number };
   details?: string;
   image?: string; // Add optional image property
+}
+
+interface Ability {
+  id: number;
+  name: string;
+  value: number;
+}
+
+// Define Allocation History Interface
+interface AllocationHistory {
+  [level: number]: {
+    [abilityId: number]: number;
+  };
+}
+
+interface StatsData {
+  xp: number;
+  level: number;
+  abilities: Ability[];
+  allocationsPerLevel: AllocationHistory;
+  race?: string;
+  class?: string;
+  hpIncreases: { [level: number]: number };
+  hitDice: number;
 }
 
 // Define specific action types if needed
@@ -74,6 +100,11 @@ export default function ActionsScreen() {
   const [newActionDetails, setNewActionDetails] = useState<string>(''); // State for the new action details
   const [editedActionName, setEditedActionName] = useState<string>(''); // State for the edited action name
   const [editingField, setEditingField] = useState<'title' | 'details' | null>(null); // Track which field is being edited
+  const [hp, setHp] = useState<number | null>(null);
+  const [tempHp, setTempHp] = useState(0);
+  const [maxHp, setMaxHp] = useState(0);
+  const [inputHpValue, setInputHpValue] = useState<string>('');
+  const [ac, setAc] = useState(10);
 
   // State for new action cost
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
@@ -84,12 +115,52 @@ export default function ActionsScreen() {
 
   // Path to the actions.json file
   const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
+  // Use context for statsData
+  const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
+
+  if (!statsData) {
+    // Render a loading indicator or return null
+    return null;
+  }
+
+  const { hpIncreases = {}, hitDice = 0 } = statsData || {};
 
   // Load actions from file system when the component mounts
   useEffect(() => {
     loadActions();
   }, []);
 
+  // Calculate AC based on Dexterity
+  useEffect(() => {
+    if (statsData.abilities) {
+      const dexterity = statsData.abilities.find(
+        (ability) => ability.name === 'Dexterity'
+      );
+      if (dexterity) {
+        const dexModifier = Math.floor((dexterity.value - 10) / 2);
+        setAc(10 + dexModifier);
+      }
+    }
+  }, [statsData]);
+
+  const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
+
+  // Function to get proficiency bonus based on level
+  const getProficiencyBonus = (level: number): number => {
+    if (level >= 17) return 6;
+    if (level >= 13) return 5;
+    if (level >= 9) return 4;
+    if (level >= 5) return 3;
+    return 2;
+  };
+
+  // Update proficiency bonus when statsData.level changes
+  useEffect(() => {
+    if (statsData && statsData.level) {
+      const newProficiencyBonus = getProficiencyBonus(statsData.level);
+      setProficiencyBonus(newProficiencyBonus);
+    }
+  }, [statsData?.level]);
 
   // Function to load actions from file system
   const loadActions = async () => {
@@ -193,6 +264,19 @@ export default function ActionsScreen() {
     }
   };
 
+  // Calculate maxHp based on hpIncreases and hitDice
+  useEffect(() => {
+    const calculateMaxHp = () => {
+      const baseHp = hitDice; // Base HP from Level 1
+      const additionalHp = Object.entries(hpIncreases)
+        .filter(([level, _]) => parseInt(level) >= 2) // Ensure only Level 2 and above are included
+        .reduce((total, [_, value]) => total + value, 0);
+      const totalHp = baseHp + additionalHp;
+      setMaxHp(totalHp);
+    };
+
+    calculateMaxHp();
+  }, [hpIncreases, hitDice]);
 
   const deleteAction = (actionId: string) => {
     // Check if the action is a default action
@@ -539,6 +623,99 @@ export default function ActionsScreen() {
     return defaultActions.some(action => action.id === actionId);
   };
 
+  // HP-Related Functions
+  const handleHpChange = (operation: 'replenish' | 'subtract' | 'add') => {
+    const changeValue = parseInt(inputHpValue) || 0;
+    if (operation === 'replenish') {
+      setHp(maxHp);
+      setTempHp(0);
+    } else if (operation === 'subtract') {
+      let remainingDamage = changeValue;
+      if (tempHp > 0) {
+        if (tempHp >= remainingDamage) {
+          // Subtract from tempHp
+          setTempHp(tempHp - remainingDamage);
+        } else {
+          // Subtract from tempHp and hp
+          remainingDamage -= tempHp;
+          setTempHp(0);
+          setHp(Math.max((hp ?? 0) - remainingDamage, 0));
+        }
+      } else {
+        // Subtract from hp
+        setHp(Math.max((hp ?? 0) - remainingDamage, 0));
+      }
+    } else if (operation === 'add') {
+      const newHp = Math.min((hp ?? 0) + changeValue, maxHp);
+      setHp(newHp);
+    }
+    setInputHpValue('');
+  };
+
+  // Load stored hp and tempHp when component mounts or hitDice changes
+  useEffect(() => {
+    const loadHpAndTempHp = async () => {
+      try {
+        const storedHp = await AsyncStorage.getItem('hp');
+        const storedTempHp = await AsyncStorage.getItem('tempHp');
+        const hpValue = storedHp !== null ? parseInt(storedHp) : maxHp;
+        const tempHpValue = storedTempHp !== null ? parseInt(storedTempHp) : 0;
+        setHp(hpValue);
+        setTempHp(tempHpValue);
+      } catch (error) {
+        console.error('Error loading hp or tempHp:', error);
+        setHp(maxHp);
+        setTempHp(0);
+      }
+    };
+    if (hitDice > 0) {
+      loadHpAndTempHp();
+    }
+  }, [hitDice]);
+
+  // Save hp, tempHp, and maxHp whenever they change
+  useEffect(() => {
+    const saveHpData = async () => {
+      try {
+        await AsyncStorage.setItem('hp', hp?.toString() ?? '');
+        await AsyncStorage.setItem('tempHp', tempHp.toString());
+        await AsyncStorage.setItem('maxHp', maxHp.toString());
+      } catch (error) {
+        console.error('Error saving HP data:', error);
+      }
+    };
+
+    saveHpData();
+  }, [hp, tempHp, maxHp]);
+
+  const renderHpBar = () => {
+    const totalHp = (hp ?? 0) + tempHp;
+    const hpUnits = [];
+
+    for (let i = 1; i <= Math.max(totalHp, maxHp); i++) {
+      let unitColor = 'gray'; // Default color for missing HP
+
+      if (i <= (hp ?? 0)) {
+        unitColor = 'red'; // Current HP
+      } else if (i <= totalHp) {
+        unitColor = 'cyan'; // Temporary HP
+      }
+
+      hpUnits.push(
+        <View
+          key={i}
+          style={[styles.hpUnit, { backgroundColor: unitColor }]}
+        />
+      );
+    }
+
+    return (
+      <View style={styles.hpBar}>
+        {hpUnits}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -594,6 +771,101 @@ export default function ActionsScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Subheader */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.subheader}>
+          <View style={styles.hpContainer}>
+            {(hp !== null && maxHp > 0) && (
+              <View style={styles.hpBarContainer}>
+                {renderHpBar()}
+              </View>
+            )}
+            <View style={styles.hpTextContainer}>
+              <Text style={styles.hpText}>
+                {hp !== null && hp > 0
+                  ? `${hp + tempHp}`
+                  : <Ionicons name="skull" size={14} color="white" />}
+              </Text>
+              <Text style={styles.subheaderText}>/{maxHp}</Text>
+            </View>
+          </View>
+          <View style={styles.subheaderInline}>
+            <View style={{ flex: 1, flexDirection: 'column' }}>
+              <View style={styles.subheaderSideBySide}>
+                <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
+                  <Text style={styles.hpText}>{proficiencyBonus}</Text>
+                  <View style={styles.subheaderSideBySide}>
+                    <Ionicons name="aperture" size={24} color="rgb(180, 100, 255)" />
+                  </View>
+                </View>
+                <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
+                  <TextInput
+                    placeholder="0"
+                    keyboardType="number-pad"
+                    placeholderTextColor="gray"
+                    style={[styles.modalInputTempHp, { fontSize: 20 }]}
+                    onChangeText={(value) => {
+                      if (value === '') {
+                        setTempHp(0);
+                      } else {
+                        const parsedValue = parseInt(value) || 0;
+                        setTempHp(Math.min(parsedValue, 999));
+                      }
+                    }}
+                    value={tempHp === 0 ? '' : tempHp.toString()}
+                    maxLength={3}
+                  />
+                  <View style={styles.subheaderSideBySide}>
+                    <Ionicons name="heart-circle" size={24} color="cyan" />
+                  </View>
+                </View>
+              </View>
+              <View style={styles.subheaderSideBySide}>
+                <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
+                  <Text style={styles.hpText}>{ac}</Text>
+                  <View style={styles.subheaderSideBySide}>
+                    <Ionicons name="shield" size={24} color="rgb(146, 187, 204)" />
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.replenishContainer}
+                  onPress={() => handleHpChange('replenish')}
+                >
+                  <View style={styles.modalButtonReplenish}>
+                    <Ionicons name="bed" size={24} color="white" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
+              <TextInput
+                placeholder="0"
+                keyboardType="number-pad"
+                placeholderTextColor="gray"
+                onChangeText={setInputHpValue}
+                style={[styles.modalInputTempHp, { fontSize: 60 }]}
+                value={inputHpValue}
+                maxLength={3}
+              />
+              <View style={[styles.subheaderSideBySide, { padding: 5, paddingTop: 0 }]}>
+                <TouchableOpacity
+                  style={styles.modalButtonSubtract}
+                  onPress={() => handleHpChange('subtract')}
+                >
+                  <Ionicons name="remove" size={24} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButtonAdd}
+                  onPress={() => handleHpChange('add')}
+                >
+                  <Ionicons name="add" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
 
       {/* Actions Grid */}
       <FlatList
