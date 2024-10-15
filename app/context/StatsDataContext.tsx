@@ -92,6 +92,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setStatsData((prev) => {
             const updatedData = { ...prev, ...newData };
             saveStatsData(updatedData);
+            setStatsData(updatedData);
             return updatedData;
         });
     };

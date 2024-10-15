@@ -29,8 +29,14 @@ import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatsDataContext from '../context/StatsDataContext';
+import healingOrbImage from '@actions/healing-orb.png';
+import damageOrbImage from '@actions/damage-image.png';
+import longRestImage from '@actions/long-rest-image.png';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
+const healingOrbImageTyped: ImageSourcePropType = healingOrbImage as ImageSourcePropType;
+const damageOrbImageTyped: ImageSourcePropType = damageOrbImage as ImageSourcePropType;
+const longRestImageTyped: ImageSourcePropType = longRestImage as ImageSourcePropType;
 // Define the base Action interface
 interface BaseAction {
   id: string;
@@ -100,12 +106,12 @@ export default function ActionsScreen() {
   const [newActionDetails, setNewActionDetails] = useState<string>(''); // State for the new action details
   const [editedActionName, setEditedActionName] = useState<string>(''); // State for the edited action name
   const [editingField, setEditingField] = useState<'title' | 'details' | null>(null); // Track which field is being edited
-  const [hp, setHp] = useState<number | null>(null);
+  const [hp, setHp] = useState(0);
   const [tempHp, setTempHp] = useState(0);
   const [maxHp, setMaxHp] = useState(0);
   const [inputHpValue, setInputHpValue] = useState<string>('');
   const [ac, setAc] = useState(10);
-
+  const [isLoading, setIsLoading] = useState(true);
   // State for new action cost
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
 
@@ -124,43 +130,6 @@ export default function ActionsScreen() {
   }
 
   const { hpIncreases = {}, hitDice = 0 } = statsData || {};
-
-  // Load actions from file system when the component mounts
-  useEffect(() => {
-    loadActions();
-  }, []);
-
-  // Calculate AC based on Dexterity
-  useEffect(() => {
-    if (statsData.abilities) {
-      const dexterity = statsData.abilities.find(
-        (ability) => ability.name === 'Dexterity'
-      );
-      if (dexterity) {
-        const dexModifier = Math.floor((dexterity.value - 10) / 2);
-        setAc(10 + dexModifier);
-      }
-    }
-  }, [statsData]);
-
-  const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
-
-  // Function to get proficiency bonus based on level
-  const getProficiencyBonus = (level: number): number => {
-    if (level >= 17) return 6;
-    if (level >= 13) return 5;
-    if (level >= 9) return 4;
-    if (level >= 5) return 3;
-    return 2;
-  };
-
-  // Update proficiency bonus when statsData.level changes
-  useEffect(() => {
-    if (statsData && statsData.level) {
-      const newProficiencyBonus = getProficiencyBonus(statsData.level);
-      setProficiencyBonus(newProficiencyBonus);
-    }
-  }, [statsData?.level]);
 
   // Function to load actions from file system
   const loadActions = async () => {
@@ -217,6 +186,45 @@ export default function ActionsScreen() {
     }
   };
 
+  // Load actions from file system when the component mounts
+  useEffect(() => {
+    loadActions();
+  }, []);
+
+  // Calculate AC based on Dexterity
+  useEffect(() => {
+    if (statsData.abilities) {
+      const dexterity = statsData.abilities.find(
+        (ability) => ability.name === 'Dexterity'
+      );
+      if (dexterity) {
+        const dexModifier = Math.floor((dexterity.value - 10) / 2);
+        setAc(10 + dexModifier);
+      }
+    }
+  }, [statsData]);
+
+  const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
+
+  // Function to get proficiency bonus based on level
+  const getProficiencyBonus = (level: number): number => {
+    if (level >= 17) return 6;
+    if (level >= 13) return 5;
+    if (level >= 9) return 4;
+    if (level >= 5) return 3;
+    return 2;
+  };
+
+  // Update proficiency bonus when statsData.level changes
+  useEffect(() => {
+    if (statsData && statsData.level) {
+      const newProficiencyBonus = getProficiencyBonus(statsData.level);
+      setProficiencyBonus(newProficiencyBonus);
+    }
+  }, [statsData?.level]);
+
+
+
 
   // Function to save actions to file system
   const saveActions = async (actionsToSave: ActionBlock[]) => {
@@ -264,19 +272,7 @@ export default function ActionsScreen() {
     }
   };
 
-  // Calculate maxHp based on hpIncreases and hitDice
-  useEffect(() => {
-    const calculateMaxHp = () => {
-      const baseHp = hitDice; // Base HP from Level 1
-      const additionalHp = Object.entries(hpIncreases)
-        .filter(([level, _]) => parseInt(level) >= 2) // Ensure only Level 2 and above are included
-        .reduce((total, [_, value]) => total + value, 0);
-      const totalHp = baseHp + additionalHp;
-      setMaxHp(totalHp);
-    };
 
-    calculateMaxHp();
-  }, [hpIncreases, hitDice]);
 
   const deleteAction = (actionId: string) => {
     // Check if the action is a default action
@@ -652,50 +648,62 @@ export default function ActionsScreen() {
     setInputHpValue('');
   };
 
-  // Load stored hp and tempHp when component mounts or hitDice changes
+  // Load stored hp and tempHp when component mounts, hitDice changes or maxHp changes
   useEffect(() => {
-    const loadHpAndTempHp = async () => {
+    const loadHpData = async () => {
       try {
         const storedHp = await AsyncStorage.getItem('hp');
         const storedTempHp = await AsyncStorage.getItem('tempHp');
-        const hpValue = storedHp !== null ? parseInt(storedHp) : maxHp;
-        const tempHpValue = storedTempHp !== null ? parseInt(storedTempHp) : 0;
-        setHp(hpValue);
+        const storedMaxHp = await AsyncStorage.getItem('maxHp');
+
+        const hpValue = storedHp !== null ? parseInt(storedHp, 10) : null;
+        const tempHpValue = storedTempHp !== null ? parseInt(storedTempHp, 10) : 0;
+        const maxHpValue = storedMaxHp !== null ? parseInt(storedMaxHp, 10) : 0;
+
+        setHp(hpValue ?? 0);
         setTempHp(tempHpValue);
+        setMaxHp(maxHpValue);
       } catch (error) {
-        console.error('Error loading hp or tempHp:', error);
-        setHp(maxHp);
-        setTempHp(0);
+        console.error('Error loading hp data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    if (hitDice > 0) {
-      loadHpAndTempHp();
-    }
-  }, [hitDice]);
 
-  // Save hp, tempHp, and maxHp whenever they change
+    loadHpData();
+  }, []); // Empty dependency array to run only once on mount
+
+  // Save hp, tempHp, maxHp, and hitDice whenever they change
   useEffect(() => {
-    const saveHpData = async () => {
-      try {
-        await AsyncStorage.setItem('hp', hp?.toString() ?? '');
-        await AsyncStorage.setItem('tempHp', tempHp.toString());
-        await AsyncStorage.setItem('maxHp', maxHp.toString());
-      } catch (error) {
-        console.error('Error saving HP data:', error);
-      }
-    };
+    if (!isLoading) {
+      const saveHpData = async () => {
+        try {
+          await AsyncStorage.setItem('hp', hp.toString());
+          await AsyncStorage.setItem('tempHp', tempHp.toString());
+          await AsyncStorage.setItem('maxHp', maxHp.toString());
+        } catch (error) {
+          console.error('Error saving HP data:', error);
+        }
+      };
 
-    saveHpData();
+      saveHpData();
+    }
   }, [hp, tempHp, maxHp]);
 
+
+
   const renderHpBar = () => {
-    const totalHp = (hp ?? 0) + tempHp;
+    if (hp === null || maxHp === 0) {
+      return null;
+    }
+
+    const totalHp = hp + tempHp;
     const hpUnits = [];
 
     for (let i = 1; i <= Math.max(totalHp, maxHp); i++) {
       let unitColor = 'gray'; // Default color for missing HP
 
-      if (i <= (hp ?? 0)) {
+      if (i <= hp) {
         unitColor = 'red'; // Current HP
       } else if (i <= totalHp) {
         unitColor = 'cyan'; // Temporary HP
@@ -715,6 +723,31 @@ export default function ActionsScreen() {
       </View>
     );
   };
+
+  // Calculate maxHp based on hpIncreases
+  useEffect(() => {
+    const calculateMaxHp = () => {
+      const baseHp = hitDice; // Base HP from Level 1
+      const additionalHp = Object.entries(hpIncreases)
+        .filter(([level, _]) => parseInt(level) >= 2)
+        .reduce((total, [_, value]) => total + value, 0);
+      const totalHp = baseHp + additionalHp;
+      setMaxHp(totalHp);
+
+      // Adjust current hp if it exceeds the new maxHp
+      setHp((prevHp) => {
+        if (prevHp === null) {
+          return totalHp;
+        } else {
+          return Math.min(prevHp, totalHp);
+        }
+      });
+    };
+
+    if (!isLoading) {
+      calculateMaxHp();
+    }
+  }, [hpIncreases, hitDice, isLoading]);
 
   return (
     <View style={styles.container}>
@@ -774,97 +807,105 @@ export default function ActionsScreen() {
 
       {/* Subheader */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.subheader}>
-          <View style={styles.hpContainer}>
-            {(hp !== null && maxHp > 0) && (
-              <View style={styles.hpBarContainer}>
-                {renderHpBar()}
+        {statsData.class !== '' && statsData.race !== '' ?
+          <View style={styles.subheader}>
+            <View style={styles.hpContainer}>
+              {(hp !== null && maxHp > 0) && (
+                <View style={styles.hpBarContainer}>
+                  {renderHpBar()}
+                </View>
+              )}
+              <View style={styles.hpTextContainer}>
+                <Text style={styles.hpText}>
+                  {hp !== null && hp > 0
+                    ? `${hp + tempHp}`
+                    : <Ionicons name="skull" size={14} color="white" />}
+                </Text>
+                <Text style={styles.subheaderText}>/{maxHp}</Text>
               </View>
-            )}
-            <View style={styles.hpTextContainer}>
-              <Text style={styles.hpText}>
-                {hp !== null && hp > 0
-                  ? `${hp + tempHp}`
-                  : <Ionicons name="skull" size={14} color="white" />}
-              </Text>
-              <Text style={styles.subheaderText}>/{maxHp}</Text>
+            </View>
+            <View style={styles.subheaderInline}>
+              <View style={{ flex: 1, flexDirection: 'column' }}>
+                <View style={styles.subheaderSideBySide}>
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
+                    <Text style={styles.hpText}>{proficiencyBonus}</Text>
+                    <View style={styles.subheaderSideBySide}>
+                      <Ionicons name="aperture" size={24} color="rgb(180, 100, 255)" />
+                    </View>
+                  </View>
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
+                    <TextInput
+                      placeholder="0"
+                      keyboardType="number-pad"
+                      placeholderTextColor="gray"
+                      style={[styles.modalInputTempHp, { fontSize: 20 }]}
+                      onChangeText={(value) => {
+                        if (value === '') {
+                          setTempHp(0);
+                        } else {
+                          const parsedValue = parseInt(value) || 0;
+                          setTempHp(Math.min(parsedValue, 999));
+                        }
+                      }}
+                      value={tempHp === 0 ? '' : tempHp.toString()}
+                      maxLength={3}
+                    />
+                    <View style={styles.subheaderSideBySide}>
+                      <Ionicons name="heart-circle" size={24} color="cyan" />
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.subheaderSideBySide}>
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
+                    <Text style={styles.hpText}>{ac}</Text>
+                    <View style={styles.subheaderSideBySide}>
+                      <Ionicons name="shield" size={24} color="rgb(146, 187, 204)" />
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.replenishContainer}
+                    onPress={() => handleHpChange('replenish')}
+                  >
+                    <ImageBackground source={longRestImageTyped} style={styles.modalButtonReplenish} resizeMode="cover" >
+                    </ImageBackground>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(218, 165, 32, 0.3)' }]}>
+                <TextInput
+                  placeholder="0"
+                  keyboardType="number-pad"
+                  placeholderTextColor="gray"
+                  onChangeText={setInputHpValue}
+                  style={[styles.modalInputTempHp, { fontSize: 60 }]}
+                  value={inputHpValue}
+                  maxLength={3}
+                />
+                <View style={[styles.subheaderSideBySide, { padding: 5, paddingTop: 0 }]}>
+                  <TouchableOpacity
+                    style={styles.modalButtonSubtract}
+                    onPress={() => handleHpChange('subtract')}
+                  >
+                    <ImageBackground source={damageOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalButtonAdd}
+                    onPress={() => handleHpChange('add')}
+                  >
+                    <ImageBackground source={healingOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
+                    </ImageBackground>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </View>
-          <View style={styles.subheaderInline}>
-            <View style={{ flex: 1, flexDirection: 'column' }}>
-              <View style={styles.subheaderSideBySide}>
-                <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
-                  <Text style={styles.hpText}>{proficiencyBonus}</Text>
-                  <View style={styles.subheaderSideBySide}>
-                    <Ionicons name="aperture" size={24} color="rgb(180, 100, 255)" />
-                  </View>
-                </View>
-                <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
-                  <TextInput
-                    placeholder="0"
-                    keyboardType="number-pad"
-                    placeholderTextColor="gray"
-                    style={[styles.modalInputTempHp, { fontSize: 20 }]}
-                    onChangeText={(value) => {
-                      if (value === '') {
-                        setTempHp(0);
-                      } else {
-                        const parsedValue = parseInt(value) || 0;
-                        setTempHp(Math.min(parsedValue, 999));
-                      }
-                    }}
-                    value={tempHp === 0 ? '' : tempHp.toString()}
-                    maxLength={3}
-                  />
-                  <View style={styles.subheaderSideBySide}>
-                    <Ionicons name="heart-circle" size={24} color="cyan" />
-                  </View>
-                </View>
-              </View>
-              <View style={styles.subheaderSideBySide}>
-                <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
-                  <Text style={styles.hpText}>{ac}</Text>
-                  <View style={styles.subheaderSideBySide}>
-                    <Ionicons name="shield" size={24} color="rgb(146, 187, 204)" />
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.replenishContainer}
-                  onPress={() => handleHpChange('replenish')}
-                >
-                  <View style={styles.modalButtonReplenish}>
-                    <Ionicons name="bed" size={24} color="white" />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
-              <TextInput
-                placeholder="0"
-                keyboardType="number-pad"
-                placeholderTextColor="gray"
-                onChangeText={setInputHpValue}
-                style={[styles.modalInputTempHp, { fontSize: 60 }]}
-                value={inputHpValue}
-                maxLength={3}
-              />
-              <View style={[styles.subheaderSideBySide, { padding: 5, paddingTop: 0 }]}>
-                <TouchableOpacity
-                  style={styles.modalButtonSubtract}
-                  onPress={() => handleHpChange('subtract')}
-                >
-                  <Ionicons name="remove" size={24} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonAdd}
-                  onPress={() => handleHpChange('add')}
-                >
-                  <Ionicons name="add" size={24} color="white" />
-                </TouchableOpacity>
-              </View>
-            </View>
+          :
+          <View style={styles.subheader}>
+            <Text style={[styles.subheaderText, { color: 'white' }]}>Please create a character</Text>
           </View>
-        </View>
+        }
+
       </TouchableWithoutFeedback>
 
       {/* Actions Grid */}

@@ -86,6 +86,9 @@ export default function MeScreen() {
     const [openClass, setOpenClass] = useState(false);
     const [raceValue, setRaceValue] = useState<string | null>(statsData.race || null);
     const [classValue, setClassValue] = useState<string | null>(statsData.class || null);
+    // State to track if race and class have been confirmed
+    const [isRaceConfirmed, setIsRaceConfirmed] = useState<boolean>(!!statsData.race);
+    const [isClassConfirmed, setIsClassConfirmed] = useState<boolean>(!!statsData.class);
 
     // Define race items
     const raceItems = [
@@ -117,47 +120,29 @@ export default function MeScreen() {
         { label: 'Wizard', value: 'Wizard', hitDice: 6 },
     ];
 
-    // Update statsData.race when raceValue changes
-    useEffect(() => {
-        if (raceValue !== statsData.race) {
-            updateStatsData({
-                ...statsData,
-                race: raceValue || '',
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [raceValue]);
-
-    // Update statsData.class and hitDice when classValue changes
-    useEffect(() => {
-        if (classValue !== statsData.class) {
-            // Find the selected class item
-            const selectedClass = classItems.find((item) => item.value === classValue);
-            const newHitDice = selectedClass ? selectedClass.hitDice : 0;
-
-            updateStatsData({
-                ...statsData,
-                class: classValue || '',
-                hitDice: newHitDice,
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [classValue]);
-
-    // Initialize classValue and hitDice when statsData.class changes (e.g., on load)
-    useEffect(() => {
-        if (statsData.class) {
-            setClassValue(statsData.class);
-            const selectedClass = classItems.find((item) => item.value === statsData.class);
-            if (selectedClass) {
-                updateStatsData({
-                    ...statsData,
-                    hitDice: selectedClass.hitDice
-                });
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [statsData.class]);
+    // Initialize classValue, raceValue, and hitDice when statsData.class and statsData.race changes
+    // useEffect(() => {
+    //     if (statsData.race) {
+    //         setRaceValue(statsData.race);
+    //         setIsRaceConfirmed(true);
+    //         updateStatsData({
+    //             ...statsData,
+    //             race: statsData.race
+    //         });
+    //     }
+    //     if (statsData.class) {
+    //         setClassValue(statsData.class);
+    //         setIsClassConfirmed(true);
+    //         const selectedClass = classItems.find((item) => item.value === statsData.class);
+    //         if (selectedClass) {
+    //             updateStatsData({
+    //                 ...statsData,
+    //                 hitDice: selectedClass.hitDice
+    //             });
+    //         }
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [statsData.class, statsData.race]);
 
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -214,6 +199,10 @@ export default function MeScreen() {
             }
         };
         loadImageUri();
+
+        // Initalize race and class
+        setRaceValue(statsData.race || null);
+        setClassValue(statsData.class || null);
     }, []);
 
     const handleImagePress = () => {
@@ -342,6 +331,63 @@ export default function MeScreen() {
         } catch (error) {
             console.error('Failed to delete equipment image:', error);
         }
+    };
+
+
+    const handleSaveRace = () => {
+        Alert.alert(
+            'Confirm Selections',
+            'Changes you make are permanent and cannot be changed. Do you want to proceed?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Confirm',
+                    onPress: () => {
+                        // Confirm race selection
+                        setIsRaceConfirmed(true);
+                        updateStatsData({
+                            ...statsData,
+                            race: raceValue || '',
+                        });
+                        console.log('Race saved:', raceValue);
+                    },
+                },
+            ],
+            { cancelable: false },
+        );
+    };
+
+    const handleSaveClass = () => {
+        Alert.alert(
+            'Confirm Selections',
+            'Changes you make are permanent and cannot be changed. Do you want to proceed?',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Confirm',
+                    onPress: () => {
+                        // Confirm class selection
+                        setIsClassConfirmed(true);
+                        // Find the selected class item
+                        const selectedClass = classItems.find((item) => item.value === classValue);
+                        const newHitDice = selectedClass ? selectedClass.hitDice : 0;
+                        updateStatsData({
+                            ...statsData,
+                            class: classValue || '',
+                            hitDice: newHitDice,
+                        });
+                        console.log('Class saved:', classValue);
+                    },
+                },
+            ],
+            { cancelable: false },
+        );
     };
 
     // Calculate half of the screen width
@@ -479,39 +525,88 @@ export default function MeScreen() {
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <View style={styles.modalContainer}>
                                 <Text style={styles.modalTitle}>Character Settings</Text>
+                                <TouchableOpacity onPress={() => {
+                                    Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
+                                        {
+                                            text: 'Cancel',
+                                            style: 'cancel'
+                                        },
+                                        {
+                                            text: 'Delete',
+                                            style: 'destructive',
+                                            onPress: () => {
+                                                setRaceValue(null);
+                                                setClassValue(null);
+                                                setImageUri(null);
+                                                setIsRaceConfirmed(false);
+                                                setIsClassConfirmed(false);
+                                                updateStatsData({
+                                                    ...statsData,
+                                                    race: '',
+                                                    class: '',
+                                                    hitDice: 0,
+                                                });
+                                            }
+                                        }
+                                    ])
+                                }}>
+                                    <Text style={{ color: 'red', padding: 10, fontSize: 16, fontWeight: 'bold', borderWidth: 1, borderColor: 'red', borderRadius: 5 }}>Delete Character</Text>
+                                </TouchableOpacity>
                                 <View style={[styles.modalRowContainer, { zIndex: 3000 }]}>
-                                    <Text style={styles.modalLabel}>Race: {statsData.race ? statsData.race : 'None'}</Text>
-                                    <DropDownPicker
-                                        open={openRace}
-                                        value={raceValue}
-                                        items={raceItems}
-                                        setOpen={setOpenRace}
-                                        setValue={setRaceValue}
-                                        placeholder="Select a race"
-                                        containerStyle={{ height: 40, width: 200 }}
-                                        style={{ backgroundColor: '#fafafa' }}
-                                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                                        zIndex={3000}
-                                    />
+                                    <Text style={styles.modalLabel}>Race:</Text>
+                                    {isRaceConfirmed ? (
+                                        <Text style={styles.modalLabel}>{statsData.race}</Text>
+                                    ) : (
+                                        <DropDownPicker
+                                            open={openRace}
+                                            value={raceValue}
+                                            items={raceItems}
+                                            setOpen={setOpenRace}
+                                            setValue={setRaceValue}
+                                            placeholder="Select a race"
+                                            containerStyle={{ height: 40, width: 200 }}
+                                            style={{ backgroundColor: '#fafafa' }}
+                                            dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                            zIndex={3000}
+                                        />
+                                    )}
+                                    {!isRaceConfirmed &&
+                                        <TouchableOpacity onPress={handleSaveRace}>
+                                            <Text >Save</Text>
+                                        </TouchableOpacity>
+                                    }
                                 </View>
                                 <View style={[styles.modalRowContainer, { zIndex: 2000 }]}>
-                                    <Text style={styles.modalLabel}>Class: {statsData.class ? statsData.class : 'None'}</Text>
-                                    <DropDownPicker
-                                        open={openClass}
-                                        value={classValue}
-                                        items={classItems}
-                                        setOpen={setOpenClass}
-                                        setValue={setClassValue}
-                                        placeholder="Select a class"
-                                        containerStyle={{ height: 40, width: 200 }}
-                                        style={{ backgroundColor: '#fafafa' }}
-                                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                                        zIndex={2000}
-                                    />
+                                    <Text style={styles.modalLabel}>Class:</Text>
+                                    {isClassConfirmed ? (
+                                        <>
+                                            <Text style={styles.modalLabel}>{statsData.class}</Text>
+                                            <View style={[styles.modalRowContainer, { zIndex: 1000 }]}>
+                                                <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
+                                            </View>
+                                        </>
+                                    ) : (
+                                        <DropDownPicker
+                                            open={openClass}
+                                            value={classValue}
+                                            items={classItems}
+                                            setOpen={setOpenClass}
+                                            setValue={setClassValue}
+                                            placeholder="Select a class"
+                                            containerStyle={{ height: 40, width: 200 }}
+                                            style={{ backgroundColor: '#fafafa' }}
+                                            dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                            zIndex={2000}
+                                        />
+                                    )}
+                                    {!isClassConfirmed &&
+                                        <TouchableOpacity onPress={handleSaveClass}>
+                                            <Text >Save</Text>
+                                        </TouchableOpacity>
+                                    }
                                 </View>
-                                <View style={[styles.modalRowContainer, { zIndex: 1000 }]}>
-                                    <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
-                                </View>
+
+
 
                             </View>
                         </TouchableWithoutFeedback>
