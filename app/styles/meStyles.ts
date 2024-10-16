@@ -534,6 +534,22 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         gap: 10,
     },
+    formContainer: {
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        gap: 10,
+    },
+    submitButton: {
+        backgroundColor: '#007AFF',
+        borderRadius: 4,
+        padding: 10,
+        marginTop: 20,
+    },
+    submitButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
 });
 
 export default styles;

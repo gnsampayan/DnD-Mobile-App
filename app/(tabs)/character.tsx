@@ -31,6 +31,8 @@ import defaultRingImage from '@equipment/default-ring.png';
 import defaultMeleeWeaponImage from '@equipment/default-melee.png';
 import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import raceBonuses from '../data/raceBonuses.json';
 
 interface EquipmentItem {
     id: string;
@@ -62,6 +64,15 @@ interface StatsData {
     hpIncreases: { [level: number]: number };
     hitDice: number;
 }
+
+// Define a function to clear AsyncStorage
+const clearAsyncStorage = async () => {
+    try {
+        await AsyncStorage.clear();
+    } catch (error) {
+        console.error('Failed to clear AsyncStorage:', error);
+    }
+};
 
 export default function MeScreen() {
     // State variables
@@ -119,30 +130,6 @@ export default function MeScreen() {
         { label: 'Warlock', value: 'Warlock', hitDice: 8 },
         { label: 'Wizard', value: 'Wizard', hitDice: 6 },
     ];
-
-    // Initialize classValue, raceValue, and hitDice when statsData.class and statsData.race changes
-    // useEffect(() => {
-    //     if (statsData.race) {
-    //         setRaceValue(statsData.race);
-    //         setIsRaceConfirmed(true);
-    //         updateStatsData({
-    //             ...statsData,
-    //             race: statsData.race
-    //         });
-    //     }
-    //     if (statsData.class) {
-    //         setClassValue(statsData.class);
-    //         setIsClassConfirmed(true);
-    //         const selectedClass = classItems.find((item) => item.value === statsData.class);
-    //         if (selectedClass) {
-    //             updateStatsData({
-    //                 ...statsData,
-    //                 hitDice: selectedClass.hitDice
-    //             });
-    //         }
-    //     }
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [statsData.class, statsData.race]);
 
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -205,7 +192,7 @@ export default function MeScreen() {
         setClassValue(statsData.class || null);
     }, []);
 
-    const handleImagePress = () => {
+    const handleImageLongPress = () => {
         if (imageUri) {
             Alert.alert('Image Options', 'What would you like to do?', [
                 {
@@ -334,7 +321,7 @@ export default function MeScreen() {
     };
 
 
-    const handleSaveRace = () => {
+    const handleSaveRaceAndClass = () => {
         Alert.alert(
             'Confirm Selections',
             'Changes you make are permanent and cannot be changed. Do you want to proceed?',
@@ -347,48 +334,45 @@ export default function MeScreen() {
                     text: 'Confirm',
                     onPress: () => {
                         // Confirm race selection
-                        setIsRaceConfirmed(true);
-                        updateStatsData({
-                            ...statsData,
-                            race: raceValue || '',
-                        });
-                        console.log('Race saved:', raceValue);
+                        if (!isRaceConfirmed && !isClassConfirmed) {
+                            setIsRaceConfirmed(true);
+                            setIsClassConfirmed(true);
+                            const selectedClass = classItems.find((item) => item.value === classValue);
+                            const newHitDice = selectedClass ? selectedClass.hitDice : 0;
+                            const updatedStatsData = {
+                                ...statsData,
+                                race: raceValue || '',
+                                class: classValue || '',
+                                hitDice: newHitDice,
+                            };
+                            updateStatsData(updatedStatsData);
+                            handleRaceAndClassBonus(updatedStatsData);
+                        }
                     },
                 },
             ],
             { cancelable: false },
         );
+    };
+    const handleRaceAndClassBonus = (updatedStatsData: StatsData) => {
+        const selectedRaceBonus = raceBonuses.find(bonus => bonus.race === updatedStatsData.race);
+
+        if (selectedRaceBonus) {
+            const updatedAbilities = updatedStatsData.abilities.map(ability => {
+                const abilityName = ability.name.toLowerCase() as keyof typeof selectedRaceBonus.bonuses;
+                const bonusValue = selectedRaceBonus.bonuses[abilityName] || 0;
+                return {
+                    ...ability,
+                    value: ability.value + bonusValue
+                };
+            });
+            updateStatsData({
+                ...updatedStatsData,
+                abilities: updatedAbilities
+            });
+        }
     };
 
-    const handleSaveClass = () => {
-        Alert.alert(
-            'Confirm Selections',
-            'Changes you make are permanent and cannot be changed. Do you want to proceed?',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Confirm',
-                    onPress: () => {
-                        // Confirm class selection
-                        setIsClassConfirmed(true);
-                        // Find the selected class item
-                        const selectedClass = classItems.find((item) => item.value === classValue);
-                        const newHitDice = selectedClass ? selectedClass.hitDice : 0;
-                        updateStatsData({
-                            ...statsData,
-                            class: classValue || '',
-                            hitDice: newHitDice,
-                        });
-                        console.log('Class saved:', classValue);
-                    },
-                },
-            ],
-            { cancelable: false },
-        );
-    };
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
@@ -433,7 +417,7 @@ export default function MeScreen() {
                 </View>
 
                 {/* Section 3 */}
-                <TouchableOpacity onLongPress={handleImagePress} onPress={() => setCharacterModalVisible(true)}>
+                <TouchableOpacity onLongPress={handleImageLongPress} onPress={() => setCharacterModalVisible(true)}>
                     <View style={[styles.imageContainer, { width: section3Width }]}>
                         {imageUri ? (
                             <Image
@@ -534,7 +518,7 @@ export default function MeScreen() {
                                         {
                                             text: 'Delete',
                                             style: 'destructive',
-                                            onPress: () => {
+                                            onPress: async () => {
                                                 setRaceValue(null);
                                                 setClassValue(null);
                                                 setImageUri(null);
@@ -542,68 +526,80 @@ export default function MeScreen() {
                                                 setIsClassConfirmed(false);
                                                 updateStatsData({
                                                     ...statsData,
-                                                    race: '',
-                                                    class: '',
+                                                    race: null || '',
+                                                    class: null || '',
                                                     hitDice: 0,
+                                                    abilities: [
+                                                        { id: 1, name: 'Strength', value: 8 },
+                                                        { id: 2, name: 'Dexterity', value: 8 },
+                                                        { id: 3, name: 'Constitution', value: 8 },
+                                                        { id: 4, name: 'Intelligence', value: 8 },
+                                                        { id: 5, name: 'Wisdom', value: 8 },
+                                                        { id: 6, name: 'Charisma', value: 8 },
+                                                    ],
                                                 });
+                                                // Call the function when needed (e.g., during development)
+                                                clearAsyncStorage();
                                             }
                                         }
                                     ])
                                 }}>
                                     <Text style={{ color: 'red', padding: 10, fontSize: 16, fontWeight: 'bold', borderWidth: 1, borderColor: 'red', borderRadius: 5 }}>Delete Character</Text>
                                 </TouchableOpacity>
-                                <View style={[styles.modalRowContainer, { zIndex: 3000 }]}>
-                                    <Text style={styles.modalLabel}>Race:</Text>
-                                    {isRaceConfirmed ? (
-                                        <Text style={styles.modalLabel}>{statsData.race}</Text>
-                                    ) : (
-                                        <DropDownPicker
-                                            open={openRace}
-                                            value={raceValue}
-                                            items={raceItems}
-                                            setOpen={setOpenRace}
-                                            setValue={setRaceValue}
-                                            placeholder="Select a race"
-                                            containerStyle={{ height: 40, width: 200 }}
-                                            style={{ backgroundColor: '#fafafa' }}
-                                            dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                                            zIndex={3000}
-                                        />
-                                    )}
-                                    {!isRaceConfirmed &&
-                                        <TouchableOpacity onPress={handleSaveRace}>
-                                            <Text >Save</Text>
+                                <View style={styles.formContainer}>
+                                    <View style={[styles.modalRowContainer, { zIndex: 3000 }]}>
+                                        <Text style={styles.modalLabel}>Race:</Text>
+                                        {isRaceConfirmed ? (
+                                            <Text style={styles.modalLabel}>{statsData.race}</Text>
+                                        ) : (
+                                            <DropDownPicker
+                                                open={openRace}
+                                                value={raceValue}
+                                                items={raceItems}
+                                                setOpen={setOpenRace}
+                                                setValue={setRaceValue}
+                                                placeholder="Select a race"
+                                                containerStyle={{ height: 40, width: 200 }}
+                                                style={{ backgroundColor: '#fafafa' }}
+                                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                                zIndex={3000}
+                                            />
+                                        )}
+                                    </View>
+                                    <View style={[styles.modalRowContainer, { zIndex: 2000 }]}>
+                                        <Text style={styles.modalLabel}>Class:</Text>
+                                        {isClassConfirmed ? (
+                                            <>
+                                                <Text style={styles.modalLabel}>{statsData.class}</Text>
+                                                <View style={[styles.modalRowContainer, { zIndex: 1000 }]}>
+                                                    <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
+                                                </View>
+                                            </>
+                                        ) : (
+                                            <DropDownPicker
+                                                open={openClass}
+                                                value={classValue}
+                                                items={classItems}
+                                                setOpen={setOpenClass}
+                                                setValue={setClassValue}
+                                                placeholder="Select a class"
+                                                containerStyle={{ height: 40, width: 200 }}
+                                                style={{ backgroundColor: '#fafafa' }}
+                                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                                zIndex={2000}
+                                            />
+                                        )}
+                                    </View>
+                                    {(!isRaceConfirmed || !isClassConfirmed) && (
+                                        <TouchableOpacity
+                                            style={styles.submitButton}
+                                            onPress={() => {
+                                                handleSaveRaceAndClass();
+                                            }}
+                                        >
+                                            <Text style={styles.submitButtonText}>Save Changes</Text>
                                         </TouchableOpacity>
-                                    }
-                                </View>
-                                <View style={[styles.modalRowContainer, { zIndex: 2000 }]}>
-                                    <Text style={styles.modalLabel}>Class:</Text>
-                                    {isClassConfirmed ? (
-                                        <>
-                                            <Text style={styles.modalLabel}>{statsData.class}</Text>
-                                            <View style={[styles.modalRowContainer, { zIndex: 1000 }]}>
-                                                <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
-                                            </View>
-                                        </>
-                                    ) : (
-                                        <DropDownPicker
-                                            open={openClass}
-                                            value={classValue}
-                                            items={classItems}
-                                            setOpen={setOpenClass}
-                                            setValue={setClassValue}
-                                            placeholder="Select a class"
-                                            containerStyle={{ height: 40, width: 200 }}
-                                            style={{ backgroundColor: '#fafafa' }}
-                                            dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                                            zIndex={2000}
-                                        />
                                     )}
-                                    {!isClassConfirmed &&
-                                        <TouchableOpacity onPress={handleSaveClass}>
-                                            <Text >Save</Text>
-                                        </TouchableOpacity>
-                                    }
                                 </View>
 
 

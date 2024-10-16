@@ -1167,6 +1167,7 @@ export default function ActionsScreen() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
     </View>
   );
 }

@@ -12,6 +12,7 @@ import intelligenceImage from '@images/abilities/intelligence.png';
 import wisdomImage from '@images/abilities/wisdom.png';
 import charismaImage from '@images/abilities/charisma.png';
 import { Ionicons } from '@expo/vector-icons';
+import raceBonuses from '../data/raceBonuses.json';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -61,6 +62,7 @@ const getLevelFromXp = (xp: number): number => {
     return level;
 };
 
+
 const getAbilityPointsFromLevel = (level: number): number => {
     return level === 1 ? 14 : 14 + (level - 1) * 2;
 };
@@ -101,9 +103,23 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         hitDice = 0,
     } = statsData || {};
 
+    // Calculate total race bonus
+    const getRaceBonusTotal = (race: string): number => {
+        if (race === '') return 0;
+
+        const selectedRaceBonus = raceBonuses.find(bonus => bonus.race === race);
+        if (selectedRaceBonus) {
+            const totalRaceBonus = selectedRaceBonus.total;
+            return totalRaceBonus;
+        } else {
+            return 0;
+        }
+    };
+
+
     // Calculate Available Ability Points
     const getAvailableAbilityPoints = (): number => {
-        const totalPoints = getAbilityPointsFromLevel(level);
+        const totalPoints = getAbilityPointsFromLevel(level) + getRaceBonusTotal(statsData.race || '');
         const usedPoints = abilities.reduce((acc, ability) => acc + (ability.value - 8), 0);
         return totalPoints - usedPoints;
     };
