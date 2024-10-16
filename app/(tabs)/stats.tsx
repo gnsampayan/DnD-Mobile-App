@@ -64,7 +64,7 @@ const getLevelFromXp = (xp: number): number => {
 
 
 const getAbilityPointsFromLevel = (level: number): number => {
-    return level === 1 ? 14 : 14 + (level - 1) * 2;
+    return level === 1 ? 6 : 6 + (level - 1) * 2;
 };
 
 
@@ -174,7 +174,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         }
 
         // Determine maximum increment based on level
-        const maxIncrement = level === 1 ? 4 : 2;
+        const maxIncrement = 2;
         const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
 
         if (currentAllocation >= maxIncrement) {
@@ -217,7 +217,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     };
 
 
-    // Function to handle ability decrement
+    // Function to handle ability decrement (undo increment)
     const decrementAbility = () => {
         if (!selectedAbility) return;
 
@@ -228,41 +228,35 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return;
         }
 
-        // Prevent decrementing below 8
-        if (currentAbility.value <= 8) {
-            Alert.alert('Minimum Value', 'Ability value cannot be less than 8.');
+        // Get race bonuses
+        const selectedRaceBonus = raceBonuses.find(bonus => bonus.race === statsData.race);
+        const raceBonusValue = selectedRaceBonus ? (selectedRaceBonus.bonuses[currentAbility.name.toLowerCase() as keyof typeof selectedRaceBonus.bonuses] || 0) : 0;
+
+        // Calculate the base value (without race bonus)
+        const baseValue = currentAbility.value - raceBonusValue;
+
+        // Prevent decrementing below base value (8 + race bonus)
+        if (baseValue <= 8) {
+            Alert.alert('Minimum Value', `${currentAbility.name} cannot be decreased further due to racial bonuses.`);
             return;
         }
 
-        // Check if decrementing is allowed based on available points
-        const maxAvailablePoints = level === 1 ? 14 : 2;
-        if (availableAbilityPoints >= maxAvailablePoints) {
+        // Check if there are any allocations to undo for the current level
+        const allocatedThisLevel = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
+        if (allocatedThisLevel <= 0) {
             Alert.alert(
-                'Maximum Available Points',
-                "You cannot decrement further as you've reached the maximum available points."
+                'No Recent Allocations',
+                `You have not recently allocated points to ${currentAbility.name} this level.`
             );
             return;
         }
 
-        // At level 2+, ensure decrements respect allocation history
-        if (level > 1) {
-            const allocatedThisLevel = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
-            if (allocatedThisLevel <= 0) {
-                Alert.alert(
-                    'No Allocations to Revert',
-                    `You have not allocated points to ${selectedAbility.name} this level.`
-                );
-                return;
-            }
-        }
-
         // Update allocations
-        const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
         const updatedAllocations = {
             ...allocationsPerLevel,
             [level]: {
                 ...allocationsPerLevel[level],
-                [selectedAbility.id]: Math.max(currentAllocation - 1, 0),
+                [selectedAbility.id]: allocatedThisLevel - 1,
             },
         };
 
@@ -274,13 +268,15 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return ability;
         });
 
-
         // Update statsData
         updateStatsData({
             ...statsData,
             abilities: updatedAbilities,
             allocationsPerLevel: updatedAllocations,
         });
+
+        // Optionally, you can add a success message
+        Alert.alert('Ability Decreased', `${currentAbility.name} has been decreased by 1.`);
     };
 
     // Function to reset XP and level

@@ -19,6 +19,8 @@ import styles from '../styles/meStyles';
 import { Ionicons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
+import classItems from '../data/classes.json';
+import raceItems from '../data/races.json';
 
 // Import default images
 import defaultHelmetImage from '@equipment/default-helmet.png';
@@ -101,35 +103,6 @@ export default function MeScreen() {
     const [isRaceConfirmed, setIsRaceConfirmed] = useState<boolean>(!!statsData.race);
     const [isClassConfirmed, setIsClassConfirmed] = useState<boolean>(!!statsData.class);
 
-    // Define race items
-    const raceItems = [
-        { label: 'Human', value: 'Human' },
-        { label: 'Elf', value: 'Elf' },
-        { label: 'Dwarf', value: 'Dwarf' },
-        { label: 'Halfling', value: 'Halfling' },
-        { label: 'Gnome', value: 'Gnome' },
-        { label: 'Half-Elf', value: 'Half-Elf' },
-        { label: 'Half-Orc', value: 'Half-Orc' },
-        { label: 'Tiefling', value: 'Tiefling' },
-        { label: 'Dragonborn', value: 'Dragonborn' },
-    ];
-
-    // Define class items with hitDice
-    const classItems = [
-        { label: 'Artificer', value: 'Artificer', hitDice: 8 },
-        { label: 'Barbarian', value: 'Barbarian', hitDice: 12 },
-        { label: 'Bard', value: 'Bard', hitDice: 8 },
-        { label: 'Cleric', value: 'Cleric', hitDice: 8 },
-        { label: 'Druid', value: 'Druid', hitDice: 8 },
-        { label: 'Fighter', value: 'Fighter', hitDice: 10 },
-        { label: 'Monk', value: 'Monk', hitDice: 8 },
-        { label: 'Paladin', value: 'Paladin', hitDice: 10 },
-        { label: 'Ranger', value: 'Ranger', hitDice: 10 },
-        { label: 'Rogue', value: 'Rogue', hitDice: 8 },
-        { label: 'Sorcerer', value: 'Sorcerer', hitDice: 6 },
-        { label: 'Warlock', value: 'Warlock', hitDice: 8 },
-        { label: 'Wizard', value: 'Wizard', hitDice: 6 },
-    ];
 
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -537,7 +510,9 @@ export default function MeScreen() {
                                                         { id: 5, name: 'Wisdom', value: 8 },
                                                         { id: 6, name: 'Charisma', value: 8 },
                                                     ],
+                                                    allocationsPerLevel: { 1: {} },
                                                 });
+
                                                 // Call the function when needed (e.g., during development)
                                                 clearAsyncStorage();
                                             }

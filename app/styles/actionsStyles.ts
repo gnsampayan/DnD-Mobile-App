@@ -368,7 +368,6 @@ const styles = StyleSheet.create({
     modalButtonReplenish: {
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 8,
       width: '100%',
       height: '100%',
     },
@@ -427,9 +426,10 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       aspectRatio: 1,
       flex: 1,
-      gap: 5,
       borderColor: 'darkgoldenrod',
       overflow: 'hidden',
+      padding: 5,
+      gap: 5,
     },
     hpContainer: {
       flexDirection: 'row',

@@ -1,0 +1,80 @@
+[
+  {
+    "label": "Artificer",
+    "value": "artificer",
+    "hitDice": 8,
+    "primaryAbility": ["Intelligence"]
+  },
+  {
+    "label": "Barbarian",
+    "value": "barbarian",
+    "hitDice": 12,
+    "primaryAbility": ["Strength"]
+  },
+  {
+    "label": "Bard",
+    "value": "bard",
+    "hitDice": 8,
+    "primaryAbility": ["Charisma"]
+  },
+  {
+    "label": "Cleric",
+    "value": "cleric",
+    "hitDice": 8,
+    "primaryAbility": ["Wisdom"]
+  },
+  {
+    "label": "Druid",
+    "value": "druid",
+    "hitDice": 8,
+    "primaryAbility": ["Wisdom"]
+  },
+  {
+    "label": "Fighter",
+    "value": "fighter",
+    "hitDice": 10,
+    "primaryAbility": ["Strength", "Dexterity"]
+  },
+  {
+    "label": "Monk",
+    "value": "monk",
+    "hitDice": 8,
+    "primaryAbility": ["Dexterity", "Wisdom"]
+  },
+  {
+    "label": "Paladin",
+    "value": "paladin",
+    "hitDice": 10,
+    "primaryAbility": ["Strength", "Charisma"]
+  },
+  {
+    "label": "Ranger",
+    "value": "ranger",
+    "hitDice": 10,
+    "primaryAbility": ["Wisdom", "Dexterity"]
+  },
+  {
+    "label": "Rogue",
+    "value": "rogue",
+    "hitDice": 8,
+    "primaryAbility": ["Dexterity"]
+  },
+  {
+    "label": "Sorcerer",
+    "value": "sorcerer",
+    "hitDice": 6,
+    "primaryAbility": ["Charisma"]
+  },
+  {
+    "label": "Warlock",
+    "value": "warlock",
+    "hitDice": 8,
+    "primaryAbility": ["Charisma"]
+  },
+  {
+    "label": "Wizard",
+    "value": "wizard",
+    "hitDice": 6,
+    "primaryAbility": ["Intelligence"]
+  }
+]
