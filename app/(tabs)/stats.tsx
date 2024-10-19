@@ -73,6 +73,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [inputValue, setInputValue] = useState<string>('');
     const [skills, setSkills] = useState<Skill[]>(skillsData);
     const [hasUnfilledHpIncreases, setHasUnfilledHpIncreases] = useState(false);
+    const [constitutionModifier, setConstitutionModifier] = useState(0);
 
     // States for Ability Modification Modal
     const [abilityModalVisible, setAbilityModalVisible] = useState<boolean>(false);
@@ -92,7 +93,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             (lvl) => statsData.hpIncreases[lvl] === undefined || statsData.hpIncreases[lvl] === null || statsData.hpIncreases[lvl] === 0
         );
         setHasUnfilledHpIncreases(unfilledLevels.length > 0);
-    }, [statsData?.hpIncreases, statsData?.level]);
+        const constitutionAbility = statsData.abilities.find(ability => ability.name === 'Constitution');
+        setConstitutionModifier(constitutionAbility ? Math.floor((constitutionAbility.value - 10) / 2) : 0);
+    }, [statsData.hpIncreases, statsData.level, statsData.abilities]);
 
     const {
         xp = 0,
@@ -173,18 +176,26 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return;
         }
 
-        // Determine maximum increment based on level
-        const maxIncrement = 2;
+        // Determine maximum increment based on level and skipped levels
+        let maxIncrement = 2;
+        let lastAllocatedLevel = 1;
+        for (let i = 2; i <= level; i++) {
+            if (allocationsPerLevel[i]) {
+                maxIncrement += 2 * (i - lastAllocatedLevel);
+                lastAllocatedLevel = i;
+            }
+        }
+        maxIncrement += 2 * (level - lastAllocatedLevel);
+
         const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
 
         if (currentAllocation >= maxIncrement) {
             Alert.alert(
                 'Max Increment Reached',
-                `You cannot increase ${selectedAbility.name} more than ${maxIncrement} points this level.`
+                `You cannot increase ${selectedAbility.name} more than ${maxIncrement} points at your current level.`
             );
             return;
         }
-
 
         // Update allocations
         const updatedAllocations = {
@@ -329,7 +340,13 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         return (
             <TouchableOpacity
                 style={styles.abilityContainer}
-                onPress={() => openAbilityModal(item)}
+                onPress={() => {
+                    if (hasUnfilledHpIncreases) { //if level 1 hp increase is not set, don't allow ability point allocation
+                        Alert.alert(`Level ${level} HP Increase Not Set`, 'Set the Level 1 HP Increase before allocating ability points.');
+                    } else {
+                        openAbilityModal(item);
+                    }
+                }}
             >
                 <ImageBackground
                     source={abilityImages[item.name]}
@@ -608,37 +625,61 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                                     {Array.from({ length: statsData.level - 1 }, (_, index) => {
                                         const level = index + 2;
+                                        const hasIncrease = hpIncreases[level] !== undefined;
                                         return (
                                             <View key={level} style={{ flexDirection: 'column', alignItems: 'flex-start', margin: 5, gap: 5 }}>
                                                 <Text style={styles.modalInputLabel}>Level {level} Increase:</Text>
-                                                <TextInput
-                                                    style={styles.modalInput}
-                                                    placeholder="Enter increase"
-                                                    keyboardType="number-pad"
-                                                    placeholderTextColor="gray"
-                                                    value={hpIncreases[level]?.toString() || ''}
-                                                    onChangeText={(text) => {
-                                                        const number = parseInt(text);
-                                                        if (!isNaN(number) && number >= 0 && number <= hitDice) {
-                                                            updateStatsData({
-                                                                ...statsData,
-                                                                hpIncreases: {
-                                                                    ...(hpIncreases || {}),
-                                                                    [level]: number,
-                                                                },
-                                                            });
-                                                        } else if (text === '') {
-                                                            const updatedIncreases = { ...(hpIncreases || {}) };
-                                                            delete updatedIncreases[level];
-                                                            updateStatsData({
-                                                                ...statsData,
-                                                                hpIncreases: updatedIncreases,
-                                                            });
-                                                        } else {
-                                                            Alert.alert('Invalid input', `Please enter a number between 0 and ${hitDice}.`);
-                                                        }
-                                                    }}
-                                                />
+                                                {!hasIncrease ? (
+                                                    <>
+                                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                            <TextInput
+                                                                style={[styles.modalInput, { width: 50 }]}
+                                                                placeholder="0"
+                                                                keyboardType="number-pad"
+                                                                placeholderTextColor="gray"
+                                                                onChangeText={(text) => {
+                                                                    const number = parseInt(text);
+                                                                    if (!isNaN(number) && number >= 0 && number <= hitDice) {
+                                                                        setInputValue(text);
+                                                                    } else if (text === '') {
+                                                                        setInputValue('');
+                                                                    } else {
+                                                                        Alert.alert('Invalid input', `Please enter a number between 0 and ${hitDice}.`);
+                                                                    }
+                                                                }}
+                                                                value={inputValue}
+                                                            />
+                                                            <Text style={styles.modalInputLabel}> + {constitutionModifier} (Con)</Text>
+                                                        </View>
+
+                                                        <TouchableOpacity
+                                                            style={styles.saveButton}
+                                                            onPress={() => {
+                                                                const number = parseInt(inputValue);
+                                                                if (!isNaN(number) && number >= 0 && number <= hitDice) {
+                                                                    const totalIncrease = number + constitutionModifier;
+                                                                    updateStatsData({
+                                                                        ...statsData,
+                                                                        hpIncreases: {
+                                                                            ...(hpIncreases || {}),
+                                                                            [level]: totalIncrease,
+                                                                        },
+                                                                    });
+                                                                    setInputValue('');
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Text style={styles.saveButtonText}>Save</Text>
+                                                        </TouchableOpacity>
+                                                    </>
+                                                ) : (
+                                                    <Text style={styles.modalText}>{hpIncreases[level]} (including +{constitutionModifier} Con)</Text>
+                                                )}
+                                                {hasIncrease &&
+                                                    <Text style={styles.modalInputLabel}>
+                                                        Total HP Added: {hpIncreases[level]}
+                                                    </Text>}
+                                                <Text style={styles.modalInputLabel}>Constitution Modifier: {constitutionModifier}</Text>
                                             </View>
                                         );
                                     })}

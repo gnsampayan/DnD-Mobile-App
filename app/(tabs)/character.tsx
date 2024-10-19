@@ -14,7 +14,6 @@ import {
     ImageSourcePropType,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import styles from '../styles/meStyles';
 import { Ionicons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
@@ -77,8 +76,26 @@ const clearAsyncStorage = async () => {
 };
 
 export default function MeScreen() {
+    // Define equipment items
+    const initialEquipmentItems: EquipmentItem[] = [
+        // Section 2 items
+        { id: 'helmet', name: 'Helmet', defaultImage: defaultHelmetImage as ImageSourcePropType, section: 2 },
+        { id: 'cape', name: 'Cape', defaultImage: defaultCapeImage as ImageSourcePropType, section: 2 },
+        { id: 'armor', name: 'Armor', defaultImage: defaultArmorImage as ImageSourcePropType, section: 2 },
+        { id: 'gauntlets', name: 'Gauntlets', defaultImage: defaultGauntletsImage as ImageSourcePropType, section: 2 },
+        { id: 'boots', name: 'Boots', defaultImage: defaultBootsImage as ImageSourcePropType, section: 2 },
+        // Section 4 items
+        { id: 'necklace', name: 'Necklace', defaultImage: defaultNecklaceImage as ImageSourcePropType, section: 4 },
+        { id: 'ring1', name: 'Ring 1', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
+        { id: 'ring2', name: 'Ring 2', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
+        // Section 5 items
+        { id: 'mainMelee', name: 'Main Melee', defaultImage: defaultMeleeWeaponImage as ImageSourcePropType, section: 5 },
+        { id: 'offhandMelee', name: 'Offhand Melee', defaultImage: defaultOffhandWeaponImage as ImageSourcePropType, section: 5 },
+        { id: 'mainRanged', name: 'Main Ranged', defaultImage: defaultRangedWeaponImage as ImageSourcePropType, section: 5 },
+    ];
     // State variables
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
     const [characterModalVisible, setCharacterModalVisible] = useState(false);
 
     // Use context for statsData
@@ -104,25 +121,7 @@ export default function MeScreen() {
     const [isClassConfirmed, setIsClassConfirmed] = useState<boolean>(!!statsData.class);
 
 
-    // Define equipment items
-    const initialEquipmentItems: EquipmentItem[] = [
-        // Section 2 items
-        { id: 'helmet', name: 'Helmet', defaultImage: defaultHelmetImage as ImageSourcePropType, section: 2 },
-        { id: 'cape', name: 'Cape', defaultImage: defaultCapeImage as ImageSourcePropType, section: 2 },
-        { id: 'armor', name: 'Armor', defaultImage: defaultArmorImage as ImageSourcePropType, section: 2 },
-        { id: 'gauntlets', name: 'Gauntlets', defaultImage: defaultGauntletsImage as ImageSourcePropType, section: 2 },
-        { id: 'boots', name: 'Boots', defaultImage: defaultBootsImage as ImageSourcePropType, section: 2 },
-        // Section 4 items
-        { id: 'necklace', name: 'Necklace', defaultImage: defaultNecklaceImage as ImageSourcePropType, section: 4 },
-        { id: 'ring1', name: 'Ring 1', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
-        { id: 'ring2', name: 'Ring 2', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
-        // Section 5 items
-        { id: 'mainMelee', name: 'Main Melee', defaultImage: defaultMeleeWeaponImage as ImageSourcePropType, section: 5 },
-        { id: 'offhandMelee', name: 'Offhand Melee', defaultImage: defaultOffhandWeaponImage as ImageSourcePropType, section: 5 },
-        { id: 'mainRanged', name: 'Main Ranged', defaultImage: defaultRangedWeaponImage as ImageSourcePropType, section: 5 },
-    ];
 
-    const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
 
     useEffect(() => {
         // Load custom images for equipment items
@@ -130,10 +129,12 @@ export default function MeScreen() {
             const updatedItems = await Promise.all(
                 equipmentItems.map(async (item) => {
                     try {
-                        const fileUri = `${FileSystem.documentDirectory}equipmentImages/${item.id}.png`;
-                        const fileInfo = await FileSystem.getInfoAsync(fileUri);
-                        if (fileInfo.exists) {
-                            return { ...item, customImageUri: fileUri };
+                        const base64Image = await AsyncStorage.getItem(`equipmentImage-${item.id}`);
+                        if (base64Image) {
+                            return {
+                                ...item,
+                                customImageUri: `data:image/jpeg;base64,${base64Image}`,
+                            };
                         }
                     } catch (e) {
                         console.error(`Failed to load image for ${item.name}:`, e);
@@ -147,18 +148,18 @@ export default function MeScreen() {
         loadEquipmentImages();
 
         // Load the main image URI
-        const loadImageUri = async () => {
+        const loadMainImage = async () => {
             try {
-                const fileUri = `${FileSystem.documentDirectory}mainImage.png`;
-                const fileInfo = await FileSystem.getInfoAsync(fileUri);
-                if (fileInfo.exists) {
-                    setImageUri(fileUri);
+                const base64Image = await AsyncStorage.getItem('mainImage');
+                if (base64Image) {
+                    setImageUri(`data:image/jpeg;base64,${base64Image}`);
                 }
             } catch (e) {
                 console.error('Failed to load main image:', e);
             }
         };
-        loadImageUri();
+
+        loadMainImage();
 
         // Initalize race and class
         setRaceValue(statsData.race || null);
@@ -174,10 +175,8 @@ export default function MeScreen() {
                 },
                 {
                     text: 'Delete Image',
-                    onPress: async () => {
-                        setImageUri(null);
-                        await FileSystem.deleteAsync(`${FileSystem.documentDirectory}mainImage.png`, { idempotent: true });
-                    },
+                    onPress: deleteMainImage,
+                    style: 'destructive',
                 },
                 { text: 'Cancel', style: 'cancel' },
             ]);
@@ -197,18 +196,19 @@ export default function MeScreen() {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
+            base64: true, // Request base64 encoding
         });
 
         if (!result.canceled) {
-            const selectedImageUri = result.assets[0].uri;
-            const localUri = `${FileSystem.documentDirectory}mainImage.png`;
+            const base64Image = result.assets[0].base64;
 
-            try {
-                await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}`, { intermediates: true });
-                await FileSystem.copyAsync({ from: selectedImageUri, to: localUri });
-                setImageUri(localUri);
-            } catch (error) {
-                console.error('Failed to save main image:', error);
+            if (base64Image) {
+                try {
+                    await AsyncStorage.setItem('mainImage', base64Image);
+                    setImageUri(`data:image/jpeg;base64,${base64Image}`);
+                } catch (error) {
+                    console.error('Failed to save main image:', error);
+                }
             }
         }
     };
@@ -255,34 +255,41 @@ export default function MeScreen() {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
+            base64: true, // Request base64 encoding
         });
 
         if (!result.canceled) {
-            const selectedImageUri = result.assets[0].uri;
-            const localUri = `${FileSystem.documentDirectory}equipmentImages/${equipmentId}.png`;
+            const base64Image = result.assets[0].base64;
 
-            try {
-                await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}equipmentImages`, { intermediates: true });
-                await FileSystem.copyAsync({ from: selectedImageUri, to: localUri });
-                const timestamp = new Date().getTime();
-                setEquipmentItems((prevItems) =>
-                    prevItems.map((item) =>
-                        item.id === equipmentId
-                            ? { ...item, customImageUri: `${localUri}?t=${timestamp}` }
-                            : item
-                    )
-                );
-            } catch (error) {
-                console.error('Failed to save equipment image:', error);
+            if (base64Image) {
+                try {
+                    await AsyncStorage.setItem(`equipmentImage-${equipmentId}`, base64Image);
+                    setEquipmentItems((prevItems) =>
+                        prevItems.map((item) =>
+                            item.id === equipmentId
+                                ? { ...item, customImageUri: `data:image/jpeg;base64,${base64Image}` }
+                                : item
+                        )
+                    );
+                } catch (error) {
+                    console.error('Failed to save equipment image:', error);
+                }
             }
         }
     };
 
-    const deleteEquipmentImage = async (equipmentId: string) => {
-        const localUri = `${FileSystem.documentDirectory}equipmentImages/${equipmentId}.png`;
-
+    const deleteMainImage = async () => {
         try {
-            await FileSystem.deleteAsync(localUri, { idempotent: true });
+            await AsyncStorage.removeItem('mainImage');
+            setImageUri(null);
+        } catch (error) {
+            console.error('Failed to delete main image:', error);
+        }
+    };
+
+    const deleteEquipmentImage = async (equipmentId: string) => {
+        try {
+            await AsyncStorage.removeItem(`equipmentImage-${equipmentId}`);
             setEquipmentItems((prevItems) =>
                 prevItems.map((item) =>
                     item.id === equipmentId ? { ...item, customImageUri: undefined } : item
@@ -292,7 +299,6 @@ export default function MeScreen() {
             console.error('Failed to delete equipment image:', error);
         }
     };
-
 
     const handleSaveRaceAndClass = () => {
         Alert.alert(

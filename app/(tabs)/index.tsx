@@ -29,14 +29,8 @@ import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatsDataContext from '../context/StatsDataContext';
-import healingOrbImage from '@actions/healing-orb.png';
-import damageOrbImage from '@actions/damage-image.png';
-import longRestImage from '@actions/long-rest-image.png';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
-const healingOrbImageTyped: ImageSourcePropType = healingOrbImage as ImageSourcePropType;
-const damageOrbImageTyped: ImageSourcePropType = damageOrbImage as ImageSourcePropType;
-const longRestImageTyped: ImageSourcePropType = longRestImage as ImageSourcePropType;
 // Define the base Action interface
 interface BaseAction {
   id: string;
@@ -93,6 +87,8 @@ const defaultActions: ActionBlock[] = [
   { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultAttackImage },
 ];
 
+const movementSpeed = 30;
+
 
 export default function ActionsScreen() {
   const [numColumns, setNumColumns] = useState(4);
@@ -114,6 +110,8 @@ export default function ActionsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   // State for new action cost
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
+  // State to hold the current Constitution modifier
+  const [currentConModifier, setCurrentConModifier] = useState<number>(0);
 
   // Convert available actions to state
   const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
@@ -128,6 +126,17 @@ export default function ActionsScreen() {
     // Render a loading indicator or return null
     return null;
   }
+
+  const calculateModifier = (score: number): number => {
+    return Math.floor((score - 10) / 2);
+  };
+  // Extract Constitution ability from statsData
+  useEffect(() => {
+    const constitutionAbility = statsData.abilities.find((ability) => ability.name === 'Constitution');
+    const constitutionScore = constitutionAbility ? constitutionAbility.value : 10; // Default to 10 if not found
+    const newConModifier = calculateModifier(constitutionScore);
+    setCurrentConModifier(newConModifier);
+  }, [statsData.abilities]);
 
   const { hpIncreases = {}, hitDice = 0 } = statsData || {};
 
@@ -727,11 +736,13 @@ export default function ActionsScreen() {
   // Calculate maxHp based on hpIncreases
   useEffect(() => {
     const calculateMaxHp = () => {
-      const baseHp = hitDice; // Base HP from Level 1
+      if (!hitDice) return; // Ensure hitDice is available
+      // Level 1 HP: Max of hit die + current Constitution modifier
+      const level1Hp = hitDice + currentConModifier;
       const additionalHp = Object.entries(hpIncreases)
         .filter(([level, _]) => parseInt(level) >= 2)
         .reduce((total, [_, value]) => total + value, 0);
-      const totalHp = baseHp + additionalHp;
+      const totalHp = level1Hp + additionalHp;
       setMaxHp(totalHp);
 
       // Adjust current hp if it exceeds the new maxHp
@@ -747,7 +758,7 @@ export default function ActionsScreen() {
     if (!isLoading) {
       calculateMaxHp();
     }
-  }, [hpIncreases, hitDice, isLoading]);
+  }, [hpIncreases, hitDice, isLoading, currentConModifier]);
 
   return (
     <View style={styles.container}>
@@ -827,12 +838,21 @@ export default function ActionsScreen() {
             <View style={styles.subheaderInline}>
               <View style={{ flex: 1, flexDirection: 'column' }}>
                 <View style={styles.subheaderSideBySide}>
-                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
-                    <Text style={styles.hpText}>{proficiencyBonus}</Text>
-                    <View style={styles.subheaderSideBySide}>
-                      <Ionicons name="aperture" size={24} color="rgb(180, 100, 255)" />
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>{proficiencyBonus}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="aperture" size={24} color="darkgoldenrod" />
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>{ac}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="shield" size={24} color="rgb(146, 187, 204)" />
+                      </View>
                     </View>
                   </View>
+
                   <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
                     <TextInput
                       placeholder="0"
@@ -856,18 +876,27 @@ export default function ActionsScreen() {
                   </View>
                 </View>
                 <View style={styles.subheaderSideBySide}>
-                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
-                    <Text style={styles.hpText}>{ac}</Text>
-                    <View style={styles.subheaderSideBySide}>
-                      <Ionicons name="shield" size={24} color="rgb(146, 187, 204)" />
+
+
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>{movementSpeed}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="footsteps" size={24} color="gray" />
+                      </View>
                     </View>
+
                   </View>
+
+
+
                   <TouchableOpacity
                     style={styles.replenishContainer}
                     onPress={() => handleHpChange('replenish')}
                   >
-                    <ImageBackground source={longRestImageTyped} style={styles.modalButtonReplenish} resizeMode="cover" >
-                    </ImageBackground>
+                    {/* <ImageBackground source={longRestImageTyped} style={styles.modalButtonReplenish} resizeMode="cover" >
+                    </ImageBackground> */}
+                    <Ionicons name="bed" size={24} color="white" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -886,15 +915,17 @@ export default function ActionsScreen() {
                     style={styles.modalButtonSubtract}
                     onPress={() => handleHpChange('subtract')}
                   >
-                    <ImageBackground source={damageOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
-                    </ImageBackground>
+                    {/* <ImageBackground source={damageOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
+                    </ImageBackground> */}
+                    <Ionicons name="remove" size={24} color="white" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.modalButtonAdd}
                     onPress={() => handleHpChange('add')}
                   >
-                    <ImageBackground source={healingOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
-                    </ImageBackground>
+                    {/* <ImageBackground source={healingOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
+                    </ImageBackground> */}
+                    <Ionicons name="add" size={24} color="white" />
                   </TouchableOpacity>
                 </View>
               </View>

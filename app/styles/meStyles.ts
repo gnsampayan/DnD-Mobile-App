@@ -550,6 +550,15 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
     },
+    saveButton: {
+        backgroundColor: '#007AFF',
+        borderRadius: 4,
+        padding: 10,
+    },
+    saveButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
 });
 
 export default styles;

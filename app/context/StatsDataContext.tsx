@@ -102,6 +102,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         loadStatsData();
     }, []);
 
+
     return (
         <StatsDataContext.Provider value={{ statsData, updateStatsData }}>
             {children}
