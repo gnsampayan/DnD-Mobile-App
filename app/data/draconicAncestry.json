@@ -1,0 +1,62 @@
+[
+  {
+    "dragon": "Black",
+    "damageType": "Acid",
+    "breathWeapon": "5 by 30ft line (Dex save)",
+    "typicalAlignment": "Evil"
+  },
+  {
+    "dragon": "Blue",
+    "damageType": "Lightning",
+    "breathWeapon": "5 by 30ft line (Dex save)",
+    "typicalAlignment": "Evil"
+  },
+  {
+    "dragon": "Brass",
+    "damageType": "Fire",
+    "breathWeapon": "5 by 30ft line (Dex save)",
+    "typicalAlignment": "Good"
+  },
+  {
+    "dragon": "Bronze",
+    "damageType": "Lightning",
+    "breathWeapon": "5 by 30ft line (Dex save)",
+    "typicalAlignment": "Good"
+  },
+  {
+    "dragon": "Copper",
+    "damageType": "Acid",
+    "breathWeapon": "5 by 30ft line (Dex save)",
+    "typicalAlignment": "Good"
+  },
+  {
+    "dragon": "Gold",
+    "damageType": "Fire",
+    "breathWeapon": "15 ft. cone (Dex save)",
+    "typicalAlignment": "Good"
+  },
+  {
+    "dragon": "Green",
+    "damageType": "Poison",
+    "breathWeapon": "15 ft. cone (Dex save)",
+    "typicalAlignment": "Evil"
+  },
+  {
+    "dragon": "Red",
+    "damageType": "Fire",
+    "breathWeapon": "15 ft. cone (Dex save)",
+    "typicalAlignment": "Evil"
+  },
+  {
+    "dragon": "Silver",
+    "damageType": "Cold",
+    "breathWeapon": "15 ft. cone (Dex save)",
+    "typicalAlignment": "Good"
+  },
+  {
+    "dragon": "White",
+    "damageType": "Cold",
+    "breathWeapon": "15 ft. cone (Dex save)",
+    "typicalAlignment": "Evil"
+  }
+]

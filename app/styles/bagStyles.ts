@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       alignItems: 'flex-start',
       borderWidth: 2,
-      borderColor: 'darkgoldenrod',
+      borderColor: 'white',
       borderStyle: 'solid',
       borderRadius: 8,
     },

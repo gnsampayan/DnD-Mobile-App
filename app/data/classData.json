@@ -1,0 +1,119 @@
+[
+  {
+    "label": "Artificer",
+    "value": "artificer",
+    "hitDice": 8,
+    "primaryAbility": ["Intelligence"],
+    "savingThrowProficiency": ["Constitution", "Intelligence"],
+    "armorProficiency": ["light", "medium", "shields"],
+    "weaponProficiency": ["simple"]
+  },
+  {
+    "label": "Barbarian",
+    "value": "barbarian",
+    "hitDice": 12,
+    "primaryAbility": ["Strength"],
+    "savingThrowProficiency": ["Strength", "Constitution"],
+    "armorProficiency": ["light", "medium", "shields"],
+    "weaponProficiency": ["simple", "martial"]
+  },
+  {
+    "label": "Bard",
+    "value": "bard",
+    "hitDice": 8,
+    "primaryAbility": ["Charisma"],
+    "savingThrowProficiency": ["Dexterity", "Charisma"],
+    "armorProficiency": ["light"],
+    "weaponProficiency": ["simple", "hand crossbows", "longswords", "rapiers", "shortswords"]
+  },
+  {
+    "label": "Cleric",
+    "value": "cleric",
+    "hitDice": 8,
+    "primaryAbility": ["Wisdom"],
+    "savingThrowProficiency": ["Wisdom", "Charisma"],
+    "armorProficiency": ["light", "medium", "shields"],
+    "weaponProficiency": ["simple"]
+  },
+  {
+    "label": "Druid",
+    "value": "druid",
+    "hitDice": 8,
+    "primaryAbility": ["Wisdom"],
+    "savingThrowProficiency": ["Wisdom", "Intelligence"],
+    "armorProficiency": ["light(non-metal)", "medium(non-metal)", "shields(non-metal)"],
+    "weaponProficiency": ["simple", "clubs", "daggers", "dart", "javelins", "maces", "quarterstaffs", "sickles", "sling", "spears"]
+  },
+  {
+    "label": "Fighter",
+    "value": "fighter",
+    "hitDice": 10,
+    "primaryAbility": ["Strength", "Dexterity"],
+    "savingThrowProficiency": ["Strength", "Constitution"],
+    "armorProficiency": ["light", "medium", "heavy", "shields"],
+    "weaponProficiency": ["simple", "martial"]
+  },
+  {
+    "label": "Monk",
+    "value": "monk",
+    "hitDice": 8,
+    "primaryAbility": ["Dexterity", "Wisdom"],
+    "savingThrowProficiency": ["Dexterity", "Strength"],
+    "armorProficiency": ["none"],
+    "weaponProficiency": ["simple", "shortswords"]
+  },
+  {
+    "label": "Paladin",
+    "value": "paladin",
+    "hitDice": 10,
+    "primaryAbility": ["Strength", "Charisma"],
+    "savingThrowProficiency": ["Wisdom", "Charisma"],
+    "armorProficiency": ["light", "medium", "heavy", "shields"],
+    "weaponProficiency": ["simple", "martial"]
+  },
+  {
+    "label": "Ranger",
+    "value": "ranger",
+    "hitDice": 10,
+    "primaryAbility": ["Wisdom", "Dexterity"],
+    "savingThrowProficiency": ["Dexterity", "Strength"],
+    "armorProficiency": ["light", "medium", "shields"],
+    "weaponProficiency": ["simple", "martial"]
+  },
+  {
+    "label": "Rogue",
+    "value": "rogue",
+    "hitDice": 8,
+    "primaryAbility": ["Dexterity"],
+    "savingThrowProficiency": ["Dexterity", "Intelligence"],
+    "armorProficiency": ["light"],
+    "weaponProficiency": ["simple", "hand crossbows", "longswords", "rapiers", "shortswords"]
+  },
+  {
+    "label": "Sorcerer",
+    "value": "sorcerer",
+    "hitDice": 6,
+    "primaryAbility": ["Charisma"],
+    "savingThrowProficiency": ["Constitution", "Charisma"],
+    "armorProficiency": ["none"],
+    "weaponProficiency": ["daggers", "darts", "slings", "quarterstaffs", "light crossbows"]
+  },
+  {
+    "label": "Warlock",
+    "value": "warlock",
+    "hitDice": 8,
+    "primaryAbility": ["Charisma"],
+    "savingThrowProficiency": ["Wisdom", "Charisma"],
+    "armorProficiency": ["light"],
+    "weaponProficiency": ["simple"]
+  },
+  {
+    "label": "Wizard",
+    "value": "wizard",
+    "hitDice": 6,
+    "primaryAbility": ["Intelligence"],
+    "savingThrowProficiency": ["Wisdom", "Intelligence"],
+    "armorProficiency": ["none"],
+    "weaponProficiency": ["daggers", "darts", "slings", "quarterstaffs", "light crossbows"]
+  }
+]

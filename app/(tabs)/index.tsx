@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
+import raceBonuses from '../data/raceData.json';
 
 import defaultAttackImage from '@actions/default-attack-image.png';
 import defaultThrowImage from '@actions/default-throw-image.png';
@@ -62,6 +63,7 @@ interface StatsData {
   class?: string;
   hpIncreases: { [level: number]: number };
   hitDice: number;
+  speed: number;
 }
 
 // Define specific action types if needed
@@ -87,7 +89,6 @@ const defaultActions: ActionBlock[] = [
   { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultAttackImage },
 ];
 
-const movementSpeed = 30;
 
 
 export default function ActionsScreen() {
@@ -112,6 +113,8 @@ export default function ActionsScreen() {
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
   // State to hold the current Constitution modifier
   const [currentConModifier, setCurrentConModifier] = useState<number>(0);
+  // State to hold movement speed
+  const [movementSpeed, setMovementSpeed] = useState<number>(30);
 
   // Convert available actions to state
   const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
@@ -126,6 +129,16 @@ export default function ActionsScreen() {
     // Render a loading indicator or return null
     return null;
   }
+
+  // Calculate movement speed based on race
+  useEffect(() => {
+    if (statsData.race) {
+      const raceData = raceBonuses.find((race) => race.race === statsData.race);
+      setMovementSpeed(raceData ? raceData.speed : 30);
+    }
+  }, [statsData.race]);
+
+
 
   const calculateModifier = (score: number): number => {
     return Math.floor((score - 10) / 2);
@@ -228,9 +241,25 @@ export default function ActionsScreen() {
   useEffect(() => {
     if (statsData && statsData.level) {
       const newProficiencyBonus = getProficiencyBonus(statsData.level);
-      setProficiencyBonus(newProficiencyBonus);
+      if (newProficiencyBonus !== proficiencyBonus) {
+        setProficiencyBonus(newProficiencyBonus);
+        // Save the new proficiency bonus to AsyncStorage
+        AsyncStorage.setItem('proficiencyBonus', newProficiencyBonus.toString())
+          .catch(error => console.error('Failed to save proficiency bonus:', error));
+      }
     }
-  }, [statsData?.level]);
+  }, [statsData?.level, proficiencyBonus]);
+
+  // Load proficiency bonus from AsyncStorage when component mounts
+  useEffect(() => {
+    AsyncStorage.getItem('proficiencyBonus')
+      .then(value => {
+        if (value !== null) {
+          setProficiencyBonus(parseInt(value, 10));
+        }
+      })
+      .catch(error => console.error('Failed to load proficiency bonus:', error));
+  }, []);
 
 
 
@@ -820,6 +849,9 @@ export default function ActionsScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         {statsData.class !== '' && statsData.race !== '' ?
           <View style={styles.subheader}>
+
+            {/* HP Container */}
+
             <View style={styles.hpContainer}>
               {(hp !== null && maxHp > 0) && (
                 <View style={styles.hpBarContainer}>
@@ -839,12 +871,16 @@ export default function ActionsScreen() {
               <View style={{ flex: 1, flexDirection: 'column' }}>
                 <View style={styles.subheaderSideBySide}>
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
+
+                    {/* Proficiency Bonus */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{proficiencyBonus}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="aperture" size={24} color="darkgoldenrod" />
+                        <Ionicons name="aperture" size={24} color="white" />
                       </View>
                     </View>
+
+                    {/* AC */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{ac}</Text>
                       <View style={styles.subheaderSideBySide}>
@@ -853,7 +889,8 @@ export default function ActionsScreen() {
                     </View>
                   </View>
 
-                  <View style={[styles.subheaderHpContainer, { borderColor: 'darkgoldenrod' }]}>
+                  {/* Temporary HP Input */}
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'white' }]}>
                     <TextInput
                       placeholder="0"
                       keyboardType="number-pad"
@@ -877,7 +914,7 @@ export default function ActionsScreen() {
                 </View>
                 <View style={styles.subheaderSideBySide}>
 
-
+                  {/* Movement Speed */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{movementSpeed}</Text>
@@ -900,7 +937,9 @@ export default function ActionsScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(218, 165, 32, 0.3)' }]}>
+
+              {/* Input HP Container add or subtract */}
+              <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
                 <TextInput
                   placeholder="0"
                   keyboardType="number-pad"

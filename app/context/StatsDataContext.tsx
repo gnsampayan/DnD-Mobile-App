@@ -23,6 +23,8 @@ interface StatsData {
     class?: string;
     hpIncreases: { [level: number]: number };
     hitDice: number;
+    speed: number;
+    proficiencyBonus: number;
 }
 
 // Define context types
@@ -51,6 +53,8 @@ const initialStatsData: StatsData = {
     class: '',
     hpIncreases: {},
     hitDice: 0,
+    speed: 30,
+    proficiencyBonus: 2,
 };
 
 // Create context

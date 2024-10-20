@@ -12,7 +12,8 @@ import intelligenceImage from '@images/abilities/intelligence.png';
 import wisdomImage from '@images/abilities/wisdom.png';
 import charismaImage from '@images/abilities/charisma.png';
 import { Ionicons } from '@expo/vector-icons';
-import raceBonuses from '../data/raceBonuses.json';
+import raceBonuses from '../data/raceData.json';
+import classBonuses from '../data/classData.json';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -47,6 +48,7 @@ interface StatsData {
     class?: string;
     hpIncreases: { [level: number]: number };
     hitDice: number;
+    proficiencyBonus: number;
 }
 
 // Functions to get level  bonus
@@ -75,6 +77,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [hasUnfilledHpIncreases, setHasUnfilledHpIncreases] = useState(false);
     const [constitutionModifier, setConstitutionModifier] = useState(0);
 
+
     // States for Ability Modification Modal
     const [abilityModalVisible, setAbilityModalVisible] = useState<boolean>(false);
     const [selectedAbility, setSelectedAbility] = useState<Ability | null>(null);
@@ -88,6 +91,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         return null;
     }
 
+    // Check if there are unfilled HP increases
     useEffect(() => {
         const unfilledLevels = Array.from({ length: statsData.level - 1 }, (_, index) => index + 2).filter(
             (lvl) => statsData.hpIncreases[lvl] === undefined || statsData.hpIncreases[lvl] === null || statsData.hpIncreases[lvl] === 0
@@ -97,6 +101,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         setConstitutionModifier(constitutionAbility ? Math.floor((constitutionAbility.value - 10) / 2) : 0);
     }, [statsData.hpIncreases, statsData.level, statsData.abilities]);
 
+    // Destructure statsData
     const {
         xp = 0,
         level = getLevelFromXp(xp),
@@ -118,6 +123,16 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return 0;
         }
     };
+
+    // Function to calculate proficiency bonus based on level
+    const getProficiencyBonus = (level: number): number => {
+        if (level >= 17) return 6;
+        if (level >= 13) return 5;
+        if (level >= 9) return 4;
+        if (level >= 5) return 3;
+        return 2;
+    };
+    const proficiencyBonus = getProficiencyBonus(level);
 
 
     // Calculate Available Ability Points
@@ -314,6 +329,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             allocationsPerLevel: resetAllocations,
             hpIncreases: {},
             hitDice: statsData.hitDice,
+            proficiencyBonus: 2,
         });
     };
 
@@ -337,9 +353,14 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             Charisma: charismaImage,
         };
 
+        // Check if the ability is a primary ability for the user's class
+        const isPrimaryAbility = statsData.class && classBonuses.find(c => c.value === statsData.class)?.primaryAbility.includes(item.name);
+
         return (
             <TouchableOpacity
-                style={styles.abilityContainer}
+                style={[
+                    styles.abilityContainer,
+                ]}
                 onPress={() => {
                     if (hasUnfilledHpIncreases) { //if level 1 hp increase is not set, don't allow ability point allocation
                         Alert.alert(`Level ${level} HP Increase Not Set`, 'Set the Level 1 HP Increase before allocating ability points.');
@@ -354,7 +375,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     imageStyle={{ borderRadius: 8 }}
                 >
                     <View style={styles.abilityOverlay}>
-                        <Text style={styles.abilityName}>{item.name}</Text>
+                        <Text style={[styles.abilityName, isPrimaryAbility ? { textDecorationLine: 'underline', textDecorationColor: 'magenta' } : {}]}>{item.name}</Text>
                         <View style={styles.abilityValueContainer}>
                             <Text style={styles.abilityValue}>{item.value}</Text>
                         </View>
@@ -395,12 +416,16 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         );
     };
 
+
+
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.statsHeader}>
                 {/* Character Stats Content */}
                 <View style={styles.firstRow}>
+
+                    {/* Level */}
                     <TouchableOpacity
                         style={[
                             styles.levelContainer,
@@ -411,6 +436,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
                         <Text style={styles.firstRowText}>Level: {level}</Text>
                     </TouchableOpacity>
+
+                    {/* XP */}
                     <TouchableOpacity
                         style={styles.firstRowContents}
                         onPress={() => {
@@ -427,6 +454,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     >
                         <Text style={styles.firstRowText}>XP: {xp}</Text>
                     </TouchableOpacity>
+
+                    {/* Reset XP */}
                     <TouchableOpacity
                         style={styles.modalResetButton}
                         onPress={() => {
@@ -468,12 +497,19 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                 <View style={styles.savingThrowsGrid}>
                     {abilities.map((ability) => {
                         const modifier = Math.floor((ability.value - 10) / 2);
+
+                        // Check if the class grants proficiency in this saving throw ability
+                        const isProficient = statsData.class && classBonuses.find(c => c.value === statsData.class)?.savingThrowProficiency.includes(ability.name);
+                        const savingThrow = isProficient ? modifier + proficiencyBonus : modifier;
                         return (
-                            <View key={ability.id} style={styles.savingThrowSquare}>
-                                <Text style={styles.savingThrowModifier}>
-                                    {modifier >= 0 ? `+${modifier}` : modifier}
+                            <View key={ability.id} style={[
+                                styles.savingThrowSquare,
+                                isProficient ? { backgroundColor: 'white' } : {}
+                            ]}>
+                                <Text style={[styles.savingThrowModifier, isProficient ? { color: 'black' } : {}]}>
+                                    {savingThrow >= 0 ? `+${savingThrow}` : savingThrow}
                                 </Text>
-                                <Text style={styles.savingThrowAbility}>
+                                <Text style={[styles.savingThrowAbility, isProficient ? { color: 'black' } : {}]}>
                                     {ability.name.substring(0, 3)}
                                 </Text>
                             </View>

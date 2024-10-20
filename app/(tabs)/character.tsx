@@ -18,8 +18,7 @@ import styles from '../styles/meStyles';
 import { Ionicons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
-import classItems from '../data/classes.json';
-import raceItems from '../data/races.json';
+import classItems from '../data/classData.json';
 
 // Import default images
 import defaultHelmetImage from '@equipment/default-helmet.png';
@@ -33,7 +32,7 @@ import defaultMeleeWeaponImage from '@equipment/default-melee.png';
 import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import raceBonuses from '../data/raceBonuses.json';
+import raceBonuses from '../data/raceData.json';
 
 interface EquipmentItem {
     id: string;
@@ -352,6 +351,34 @@ export default function MeScreen() {
         }
     };
 
+    const handleDeleteCharacter = () => {
+        setRaceValue(null);
+        setClassValue(null);
+        setImageUri(null);
+        setIsRaceConfirmed(false);
+        setIsClassConfirmed(false);
+        updateStatsData({
+            ...statsData,
+            race: null || '',
+            class: null || '',
+            hitDice: 0,
+            hpIncreases: {},
+            xp: 0,
+            level: 1,
+            abilities: [
+                { id: 1, name: 'Strength', value: 8 },
+                { id: 2, name: 'Dexterity', value: 8 },
+                { id: 3, name: 'Constitution', value: 8 },
+                { id: 4, name: 'Intelligence', value: 8 },
+                { id: 5, name: 'Wisdom', value: 8 },
+                { id: 6, name: 'Charisma', value: 8 },
+            ],
+            allocationsPerLevel: { 1: {} },
+        });
+        // Clear AsyncStorage
+        clearAsyncStorage();
+    };
+
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
@@ -498,34 +525,20 @@ export default function MeScreen() {
                                             text: 'Delete',
                                             style: 'destructive',
                                             onPress: async () => {
-                                                setRaceValue(null);
-                                                setClassValue(null);
-                                                setImageUri(null);
-                                                setIsRaceConfirmed(false);
-                                                setIsClassConfirmed(false);
-                                                updateStatsData({
-                                                    ...statsData,
-                                                    race: null || '',
-                                                    class: null || '',
-                                                    hitDice: 0,
-                                                    abilities: [
-                                                        { id: 1, name: 'Strength', value: 8 },
-                                                        { id: 2, name: 'Dexterity', value: 8 },
-                                                        { id: 3, name: 'Constitution', value: 8 },
-                                                        { id: 4, name: 'Intelligence', value: 8 },
-                                                        { id: 5, name: 'Wisdom', value: 8 },
-                                                        { id: 6, name: 'Charisma', value: 8 },
-                                                    ],
-                                                    allocationsPerLevel: { 1: {} },
-                                                });
-
-                                                // Call the function when needed (e.g., during development)
-                                                clearAsyncStorage();
+                                                handleDeleteCharacter();
                                             }
                                         }
                                     ])
                                 }}>
-                                    <Text style={{ color: 'red', padding: 10, fontSize: 16, fontWeight: 'bold', borderWidth: 1, borderColor: 'red', borderRadius: 5 }}>Delete Character</Text>
+                                    <Text style={{
+                                        color: 'red',
+                                        padding: 10,
+                                        fontSize: 16,
+                                        fontWeight: 'bold',
+                                        borderWidth: 1,
+                                        borderColor: 'red',
+                                        borderRadius: 5
+                                    }}>Delete Character</Text>
                                 </TouchableOpacity>
                                 <View style={styles.formContainer}>
                                     <View style={[styles.modalRowContainer, { zIndex: 3000 }]}>
@@ -536,7 +549,7 @@ export default function MeScreen() {
                                             <DropDownPicker
                                                 open={openRace}
                                                 value={raceValue}
-                                                items={raceItems}
+                                                items={raceBonuses.map((race) => ({ label: race.race, value: race.race }))}
                                                 setOpen={setOpenRace}
                                                 setValue={setRaceValue}
                                                 placeholder="Select a race"

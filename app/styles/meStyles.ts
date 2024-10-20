@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         borderWidth: 2,
-        borderColor: 'darkgoldenrod',
+        borderColor: 'white',
         borderStyle: 'solid',
         flex: 1,
     },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     },
     levelContainerHighlighted: {
         borderWidth: 2,
-        borderColor: 'darkgoldenrod',
+        borderColor: 'white',
     },
     firstRowText: {
         fontSize: 18,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         position: 'relative',
         borderWidth: 2,
-        borderColor: 'darkgoldenrod',
+        borderColor: 'white',
         borderStyle: 'solid',
     },
     abilityValueContainer: {
@@ -329,9 +329,9 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     abilityName: {
-        fontSize: 18,
+        fontSize: 16,
         color: 'white',
-        fontWeight: 'normal',
+        fontWeight: 'bold',
         textAlign: 'center',
         padding: 5,
         width: '100%',
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     },
     availableAbilityPointsHighlighted: {
         borderWidth: 2,
-        borderColor: 'darkgoldenrod',
+        borderColor: 'white',
         padding: 5,
         alignSelf: 'flex-start',
         borderRadius: 8,
