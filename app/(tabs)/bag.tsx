@@ -143,10 +143,20 @@ export default function BagScreen() {
       // Delete custom item images from AsyncStorage
       for (const item of items) {
         if (!isDefaultItem(item.id) && item.image) {
-          const imageKey = item.image.split(',')[0].split('/')[3].split(';')[0];
-          await AsyncStorage.removeItem(imageKey).catch((error) => {
-            console.error('Failed to delete image from AsyncStorage:', error);
-          });
+          // Check if item.image contains the expected substrings
+          const imageSplitCommas = item.image.split(',');
+          if (imageSplitCommas.length > 0) {
+            const imageSplitSlashes = imageSplitCommas[0].split('/');
+            if (imageSplitSlashes.length > 3) {
+              const imageSplitSemicolons = imageSplitSlashes[3].split(';');
+              if (imageSplitSemicolons.length > 0) {
+                const imageKey = imageSplitSemicolons[0];
+                await AsyncStorage.removeItem(imageKey).catch((error) => {
+                  console.error('Failed to delete image from AsyncStorage:', error);
+                });
+              }
+            }
+          }
         }
       }
 

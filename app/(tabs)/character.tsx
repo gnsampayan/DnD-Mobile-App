@@ -116,16 +116,48 @@ export default function MeScreen() {
 
     // Update weapons whenever items change
     useEffect(() => {
-        setWeapons(
-            items
-                .filter((item) => item.type === 'Weapon')
-                .map((item) => ({
-                    label: item.name,
-                    value: item.name,
-                    image: item.image || '',
-                }))
-        );
+        const weaponsList = items
+            .filter((item) => item.type === 'Weapon')
+            .map((item) => ({
+                label: item.name,
+                value: item.id,
+                image: item.image || '',
+            }));
+
+        // Add 'None' option at the beginning of the list
+        weaponsList.unshift({
+            label: 'None',
+            value: 'none', // Use 'none' as the value for the 'None' option
+            image: '', // No image for 'None'
+        });
+
+        setWeapons(weaponsList);
     }, [items]);
+
+    // Add this useEffect to check if equipped weapons are deleted
+    useEffect(() => {
+        // Check if the main hand weapon is still in the items list
+        if (
+            mainHandWeaponValue &&
+            mainHandWeaponValue !== 'none' &&
+            !items.some((item) => item.id === mainHandWeaponValue)
+        ) {
+            // If not, unset the main hand weapon
+            setMainHandWeaponValue(null);
+            console.log('Main hand weapon was deleted and has been unequipped.');
+        }
+
+        // Check if the offhand weapon is still in the items list
+        if (
+            offHandWeaponValue &&
+            offHandWeaponValue !== 'none' &&
+            !items.some((item) => item.id === offHandWeaponValue)
+        ) {
+            // If not, unset the offhand weapon
+            setOffHandWeaponValue(null);
+            console.log('Offhand weapon was deleted and has been unequipped.');
+        }
+    }, [items, mainHandWeaponValue, offHandWeaponValue]);
 
     // Use context for statsData
     const { statsData, updateStatsData } = useContext(StatsDataContext) as {
@@ -412,6 +444,16 @@ export default function MeScreen() {
     const handleEquipWeapon = (slot: 'mainHand' | 'offHand', weaponId: string | null) => {
         if (!weaponId) return;
 
+        // Handle 'None' selection
+        if (weaponId === 'none' || weaponId === null) {
+            if (slot === 'mainHand') {
+                setMainHandWeaponValue(null);
+            } else {
+                setOffHandWeaponValue(null);
+            }
+            console.log(`No weapon equipped in ${slot === 'mainHand' ? 'Main Hand' : 'Offhand'}`);
+            return;
+        }
         // Check if the weapon is already equipped in the other slot
         if (slot === 'mainHand' && offHandWeaponValue === weaponId) {
             // Remove from offhand
@@ -545,16 +587,31 @@ export default function MeScreen() {
                         onPress={() => setMainHandModalVisible(true)}
                         onLongPress={() => handleEquipmentLongPress('mainMelee')}
                     >
-                        <ImageBackground
-                            source={
-                                mainHandWeaponValue && weapons.find((w) => w.value === mainHandWeaponValue)?.image
-                                    ? { uri: weapons.find((w) => w.value === mainHandWeaponValue)?.image }
-                                    : equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage
-                            }
-                            style={styles.equipmentItemImage}
-                        >
-                            {/* Optional: Add overlay or text */}
-                        </ImageBackground>
+                        {mainHandWeaponValue && mainHandWeaponValue !== 'none' ? (
+                            (() => {
+                                const weapon = weapons.find((w) => w.value === mainHandWeaponValue);
+                                if (weapon && weapon.image && weapon.image !== '') {
+                                    return (
+                                        <ImageBackground
+                                            source={{ uri: weapon.image }}
+                                            style={styles.equipmentItemImage}
+                                        />
+                                    );
+                                } else {
+                                    return <Text style={{
+                                        color: 'white',
+                                        fontSize: 16,
+                                        marginTop: 10,
+                                        marginLeft: 10
+                                    }}>{weapon?.label}</Text>;
+                                }
+                            })()
+                        ) : (
+                            <ImageBackground
+                                source={equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage}
+                                style={styles.equipmentItemImage}
+                            />
+                        )}
                     </TouchableOpacity>
 
                     {/* Offhand Weapon */}
@@ -563,16 +620,31 @@ export default function MeScreen() {
                         onPress={() => setOffHandModalVisible(true)}
                         onLongPress={() => handleEquipmentLongPress('offhandMelee')}
                     >
-                        <ImageBackground
-                            source={
-                                offHandWeaponValue && weapons.find((w) => w.value === offHandWeaponValue)?.image
-                                    ? { uri: weapons.find((w) => w.value === offHandWeaponValue)?.image }
-                                    : equipmentItems.find((item) => item.id === 'offhandMelee')?.defaultImage
-                            }
-                            style={styles.equipmentItemImage}
-                        >
-                            {/* Optional: Add overlay or text */}
-                        </ImageBackground>
+                        {offHandWeaponValue && offHandWeaponValue !== 'none' ? (
+                            (() => {
+                                const weapon = weapons.find((w) => w.value === offHandWeaponValue);
+                                if (weapon && weapon.image && weapon.image !== '') {
+                                    return (
+                                        <ImageBackground
+                                            source={{ uri: weapon.image }}
+                                            style={styles.equipmentItemImage}
+                                        />
+                                    );
+                                } else {
+                                    return <Text style={{
+                                        color: 'white',
+                                        fontSize: 16,
+                                        marginTop: 10,
+                                        marginLeft: 10
+                                    }}>{weapon?.label}</Text>;
+                                }
+                            })()
+                        ) : (
+                            <ImageBackground
+                                source={equipmentItems.find((item) => item.id === 'offhandMelee')?.defaultImage}
+                                style={styles.equipmentItemImage}
+                            />
+                        )}
                     </TouchableOpacity>
                 </View>
                 {equipmentItems
@@ -721,7 +793,7 @@ export default function MeScreen() {
                             <Text>Select Main Hand Weapon</Text>
                             <DropDownPicker
                                 open={openMainHandPicker}
-                                value={mainHandWeaponValue}
+                                value={mainHandWeaponValue || 'none'}
                                 items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
                                 setOpen={setOpenMainHandPicker}
                                 setValue={setMainHandWeaponValue}
@@ -743,7 +815,7 @@ export default function MeScreen() {
                                     setMainHandModalVisible(false);
                                 }}
                             >
-                                <Text>Equip Weapon</Text>
+                                <Text>Save</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -758,7 +830,7 @@ export default function MeScreen() {
                             <Text>Select Offhand Weapon</Text>
                             <DropDownPicker
                                 open={openOffHandPicker}
-                                value={offHandWeaponValue}
+                                value={offHandWeaponValue || 'none'}
                                 items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
                                 setOpen={setOpenOffHandPicker}
                                 setValue={setOffHandWeaponValue}
