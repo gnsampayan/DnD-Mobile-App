@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
 import itemTypes from '../data/itemTypes.json';
 import { useItemEquipment } from '../context/ItemEquipmentContext';
+import weapons from '../data/weapons.json';
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
@@ -113,6 +114,9 @@ export default function BagScreen() {
   useEffect(() => {
     loadItems();
   }, []);
+
+  const [openWeaponType, setOpenWeaponType] = useState(false);
+  const [weaponTypeValue, setWeaponTypeValue] = useState<string | null>(null);
 
 
   // Function to load items from AsyncStorage
@@ -669,8 +673,23 @@ export default function BagScreen() {
                   setValue={setItemTypeValue}
                   placeholder="Select an item type"
                   style={{ marginBottom: 10 }}
+                  zIndex={2000}
                   onChangeValue={(value) => setItemTypeValue(value)}
                 />
+                {(itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') && (
+                  <DropDownPicker
+                    open={openWeaponType}
+                    value={weaponTypeValue}
+                    items={weapons.weapons.flatMap(category =>
+                      category.items.map(weapon => ({ label: weapon.name, value: weapon.name }))
+                    )}
+                    setOpen={setOpenWeaponType}
+                    setValue={setWeaponTypeValue}
+                    placeholder="Select a weapon type"
+                    style={{ marginBottom: 10 }}
+                    zIndex={1000}
+                  />
+                )}
                 <TextInput
                   style={styles.modalInput}
                   placeholder="Name"
