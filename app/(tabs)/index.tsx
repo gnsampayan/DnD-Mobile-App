@@ -869,9 +869,10 @@ export default function ActionsScreen() {
             </View>
             <View style={styles.subheaderInline}>
               <View style={{ flex: 1, flexDirection: 'column' }}>
+                {/* Useful Stats */}
                 <View style={styles.subheaderSideBySide}>
-                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
 
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
                     {/* Proficiency Bonus */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{proficiencyBonus}</Text>
@@ -888,6 +889,29 @@ export default function ActionsScreen() {
                       </View>
                     </View>
                   </View>
+
+                  {/* Movement Speed */}
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>{movementSpeed}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="footsteps" size={24} color="gray" />
+                      </View>
+                    </View>
+                  </View>
+
+                </View>
+
+
+                <View style={styles.subheaderSideBySide}>
+
+                  {/* Replenish Button */}
+                  <TouchableOpacity
+                    style={styles.replenishContainer}
+                    onPress={() => handleHpChange('replenish')}
+                  >
+                    <Ionicons name="bed" size={24} color="white" />
+                  </TouchableOpacity>
 
                   {/* Temporary HP Input */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'white' }]}>
@@ -911,31 +935,9 @@ export default function ActionsScreen() {
                       <Ionicons name="heart-circle" size={24} color="cyan" />
                     </View>
                   </View>
+
                 </View>
-                <View style={styles.subheaderSideBySide}>
 
-                  {/* Movement Speed */}
-                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
-                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                      <Text style={styles.hpText}>{movementSpeed}</Text>
-                      <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="footsteps" size={24} color="gray" />
-                      </View>
-                    </View>
-
-                  </View>
-
-
-
-                  <TouchableOpacity
-                    style={styles.replenishContainer}
-                    onPress={() => handleHpChange('replenish')}
-                  >
-                    {/* <ImageBackground source={longRestImageTyped} style={styles.modalButtonReplenish} resizeMode="cover" >
-                    </ImageBackground> */}
-                    <Ionicons name="bed" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
               </View>
 
               {/* Input HP Container add or subtract */}
@@ -954,16 +956,12 @@ export default function ActionsScreen() {
                     style={styles.modalButtonSubtract}
                     onPress={() => handleHpChange('subtract')}
                   >
-                    {/* <ImageBackground source={damageOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
-                    </ImageBackground> */}
                     <Ionicons name="remove" size={24} color="white" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.modalButtonAdd}
                     onPress={() => handleHpChange('add')}
                   >
-                    {/* <ImageBackground source={healingOrbImageTyped} style={styles.hpButtonImage} resizeMode="cover" >
-                    </ImageBackground> */}
                     <Ionicons name="add" size={24} color="white" />
                   </TouchableOpacity>
                 </View>

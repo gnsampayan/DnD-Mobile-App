@@ -595,8 +595,28 @@ export default function MeScreen() {
                                         </TouchableOpacity>
                                     )}
                                 </View>
-
-
+                                {/* Race Features */}
+                                <View>
+                                    <Text>Race Features</Text>
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.skills && <Text>Skills: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.skills}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feat && <Text>Feat: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feat}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feyAncestry && <Text>Fey Ancestry: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feyAncestry}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.trance && <Text>Trance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.trance}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.stoneCunning && <Text>Stone Cunning: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.stoneCunning}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.darkvision && <Text>Darkvision: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.darkvision}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.lucky && <Text>Lucky: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.lucky}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.brave && <Text>Brave: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.brave}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.halflingNimbleness && <Text>Halfling Nimbleness: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.halflingNimbleness}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.gnomeCunning && <Text>Gnome Cunning: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.gnomeCunning}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.relentlessEndurance && <Text>Relentless Endurance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.relentlessEndurance}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.savageAttacks && <Text>Savage Attacks: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.savageAttacks}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.hellishResistance && <Text>Hellish Resistance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.hellishResistance}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.infernalLegacy && <Text>Infernal Legacy: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.infernalLegacy}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.draconicAncestry && <Text>Draconic Ancestry: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.draconicAncestry}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.breathWeapon && <Text>Breath Weapon: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.breathWeapon}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.damageResistance && <Text>Damage Resistance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.damageResistance}</Text>}
+                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.language && <Text>Language: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.language}</Text>}
+                                </View>
 
                             </View>
                         </TouchableWithoutFeedback>
