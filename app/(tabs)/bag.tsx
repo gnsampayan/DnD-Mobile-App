@@ -16,14 +16,17 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
+import itemTypes from '../data/itemTypes.json';
+
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
 import coinPouchImage from '@items/default-item-coin-pouch.png';
 import addItemImage from '@items/add-item-image.png';
+import DropDownPicker from 'react-native-dropdown-picker';
 const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
 
 // Define the base Item interface
@@ -33,6 +36,7 @@ interface BaseItem {
   quantity: number;
   image?: string; // Optional image property
   details?: string; // **Add the details property**
+  type?: string; // **Add the type property**
 }
 
 
@@ -46,8 +50,8 @@ interface Weapon extends BaseItem {
 }
 
 
-interface Wares extends BaseItem {
-  // Additional properties specific to Wares
+interface Equipment extends BaseItem {
+  // Additional properties specific to Equipment
 }
 
 interface MagicItem extends BaseItem {
@@ -63,7 +67,7 @@ interface Misc extends BaseItem {
 }
 
 // Create a union type for Item
-type Item = Food | Weapon | Wares | MagicItem | Special | Misc;
+type Item = Food | Weapon | Equipment | MagicItem | Special | Misc;
 
 // **Default starting items with details**
 const defaultItems: Item[] = [
@@ -102,10 +106,8 @@ export default function BagScreen() {
     image: undefined,
     details: '',
   });
-
-
-  // Path to the items.json file
-  const ITEMS_FILE_PATH = `${FileSystem.documentDirectory}items.json`;
+  const [openItemType, setOpenItemType] = useState(false);
+  const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
 
   // Load items from local storage when the component mounts
   useEffect(() => {
@@ -113,14 +115,12 @@ export default function BagScreen() {
   }, []);
 
 
-  // Function to load items from file system
+  // Function to load items from AsyncStorage
   const loadItems = async () => {
     try {
-      const fileInfo = await FileSystem.getInfoAsync(ITEMS_FILE_PATH);
-      if (fileInfo.exists) {
-        const jsonString = await FileSystem.readAsStringAsync(ITEMS_FILE_PATH);
+      const jsonString = await AsyncStorage.getItem('items');
+      if (jsonString) {
         const parsedItems: Item[] = JSON.parse(jsonString);
-
         setItems(parsedItems);
       } else {
         // If no items in storage, initialize with default items
@@ -134,30 +134,32 @@ export default function BagScreen() {
     }
   };
 
-
-  // Function to save items to local storage
+  // Function to save items to AsyncStorage
   const saveItems = async (itemsToSave: Item[]) => {
     try {
       const jsonString = JSON.stringify(itemsToSave);
-      await FileSystem.writeAsStringAsync(ITEMS_FILE_PATH, jsonString);
+      await AsyncStorage.setItem('items', jsonString);
     } catch (error) {
       console.error('Failed to save items:', error);
     }
   };
 
-
   // Function to clear items and reset to default
   const resetItems = async () => {
     try {
-      await FileSystem.deleteAsync(ITEMS_FILE_PATH, { idempotent: true });
-      // Delete custom item images
+      // Remove all items from AsyncStorage
+      await AsyncStorage.removeItem('items');
+
+      // Delete custom item images from AsyncStorage
       for (const item of items) {
         if (!isDefaultItem(item.id) && item.image) {
-          await FileSystem.deleteAsync(item.image, { idempotent: true }).catch((error) => {
-            console.error('Failed to delete image file:', error);
+          const imageKey = item.image.split(',')[0].split('/')[3].split(';')[0];
+          await AsyncStorage.removeItem(imageKey).catch((error) => {
+            console.error('Failed to delete image from AsyncStorage:', error);
           });
         }
       }
+
       setItems(defaultItems);
       saveItems(defaultItems);
       setResetModalVisible(false);
@@ -171,8 +173,6 @@ export default function BagScreen() {
     // Cycle through column numbers from 2 to 4
     setNumColumns((prevColumns) => (prevColumns % 3) + 2);
   };
-
-
   // Function to pick an image from the media library
   async function pickImage(forNewItem: boolean = false) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -185,32 +185,32 @@ export default function BagScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
+      base64: true,
     });
 
-
-    if (!result.canceled) {
-      const imageUri = result.assets[0].uri;
-      const fileName = imageUri.split('/').pop();
-      const newPath = `${FileSystem.documentDirectory}${fileName}`;
-
-      try {
-        await FileSystem.copyAsync({ from: imageUri, to: newPath });
-      } catch (error) {
-        console.error('Failed to copy image:', error);
-      }
+    if (!result.canceled && result.assets[0].base64) {
+      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
 
       if (forNewItem) {
-        setNewItem((prev) => ({ ...prev, image: newPath }));
+        setNewItem((prev) => ({ ...prev, image: base64Image }));
       } else if (selectedItem) {
         const updatedItems = items.map((item) => {
           if (item.id === selectedItem.id) {
-            return { ...item, image: newPath };
+            return { ...item, image: base64Image };
           }
           return item;
         });
         setItems(updatedItems);
         saveItems(updatedItems); // Save updated items
-        setSelectedItem((prev) => (prev ? { ...prev, image: newPath } : null));
+        setSelectedItem((prev) => (prev ? { ...prev, image: base64Image } : null));
+      }
+
+      // Save the base64 image to AsyncStorage
+      try {
+        const imageKey = `image_${Date.now()}`;
+        await AsyncStorage.setItem(imageKey, base64Image);
+      } catch (error) {
+        console.error('Failed to save image to AsyncStorage:', error);
       }
     }
   }
@@ -239,14 +239,16 @@ export default function BagScreen() {
         id: newId,
         name: newItem.name,
         quantity: Number(newItem.quantity),
-        image: newItem.image,
-        details: newItem.details,
+        image: newItem.image ?? undefined,
+        details: newItem.details ?? '',
+        type: itemTypeValue ?? '',
       };
 
       const updatedItems = [...items, newItemToAdd];
       setItems(updatedItems);
       saveItems(updatedItems);
       setNewItem({ name: '', quantity: 1, image: undefined, details: '' });
+      setItemTypeValue(null);
       setModalVisible(false);
     } else {
       Alert.alert('Error', 'Please enter the Name of the item.');
@@ -255,17 +257,20 @@ export default function BagScreen() {
 
 
   // Function to delete an item from the items array
-  const deleteItem = (itemId: string) => {
-    const itemToDelete = items.find((item) => item.id === itemId);
-    if (itemToDelete && itemToDelete.image) {
-      FileSystem.deleteAsync(itemToDelete.image, { idempotent: true }).catch((error) => {
-        console.error('Failed to delete image file:', error);
-      });
-    }
-
+  const deleteItem = async (itemId: string) => {
     const updatedItems = items.filter((item) => item.id !== itemId);
     setItems(updatedItems);
-    saveItems(updatedItems);
+    await saveItems(updatedItems);
+
+    // Remove the item's image from AsyncStorage if it exists
+    const itemToDelete = items.find((item) => item.id === itemId);
+    if (itemToDelete && itemToDelete.image) {
+      try {
+        await AsyncStorage.removeItem(`itemImage_${itemId}`);
+      } catch (error) {
+        console.error('Failed to delete image from AsyncStorage:', error);
+      }
+    }
   };
 
 
@@ -309,7 +314,7 @@ export default function BagScreen() {
               item?.image
                 ? typeof item.image === 'number'
                   ? item.image // Local image imported via require/import
-                  : { uri: item.image } // URI from file system or remote
+                  : { uri: item.image } // URI from async storage or remote
                 : { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }
             }
             style={styles.itemImageBackground}
@@ -651,11 +656,25 @@ export default function BagScreen() {
         transparent={true}
         visible={modalVisible}
       >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setModalVisible(false);
+            setItemTypeValue(null);
+          }}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Add New Item</Text>
+                <DropDownPicker
+                  open={openItemType}
+                  value={itemTypeValue}
+                  items={itemTypes}
+                  setOpen={setOpenItemType}
+                  setValue={setItemTypeValue}
+                  placeholder="Select an item type"
+                  style={{ marginBottom: 10 }}
+                  onChangeValue={(value) => setItemTypeValue(value)}
+                />
                 <TextInput
                   style={styles.modalInput}
                   placeholder="Name"

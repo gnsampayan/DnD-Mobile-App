@@ -33,6 +33,7 @@ import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import raceBonuses from '../data/raceData.json';
+import { useItemEquipment } from '../context/ItemEquipmentContext';
 
 interface EquipmentItem {
     id: string;
@@ -96,6 +97,29 @@ export default function MeScreen() {
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
     const [characterModalVisible, setCharacterModalVisible] = useState(false);
+    const [weaponModalVisible, setWeaponModalVisible] = useState(false);
+
+    // State variables for DropDownPicker
+    const [openWeapon, setOpenWeapon] = useState(false);
+    const [weaponValue, setWeaponValue] = useState<string | null>(null);
+    const { items, loadItems } = useItemEquipment();
+    const [weapons, setWeapons] = useState<{ label: string, value: string }[]>([]);
+
+    useEffect(() => {
+        loadItems();
+    }, []);
+
+    // Update weapons whenever items change
+    useEffect(() => {
+        setWeapons(
+            items
+                .filter(item => item.type === 'Weapon')
+                .map(item => ({
+                    label: item.name,
+                    value: item.id
+                }))
+        );
+    }, [items]);
 
     // Use context for statsData
     const { statsData, updateStatsData } = useContext(StatsDataContext) as {
@@ -118,7 +142,6 @@ export default function MeScreen() {
     // State to track if race and class have been confirmed
     const [isRaceConfirmed, setIsRaceConfirmed] = useState<boolean>(!!statsData.race);
     const [isClassConfirmed, setIsClassConfirmed] = useState<boolean>(!!statsData.class);
-
 
 
 
@@ -388,6 +411,10 @@ export default function MeScreen() {
         <View style={styles.container}>
             {/* Section 1: Header */}
             <View style={styles.header}>
+                <View style={{ flexDirection: 'column', gap: 5, marginLeft: 10 }}>
+                    <Text style={{ color: 'white', fontSize: 16, }}>{statsData.race}</Text>
+                    <Text style={{ color: 'white', fontSize: 16, }}>{statsData.class ? statsData.class.charAt(0).toUpperCase() + statsData.class.slice(1) : ''}</Text>
+                </View>
                 <View style={styles.headerButtons}>
                     <TouchableOpacity style={styles.userAccountButton}>
                         <Ionicons name="settings" size={24} color="white" />
@@ -404,7 +431,7 @@ export default function MeScreen() {
                         .map((item) => (
                             <TouchableOpacity
                                 key={item.id}
-                                style={styles.equipmentItem}
+                                style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
                                 onPress={() => { }}
                                 onLongPress={() => handleEquipmentLongPress(item.id)}
                             >
@@ -423,7 +450,10 @@ export default function MeScreen() {
                 </View>
 
                 {/* Section 3 */}
-                <TouchableOpacity onLongPress={handleImageLongPress} onPress={() => setCharacterModalVisible(true)}>
+                <TouchableOpacity
+                    style={{ borderWidth: 2, borderColor: 'white', borderStyle: 'solid', borderRadius: 8 }}
+                    onLongPress={handleImageLongPress}
+                    onPress={() => setCharacterModalVisible(true)}>
                     <View style={[styles.imageContainer, { width: section3Width }]}>
                         {imageUri ? (
                             <Image
@@ -433,7 +463,16 @@ export default function MeScreen() {
                             />
                         ) : (
                             <View style={styles.emptyImageContainer}>
-                                <Text>No Image available</Text>
+                                {!statsData.race && !statsData.class ?
+                                    <>
+                                        <Ionicons name="body" size={24} color="white" />
+                                        <Text style={{ color: 'white', marginBottom: 40, marginTop: 10, fontSize: 16, textAlign: 'center' }}>
+                                            Tap to create your{'\n'}character
+                                        </Text>
+                                    </>
+                                    : null}
+                                <Ionicons name="image" size={24} color="white" />
+                                <Text style={{ color: 'white', fontSize: 12, marginTop: 10 }}>Long press to add an image</Text>
                             </View>
                         )}
                     </View>
@@ -446,7 +485,7 @@ export default function MeScreen() {
                         .map((item) => (
                             <TouchableOpacity
                                 key={item.id}
-                                style={styles.equipmentItem}
+                                style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
                                 onPress={() => { }}
                                 onLongPress={() => handleEquipmentLongPress(item.id)}
                             >
@@ -474,7 +513,7 @@ export default function MeScreen() {
                             <TouchableOpacity
                                 key={item.id}
                                 style={styles.weapon}
-                                onPress={() => { }}
+                                onPress={() => setWeaponModalVisible(true)}
                                 onLongPress={() => handleEquipmentLongPress(item.id)}
                             >
                                 <ImageBackground
@@ -508,6 +547,7 @@ export default function MeScreen() {
                         </TouchableOpacity>
                     ))}
             </View>
+
             {/* Character Modal */}
             <Modal animationType="fade" transparent={true} visible={characterModalVisible}>
                 <TouchableWithoutFeedback onPress={() => setCharacterModalVisible(false)}>
@@ -620,6 +660,28 @@ export default function MeScreen() {
 
                             </View>
                         </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Weapon Modal */}
+            <Modal animationType="fade" transparent={true} visible={weaponModalVisible}>
+                <TouchableWithoutFeedback onPress={() => setWeaponModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContainer}>
+                            <Text>Weapon Modal</Text>
+                            <DropDownPicker
+                                open={openWeapon}
+                                value={weaponValue}
+                                items={weapons}
+                                setOpen={setOpenWeapon}
+                                setValue={setWeaponValue}
+                                placeholder="Select a weapon"
+                                containerStyle={{ height: 40, width: '100%' }}
+                                style={{ backgroundColor: '#fafafa' }}
+                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                            />
+                        </View>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>

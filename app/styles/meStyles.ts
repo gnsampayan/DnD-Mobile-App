@@ -193,8 +193,11 @@ const styles = StyleSheet.create({
         aspectRatio: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: 'black',
         borderRadius: 8,
+        borderWidth: 2,
+        borderColor: 'white',
+        borderStyle: 'solid',
     },
     equipmentItemImage: {
         width: '100%',

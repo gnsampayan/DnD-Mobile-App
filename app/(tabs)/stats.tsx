@@ -73,6 +73,7 @@ const getAbilityPointsFromLevel = (level: number): number => {
 const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
+    const [inputValues, setInputValues] = useState<{ [level: number]: string }>({});
     const [skills, setSkills] = useState<Skill[]>(skillsData);
     const [hasUnfilledHpIncreases, setHasUnfilledHpIncreases] = useState(false);
     const [constitutionModifier, setConstitutionModifier] = useState(0);
@@ -406,12 +407,14 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
         const skillValue = abilityModifier;
 
+        const isProficient = raceBonuses.find(bonus => bonus.race === statsData.race)?.proficiencies?.skillProficiency?.includes(item.name.toLowerCase());
+        const skillModifier = isProficient ? skillValue + proficiencyBonus : skillValue;
         return (
-            <View style={styles.skillContainer}>
-                <Text style={styles.skillValue}>
-                    {skillValue >= 0 ? `+${skillValue}` : `${skillValue}`}
+            <View style={[styles.skillContainer, isProficient ? { backgroundColor: 'white' } : {}]}>
+                <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>
+                    {skillModifier >= 0 ? `+${skillModifier}` : `${skillModifier}`}
                 </Text>
-                <Text style={styles.skillName}>{item.name.substring(0, 5)}</Text>
+                <Text style={[styles.skillName, isProficient ? { color: 'black' } : {}]}>{item.name.substring(0, 5)}</Text>
             </View>
         );
     };
@@ -642,6 +645,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                 </TouchableWithoutFeedback>
             </Modal>
 
+
             {/* Level Modal */}
             <Modal
                 animationType="fade"
@@ -658,50 +662,83 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 <View style={styles.modalHeader}>
                                     <Text style={styles.modalTitle}>Level: {level}</Text>
                                 </View>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        flexWrap: 'wrap',
+                                        justifyContent: 'flex-start',
+                                    }}
+                                >
                                     {Array.from({ length: statsData.level - 1 }, (_, index) => {
-                                        const level = index + 2;
-                                        const hasIncrease = hpIncreases[level] !== undefined;
+                                        const lvl = index + 2;
+                                        const hasIncrease = hpIncreases[lvl] !== undefined;
                                         return (
-                                            <View key={level} style={{ flexDirection: 'column', alignItems: 'flex-start', margin: 5, gap: 5 }}>
-                                                <Text style={styles.modalInputLabel}>Level {level} Increase:</Text>
+                                            <View
+                                                key={lvl}
+                                                style={{
+                                                    flexDirection: 'column',
+                                                    alignItems: 'flex-start',
+                                                    margin: 5,
+                                                    gap: 5,
+                                                }}
+                                            >
+                                                <Text style={styles.modalInputLabel}>Level {lvl} Increase:</Text>
                                                 {!hasIncrease ? (
                                                     <>
                                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                                             <TextInput
                                                                 style={[styles.modalInput, { width: 50 }]}
-                                                                placeholder="0"
+                                                                placeholder="1"
                                                                 keyboardType="number-pad"
                                                                 placeholderTextColor="gray"
                                                                 onChangeText={(text) => {
                                                                     const number = parseInt(text);
-                                                                    if (!isNaN(number) && number >= 0 && number <= hitDice) {
-                                                                        setInputValue(text);
+                                                                    if (
+                                                                        !isNaN(number) &&
+                                                                        number >= 1 &&
+                                                                        number <= hitDice
+                                                                    ) {
+                                                                        setInputValues((prev) => ({ ...prev, [lvl]: text }));
                                                                     } else if (text === '') {
-                                                                        setInputValue('');
+                                                                        setInputValues((prev) => ({ ...prev, [lvl]: '' }));
                                                                     } else {
-                                                                        Alert.alert('Invalid input', `Please enter a number between 0 and ${hitDice}.`);
+                                                                        Alert.alert(
+                                                                            'Invalid input',
+                                                                            `Please enter a number between 1 and ${hitDice}.`
+                                                                        );
                                                                     }
                                                                 }}
-                                                                value={inputValue}
+                                                                value={inputValues[lvl] || ''}
                                                             />
-                                                            <Text style={styles.modalInputLabel}> + {constitutionModifier} (Con)</Text>
+                                                            <Text style={styles.modalInputLabel}>
+                                                                {' '}
+                                                                + {constitutionModifier} (Con)
+                                                            </Text>
                                                         </View>
 
                                                         <TouchableOpacity
                                                             style={styles.saveButton}
                                                             onPress={() => {
-                                                                const number = parseInt(inputValue);
-                                                                if (!isNaN(number) && number >= 0 && number <= hitDice) {
+                                                                const number = parseInt(inputValues[lvl]);
+                                                                if (
+                                                                    !isNaN(number) &&
+                                                                    number >= 1 &&
+                                                                    number <= hitDice
+                                                                ) {
                                                                     const totalIncrease = number + constitutionModifier;
                                                                     updateStatsData({
                                                                         ...statsData,
                                                                         hpIncreases: {
                                                                             ...(hpIncreases || {}),
-                                                                            [level]: totalIncrease,
+                                                                            [lvl]: totalIncrease,
                                                                         },
                                                                     });
-                                                                    setInputValue('');
+                                                                    setInputValues((prev) => ({ ...prev, [lvl]: '' }));
+                                                                } else {
+                                                                    Alert.alert(
+                                                                        'Invalid input',
+                                                                        `Please enter a number between 1 and ${hitDice}.`
+                                                                    );
                                                                 }
                                                             }}
                                                         >
@@ -709,13 +746,18 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                                         </TouchableOpacity>
                                                     </>
                                                 ) : (
-                                                    <Text style={styles.modalText}>{hpIncreases[level]} (including +{constitutionModifier} Con)</Text>
+                                                    <Text style={styles.modalText}>
+                                                        {hpIncreases[lvl]} (including +{constitutionModifier} Con)
+                                                    </Text>
                                                 )}
-                                                {hasIncrease &&
+                                                {hasIncrease && (
                                                     <Text style={styles.modalInputLabel}>
-                                                        Total HP Added: {hpIncreases[level]}
-                                                    </Text>}
-                                                <Text style={styles.modalInputLabel}>Constitution Modifier: {constitutionModifier}</Text>
+                                                        Total HP Added: {hpIncreases[lvl]}
+                                                    </Text>
+                                                )}
+                                                <Text style={styles.modalInputLabel}>
+                                                    Constitution Modifier: {constitutionModifier}
+                                                </Text>
                                             </View>
                                         );
                                     })}
@@ -725,6 +767,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
+
         </View>
     );
 };

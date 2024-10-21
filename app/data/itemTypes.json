@@ -1,0 +1,26 @@
+[
+  {
+    "label": "Food",
+    "value": "Food"
+  },
+  {
+    "label": "Weapon",
+    "value": "Weapon"
+  },
+  {
+    "label": "Equipment",
+    "value": "Equipment"
+  },
+  {
+    "label": "Magic Item",
+    "value": "Magic Item"
+  },
+  {
+    "label": "Special",
+    "value": "Special"
+  },
+  {
+    "label": "Misc",
+    "value": "Misc"
+  }
+]

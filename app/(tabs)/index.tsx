@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
 
+import defaultUnarmedAttackImage from '@actions/default-unarmed-attack-image.png';
 import defaultAttackImage from '@actions/default-attack-image.png';
 import defaultThrowImage from '@actions/default-throw-image.png';
 import defaultPushImage from '@actions/default-push-image.png';
@@ -79,15 +80,9 @@ interface CustomActionBlock extends BaseAction {
 // Create a union type for Action
 type ActionBlock = DefaultActionBlock | CustomActionBlock;
 
-// Default actions that cannot be deleted
-const defaultActions: ActionBlock[] = [
-  { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 0 }, image: defaultSprintImage },
-  { id: '1', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
-  { id: '2', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
-  { id: '3', name: 'Push', details: 'Move an object or creature forward', cost: { actions: 0, bonus: 1 }, image: defaultPushImage },
-  { id: '4', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
-  { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultAttackImage },
-];
+
+
+
 
 
 
@@ -119,6 +114,20 @@ export default function ActionsScreen() {
   // Convert available actions to state
   const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
   const [currentBonusActionsAvailable, setCurrentBonusActionsAvailable] = useState<number>(1);
+
+
+  // Change later to check if character main weapon state is equipped
+  const isArmed = false;
+
+  // Default actions that cannot be deleted
+  const defaultActions: ActionBlock[] = [
+    { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 0 }, image: defaultSprintImage },
+    { id: '1', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '2', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
+    { id: '3', name: 'Push', details: 'Move an object or creature forward', cost: { actions: 0, bonus: 1 }, image: defaultPushImage },
+    { id: '4', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
+    { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+  ];
 
   // Path to the actions.json file
   const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
@@ -789,6 +798,21 @@ export default function ActionsScreen() {
     }
   }, [hpIncreases, hitDice, isLoading, currentConModifier]);
 
+  // Function to get the current Strength modifier
+  const getStrengthModifier = useCallback(() => {
+    const strengthAbility = statsData.abilities.find(ability => ability.name === 'Strength');
+    const strengthValue = strengthAbility ? strengthAbility.value : 10;
+    return Math.floor((strengthValue - 10) / 2);
+  }, [statsData.abilities]);
+
+  // State to hold the current Strength modifier
+  const [currentStrengthModifier, setCurrentStrengthModifier] = useState(getStrengthModifier());
+
+  // Update the Strength modifier when statsData changes
+  useEffect(() => {
+    setCurrentStrengthModifier(getStrengthModifier());
+  }, [statsData.abilities, getStrengthModifier]);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -877,7 +901,7 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{proficiencyBonus}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="aperture" size={24} color="white" />
+                        <Ionicons name="ribbon" size={24} color="white" />
                       </View>
                     </View>
 
@@ -896,6 +920,12 @@ export default function ActionsScreen() {
                       <Text style={styles.hpText}>{movementSpeed}</Text>
                       <View style={styles.subheaderSideBySide}>
                         <Ionicons name="footsteps" size={24} color="gray" />
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>{hitDice}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="fitness" size={24} color="white" />
                       </View>
                     </View>
                   </View>
@@ -969,8 +999,8 @@ export default function ActionsScreen() {
             </View>
           </View>
           :
-          <View style={styles.subheader}>
-            <Text style={[styles.subheaderText, { color: 'white' }]}>Please create a character</Text>
+          <View style={[styles.subheader, { padding: 10, borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
+            <Text style={[styles.subheaderText, { color: 'white', textAlign: 'center' }]}>Please create a character</Text>
           </View>
         }
 
@@ -1038,7 +1068,7 @@ export default function ActionsScreen() {
                       />
                     ) : (
                       <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
-                        <Text style={styles.modalTitle}>{selectedAction?.name}</Text>
+                        <Text style={styles.modalTitle}>{!isArmed && selectedAction.name === 'Attack' ? 'Unarmed ' : null}{selectedAction?.name}</Text>
                       </TouchableWithoutFeedback>
                     )}
 
@@ -1081,6 +1111,20 @@ export default function ActionsScreen() {
                           <Ionicons name="triangle" size={16} color="#FF8C00" />
                         </View>
                       )}
+                    </View>
+
+                    {/* Damage Section */}
+                    <View style={{}}>
+                      {(selectedAction.name === 'Attack' || selectedAction.name === 'Throw') &&
+                        <>
+                          <Text>Damage: </Text>
+                          <Text>1+({currentStrengthModifier} Str)</Text>
+                          <Text>Damage Type: </Text>
+                          <Text>
+                            {!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '?'}
+                          </Text>
+                        </>
+                      }
                     </View>
 
                     {/* Modal Buttons */}
@@ -1137,7 +1181,7 @@ export default function ActionsScreen() {
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Add New Action</Text>
+                <Text style={styles.modalTitle}>Create New Action</Text>
                 <TextInput
                   style={styles.modalInput}
                   placeholder="Action Name"
@@ -1186,10 +1230,10 @@ export default function ActionsScreen() {
                 )}
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={styles.modalButtonAdd}
+                    style={styles.modalButtonAddAction}
                     onPress={addAction}
                   >
-                    <Text style={styles.modalButtonText}>Add</Text>
+                    <Text style={styles.modalButtonText}>Create Action</Text>
                   </TouchableOpacity>
                 </View>
               </View>

@@ -112,6 +112,8 @@ const styles = StyleSheet.create({
       backgroundColor: 'white',
       borderRadius: 8,
       padding: 20,
+      maxHeight: '90%',
+      overflow: 'scroll',
     },
     // Modal title
     modalTitle: {
@@ -168,6 +170,17 @@ const styles = StyleSheet.create({
       borderColor: 'white',
       borderStyle: 'solid',
       overflow: 'hidden',
+    },
+    modalButtonAddAction: {
+      backgroundColor: 'darkgreen',
+      borderRadius: 4,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      width: '100%',
+      justifyContent: 'center',
     },
     modalButtonReset: {
       backgroundColor: 'darkred',
