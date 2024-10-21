@@ -97,26 +97,32 @@ export default function MeScreen() {
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
     const [characterModalVisible, setCharacterModalVisible] = useState(false);
-    const [weaponModalVisible, setWeaponModalVisible] = useState(false);
 
-    // State variables for DropDownPicker
-    const [openWeapon, setOpenWeapon] = useState(false);
-    const [weaponValue, setWeaponValue] = useState<string | null>(null);
-    const { items, loadItems } = useItemEquipment();
-    const [weapons, setWeapons] = useState<{ label: string, value: string }[]>([]);
+    // State variables for weapon slots
+    const [mainHandWeaponValue, setMainHandWeaponValue] = useState<string | null>(null);
+    const [offHandWeaponValue, setOffHandWeaponValue] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadItems();
-    }, []);
+    // State variables for weapon modals
+    const [mainHandModalVisible, setMainHandModalVisible] = useState(false);
+    const [offHandModalVisible, setOffHandModalVisible] = useState(false);
+
+    // State variables for DropDownPicker for each slot
+    const [openMainHandPicker, setOpenMainHandPicker] = useState(false);
+    const [openOffHandPicker, setOpenOffHandPicker] = useState(false);
+
+    // Items and weapons
+    const { items } = useItemEquipment();
+    const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
 
     // Update weapons whenever items change
     useEffect(() => {
         setWeapons(
             items
-                .filter(item => item.type === 'Weapon')
-                .map(item => ({
+                .filter((item) => item.type === 'Weapon')
+                .map((item) => ({
                     label: item.name,
-                    value: item.id
+                    value: item.name,
+                    image: item.image || '',
                 }))
         );
     }, [items]);
@@ -402,6 +408,32 @@ export default function MeScreen() {
         clearAsyncStorage();
     };
 
+    // Function to handle equipping a weapon
+    const handleEquipWeapon = (slot: 'mainHand' | 'offHand', weaponId: string | null) => {
+        if (!weaponId) return;
+
+        // Check if the weapon is already equipped in the other slot
+        if (slot === 'mainHand' && offHandWeaponValue === weaponId) {
+            // Remove from offhand
+            setOffHandWeaponValue(null);
+        } else if (slot === 'offHand' && mainHandWeaponValue === weaponId) {
+            // Remove from main hand
+            setMainHandWeaponValue(null);
+        }
+
+        // Equip weapon in the selected slot
+        if (slot === 'mainHand') {
+            setMainHandWeaponValue(weaponId);
+        } else {
+            setOffHandWeaponValue(weaponId);
+        }
+
+        // Log the equipped weapon and slot
+        const weaponName = items.find(item => item.name === weaponId)?.name || 'Unknown Weapon';
+        const slotName = slot === 'mainHand' ? 'Main Hand' : 'Offhand';
+        console.log(`${weaponName} is equipped in ${slotName}`);
+    };
+
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
@@ -507,32 +539,48 @@ export default function MeScreen() {
             {/* Section 5: Bottom Section */}
             <View style={styles.section5}>
                 <View style={styles.meleeContainer}>
-                    {equipmentItems
-                        .filter((item) => item.section === 5 && (item.id === 'mainMelee' || item.id === 'offhandMelee'))
-                        .map((item) => (
-                            <TouchableOpacity
-                                key={item.id}
-                                style={styles.weapon}
-                                onPress={() => setWeaponModalVisible(true)}
-                                onLongPress={() => handleEquipmentLongPress(item.id)}
-                            >
-                                <ImageBackground
-                                    source={
-                                        item.customImageUri ? { uri: item.customImageUri } : item.defaultImage
-                                    }
-                                    style={styles.equipmentItemImage}
-                                >
-                                    {/* Optional: Add overlay or text */}
-                                </ImageBackground>
-                            </TouchableOpacity>
-                        ))}
+                    {/* Main Hand Weapon */}
+                    <TouchableOpacity
+                        style={[styles.weapon, !mainHandWeaponValue ? { padding: 15 } : {}]}
+                        onPress={() => setMainHandModalVisible(true)}
+                        onLongPress={() => handleEquipmentLongPress('mainMelee')}
+                    >
+                        <ImageBackground
+                            source={
+                                mainHandWeaponValue && weapons.find((w) => w.value === mainHandWeaponValue)?.image
+                                    ? { uri: weapons.find((w) => w.value === mainHandWeaponValue)?.image }
+                                    : equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage
+                            }
+                            style={styles.equipmentItemImage}
+                        >
+                            {/* Optional: Add overlay or text */}
+                        </ImageBackground>
+                    </TouchableOpacity>
+
+                    {/* Offhand Weapon */}
+                    <TouchableOpacity
+                        style={[styles.weapon, !offHandWeaponValue ? { padding: 15 } : {}]}
+                        onPress={() => setOffHandModalVisible(true)}
+                        onLongPress={() => handleEquipmentLongPress('offhandMelee')}
+                    >
+                        <ImageBackground
+                            source={
+                                offHandWeaponValue && weapons.find((w) => w.value === offHandWeaponValue)?.image
+                                    ? { uri: weapons.find((w) => w.value === offHandWeaponValue)?.image }
+                                    : equipmentItems.find((item) => item.id === 'offhandMelee')?.defaultImage
+                            }
+                            style={styles.equipmentItemImage}
+                        >
+                            {/* Optional: Add overlay or text */}
+                        </ImageBackground>
+                    </TouchableOpacity>
                 </View>
                 {equipmentItems
                     .filter((item) => item.section === 5 && item.id === 'mainRanged')
                     .map((item) => (
                         <TouchableOpacity
                             key={item.id}
-                            style={styles.weapon}
+                            style={[styles.weapon, !mainHandWeaponValue ? { padding: 15 } : {}]}
                             onPress={() => { }}
                             onLongPress={() => handleEquipmentLongPress(item.id)}
                         >
@@ -665,26 +713,81 @@ export default function MeScreen() {
             </Modal>
 
             {/* Weapon Modal */}
-            <Modal animationType="fade" transparent={true} visible={weaponModalVisible}>
-                <TouchableWithoutFeedback onPress={() => setWeaponModalVisible(false)}>
+            {/* Main Hand Weapon Modal */}
+            <Modal animationType="fade" transparent={true} visible={mainHandModalVisible}>
+                <TouchableWithoutFeedback onPress={() => setMainHandModalVisible(false)}>
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContainer}>
-                            <Text>Weapon Modal</Text>
+                            <Text>Select Main Hand Weapon</Text>
                             <DropDownPicker
-                                open={openWeapon}
-                                value={weaponValue}
-                                items={weapons}
-                                setOpen={setOpenWeapon}
-                                setValue={setWeaponValue}
+                                open={openMainHandPicker}
+                                value={mainHandWeaponValue}
+                                items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
+                                setOpen={setOpenMainHandPicker}
+                                setValue={setMainHandWeaponValue}
                                 placeholder="Select a weapon"
                                 containerStyle={{ height: 40, width: '100%' }}
                                 style={{ backgroundColor: '#fafafa' }}
                                 dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
                             />
+                            <TouchableOpacity
+                                style={{
+                                    padding: 10,
+                                    backgroundColor: 'lightblue',
+                                    borderRadius: 8,
+                                    marginTop: 10,
+                                    alignSelf: 'center',
+                                }}
+                                onPress={() => {
+                                    handleEquipWeapon('mainHand', mainHandWeaponValue);
+                                    setMainHandModalVisible(false);
+                                }}
+                            >
+                                <Text>Equip Weapon</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
+            {/* Offhand Weapon Modal */}
+            <Modal animationType="fade" transparent={true} visible={offHandModalVisible}>
+                <TouchableWithoutFeedback onPress={() => setOffHandModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContainer}>
+                            <Text>Select Offhand Weapon</Text>
+                            <DropDownPicker
+                                open={openOffHandPicker}
+                                value={offHandWeaponValue}
+                                items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
+                                setOpen={setOpenOffHandPicker}
+                                setValue={setOffHandWeaponValue}
+                                placeholder="Select a weapon"
+                                containerStyle={{ height: 40, width: '100%' }}
+                                style={{ backgroundColor: '#fafafa' }}
+                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                            />
+                            <TouchableOpacity
+                                style={{
+                                    padding: 10,
+                                    backgroundColor: 'lightblue',
+                                    borderRadius: 8,
+                                    marginTop: 10,
+                                    alignSelf: 'center',
+                                }}
+                                onPress={() => {
+                                    handleEquipWeapon('offHand', offHandWeaponValue);
+                                    setOffHandModalVisible(false);
+                                }}
+                            >
+                                <Text>Equip Weapon</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+
         </View>
     );
 }

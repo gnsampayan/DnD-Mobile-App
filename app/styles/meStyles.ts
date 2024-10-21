@@ -101,10 +101,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     weapon: {
-        backgroundColor: '#fff',
         borderRadius: 8,
         height: '100%',
         aspectRatio: 1,
+        borderWidth: 2,
+        borderColor: 'white',
+        borderStyle: 'solid',
     },
     modalOverlay: {
         flex: 1,

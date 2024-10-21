@@ -20,7 +20,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
 import itemTypes from '../data/itemTypes.json';
-
+import { useItemEquipment } from '../context/ItemEquipmentContext';
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
@@ -108,7 +108,7 @@ export default function BagScreen() {
   });
   const [openItemType, setOpenItemType] = useState(false);
   const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
-
+  const { saveItems } = useItemEquipment();
   // Load items from local storage when the component mounts
   useEffect(() => {
     loadItems();
@@ -131,16 +131,6 @@ export default function BagScreen() {
       console.error('Failed to load items:', error);
       // In case of error, initialize with default items
       setItems(defaultItems);
-    }
-  };
-
-  // Function to save items to AsyncStorage
-  const saveItems = async (itemsToSave: Item[]) => {
-    try {
-      const jsonString = JSON.stringify(itemsToSave);
-      await AsyncStorage.setItem('items', jsonString);
-    } catch (error) {
-      console.error('Failed to save items:', error);
     }
   };
 
@@ -173,6 +163,8 @@ export default function BagScreen() {
     // Cycle through column numbers from 2 to 4
     setNumColumns((prevColumns) => (prevColumns % 3) + 2);
   };
+
+
   // Function to pick an image from the media library
   async function pickImage(forNewItem: boolean = false) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -219,12 +211,6 @@ export default function BagScreen() {
   const isDefaultItem = (itemId: string) => {
     return defaultItems.some((item) => item.id === itemId);
   };
-
-  // Function to find a default item by ID
-  function getDefaultItemImage(itemId: string): ImageSourcePropType | undefined {
-    const defaultItem = defaultItems.find(item => item.id === itemId);
-    return defaultItem ? { uri: defaultItem.image } : undefined;
-  }
 
 
   // Function to add a new item to the items array

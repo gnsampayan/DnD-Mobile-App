@@ -9,12 +9,14 @@ interface Item {
     image?: string;
     details?: string;
     type?: string;
+    imageUri?: string;
 }
 
 // Define the shape of our context
 interface ItemEquipmentContextType {
     items: Item[];
     loadItems: () => Promise<void>;
+    saveItems: (itemsToSave: Item[]) => Promise<void>;
 }
 
 // Create the context
@@ -42,10 +44,22 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
         loadItems();
     }, []);
 
+    // Function to save items to AsyncStorage
+    const saveItems = async (itemsToSave: Item[]) => {
+        try {
+            const jsonString = JSON.stringify(itemsToSave);
+            await AsyncStorage.setItem('items', jsonString);
+            setItems(itemsToSave);
+        } catch (error) {
+            console.error('Failed to save items:', error);
+        }
+    };
+
     return (
         <ItemEquipmentContext.Provider value={{
             items,
             loadItems,
+            saveItems,
         }}>
             {children}
         </ItemEquipmentContext.Provider>
