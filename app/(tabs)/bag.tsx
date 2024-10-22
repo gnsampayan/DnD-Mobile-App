@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,9 @@ import styles from '../styles/bagStyles';
 import itemTypes from '../data/itemTypes.json';
 import { useItemEquipment } from '../context/ItemEquipmentContext';
 import weapons from '../data/weapons.json';
+import classData from '../data/classData.json';
+import StatsDataContext from '../context/StatsDataContext';
+import raceData from '../data/raceData.json';
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
@@ -101,7 +104,7 @@ export default function BagScreen() {
   const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
-  const [newItem, setNewItem] = useState<{ name: string; quantity: number; image?: string; details?: string }>({
+  const [newItem, setNewItem] = useState<{ name: string; quantity: number; image?: string; details?: string; }>({
     name: '',
     quantity: 1,
     image: undefined,
@@ -115,9 +118,200 @@ export default function BagScreen() {
     loadItems();
   }, []);
 
+  // Food Units
+  const [foodUnitsValue, setFoodUnitsValue] = useState<number>(0);
+
+  // Weapon Type
   const [openWeaponType, setOpenWeaponType] = useState(false);
   const [weaponTypeValue, setWeaponTypeValue] = useState<string | null>(null);
+  const [weaponTypesOptionsFiltered, setWeaponTypesOptionsFiltered] = useState<{ label: string; value: string; parent?: string; selectable?: boolean }[]>([]);
 
+  // State for weapon proficiency (to be made dynamic later)
+  // Use context for statsData
+  const { statsData } = useContext(StatsDataContext);
+
+  if (!statsData) {
+    // Render a loading indicator or return null
+    return null;
+  }
+  const [isProficientInMartialWeapons, setIsProficientInMartialWeapons] = useState(false);
+  const [classSpecificWeapons, setClassSpecificWeapons] = useState<string[]>([]);
+
+  useEffect(() => {
+    const checkWeaponProficiency = () => {
+      const characterClass = classData.find(c => c.value === statsData.class);
+      if (characterClass && characterClass.weaponProficiency) {
+        const isProficient = characterClass.weaponProficiency.includes('martial');
+        setIsProficientInMartialWeapons(isProficient);
+
+        // Extract specific weapons
+        const specificWeapons = characterClass.weaponProficiency.filter(wp =>
+          !['simple', 'martial'].includes(wp.toLowerCase())
+        );
+        setClassSpecificWeapons(specificWeapons);
+      }
+    };
+
+    checkWeaponProficiency();
+  }, [statsData.class]);
+
+  // Function to filter and group weapons based on proficiency
+  const filterAndGroupWeapons = () => {
+    const groupedWeapons = weapons.weapons.reduce((acc, category) => {
+      // Show both simple and martial weapons if race or class is not available
+      if (!statsData.race || !statsData.class || statsData.race === '' || statsData.class === '') {
+        // Add group label with bold font
+        acc.push({
+          label: category.category,
+          value: category.category.toLowerCase(),
+          parent: null,
+          selectable: false,
+          labelStyle: {
+            fontWeight: 'bold',
+          },
+        });
+
+        // Add all weapons under the current category
+        category.items.forEach(item => {
+          acc.push({
+            label: item.name,
+            value: item.name.toLowerCase(),
+            parent: category.category.toLowerCase(),
+            selectable: true,
+            labelStyle: {
+              fontWeight: 'normal',
+            },
+          });
+        });
+      } else if (
+        isProficientInMartialWeapons ||
+        !category.category.toLowerCase().includes('martial')
+      ) {
+        // Add group label with bold font
+        acc.push({
+          label: category.category,
+          value: category.category.toLowerCase(),
+          parent: null,
+          selectable: false,
+          labelStyle: {
+            fontWeight: 'bold',
+          },
+        });
+
+        // Add weapons under the current category
+        category.items.forEach(item => {
+          acc.push({
+            label: item.name,
+            value: item.name.toLowerCase(),
+            parent: category.category.toLowerCase(),
+            selectable: true,
+            labelStyle: {
+              fontWeight: 'normal',
+            },
+          });
+        });
+      }
+      return acc;
+    }, [] as {
+      label: string;
+      value: string;
+      parent: string | null;
+      selectable: boolean;
+      labelStyle?: object;
+    }[]);
+
+    // If race and class are available, proceed with class and race specific weapons
+    if (statsData.race && statsData.class && statsData.race !== '' && statsData.class !== '') {
+      // Create a Set of existing weapon values to avoid duplicates
+      const existingWeaponValues = new Set(
+        groupedWeapons
+          .filter(w => w.selectable)
+          .map(w => w.value.toLowerCase())
+      );
+
+      // Add class-specific weapons, ensuring no duplicates
+      if (classSpecificWeapons.length > 0) {
+        // Filter out class-specific weapons that already exist in main categories
+        const uniqueClassWeapons = classSpecificWeapons.filter(weapon =>
+          !existingWeaponValues.has(weapon.toLowerCase())
+        );
+
+        if (uniqueClassWeapons.length > 0) {
+          // Add the "Class Specific" group label
+          groupedWeapons.push({
+            label: `${statsData.class} Specific`,
+            value: 'class-specific',
+            parent: null,
+            selectable: false,
+            labelStyle: {
+              fontWeight: 'bold',
+              textTransform: 'capitalize',
+            },
+          });
+
+          // Add each unique class-specific weapon
+          uniqueClassWeapons.forEach(weapon => {
+            groupedWeapons.push({
+              label: weapon,
+              value: weapon.toLowerCase(),
+              parent: 'class-specific',
+              selectable: true,
+              labelStyle: {
+                fontWeight: 'normal',
+                textTransform: 'capitalize',
+              },
+            });
+            // Add to existingWeaponValues to avoid duplicates in race-specific weapons
+            existingWeaponValues.add(weapon.toLowerCase());
+          });
+        }
+      }
+
+      // Add race-specific weapons
+      const characterRace = raceData.find(r => r.race.toLowerCase() === statsData.race?.toLowerCase());
+      if (characterRace && characterRace.proficiencies && characterRace.proficiencies.weaponProficiency) {
+        const raceSpecificWeapons = characterRace.proficiencies.weaponProficiency.filter(weapon =>
+          !existingWeaponValues.has(weapon.toLowerCase())
+        );
+
+        if (raceSpecificWeapons.length > 0) {
+          // Add the "Race Specific" group label
+          groupedWeapons.push({
+            label: `${statsData.race} Specific`,
+            value: 'race-specific',
+            parent: null,
+            selectable: false,
+            labelStyle: {
+              fontWeight: 'bold',
+            },
+          });
+
+          // Add each unique race-specific weapon
+          raceSpecificWeapons.forEach(weapon => {
+            groupedWeapons.push({
+              label: weapon,
+              value: weapon.toLowerCase(),
+              parent: 'race-specific',
+              selectable: true,
+              labelStyle: {
+                fontWeight: 'normal',
+                textTransform: 'capitalize',
+              },
+            });
+          });
+        }
+      }
+    }
+    return groupedWeapons;
+  };
+
+  // Update weaponTypesOptionsFiltered when relevant data changes
+  useEffect(() => {
+    if (itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') {
+      const groupedAndFilteredWeapons = filterAndGroupWeapons();
+      setWeaponTypesOptionsFiltered(groupedAndFilteredWeapons as { label: string; value: string; parent?: string | undefined; selectable?: boolean | undefined }[]);
+    }
+  }, [itemTypeValue, isProficientInMartialWeapons, classSpecificWeapons, statsData.race, statsData.class]);
 
   // Function to load items from AsyncStorage
   const loadItems = async () => {
@@ -665,6 +859,7 @@ export default function BagScreen() {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Add New Item</Text>
+                <Text>Item Type</Text>
                 <DropDownPicker
                   open={openItemType}
                   value={itemTypeValue}
@@ -677,19 +872,48 @@ export default function BagScreen() {
                   onChangeValue={(value) => setItemTypeValue(value)}
                 />
                 {(itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') && (
-                  <DropDownPicker
-                    open={openWeaponType}
-                    value={weaponTypeValue}
-                    items={weapons.weapons.flatMap(category =>
-                      category.items.map(weapon => ({ label: weapon.name, value: weapon.name }))
-                    )}
-                    setOpen={setOpenWeaponType}
-                    setValue={setWeaponTypeValue}
-                    placeholder="Select a weapon type"
-                    style={{ marginBottom: 10 }}
-                    zIndex={1000}
-                  />
+                  <>
+                    <Text>Weapon Type</Text>
+                    <DropDownPicker
+                      open={openWeaponType}
+                      value={weaponTypeValue}
+                      items={weaponTypesOptionsFiltered}
+                      setOpen={setOpenWeaponType}
+                      setValue={setWeaponTypeValue}
+                      placeholder="Select a weapon type"
+                      style={{ marginBottom: 10 }}
+                      textStyle={{ textTransform: 'capitalize' }}
+                      zIndex={1000}
+                      listMode="SCROLLVIEW"
+                      scrollViewProps={{
+                        nestedScrollEnabled: true,
+                      }}
+                      onChangeValue={(value) => {
+                        setWeaponTypeValue(value);
+                        if (value) {
+                          const capitalizedName = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                          setNewItem({ ...newItem, name: capitalizedName });
+                        }
+                      }}
+                    />
+                  </>
                 )}
+                {(itemTypeValue && itemTypeValue.toLowerCase() === 'food') && (
+                  <>
+                    <Text>Food Units</Text>
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="Food Units"
+                      placeholderTextColor="gray"
+                      keyboardType="number-pad"
+                      onChangeText={(text) =>
+                        setFoodUnitsValue(Number(text) || 0)
+                      }
+                      value={foodUnitsValue.toString()}
+                    />
+                  </>
+                )}
+                <Text>Name</Text>
                 <TextInput
                   style={styles.modalInput}
                   placeholder="Name"
@@ -699,6 +923,7 @@ export default function BagScreen() {
                   }
                   value={newItem.name}
                 />
+                <Text>Quantity</Text>
                 <TextInput
                   style={styles.modalInput}
                   placeholder="Quantity"
@@ -710,6 +935,7 @@ export default function BagScreen() {
                   value={newItem.quantity.toString()}
                 />
                 {/* Add details input */}
+                <Text>Details</Text>
                 <TextInput
                   style={[styles.modalInput, styles.detailsInput]}
                   placeholder="Item Details"
@@ -738,6 +964,10 @@ export default function BagScreen() {
                     <Text style={styles.modalButtonText}>Add</Text>
                   </TouchableOpacity>
                 </View>
+
+
+
+
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -1011,13 +1241,6 @@ export default function BagScreen() {
                         style={styles.quantityButton}
                       >
                         <Text style={styles.quantityButtonText}>+</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* Buttons */}
-                    <View style={styles.itemModalButtons}>
-                      <TouchableOpacity style={styles.itemModalButton}>
-                        <Text style={styles.itemModalButtonText}>Send To</Text>
                       </TouchableOpacity>
                     </View>
                   </>

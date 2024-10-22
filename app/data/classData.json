@@ -5,7 +5,7 @@
     "hitDice": 8,
     "primaryAbility": ["Intelligence"],
     "savingThrowProficiency": ["Constitution", "Intelligence"],
-    "armorProficiency": ["light", "medium", "shields"],
+    "armorProficiency": ["light", "medium", "shield"],
     "weaponProficiency": ["simple"]
   },
   {
@@ -14,7 +14,7 @@
     "hitDice": 12,
     "primaryAbility": ["Strength"],
     "savingThrowProficiency": ["Strength", "Constitution"],
-    "armorProficiency": ["light", "medium", "shields"],
+    "armorProficiency": ["light", "medium", "shield"],
     "weaponProficiency": ["simple", "martial"]
   },
   {
@@ -24,7 +24,7 @@
     "primaryAbility": ["Charisma"],
     "savingThrowProficiency": ["Dexterity", "Charisma"],
     "armorProficiency": ["light"],
-    "weaponProficiency": ["simple", "hand crossbows", "longswords", "rapiers", "shortswords"]
+    "weaponProficiency": ["simple", "hand crossbow", "longsword", "rapier", "shortsword"]
   },
   {
     "label": "Cleric",
@@ -32,7 +32,7 @@
     "hitDice": 8,
     "primaryAbility": ["Wisdom"],
     "savingThrowProficiency": ["Wisdom", "Charisma"],
-    "armorProficiency": ["light", "medium", "shields"],
+    "armorProficiency": ["light", "medium", "shield"],
     "weaponProficiency": ["simple"]
   },
   {
@@ -41,8 +41,8 @@
     "hitDice": 8,
     "primaryAbility": ["Wisdom"],
     "savingThrowProficiency": ["Wisdom", "Intelligence"],
-    "armorProficiency": ["light(non-metal)", "medium(non-metal)", "shields(non-metal)"],
-    "weaponProficiency": ["simple", "clubs", "daggers", "dart", "javelins", "maces", "quarterstaffs", "sickles", "sling", "spears"]
+    "armorProficiency": ["light(non-metal)", "medium(non-metal)", "shield(non-metal)"],
+    "weaponProficiency": ["simple", "club", "dagger", "dart", "javelin", "mace", "quarterstaff", "sickle", "sling", "spear"]
   },
   {
     "label": "Fighter",
@@ -50,7 +50,7 @@
     "hitDice": 10,
     "primaryAbility": ["Strength", "Dexterity"],
     "savingThrowProficiency": ["Strength", "Constitution"],
-    "armorProficiency": ["light", "medium", "heavy", "shields"],
+    "armorProficiency": ["light", "medium", "heavy", "shield"],
     "weaponProficiency": ["simple", "martial"]
   },
   {
@@ -60,7 +60,7 @@
     "primaryAbility": ["Dexterity", "Wisdom"],
     "savingThrowProficiency": ["Dexterity", "Strength"],
     "armorProficiency": ["none"],
-    "weaponProficiency": ["simple", "shortswords"]
+    "weaponProficiency": ["simple", "shortsword"]
   },
   {
     "label": "Paladin",
@@ -68,7 +68,7 @@
     "hitDice": 10,
     "primaryAbility": ["Strength", "Charisma"],
     "savingThrowProficiency": ["Wisdom", "Charisma"],
-    "armorProficiency": ["light", "medium", "heavy", "shields"],
+    "armorProficiency": ["light", "medium", "heavy", "shield"],
     "weaponProficiency": ["simple", "martial"]
   },
   {
@@ -77,7 +77,7 @@
     "hitDice": 10,
     "primaryAbility": ["Wisdom", "Dexterity"],
     "savingThrowProficiency": ["Dexterity", "Strength"],
-    "armorProficiency": ["light", "medium", "shields"],
+    "armorProficiency": ["light", "medium", "shield"],
     "weaponProficiency": ["simple", "martial"]
   },
   {
@@ -87,7 +87,7 @@
     "primaryAbility": ["Dexterity"],
     "savingThrowProficiency": ["Dexterity", "Intelligence"],
     "armorProficiency": ["light"],
-    "weaponProficiency": ["simple", "hand crossbows", "longswords", "rapiers", "shortswords"]
+    "weaponProficiency": ["simple", "hand crossbow", "longsword", "rapier", "shortsword"]
   },
   {
     "label": "Sorcerer",
@@ -96,7 +96,7 @@
     "primaryAbility": ["Charisma"],
     "savingThrowProficiency": ["Constitution", "Charisma"],
     "armorProficiency": ["none"],
-    "weaponProficiency": ["daggers", "darts", "slings", "quarterstaffs", "light crossbows"]
+    "weaponProficiency": ["dagger", "dart", "sling", "quarterstaff", "light crossbow"]
   },
   {
     "label": "Warlock",
@@ -114,6 +114,6 @@
     "primaryAbility": ["Intelligence"],
     "savingThrowProficiency": ["Wisdom", "Intelligence"],
     "armorProficiency": ["none"],
-    "weaponProficiency": ["daggers", "darts", "slings", "quarterstaffs", "light crossbows"]
+    "weaponProficiency": ["dagger", "dart", "sling", "quarterstaff", "light crossbow"]
   }
 ]

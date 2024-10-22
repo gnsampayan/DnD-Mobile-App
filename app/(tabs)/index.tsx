@@ -19,6 +19,7 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
+import { CharacterContext } from '../context/equipmentActionsContext';
 
 import defaultUnarmedAttackImage from '@actions/default-unarmed-attack-image.png';
 import defaultAttackImage from '@actions/default-attack-image.png';
@@ -31,6 +32,7 @@ import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StatsDataContext from '../context/StatsDataContext';
+import { Item } from '../context/ItemEquipmentContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 // Define the base Action interface
@@ -117,7 +119,13 @@ export default function ActionsScreen() {
 
 
   // Change later to check if character main weapon state is equipped
-  const isArmed = false;
+  const { mainHandWeapon } = useContext(CharacterContext) as { mainHandWeapon: Item | null };
+  const [isArmed, setIsArmed] = useState(false);
+
+  // Update `isArmed` when mainHandWeapon changes
+  useEffect(() => {
+    setIsArmed(mainHandWeapon !== null);
+  }, [mainHandWeapon]);
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
@@ -147,6 +155,20 @@ export default function ActionsScreen() {
     }
   }, [statsData.race]);
 
+  // Function to get the correct action image based on the action and if the character is armed
+  function getActionImage(action: ActionBlock): ImageSourcePropType | string {
+    if (action.name === 'Attack') {
+      return isArmed ? defaultAttackImage : defaultUnarmedAttackImage;
+    } else if (action.image) {
+      if (typeof action.image === 'number') {
+        return action.image; // Local image imported via require/import
+      } else {
+        return { uri: action.image }; // URI from file system or remote
+      }
+    } else {
+      return { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' };
+    }
+  }
 
 
   const calculateModifier = (score: number): number => {
@@ -610,13 +632,7 @@ export default function ActionsScreen() {
 
       return (
         <ImageBackground
-          source={
-            item?.image
-              ? typeof item.image === 'number'
-                ? item.image // Local image imported via require/import
-                : { uri: item.image } // URI from file system or remote
-              : { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }
-          }
+          source={getActionImage(item) as ImageSourcePropType}
           style={[
             styles.itemContainer,
             { width: itemWidth, opacity: affordable ? 1 : 0.2 }
@@ -1041,11 +1057,7 @@ export default function ActionsScreen() {
                     <TouchableWithoutFeedback onLongPress={handleImageLongPress} style={styles.itemModalImageContainer}>
                       {selectedAction?.image ? (
                         <Image
-                          source={
-                            typeof selectedAction.image === 'number'
-                              ? selectedAction.image
-                              : { uri: selectedAction.image }
-                          }
+                          source={getActionImage(selectedAction) as ImageSourcePropType}
                           style={styles.itemModalImage}
                         />
                       ) : (
@@ -1068,7 +1080,7 @@ export default function ActionsScreen() {
                       />
                     ) : (
                       <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
-                        <Text style={styles.modalTitle}>{!isArmed && selectedAction.name === 'Attack' ? 'Unarmed ' : null}{selectedAction?.name}</Text>
+                        <Text style={styles.modalTitle}>{!isArmed && selectedAction.name === 'Attack' ? 'Unarmed ' : 'Armed '}{selectedAction?.name}</Text>
                       </TouchableWithoutFeedback>
                     )}
 

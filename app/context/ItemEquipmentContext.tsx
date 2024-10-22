@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Define the shape of our Item
-interface Item {
+export interface Item {
     id: string;
     name: string;
     quantity: number;
@@ -11,6 +11,7 @@ interface Item {
     type?: string;
     imageUri?: string;
 }
+
 
 // Define the shape of our context
 interface ItemEquipmentContextType {

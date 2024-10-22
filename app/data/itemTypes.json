@@ -8,19 +8,31 @@
     "value": "Weapon"
   },
   {
-    "label": "Equipment",
-    "value": "Equipment"
+    "label": "Armor",
+    "value": "Armor"
   },
   {
-    "label": "Magic Item",
-    "value": "Magic Item"
+    "label": "Item",
+    "value": "Item"
   },
   {
-    "label": "Special",
-    "value": "Special"
+    "label": "Scroll",
+    "value": "Scroll"
   },
   {
-    "label": "Misc",
-    "value": "Misc"
+    "label": "Potion",
+    "value": "Potion"
+  },
+  {
+    "label": "Ring",
+    "value": "Ring"
+  },
+  {
+    "label": "Necklace",
+    "value": "Necklace"
+  },
+  {
+    "label": "Custom",
+    "value": "Custom"
   }
 ]
