@@ -146,26 +146,28 @@ export default function MeScreen() {
     useEffect(() => {
         // Check if the main hand weapon is still in the items list
         if (
-            mainHandWeapon?.name &&
+            mainHandWeapon &&
             mainHandWeapon.name !== 'none' &&
-            !items.some((item) => item.name.toLowerCase() === mainHandWeapon.name)
+            !items.some((item) => item.name.toLowerCase() === mainHandWeapon.name.toLowerCase())
         ) {
             // If not, unset the main hand weapon
             equipWeapon('mainHand', null);
+            setMainHandValue('none');
             console.log('Main hand weapon was deleted and has been unequipped.');
         }
 
         // Check if the offhand weapon is still in the items list
         if (
-            offHandWeapon?.name &&
+            offHandWeapon &&
             offHandWeapon.name !== 'none' &&
-            !items.some((item) => item.name.toLowerCase() === offHandWeapon.name)
+            !items.some((item) => item.name.toLowerCase() === offHandWeapon.name.toLowerCase())
         ) {
             // If not, unset the offhand weapon
             equipWeapon('offHand', null);
+            setOffHandValue('none');
             console.log('Offhand weapon was deleted and has been unequipped.');
         }
-    }, [items, mainHandWeapon?.name, offHandWeapon?.name]);
+    }, [items, mainHandWeapon, offHandWeapon, equipWeapon]);
 
     // Use context for statsData
     const { statsData, updateStatsData } = useContext(StatsDataContext) as {
@@ -276,71 +278,6 @@ export default function MeScreen() {
                     setImageUri(`data:image/jpeg;base64,${base64Image}`);
                 } catch (error) {
                     console.error('Failed to save main image:', error);
-                }
-            }
-        }
-    };
-
-
-    const handleEquipmentLongPress = (equipmentId: string) => {
-        const item = equipmentItems.find((item) => item.id === equipmentId);
-
-        if (item) {
-            Alert.alert(
-                'Image Options',
-                item.customImageUri ? 'What would you like to do with the image?' : 'You can add an image.',
-                [
-                    ...(item.customImageUri
-                        ? [
-                            {
-                                text: 'Replace Image',
-                                onPress: () => pickEquipmentImage(equipmentId),
-                            },
-                            {
-                                text: 'Delete Image',
-                                onPress: () => deleteEquipmentImage(equipmentId),
-                            },
-                        ]
-                        : [
-                            {
-                                text: 'Add Image',
-                                onPress: () => pickEquipmentImage(equipmentId),
-                            },
-                        ]),
-                    { text: 'Cancel', style: 'cancel' },
-                ]
-            );
-        }
-    };
-
-    const pickEquipmentImage = async (equipmentId: string) => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission Denied', 'We need permission to access your media library.');
-            return;
-        }
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 1,
-            base64: true, // Request base64 encoding
-        });
-
-        if (!result.canceled) {
-            const base64Image = result.assets[0].base64;
-
-            if (base64Image) {
-                try {
-                    await AsyncStorage.setItem(`equipmentImage-${equipmentId}`, base64Image);
-                    setEquipmentItems((prevItems) =>
-                        prevItems.map((item) =>
-                            item.id === equipmentId
-                                ? { ...item, customImageUri: `data:image/jpeg;base64,${base64Image}` }
-                                : item
-                        )
-                    );
-                } catch (error) {
-                    console.error('Failed to save equipment image:', error);
                 }
             }
         }
@@ -532,7 +469,6 @@ export default function MeScreen() {
                                 key={item.id}
                                 style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
                                 onPress={() => { }}
-                                onLongPress={() => handleEquipmentLongPress(item.id)}
                             >
                                 <ImageBackground
                                     source={
@@ -586,7 +522,6 @@ export default function MeScreen() {
                                 key={item.id}
                                 style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
                                 onPress={() => { }}
-                                onLongPress={() => handleEquipmentLongPress(item.id)}
                             >
                                 <ImageBackground
                                     source={
@@ -610,31 +545,35 @@ export default function MeScreen() {
                     <TouchableOpacity
                         style={[styles.weapon, !mainHandWeapon?.name ? { padding: 15 } : {}]}
                         onPress={() => setMainHandModalVisible(true)}
-                        onLongPress={() => handleEquipmentLongPress('mainMelee')}
                     >
                         {mainHandWeapon?.name && mainHandWeapon?.name !== 'none' ? (
                             (() => {
-                                const weapon = weapons.find((w) => w.value === mainHandWeapon.name);
+                                const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase());
                                 if (weapon && weapon.image && weapon.image !== '') {
                                     return (
-                                        <ImageBackground
+                                        <Image
                                             source={{ uri: weapon.image }}
                                             style={styles.equipmentItemImage}
+                                            resizeMode="contain"
                                         />
                                     );
                                 } else {
-                                    return <Text style={{
-                                        color: 'white',
-                                        fontSize: 16,
-                                        marginTop: 10,
-                                        marginLeft: 10
-                                    }}>{weapon?.label}</Text>;
+                                    return (
+                                        <View style={styles.equipmentItemImage}>
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 16,
+                                                textAlign: 'center'
+                                            }}>{weapon?.label || mainHandWeapon.name}</Text>
+                                        </View>
+                                    );
                                 }
                             })()
                         ) : (
-                            <ImageBackground
+                            <Image
                                 source={equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage}
                                 style={styles.equipmentItemImage}
+                                resizeMode="contain"
                             />
                         )}
                     </TouchableOpacity>
@@ -643,11 +582,10 @@ export default function MeScreen() {
                     <TouchableOpacity
                         style={[styles.weapon, !offHandWeapon?.name ? { padding: 15 } : {}]}
                         onPress={() => setOffHandModalVisible(true)}
-                        onLongPress={() => handleEquipmentLongPress('offhandMelee')}
                     >
                         {offHandWeapon?.name && offHandWeapon?.name !== 'none' ? (
                             (() => {
-                                const weapon = weapons.find((w) => w.value === offHandWeapon.name);
+                                const weapon = weapons.find((w) => w.value === offHandWeapon.name.toLowerCase());
                                 if (weapon && weapon.image && weapon.image !== '') {
                                     return (
                                         <ImageBackground
@@ -679,7 +617,6 @@ export default function MeScreen() {
                             key={item.id}
                             style={[styles.weapon, !mainHandWeapon?.name ? { padding: 15 } : {}]}
                             onPress={() => { }}
-                            onLongPress={() => handleEquipmentLongPress(item.id)}
                         >
                             <ImageBackground
                                 source={
@@ -822,7 +759,7 @@ export default function MeScreen() {
                                 items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
                                 setOpen={setOpenMainHandPicker}
                                 setValue={setMainHandValue}
-                                onChangeValue={(value) => handleMainHandValueChange(value)}
+                                onChangeValue={handleMainHandValueChange}
                                 placeholder="Select a weapon"
                                 containerStyle={{ height: 40, width: '100%' }}
                                 style={{ backgroundColor: '#fafafa' }}
@@ -838,7 +775,7 @@ export default function MeScreen() {
                                     // Start of Selection
                                 }}
                                 onPress={() => {
-                                    handleEquipWeapon('mainHand', mainHandWeapon?.name ?? null);
+                                    handleEquipWeapon('mainHand', mainHandValue);
                                     setMainHandModalVisible(false);
                                 }}
                             >
@@ -861,7 +798,7 @@ export default function MeScreen() {
                                 items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
                                 setOpen={setOpenOffHandPicker}
                                 setValue={setOffHandValue}
-                                onChangeValue={(value) => handleOffHandValueChange(value)}
+                                onChangeValue={handleOffHandValueChange}
                                 placeholder="Select a weapon"
                                 containerStyle={{ height: 40, width: '100%' }}
                                 style={{ backgroundColor: '#fafafa' }}
@@ -876,7 +813,7 @@ export default function MeScreen() {
                                     alignSelf: 'center',
                                 }}
                                 onPress={() => {
-                                    handleEquipWeapon('offHand', offHandWeapon?.name ?? null);
+                                    handleEquipWeapon('offHand', offHandValue);
                                     setOffHandModalVisible(false);
                                 }}
                             >

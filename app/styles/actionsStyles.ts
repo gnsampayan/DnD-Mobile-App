@@ -112,8 +112,6 @@ const styles = StyleSheet.create({
       backgroundColor: 'white',
       borderRadius: 8,
       padding: 20,
-      maxHeight: '90%',
-      overflow: 'scroll',
     },
     // Modal title
     modalTitle: {
@@ -494,6 +492,12 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: 'black',
       borderRadius: 2,
+    },
+    modalWeaponProperty: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
     },
   });
 

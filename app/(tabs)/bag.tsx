@@ -100,7 +100,7 @@ const defaultItems: Item[] = [
 
 
 export default function BagScreen() {
-  const [numColumns, setNumColumns] = useState(4);
+  const [numColumns, setNumColumns] = useState(3);
   const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);

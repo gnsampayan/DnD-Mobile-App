@@ -9,7 +9,6 @@ export interface Item {
     image?: string;
     details?: string;
     type?: string;
-    imageUri?: string;
 }
 
 

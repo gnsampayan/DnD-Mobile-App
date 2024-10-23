@@ -13,6 +13,7 @@ import {
   ImageBackground,
   ImageSourcePropType,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -20,7 +21,9 @@ import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
 import { CharacterContext } from '../context/equipmentActionsContext';
+import weapons from '../data/weapons.json';
 
+import defaultRangedAttackImage from '@actions/default-ranged-attack-image.png';
 import defaultUnarmedAttackImage from '@actions/default-unarmed-attack-image.png';
 import defaultAttackImage from '@actions/default-attack-image.png';
 import defaultThrowImage from '@actions/default-throw-image.png';
@@ -89,7 +92,7 @@ type ActionBlock = DefaultActionBlock | CustomActionBlock;
 
 
 export default function ActionsScreen() {
-  const [numColumns, setNumColumns] = useState(4);
+  const [numColumns, setNumColumns] = useState(3);
   const [actions, setActions] = useState<ActionBlock[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newActionName, setNewActionName] = useState('');
@@ -119,7 +122,11 @@ export default function ActionsScreen() {
 
 
   // Change later to check if character main weapon state is equipped
-  const { mainHandWeapon } = useContext(CharacterContext) as { mainHandWeapon: Item | null };
+  const { mainHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
+    mainHandWeapon: Item | null,
+    getWeaponDamage: (weapon: Item) => string,
+    getWeaponSkillModifiers: (weapon: Item) => string[]
+  };
   const [isArmed, setIsArmed] = useState(false);
 
   // Update `isArmed` when mainHandWeapon changes
@@ -129,12 +136,13 @@ export default function ActionsScreen() {
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
-    { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 0 }, image: defaultSprintImage },
+    { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '1', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
     { id: '2', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
     { id: '3', name: 'Push', details: 'Move an object or creature forward', cost: { actions: 0, bonus: 1 }, image: defaultPushImage },
     { id: '4', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
-    { id: '5', name: 'Attack', details: 'Make a melee or ranged attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+    { id: '6', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
+    { id: '5', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
   ];
 
   // Path to the actions.json file
@@ -608,7 +616,6 @@ export default function ActionsScreen() {
         setCurrentActionsAvailable(prev => prev - costActions);
         setCurrentBonusActionsAvailable(prev => prev - costBonus);
         setActionModalVisible(false);
-        Alert.alert('Success', `${selectedAction.name} committed.`);
       } else {
         Alert.alert('Insufficient Resources', 'You do not have enough actions or bonus actions for this.');
       }
@@ -821,13 +828,21 @@ export default function ActionsScreen() {
     return Math.floor((strengthValue - 10) / 2);
   }, [statsData.abilities]);
 
+  const getDexModifier = useCallback(() => {
+    const dexterityAbility = statsData.abilities.find(ability => ability.name === 'Dexterity');
+    const dexterityValue = dexterityAbility ? dexterityAbility.value : 10;
+    return Math.floor((dexterityValue - 10) / 2);
+  }, [statsData.abilities]);
+
   // State to hold the current Strength modifier
   const [currentStrengthModifier, setCurrentStrengthModifier] = useState(getStrengthModifier());
+  const [currentDexModifier, setCurrentDexModifier] = useState(getDexModifier());
 
   // Update the Strength modifier when statsData changes
   useEffect(() => {
     setCurrentStrengthModifier(getStrengthModifier());
-  }, [statsData.abilities, getStrengthModifier]);
+    setCurrentDexModifier(getDexModifier());
+  }, [statsData.abilities, getStrengthModifier, getDexModifier]);
 
   return (
     <View style={styles.container}>
@@ -1080,7 +1095,11 @@ export default function ActionsScreen() {
                       />
                     ) : (
                       <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
-                        <Text style={styles.modalTitle}>{!isArmed && selectedAction.name === 'Attack' ? 'Unarmed ' : 'Armed '}{selectedAction?.name}</Text>
+                        <Text style={styles.modalTitle}>
+                          {selectedAction.name === 'Attack'
+                            ? (isArmed ? 'Armed ' : 'Unarmed ')
+                            : ''}{selectedAction?.name}
+                        </Text>
                       </TouchableWithoutFeedback>
                     )}
 
@@ -1125,19 +1144,75 @@ export default function ActionsScreen() {
                       )}
                     </View>
 
-                    {/* Damage Section */}
-                    <View style={{}}>
-                      {(selectedAction.name === 'Attack' || selectedAction.name === 'Throw') &&
-                        <>
-                          <Text>Damage: </Text>
+                    {/* Weapon Properties Section */}
+                    {(selectedAction.name === 'Attack') &&
+                      <>
+                        {mainHandWeapon && mainHandWeapon.name !== 'none' ? (
+                          <>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Weapon Name: </Text>
+                              <Text>
+                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.name || '?'
+                                  : '?'}
+                              </Text>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Damage: </Text>
+                              <Text>
+                                {getWeaponDamage(mainHandWeapon)}
+                              </Text>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Skill Modifiers: </Text>
+                              <View style={{ flexDirection: 'row' }}>
+                                <Text>
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`}
+                                </Text>
+                                {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                                  getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                                  <Text> or </Text>}
+                                <Text>
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && `${currentDexModifier} Dex`}
+                                </Text>
+                              </View>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Proficiency Modifier: </Text>
+                              <Text>
+                                +{proficiencyBonus} Prof
+                              </Text>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Damage Type: </Text>
+                              <Text style={{ textTransform: 'capitalize' }}>
+                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.damageType || '?'
+                                  : (!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '?')}
+                              </Text>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Range: </Text>
+                              <Text>
+                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.throwRange || '?'
+                                  : '?'}
+                              </Text>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Properties: </Text>
+                              <Text>
+                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.properties.join(', ') || '?'
+                                  : '?'}
+                              </Text>
+                            </View>
+                          </>
+                        ) : (
                           <Text>1+({currentStrengthModifier} Str)</Text>
-                          <Text>Damage Type: </Text>
-                          <Text>
-                            {!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '?'}
-                          </Text>
-                        </>
-                      }
-                    </View>
+                        )}
+                      </>
+                    }
 
                     {/* Modal Buttons */}
                     <View style={styles.modalButtons}>
@@ -1175,8 +1250,10 @@ export default function ActionsScreen() {
                         </View>
                       </TouchableOpacity>
                     </View>
+
                   </>
                 )}
+
               </View>
             </TouchableWithoutFeedback>
           </View>

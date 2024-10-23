@@ -1,17 +1,22 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Item } from './ItemEquipmentContext'; // Assuming you have an Item interface defined here.
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import weapons from '../data/weapons.json';
 
 interface CharacterContextProps {
     mainHandWeapon: Item | null;
     offHandWeapon: Item | null;
     equipWeapon: (slot: 'mainHand' | 'offHand', weapon: Item | null) => void;
+    getWeaponDamage: (weapon: Item) => string;
+    getWeaponSkillModifiers: (weapon: Item) => string[];
 }
 
 export const CharacterContext = createContext<CharacterContextProps>({
     mainHandWeapon: null,
     offHandWeapon: null,
     equipWeapon: () => { },
+    getWeaponDamage: () => '1',
+    getWeaponSkillModifiers: () => [],
 });
 
 export const CharacterProvider = ({ children }: { children: ReactNode }) => {
@@ -63,9 +68,20 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const getWeaponDamage = (weapon: Item) => {
+        const weaponData = weapons.weapons.find(w => w.items.find(i => i.name === weapon.name));
+        const weaponItem = weaponData?.items.find(i => i.name === weapon.name);
+        return weaponItem?.damage || '1';
+    };
+
+    const getWeaponSkillModifiers = (weapon: Item) => {
+        const weaponData = weapons.weapons.find(w => w.items.find(i => i.name === weapon.name));
+        const weaponItem = weaponData?.items.find(i => i.name === weapon.name);
+        return weaponItem?.skill_modifiers || [];
+    };
 
     return (
-        <CharacterContext.Provider value={{ mainHandWeapon, offHandWeapon, equipWeapon }}>
+        <CharacterContext.Provider value={{ mainHandWeapon, offHandWeapon, equipWeapon, getWeaponDamage, getWeaponSkillModifiers }}>
             {children}
         </CharacterContext.Provider>
     );

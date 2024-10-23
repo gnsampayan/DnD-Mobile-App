@@ -1,6 +1,5 @@
 {
   "weapons": [
-    
     {
       "category": "Simple Melee",
       "items": [
@@ -10,7 +9,8 @@
           "damage": "1d4",
           "damageType": "bludgeoning",
           "weight": "2 lb.",
-          "properties": ["Light"]
+          "properties": ["Light"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Dagger",
@@ -18,7 +18,9 @@
           "damage": "1d4",
           "damageType": "piercing",
           "weight": "1 lb.",
-          "properties": ["Finesse", "Light", "Thrown (range 20/60)"]
+          "properties": ["Finesse", "Thrown", "Light"],
+          "throwRange": "20/60",
+          "skill_modifiers": ["Strength", "Dexterity"]
         },
         {
           "name": "Greatclub",
@@ -26,7 +28,8 @@
           "damage": "1d8",
           "damageType": "bludgeoning",
           "weight": "10 lb.",
-          "properties": ["Two-handed"]
+          "properties": ["Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Handaxe",
@@ -34,7 +37,9 @@
           "damage": "1d6",
           "damageType": "slashing",
           "weight": "2 lb.",
-          "properties": ["Light", "Thrown (range 20/60)"]
+          "properties": ["Light", "Thrown"],
+          "throwRange": "20/60",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Javelin",
@@ -42,7 +47,9 @@
           "damage": "1d6",
           "damageType": "piercing",
           "weight": "2 lb.",
-          "properties": ["Thrown (range 30/120)"]
+          "properties": ["Thrown"],
+          "throwRange": "30/120",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Hammer, Light",
@@ -50,7 +57,9 @@
           "damage": "1d4",
           "damageType": "bludgeoning",
           "weight": "2 lb.",
-          "properties": ["Light", "Thrown (range 20/60)"]
+          "properties": ["Light", "Thrown"],
+          "throwRange": "20/60",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Mace",
@@ -58,7 +67,8 @@
           "damage": "1d6",
           "damageType": "bludgeoning",
           "weight": "4 lb.",
-          "properties": []
+          "properties": [],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Quarterstaff",
@@ -66,7 +76,9 @@
           "damage": "1d6",
           "damageType": "bludgeoning",
           "weight": "4 lb.",
-          "properties": ["Versatile (1d8)"]
+          "properties": ["Versatile"],
+          "versatileDamage": "1d8",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Sickle",
@@ -74,7 +86,8 @@
           "damage": "1d4",
           "damageType": "slashing",
           "weight": "2 lb.",
-          "properties": ["Light"]
+          "properties": ["Light"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Spear",
@@ -82,7 +95,10 @@
           "damage": "1d6",
           "damageType": "piercing",
           "weight": "3 lb.",
-          "properties": ["Thrown (range 20/60)", "Versatile (1d8)"]
+          "properties": ["Thrown", "Versatile"],
+          "throwRange": "20/60",
+          "versatileDamage": "1d8",
+          "skill_modifiers": ["Strength"]
         }
       ]
     },
@@ -95,7 +111,9 @@
           "damage": "1d8",
           "damageType": "piercing",
           "weight": "5 lb.",
-          "properties": ["Ammunition (range 80/320)", "Loading", "Two-handed"]
+          "properties": ["Ammunition", "Loading", "Two-handed"],
+          "range": "80/320",
+          "skill_modifiers": ["Dexterity"]
         },
         {
           "name": "Dart",
@@ -103,7 +121,9 @@
           "damage": "1d4",
           "damageType": "piercing",
           "weight": "1/4 lb.",
-          "properties": ["Finesse", "Thrown (range 20/60)"]
+          "properties": ["Finesse", "Thrown"],
+          "throwRange": "20/60",
+          "skill_modifiers": ["Strength", "Dexterity"]
         },
         {
           "name": "Shortbow",
@@ -111,7 +131,9 @@
           "damage": "1d6",
           "damageType": "piercing",
           "weight": "2 lb.",
-          "properties": ["Ammunition (range 80/320)", "Two-handed"]
+          "properties": ["Ammunition", "Two-handed"],
+          "range": "80/320",
+          "skill_modifiers": ["Dexterity"]
         },
         {
           "name": "Sling",
@@ -119,7 +141,9 @@
           "damage": "1d4",
           "damageType": "bludgeoning",
           "weight": "—",
-          "properties": ["Ammunition (range 30/120)"]
+          "properties": ["Ammunition"],
+          "range": "30/120",
+          "skill_modifiers": ["Dexterity"]
         }
       ]
     },
@@ -132,7 +156,9 @@
           "damage": "1d8",
           "damageType": "slashing",
           "weight": "4 lb.",
-          "properties": ["Versatile (1d10)"]
+          "properties": ["Versatile"],
+          "versatileDamage": "1d10",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Flail",
@@ -140,7 +166,8 @@
           "damage": "1d8",
           "damageType": "bludgeoning",
           "weight": "2 lb.",
-          "properties": []
+          "properties": [],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Glaive",
@@ -148,7 +175,8 @@
           "damage": "1d10",
           "damageType": "slashing",
           "weight": "6 lb.",
-          "properties": ["Heavy", "Reach", "Two-handed"]
+          "properties": ["Heavy", "Reach", "Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Greataxe",
@@ -156,7 +184,8 @@
           "damage": "1d12",
           "damageType": "slashing",
           "weight": "7 lb.",
-          "properties": ["Heavy", "Two-handed"]
+          "properties": ["Heavy", "Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Greatsword",
@@ -164,7 +193,8 @@
           "damage": "2d6",
           "damageType": "slashing",
           "weight": "6 lb.",
-          "properties": ["Heavy", "Two-handed"]
+          "properties": ["Heavy", "Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Halberd",
@@ -172,7 +202,8 @@
           "damage": "1d10",
           "damageType": "slashing",
           "weight": "6 lb.",
-          "properties": ["Heavy", "Reach", "Two-handed"]
+          "properties": ["Heavy", "Reach", "Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Lance",
@@ -180,7 +211,8 @@
           "damage": "1d12",
           "damageType": "piercing",
           "weight": "6 lb.",
-          "properties": ["Reach", "Special"]
+          "properties": ["Reach", "Special"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Longsword",
@@ -188,7 +220,9 @@
           "damage": "1d8",
           "damageType": "slashing",
           "weight": "3 lb.",
-          "properties": ["Versatile (1d10)"]
+          "properties": ["Versatile"],
+          "versatileDamage": "1d10",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Maul",
@@ -196,7 +230,8 @@
           "damage": "2d6",
           "damageType": "bludgeoning",
           "weight": "10 lb.",
-          "properties": ["Heavy", "Two-handed"]
+          "properties": ["Heavy", "Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Morningstar",
@@ -204,7 +239,8 @@
           "damage": "1d8",
           "damageType": "piercing",
           "weight": "4 lb.",
-          "properties": []
+          "properties": [],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Pike",
@@ -212,7 +248,8 @@
           "damage": "1d10",
           "damageType": "piercing",
           "weight": "18 lb.",
-          "properties": ["Heavy", "Reach", "Two-handed"]
+          "properties": ["Heavy", "Reach", "Two-handed"],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Rapier",
@@ -220,7 +257,8 @@
           "damage": "1d8",
           "damageType": "piercing",
           "weight": "2 lb.",
-          "properties": ["Finesse"]
+          "properties": ["Finesse"],
+          "skill_modifiers": ["Strength", "Dexterity"]
         },
         {
           "name": "Scimitar",
@@ -228,7 +266,8 @@
           "damage": "1d6",
           "damageType": "slashing",
           "weight": "3 lb.",
-          "properties": ["Finesse", "Light"]
+          "properties": ["Finesse", "Light"],
+          "skill_modifiers": ["Strength", "Dexterity"]
         },
         {
           "name": "Shortsword",
@@ -236,7 +275,8 @@
           "damage": "1d6",
           "damageType": "piercing",
           "weight": "2 lb.",
-          "properties": ["Finesse", "Light"]
+          "properties": ["Finesse", "Light"],
+          "skill_modifiers": ["Strength", "Dexterity"]
         },
         {
           "name": "Trident",
@@ -244,7 +284,10 @@
           "damage": "1d6",
           "damageType": "piercing",
           "weight": "4 lb.",
-          "properties": ["Thrown (range 20/60)", "Versatile (1d8)"]
+          "properties": ["Thrown", "Versatile"],
+          "throwRange": "20/60",
+          "versatileDamage": "1d8",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "War pick",
@@ -252,7 +295,8 @@
           "damage": "1d8",
           "damageType": "piercing",
           "weight": "2 lb.",
-          "properties": []
+          "properties": [],
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Warhammer",
@@ -260,7 +304,9 @@
           "damage": "1d8",
           "damageType": "bludgeoning",
           "weight": "2 lb.",
-          "properties": ["Versatile (1d10)"]
+          "properties": ["Versatile"],
+          "versatileDamage": "1d10",
+          "skill_modifiers": ["Strength"]
         },
         {
           "name": "Whip",
@@ -268,7 +314,8 @@
           "damage": "1d4",
           "damageType": "slashing",
           "weight": "3 lb.",
-          "properties": ["Finesse", "Reach"]
+          "properties": ["Finesse", "Reach"],
+          "skill_modifiers": ["Strength", "Dexterity"]
         }
       ]
     },
@@ -281,7 +328,9 @@
           "damage": "1",
           "damageType": "piercing",
           "weight": "1 lb.",
-          "properties": ["Ammunition (range 25/100)", "Loading"]
+          "properties": ["Ammunition", "Loading"],
+          "range": "25/100",
+          "skill_modifiers": ["Dexterity"]
         },
         {
           "name": "Crossbow, hand",
@@ -289,7 +338,9 @@
           "damage": "1d6",
           "damageType": "piercing",
           "weight": "3 lb.",
-          "properties": ["Ammunition (range 30/120)", "Light", "Loading"]
+          "properties": ["Ammunition", "Light", "Loading"],
+          "range": "30/120",
+          "skill_modifiers": ["Dexterity"]
         },
         {
           "name": "Crossbow, heavy",
@@ -297,7 +348,9 @@
           "damage": "1d10",
           "damageType": "piercing",
           "weight": "18 lb.",
-          "properties": ["Ammunition (range 100/400)", "Heavy", "Loading", "Two-handed"]
+          "properties": ["Ammunition", "Heavy", "Loading", "Two-handed"],
+          "range": "100/400",
+          "skill_modifiers": ["Dexterity"]
         },
         {
           "name": "Longbow",
@@ -305,14 +358,18 @@
           "damage": "1d8",
           "damageType": "piercing",
           "weight": "2 lb.",
-          "properties": ["Ammunition (range 150/600)", "Heavy", "Two-handed"]
+          "properties": ["Ammunition", "Heavy", "Two-handed"],
+          "range": "150/600",
+          "skill_modifiers": ["Dexterity"]
         },
         {
           "name": "Net",
           "cost": "1 gp",
           "damage": "—",
           "weight": "3 lb.",
-          "properties": ["Special", "Thrown (range 5/15)"]
+          "properties": ["Special", "Thrown"],
+          "throwRange": "5/15",
+          "skill_modifiers": ["Dexterity"]
         }
       ]
     }
