@@ -4,7 +4,6 @@ import {
     Text,
     TouchableOpacity,
     Modal,
-    TextInput,
     TouchableWithoutFeedback,
     Keyboard,
     Image,
@@ -426,15 +425,21 @@ export default function MeScreen() {
         // Unequip Two-handed weapon if any slot has it equipped
         if (isTwoHandedEquipped) {
             equipWeapon('mainHand', null);
+            setMainHandValue('none');
             equipWeapon('offHand', null);
+            setOffHandValue('none');
             equipWeapon('rangedHand', null);
+            setRangedHandValue('none');
         }
 
         // Check if the weapon has the "Two-handed" property
         if (weaponItem?.properties?.includes("Two-handed")) {
             equipWeapon('mainHand', null);
+            setMainHandValue('none');
             equipWeapon('offHand', null);
+            setOffHandValue('none');
             equipWeapon('rangedHand', null);
+            setRangedHandValue('none');
         }
 
         equipWeapon(slot, weapon);

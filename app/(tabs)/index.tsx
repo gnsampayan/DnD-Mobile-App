@@ -21,9 +21,9 @@ import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
 import { CharacterContext } from '../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
-import skillsData from '../data/skills.json';
 import StatsDataContext from '../context/StatsDataContext';
 
+import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
 import defaultDisengageImage from '@actions/default-disengage-image.png';
 import defaultRangedAttackImage from '@actions/default-ranged-attack-image.png';
 import defaultUnarmedAttackImage from '@actions/default-unarmed-attack-image.png';
@@ -39,6 +39,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Item } from '../context/ItemEquipmentContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
+
+
 // Define the base Action interface
 interface BaseAction {
   id: string;
@@ -99,7 +101,9 @@ interface CustomActionBlock extends BaseAction {
 // Create a union type for Action
 type ActionBlock = DefaultActionBlock | CustomActionBlock;
 
-
+// Change later to check if character has the Two-Weapon Fighting class feature
+const isTwoWeaponFightingProficient = false;
+const isUnarmedStrikeProficient = false;
 
 
 export default function ActionsScreen() {
@@ -132,9 +136,10 @@ export default function ActionsScreen() {
   const [currentBonusActionsAvailable, setCurrentBonusActionsAvailable] = useState<number>(1);
 
   // Change later to check if character main weapon state is equipped
-  const { mainHandWeapon, rangedHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
+  const { mainHandWeapon, rangedHandWeapon, offHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
     mainHandWeapon: Item | null,
     rangedHandWeapon: Item | null,
+    offHandWeapon: Item | null,
     getWeaponDamage: (weapon: Item) => string,
     getWeaponSkillModifiers: (weapon: Item) => string[]
   };
@@ -149,7 +154,7 @@ export default function ActionsScreen() {
   const defaultActions: ActionBlock[] = [
     { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '1', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
-    { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 0, bonus: 1 }, image: defaultHideImage },
     { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
     {
       id: '4', name: 'Shove',
@@ -158,8 +163,9 @@ export default function ActionsScreen() {
       image: defaultPushImage
     },
     { id: '5', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
-    { id: '6', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
-    { id: '7', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+    { id: '6', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
+    { id: '7', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
+    { id: '8', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
 
   ];
 
@@ -659,6 +665,7 @@ export default function ActionsScreen() {
   const windowWidth = Dimensions.get('window').width;
   const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns; // 20 for horizontal padding, 10 for gap between items
 
+  // Render Action Blocks
   const renderActionBlocks = ({ item }: { item: ActionBlock | null }) => {
     if (item) {
       const affordable =
@@ -666,14 +673,29 @@ export default function ActionsScreen() {
         currentBonusActionsAvailable >= item.cost.bonus;
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
+      const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
+      const offHandWeaponEquipped = offHandWeapon && offHandWeapon.name.toLowerCase() !== 'none';
 
       return (
         <ImageBackground
           source={getActionImage(item) as ImageSourcePropType}
           style={[
             styles.itemContainer,
-            { width: itemWidth, opacity: affordable ? (isRangedAttack && !rangedHandWeaponEquipped ? 0.2 : 1) : 0.2 }
+            {
+              width: itemWidth, opacity: affordable ?
+                (isRangedAttack && !rangedHandWeaponEquipped ?
+                  0.2
+                  :
+                  (isOffhandAttack && !offHandWeaponEquipped ?
+                    0.2
+                    :
+                    1
+                  )
+                )
+                :
+                0.2
+            }
           ]}
           imageStyle={{ borderRadius: 8 }}
         >
@@ -684,7 +706,7 @@ export default function ActionsScreen() {
               setActionModalVisible(true);
             }}
             onLongPress={() => handleLongPress(item.id)}
-            disabled={!affordable || (isRangedAttack && !rangedHandWeaponEquipped)}
+            disabled={!affordable || (isRangedAttack && !rangedHandWeaponEquipped) || (isOffhandAttack && !offHandWeaponEquipped)}
           >
             {!item.image && (
               <View style={styles.itemTextContainer}>
@@ -1221,7 +1243,17 @@ export default function ActionsScreen() {
 
                         {/* Shove Success Requirement Legend */}
                         {(selectedAction.name === 'Shove') && (
-                          <View style={{ flexDirection: 'row', gap: 5, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'black', borderRadius: 5, padding: 5 }}>
+                          <View style={{
+                            flexDirection: 'row',
+                            gap: 5,
+                            alignSelf: 'flex-start',
+                            borderWidth: 1,
+                            borderColor: 'black',
+                            borderRadius: 5,
+                            padding: 5,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}>
                             <Ionicons name="dice" size={20} color="black" />
                             <Text>{' > '}</Text>
                             <Ionicons name="dice-outline" size={20} color="black" />
@@ -1229,7 +1261,6 @@ export default function ActionsScreen() {
                             <Ionicons name="checkmark" size={20} color="black" />
                           </View>
                         )}
-
 
                       </View>
                     </View>
@@ -1338,7 +1369,25 @@ export default function ActionsScreen() {
                             </View>
                           </>
                         ) : (
-                          <Text>1+({currentStrengthModifier} Str)</Text>
+                          <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
+                            <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                              <Ionicons name={isUnarmedStrikeProficient ? "dice" : "dice-outline"} size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <Text>+({currentStrengthModifier} Str) or +({currentDexModifier} Dex)</Text>
+                                {isUnarmedStrikeProficient &&
+                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                    <Text>+{proficiencyBonus}</Text>
+                                    <Ionicons name="ribbon" size={16} color="black" />
+                                  </View>
+                                }
+                              </View>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Ionicons name="flash" size={20} color="black" />
+                              <Text>1+({currentStrengthModifier} Str)</Text>
+                            </View>
+                          </View>
+
                         )}
                       </>
                     }
@@ -1437,6 +1486,53 @@ export default function ActionsScreen() {
                           </View>
                           <Text>(Athle) or (Acrob)</Text>
                         </View>
+                      </View>
+                    )}
+
+                    {/* Offhand Attack Details */}
+                    {(selectedAction.name === 'Offhand Attack') && (
+                      <View>
+                        {offHandWeapon && offHandWeapon.name !== 'none' ? (
+                          <>
+                            {/* Modifiers Row */}
+                            <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
+                              <Ionicons name="dice" size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponSkillModifiers(offHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                                  {getWeaponSkillModifiers(offHandWeapon).includes("Strength") &&
+                                    getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") &&
+                                    <Text> or </Text>}
+                                  {getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                  <Text>+{proficiencyBonus}</Text>
+                                  <Ionicons name="ribbon" size={16} color="black" />
+                                </View>
+                              </View>
+                            </View>
+                            {/* Damage Row */}
+                            <View style={styles.modalWeaponProperty}>
+                              <Ionicons name="flash-outline" size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <Text>
+                                  {getWeaponDamage(offHandWeapon)}
+                                </Text>
+                                {isTwoWeaponFightingProficient &&
+                                  <View style={{ flexDirection: 'row' }}>
+                                    {getWeaponSkillModifiers(offHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                                    {getWeaponSkillModifiers(offHandWeapon).includes("Strength") &&
+                                      getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") &&
+                                      <Text> or </Text>}
+                                    {getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                  </View>
+                                }
+                              </View>
+                            </View>
+                          </>
+                        ) : (
+                          <Text>No Offhand Weapon Equipped</Text>
+                        )}
                       </View>
                     )}
 

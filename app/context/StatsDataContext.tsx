@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import classData from '../data/classData.json';
 
 // Define interfaces for statsData
 interface Ability {
@@ -31,6 +32,7 @@ interface StatsData {
 interface StatsDataContextProps {
     statsData: StatsData;
     updateStatsData: (data: Partial<StatsData>) => void;
+    isSpellCaster: boolean;
 }
 
 // Define initial abilities
@@ -61,11 +63,13 @@ const initialStatsData: StatsData = {
 const StatsDataContext = createContext<StatsDataContextProps>({
     statsData: initialStatsData,
     updateStatsData: () => { },
+    isSpellCaster: false,
 });
 
 // Create provider component
 export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [statsData, setStatsData] = useState<StatsData>(initialStatsData);
+    const [isSpellCaster, setIsSpellCaster] = useState(false);
 
     // Load statsData from AsyncStorage
     const loadStatsData = async () => {
@@ -101,14 +105,27 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         });
     };
 
+    // Get the class object and set the isSpellCaster state
+    const handleSpellCaster = () => {
+        const classValue = statsData.class?.toLowerCase();
+        const classObject = classData.find((c) => c.value.toLowerCase() === classValue);
+        const isSpellCaster = classObject ? classObject.spellcaster : false;
+        setIsSpellCaster(isSpellCaster);
+    }
+
     // Load statsData on mount
     useEffect(() => {
         loadStatsData();
     }, []);
 
+    // Set the isSpellCaster state based on the class
+    useEffect(() => {
+        handleSpellCaster();
+    }, [statsData.class]);
+
 
     return (
-        <StatsDataContext.Provider value={{ statsData, updateStatsData }}>
+        <StatsDataContext.Provider value={{ statsData, updateStatsData, isSpellCaster }}>
             {children}
         </StatsDataContext.Provider>
     );
