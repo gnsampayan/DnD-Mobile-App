@@ -34,7 +34,7 @@ import defaultRangedWeaponImage from '@equipment/default-ranged.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
-import { CharacterContext } from '../context/equipmentActionsContext';
+import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
 
 interface EquipmentItem {
     id: string;
@@ -102,17 +102,19 @@ export default function MeScreen() {
     // State variables for weapon modals
     const [mainHandModalVisible, setMainHandModalVisible] = useState(false);
     const [offHandModalVisible, setOffHandModalVisible] = useState(false);
-
+    const [rangedHandModalVisible, setRangedHandModalVisible] = useState(false);
 
     // State variables for DropDownPicker for each slot
     const [openMainHandPicker, setOpenMainHandPicker] = useState(false);
     const [openOffHandPicker, setOpenOffHandPicker] = useState(false);
+    const [openRangedHandPicker, setOpenRangedHandPicker] = useState(false);
 
     // Items and weapons
-    const { mainHandWeapon, offHandWeapon, equipWeapon } = useContext(CharacterContext) as {
+    const { mainHandWeapon, offHandWeapon, rangedHandWeapon, equipWeapon } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
-        equipWeapon: (slot: 'mainHand' | 'offHand', weapon: Item | null) => void;
+        rangedHandWeapon: Item | null;
+        equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
     };
     const { items } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
@@ -120,6 +122,7 @@ export default function MeScreen() {
     // Local state variables for DropDownPicker values
     const [mainHandValue, setMainHandValue] = useState<string>(mainHandWeapon?.name || 'none');
     const [offHandValue, setOffHandValue] = useState<string>(offHandWeapon?.name || 'none');
+    const [rangedHandValue, setRangedHandValue] = useState<string>(rangedHandWeapon?.name || 'none');
 
 
     // Update weapons whenever items change
@@ -386,15 +389,16 @@ export default function MeScreen() {
     };
 
     // Function to handle equipping a weapon
-    const handleEquipWeapon = (slot: 'mainHand' | 'offHand', weaponName: string | null) => {
+    const handleEquipWeapon = (slot: WeaponSlot, weaponName: string | null) => {
         if (!weaponName) return;
 
         // Handle 'None' selection
         if (weaponName === 'none' || weaponName === null) {
             equipWeapon(slot, null);
-            console.log(`No weapon equipped in ${slot === 'mainHand' ? 'Main Hand' : 'Offhand'}`);
+            console.log(`No weapon equipped in ${slot === 'mainHand' ? 'Main Hand' : slot === 'offHand' ? 'Offhand' : 'Ranged Hand'}`);
             return;
         }
+
         // Find the selected weapon item
         const weapon = items.find((item) => item.name.toLowerCase() === weaponName.toLowerCase() && item.type === 'Weapon');
 
@@ -403,15 +407,42 @@ export default function MeScreen() {
             return;
         }
 
-        // Check if the weapon is already equipped in the other slot
-        if (slot === 'mainHand' && offHandWeapon?.id === weapon.id) {
-            equipWeapon('offHand', null);
-        } else if (slot === 'offHand' && mainHandWeapon?.id === weapon.id) {
+        // Load weapon data
+        const weaponData = require('../data/weapons.json');
+        const weaponCategory = weaponData.weapons.find((category: { items: Item[] }) =>
+            category.items.some((item: Item) => item.name.toLowerCase() === weapon.name.toLowerCase())
+        );
+        const weaponItem = weaponCategory?.items.find((item: Item) => item.name.toLowerCase() === weapon.name.toLowerCase());
+
+        // Check if any slot has a Two-handed weapon equipped
+        const isTwoHandedEquipped = (mainHandWeapon && weaponData.weapons.some((category: { items: Item[] }) =>
+            category.items.some((item: Item) => item.name.toLowerCase() === mainHandWeapon.name.toLowerCase() && item.properties?.includes("Two-handed"))
+        )) || (offHandWeapon && weaponData.weapons.some((category: { items: Item[] }) =>
+            category.items.some((item: Item) => item.name.toLowerCase() === offHandWeapon.name.toLowerCase() && item.properties?.includes("Two-handed"))
+        )) || (rangedHandWeapon && weaponData.weapons.some((category: { items: Item[] }) =>
+            category.items.some((item: Item) => item.name.toLowerCase() === rangedHandWeapon.name.toLowerCase() && item.properties?.includes("Two-handed"))
+        ));
+
+        // Unequip Two-handed weapon if any slot has it equipped
+        if (isTwoHandedEquipped) {
             equipWeapon('mainHand', null);
+            equipWeapon('offHand', null);
+            equipWeapon('rangedHand', null);
+        }
+
+        // Check if the weapon has the "Two-handed" property
+        if (weaponItem?.properties?.includes("Two-handed")) {
+            equipWeapon('mainHand', null);
+            equipWeapon('offHand', null);
+            equipWeapon('rangedHand', null);
         }
 
         equipWeapon(slot, weapon);
-        console.log(`${weapon.name} is equipped in ${slot === 'mainHand' ? 'Main Hand' : 'Offhand'}`);
+        if (slot === 'rangedHand') {
+            console.log(`${weapon.name} is equipped in Ranged Hand`);
+        } else {
+            console.log(`${weapon.name} is equipped in ${slot === 'mainHand' ? 'Main Hand' : 'Offhand'}`);
+        }
     };
 
 
@@ -438,6 +469,68 @@ export default function MeScreen() {
         }
     };
 
+    const handleRangedHandValueChange = (value: string | null) => {
+        if (value === 'none' || !value) {
+            equipWeapon('rangedHand', null);
+        } else {
+            const weapon = items.find((item) => item.name === value && item.type === 'Weapon');
+            if (weapon) {
+                equipWeapon('rangedHand', weapon);
+            }
+        }
+    };
+    const filterEquipableRangedWeapons = () => {
+        const rangedCategories = ["Simple Ranged", "Martial Ranged"];
+        const weaponData = require('../data/weapons.json');
+
+        // Get the items created by the user in the bag
+        const userItems = items.filter((item) => item.type === 'Weapon');
+
+        // Filter the user items by checking if they belong to the ranged categories
+        return [
+            { label: 'None', value: 'none' },
+            ...userItems
+                .filter((userItem) =>
+                    weaponData.weapons.some((category: { category: string; items: Item[] }) =>
+                        rangedCategories.includes(category.category) &&
+                        category.items.some((weapon) => weapon.name.toLowerCase() === userItem.name.toLowerCase())
+                    )
+                )
+                .map((item) => ({ label: item.name, value: item.name.toLowerCase() }))
+        ];
+    };
+    const filterEquipableMeleeWeapons = () => {
+        const meleeCategories = ["Simple Melee", "Martial Melee"];
+        const weaponData = require('../data/weapons.json');
+
+        // Get the items created by the user in the bag
+        const userItems = items.filter((item) => item.type === 'Weapon');
+        return [
+            { label: 'None', value: 'none' },
+            ...userItems
+                .filter((userItem) =>
+                    weaponData.weapons.some((category: { category: string; items: Item[] }) =>
+                        meleeCategories.includes(category.category) &&
+                        category.items.some((weapon) => weapon.name.toLowerCase() === userItem.name.toLowerCase())
+                    )
+                )
+                .map((item) => ({ label: item.name, value: item.name.toLowerCase() }))
+        ];
+    }
+
+    const filterEquipableOffhandWeapons = () => {
+        const meleeWeapons = filterEquipableMeleeWeapons();
+        const weaponData = require('../data/weapons.json');
+
+        // Filter the melee weapons to only include those with the "Light" property
+        return meleeWeapons.filter((weapon) => {
+            if (weapon.value === 'none') return true; // Keep the 'None' option
+            const weaponDetails = weaponData.weapons
+                .flatMap((category: { category: string; items: Item[] }) => category.items)
+                .find((item: Item) => item.name.toLowerCase() === weapon.value);
+            return weaponDetails && weaponDetails.properties?.includes("Light");
+        });
+    }
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
@@ -615,17 +708,34 @@ export default function MeScreen() {
                     .map((item) => (
                         <TouchableOpacity
                             key={item.id}
-                            style={[styles.weapon, !mainHandWeapon?.name ? { padding: 15 } : {}]}
-                            onPress={() => { }}
+                            style={[styles.weapon, !rangedHandWeapon?.name ? { padding: 15 } : {}]}
+                            onPress={() => { setRangedHandModalVisible(true) }}
                         >
-                            <ImageBackground
-                                source={
-                                    item.customImageUri ? { uri: item.customImageUri } : item.defaultImage
-                                }
-                                style={styles.equipmentItemImage}
-                            >
-                                {/* Optional: Add overlay or text */}
-                            </ImageBackground>
+                            {rangedHandWeapon?.name && rangedHandWeapon?.name !== 'none' ? (
+                                (() => {
+                                    const weapon = weapons.find((w) => w.value === rangedHandWeapon.name.toLowerCase());
+                                    if (weapon && weapon.image && weapon.image !== '') {
+                                        return (
+                                            <ImageBackground
+                                                source={{ uri: weapon.image }}
+                                                style={styles.equipmentItemImage}
+                                            />
+                                        );
+                                    } else {
+                                        return <Text style={{
+                                            color: 'white',
+                                            fontSize: 16,
+                                            marginTop: 10,
+                                            marginLeft: 10
+                                        }}>{weapon?.label}</Text>;
+                                    }
+                                })()
+                            ) : (
+                                <ImageBackground
+                                    source={equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
+                                    style={styles.equipmentItemImage}
+                                />
+                            )}
                         </TouchableOpacity>
                     ))}
             </View>
@@ -749,14 +859,18 @@ export default function MeScreen() {
             {/* Weapon Modal */}
             {/* Main Hand Weapon Modal */}
             <Modal animationType="fade" transparent={true} visible={mainHandModalVisible}>
-                <TouchableWithoutFeedback onPress={() => setMainHandModalVisible(false)}>
+                <TouchableWithoutFeedback onPress={() => {
+                    setMainHandModalVisible(false);
+                    setMainHandValue('none');
+                    setOpenMainHandPicker(false);
+                }}>
                     <View style={styles.modalOverlay}>
-                        <View style={styles.modalContainer}>
+                        <View style={styles.modalContainer} >
                             <Text>Select Main Hand Weapon</Text>
                             <DropDownPicker
                                 open={openMainHandPicker}
                                 value={mainHandValue}
-                                items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
+                                items={filterEquipableMeleeWeapons()}
                                 setOpen={setOpenMainHandPicker}
                                 setValue={setMainHandValue}
                                 onChangeValue={handleMainHandValueChange}
@@ -788,14 +902,18 @@ export default function MeScreen() {
 
             {/* Offhand Weapon Modal */}
             <Modal animationType="fade" transparent={true} visible={offHandModalVisible}>
-                <TouchableWithoutFeedback onPress={() => setOffHandModalVisible(false)}>
+                <TouchableWithoutFeedback onPress={() => {
+                    setOffHandModalVisible(false);
+                    setOffHandValue('none');
+                    setOpenOffHandPicker(false);
+                }}>
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContainer}>
                             <Text>Select Offhand Weapon</Text>
                             <DropDownPicker
                                 open={openOffHandPicker}
                                 value={offHandValue}
-                                items={weapons.map((weapon) => ({ label: weapon.label, value: weapon.value }))}
+                                items={filterEquipableOffhandWeapons()}
                                 setOpen={setOpenOffHandPicker}
                                 setValue={setOffHandValue}
                                 onChangeValue={handleOffHandValueChange}
@@ -824,7 +942,47 @@ export default function MeScreen() {
                 </TouchableWithoutFeedback>
             </Modal>
 
-
+            {/* Ranged Hand Weapon Modal */}
+            <Modal animationType="fade" transparent={true} visible={rangedHandModalVisible}>
+                <TouchableWithoutFeedback onPress={() => {
+                    setRangedHandModalVisible(false);
+                    setRangedHandValue('none');
+                    setOpenRangedHandPicker(false);
+                }}>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContainer}>
+                            <Text>Select Ranged Hand Weapon</Text>
+                            <DropDownPicker
+                                open={openRangedHandPicker}
+                                value={rangedHandValue}
+                                items={filterEquipableRangedWeapons()}
+                                setOpen={setOpenRangedHandPicker}
+                                setValue={setRangedHandValue}
+                                onChangeValue={handleRangedHandValueChange}
+                                placeholder="Select a weapon"
+                                containerStyle={{ height: 40, width: '100%' }}
+                                style={{ backgroundColor: '#fafafa' }}
+                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                            />
+                            <TouchableOpacity
+                                style={{
+                                    padding: 10,
+                                    backgroundColor: 'lightblue',
+                                    borderRadius: 8,
+                                    marginTop: 10,
+                                    alignSelf: 'center',
+                                }}
+                                onPress={() => {
+                                    handleEquipWeapon('rangedHand', rangedHandValue);
+                                    setRangedHandModalVisible(false);
+                                }}
+                            >
+                                <Text>Equip Weapon</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </View>
     );
 }

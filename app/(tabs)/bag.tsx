@@ -38,9 +38,9 @@ interface BaseItem {
   id: string;
   name: string;
   quantity: number;
-  image?: string; // Optional image property
-  details?: string; // **Add the details property**
-  type?: string; // **Add the type property**
+  image?: string;
+  details?: string;
+  type?: string;
 }
 
 

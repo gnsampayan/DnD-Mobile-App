@@ -9,6 +9,7 @@ export interface Item {
     image?: string;
     details?: string;
     type?: string;
+    properties?: string[];
 }
 
 

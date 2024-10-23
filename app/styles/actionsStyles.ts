@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
       backgroundColor: 'white',
       borderRadius: 8,
       padding: 20,
+      position: 'relative',
     },
     // Modal title
     modalTitle: {
@@ -142,12 +143,12 @@ const styles = StyleSheet.create({
     modalButtons: {
       flexDirection: 'row',
       justifyContent: 'center',
+      alignItems: 'center',
       paddingTop: 20,
       gap: 10,
     },
     // Modal cancel button
     modalButtonCommit: {
-      marginRight: 10,
       backgroundColor: 'rgba(0, 122, 255, 0.1)', // #007AFF with 10% opacity
       borderColor: '#007AFF',
       borderWidth: 2,
@@ -202,6 +203,7 @@ const styles = StyleSheet.create({
     modalButtonTextContainer: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'center',
     },
     modalButtonText: {
       color: 'white',
@@ -253,17 +255,14 @@ const styles = StyleSheet.create({
       borderRadius: 8,
     },
     itemModalImageContainer: {
-      aspectRatio: 1,
       borderRadius: 8,
-      width: '100%',
-      padding: 10,
       alignItems: 'center',
+      justifyContent: 'center',
     },
     itemModalImage: {
-      width: '100%',
-      height: undefined,
-      aspectRatio: 1,
-      resizeMode: 'contain',
+      width: 100,
+      height: 100,
+      resizeMode: 'cover',
       borderRadius: 8,
       alignSelf: 'center',
       marginBottom: 20,
@@ -312,7 +311,7 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       margin: 5,
       overflow: 'hidden',
-      
+      flex: 1,
     },  
     footerButton: {
       flexDirection: 'row',
@@ -429,18 +428,14 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     replenishContainer: {
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
       borderWidth: 2,
       borderStyle: 'solid',
       borderRadius: 8,
       aspectRatio: 1,
-      flex: 1,
       borderColor: 'white',
-      overflow: 'hidden',
-      padding: 5,
-      gap: 5,
+      padding: 10,
+      marginLeft: 5,
+      backgroundColor: 'black',
     },
     hpContainer: {
       flexDirection: 'row',
@@ -464,16 +459,13 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(255, 0, 0, 0.3)',
     },
     hpTextContainer: {
-      position: 'absolute',
-      left: 5,
-      top: 2,
-      width: '100%',
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
+      marginHorizontal: 5,
     },
     hpBarContainer: {
-      width: '100%',
+      flex: 1,
       alignItems: 'center',
       marginVertical: 10,
     },
@@ -482,22 +474,19 @@ const styles = StyleSheet.create({
       flexWrap: 'nowrap',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingLeft: 5,
-      paddingRight: 5,
+      marginHorizontal: 5,
     },
     hpUnit: {
       height: 10,
       flex: 1,
-      margin: 1,
-      borderWidth: 1,
-      borderColor: 'black',
-      borderRadius: 2,
+      borderRadius: 4,
     },
     modalWeaponProperty: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       width: '100%',
+      padding: 5,
     },
   });
 

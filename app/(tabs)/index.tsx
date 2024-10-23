@@ -13,7 +13,6 @@ import {
   ImageBackground,
   ImageSourcePropType,
   Dimensions,
-  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -22,7 +21,10 @@ import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
 import { CharacterContext } from '../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
+import skillsData from '../data/skills.json';
+import StatsDataContext from '../context/StatsDataContext';
 
+import defaultDisengageImage from '@actions/default-disengage-image.png';
 import defaultRangedAttackImage from '@actions/default-ranged-attack-image.png';
 import defaultUnarmedAttackImage from '@actions/default-unarmed-attack-image.png';
 import defaultAttackImage from '@actions/default-attack-image.png';
@@ -34,7 +36,6 @@ import defaultSprintImage from '@actions/default-sprint-image.png';
 import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import StatsDataContext from '../context/StatsDataContext';
 import { Item } from '../context/ItemEquipmentContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
@@ -45,6 +46,19 @@ interface BaseAction {
   cost: { actions: number; bonus: number };
   details?: string;
   image?: string; // Add optional image property
+}
+
+interface WeaponItem {
+  name: string;
+  cost: string;
+  damage: string;
+  damageType: string;
+  weight: string;
+  properties: string[];
+  skill_modifiers: string[];
+  range?: string; // Optional property
+  throwRange?: string;
+  versatileDamage?: string;
 }
 
 interface Ability {
@@ -88,9 +102,6 @@ type ActionBlock = DefaultActionBlock | CustomActionBlock;
 
 
 
-
-
-
 export default function ActionsScreen() {
   const [numColumns, setNumColumns] = useState(3);
   const [actions, setActions] = useState<ActionBlock[]>([]);
@@ -120,10 +131,10 @@ export default function ActionsScreen() {
   const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
   const [currentBonusActionsAvailable, setCurrentBonusActionsAvailable] = useState<number>(1);
 
-
   // Change later to check if character main weapon state is equipped
-  const { mainHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
+  const { mainHandWeapon, rangedHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
     mainHandWeapon: Item | null,
+    rangedHandWeapon: Item | null,
     getWeaponDamage: (weapon: Item) => string,
     getWeaponSkillModifiers: (weapon: Item) => string[]
   };
@@ -137,12 +148,19 @@ export default function ActionsScreen() {
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
     { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
-    { id: '1', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
-    { id: '2', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
-    { id: '3', name: 'Push', details: 'Move an object or creature forward', cost: { actions: 0, bonus: 1 }, image: defaultPushImage },
-    { id: '4', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
+    { id: '1', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
+    { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
+    {
+      id: '4', name: 'Shove',
+      details: 'Push a creature forward 5m or knock it prone. You can only shove creatures up to one size larger than you.',
+      cost: { actions: 0, bonus: 1 },
+      image: defaultPushImage
+    },
+    { id: '5', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
     { id: '6', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
-    { id: '5', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+    { id: '7', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+
   ];
 
   // Path to the actions.json file
@@ -182,15 +200,25 @@ export default function ActionsScreen() {
   const calculateModifier = (score: number): number => {
     return Math.floor((score - 10) / 2);
   };
-  // Extract Constitution ability from statsData
+  // Extract Ability Modifiers from statsData
   useEffect(() => {
+    // Get current constitution modifier
     const constitutionAbility = statsData.abilities.find((ability) => ability.name === 'Constitution');
     const constitutionScore = constitutionAbility ? constitutionAbility.value : 10; // Default to 10 if not found
     const newConModifier = calculateModifier(constitutionScore);
     setCurrentConModifier(newConModifier);
+
+    // Get current wisdom modifier
+    const wisdomAbility = statsData.abilities.find((ability) => ability.name === 'Wisdom');
+    const wisdomScore = wisdomAbility ? wisdomAbility.value : 10;
+    const wisdomModifier = calculateModifier(wisdomScore);
+    setCurrentWisdomModifier(wisdomModifier);
   }, [statsData.abilities]);
 
   const { hpIncreases = {}, hitDice = 0 } = statsData || {};
+
+  const [currentWisdomModifier, setCurrentWisdomModifier] = useState<number>(0);
+
 
   // Function to load actions from file system
   const loadActions = async () => {
@@ -637,12 +665,15 @@ export default function ActionsScreen() {
         currentActionsAvailable >= item.cost.actions &&
         currentBonusActionsAvailable >= item.cost.bonus;
 
+      const isRangedAttack = item.name.toLowerCase().includes('ranged');
+      const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
+
       return (
         <ImageBackground
           source={getActionImage(item) as ImageSourcePropType}
           style={[
             styles.itemContainer,
-            { width: itemWidth, opacity: affordable ? 1 : 0.2 }
+            { width: itemWidth, opacity: affordable ? (isRangedAttack && !rangedHandWeaponEquipped ? 0.2 : 1) : 0.2 }
           ]}
           imageStyle={{ borderRadius: 8 }}
         >
@@ -653,7 +684,7 @@ export default function ActionsScreen() {
               setActionModalVisible(true);
             }}
             onLongPress={() => handleLongPress(item.id)}
-            disabled={!affordable}
+            disabled={!affordable || (isRangedAttack && !rangedHandWeaponEquipped)}
           >
             {!item.image && (
               <View style={styles.itemTextContainer}>
@@ -908,19 +939,23 @@ export default function ActionsScreen() {
             {/* HP Container */}
 
             <View style={styles.hpContainer}>
+              <View style={styles.hpTextContainer}>
+                {hp !== null && hp > 0
+                  ?
+                  <Ionicons name="heart" size={16} color="lightgrey" />
+                  :
+                  <Ionicons name="skull" size={16} color="lightgrey" />
+                }
+                <Text style={[styles.hpText, { marginLeft: 5 }]}>
+                  {hp + tempHp}
+                </Text>
+                <Text style={styles.subheaderText}>/{maxHp}</Text>
+              </View>
               {(hp !== null && maxHp > 0) && (
                 <View style={styles.hpBarContainer}>
                   {renderHpBar()}
                 </View>
               )}
-              <View style={styles.hpTextContainer}>
-                <Text style={styles.hpText}>
-                  {hp !== null && hp > 0
-                    ? `${hp + tempHp}`
-                    : <Ionicons name="skull" size={14} color="white" />}
-                </Text>
-                <Text style={styles.subheaderText}>/{maxHp}</Text>
-              </View>
             </View>
             <View style={styles.subheaderInline}>
               <View style={{ flex: 1, flexDirection: 'column' }}>
@@ -930,9 +965,9 @@ export default function ActionsScreen() {
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
                     {/* Proficiency Bonus */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                      <Text style={styles.hpText}>{proficiencyBonus}</Text>
+                      <Text style={styles.hpText}>+{proficiencyBonus}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="ribbon" size={24} color="white" />
+                        <Ionicons name="ribbon" size={24} color="lightgrey" />
                       </View>
                     </View>
 
@@ -940,23 +975,25 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{ac}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="shield" size={24} color="rgb(146, 187, 204)" />
+                        <Ionicons name="shield" size={24} color="lightgrey" />
                       </View>
                     </View>
                   </View>
 
                   {/* Movement Speed */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
+                    {/* Perception */}
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>+{currentWisdomModifier + proficiencyBonus}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="eye" size={24} color="lightgrey" />
+                      </View>
+                    </View>
+                    {/* Movement Speed */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{movementSpeed}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="footsteps" size={24} color="gray" />
-                      </View>
-                    </View>
-                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                      <Text style={styles.hpText}>{hitDice}</Text>
-                      <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="fitness" size={24} color="white" />
+                        <Ionicons name="footsteps" size={24} color="lightgrey" />
                       </View>
                     </View>
                   </View>
@@ -966,13 +1003,25 @@ export default function ActionsScreen() {
 
                 <View style={styles.subheaderSideBySide}>
 
-                  {/* Replenish Button */}
-                  <TouchableOpacity
-                    style={styles.replenishContainer}
-                    onPress={() => handleHpChange('replenish')}
-                  >
-                    <Ionicons name="bed" size={24} color="white" />
-                  </TouchableOpacity>
+                  {/* Third Box Quick Stats */}
+                  <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
+                    {/* AC */}
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>+{currentDexModifier}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="alert" size={24} color="lightgrey" />
+                      </View>
+                    </View>
+
+                    {/* Hit Dice */}
+                    <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                      <Text style={styles.hpText}>{hitDice}</Text>
+                      <View style={styles.subheaderSideBySide}>
+                        <Ionicons name="pulse" size={24} color="lightgrey" />
+                      </View>
+                    </View>
+
+                  </View>
 
                   {/* Temporary HP Input */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'white' }]}>
@@ -1017,13 +1066,13 @@ export default function ActionsScreen() {
                     style={styles.modalButtonSubtract}
                     onPress={() => handleHpChange('subtract')}
                   >
-                    <Ionicons name="remove" size={24} color="white" />
+                    <Ionicons name="flash" size={24} color="white" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.modalButtonAdd}
                     onPress={() => handleHpChange('add')}
                   >
-                    <Ionicons name="add" size={24} color="white" />
+                    <Ionicons name="bandage" size={24} color="white" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1047,13 +1096,26 @@ export default function ActionsScreen() {
         contentContainerStyle={styles.grid}
       />
 
-      {/* Footer Button */}
-      <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
-        <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
-          <Text style={styles.footerButtonText}>Next Turn</Text>
-          <Ionicons name="refresh" size={28} color="white" style={{ marginLeft: 5 }} />
+      {/* Footer Section */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 5 }}>
+
+        {/* Replenish Button */}
+        <TouchableOpacity
+          style={styles.replenishContainer}
+          onPress={() => handleHpChange('replenish')}
+        >
+          <Ionicons name="bed" size={26} color="white" />
         </TouchableOpacity>
-      </ImageBackground>
+        {/* Footer Button */}
+        <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
+          <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
+            <Text style={styles.footerButtonText}>Next Turn</Text>
+            <Ionicons name="refresh" size={28} color="white" style={{ marginLeft: 5 }} />
+          </TouchableOpacity>
+        </ImageBackground>
+
+      </View>
+
 
       {/* Action Details Modal */}
       <Modal
@@ -1067,41 +1129,110 @@ export default function ActionsScreen() {
               <View style={styles.modalContainer}>
                 {selectedAction && (
                   <>
-
-                    {/* Image Section */}
-                    <TouchableWithoutFeedback onLongPress={handleImageLongPress} style={styles.itemModalImageContainer}>
-                      {selectedAction?.image ? (
-                        <Image
-                          source={getActionImage(selectedAction) as ImageSourcePropType}
-                          style={styles.itemModalImage}
-                        />
-                      ) : (
-                        <View style={styles.itemModalNoImage}>
-                          <Text>No Image Available</Text>
-                        </View>
-                      )}
-                    </TouchableWithoutFeedback>
-
-                    {/* Title Section */}
-                    {editingField === 'title' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
-                      <TextInput
-                        style={styles.modalInput}
-                        value={editedActionName}
-                        onChangeText={setEditedActionName}
-                        keyboardType="default"
-                        onBlur={saveActionName}
-                        onSubmitEditing={saveActionName}
-                        autoFocus={true}
-                      />
-                    ) : (
-                      <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
-                        <Text style={styles.modalTitle}>
-                          {selectedAction.name === 'Attack'
-                            ? (isArmed ? 'Armed ' : 'Unarmed ')
-                            : ''}{selectedAction?.name}
-                        </Text>
+                    {/* Image, Title and Cost Section */}
+                    <View style={{ flexDirection: 'row', gap: 10 }}>
+                      {/* Image Section */}
+                      <TouchableWithoutFeedback onLongPress={handleImageLongPress} style={styles.itemModalImageContainer}>
+                        {selectedAction?.image ? (
+                          <Image
+                            source={getActionImage(selectedAction) as ImageSourcePropType}
+                            style={styles.itemModalImage}
+                          />
+                        ) : (
+                          <View style={styles.itemModalNoImage}>
+                            <Text>No Image Available</Text>
+                          </View>
+                        )}
                       </TouchableWithoutFeedback>
-                    )}
+                      <View style={{ flex: 1 }}>
+                        {/* Title Section */}
+                        {editingField === 'title' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
+                          <TextInput
+                            style={styles.modalInput}
+                            value={editedActionName}
+                            onChangeText={setEditedActionName}
+                            keyboardType="default"
+                            onBlur={saveActionName}
+                            onSubmitEditing={saveActionName}
+                            autoFocus={true}
+                          />
+                        ) : (
+                          <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
+                            <Text style={styles.modalTitle}>
+                              {selectedAction.name === 'Attack'
+                                ? (isArmed ? 'Armed ' : 'Unarmed ')
+                                : ''}{selectedAction?.name}
+                            </Text>
+                          </TouchableWithoutFeedback>
+                        )}
+
+                        {/* Weapon Name Section */}
+                        {['Attack', 'Ranged Attack'].map((actionType) => {
+                          const weapon = actionType === 'Attack' ? mainHandWeapon : rangedHandWeapon;
+                          const weaponName =
+                            weapon && weapon.name !== 'none'
+                              ? weapons.weapons
+                                .find((w) =>
+                                  w.items.some(
+                                    (i) => i.name.toLowerCase() === weapon.name.toLowerCase()
+                                  )
+                                )
+                                ?.items.find(
+                                  (i) => i.name.toLowerCase() === weapon.name.toLowerCase()
+                                )?.name || '?'
+                              : '?';
+
+                          if (selectedAction.name !== actionType) {
+                            return null;
+                          }
+
+                          return (
+                            <View
+                              key={actionType}
+                              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                            >
+                              <Text>Name: </Text>
+                              <Text style={{ textTransform: 'capitalize' }}>
+                                {weaponName}
+                              </Text>
+                            </View>
+                          );
+                        })}
+
+                        {/* Cost Section */}
+                        <View style={styles.modalCostContainer}>
+                          <Text>Cost: </Text>
+                          {selectedAction.cost.actions === 0 ? null : (
+                            <View style={styles.costTextContainer}>
+                              <Text>{selectedAction.cost.actions}</Text>
+                              <Ionicons name="ellipse" size={16} color="green" />
+                            </View>
+                          )}
+                          {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
+                            <Text>, </Text>
+                          )}
+                          {selectedAction.cost.bonus === 0 ? null : (
+                            <View style={styles.costTextContainer}>
+                              <Text>{selectedAction.cost.bonus}</Text>
+                              <Ionicons name="triangle" size={16} color="#FF8C00" />
+                            </View>
+                          )}
+                        </View>
+
+                        {/* Shove Success Requirement Legend */}
+                        {(selectedAction.name === 'Shove') && (
+                          <View style={{ flexDirection: 'row', gap: 5, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'black', borderRadius: 5, padding: 5 }}>
+                            <Ionicons name="dice" size={20} color="black" />
+                            <Text>{' > '}</Text>
+                            <Ionicons name="dice-outline" size={20} color="black" />
+                            <Text>{' = '}</Text>
+                            <Ionicons name="checkmark" size={20} color="black" />
+                          </View>
+                        )}
+
+
+                      </View>
+                    </View>
 
                     {/* Details Section */}
                     {editingField === 'details' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
@@ -1124,87 +1255,85 @@ export default function ActionsScreen() {
                       </TouchableWithoutFeedback>
                     )}
 
-                    {/* Cost Section */}
-                    <View style={styles.modalCostContainer}>
-                      <Text>Cost: </Text>
-                      {selectedAction.cost.actions === 0 ? null : (
-                        <View style={styles.costTextContainer}>
-                          <Text>{selectedAction.cost.actions}</Text>
-                          <Ionicons name="ellipse" size={16} color="green" />
-                        </View>
-                      )}
-                      {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
-                        <Text>, </Text>
-                      )}
-                      {selectedAction.cost.bonus === 0 ? null : (
-                        <View style={styles.costTextContainer}>
-                          <Text>{selectedAction.cost.bonus}</Text>
-                          <Ionicons name="triangle" size={16} color="#FF8C00" />
-                        </View>
-                      )}
-                    </View>
-
-                    {/* Weapon Properties Section */}
+                    {/* Melee Weapon Properties Section */}
                     {(selectedAction.name === 'Attack') &&
                       <>
                         {mainHandWeapon && mainHandWeapon.name !== 'none' ? (
                           <>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Weapon Name: </Text>
-                              <Text>
-                                {mainHandWeapon && mainHandWeapon.name !== 'none'
-                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.name || '?'
-                                  : '?'}
-                              </Text>
+                            {/* Attack Roll Row */}
+                            <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
+                              <Ionicons name="dice" size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <View style={{ flexDirection: 'row' }}>
+                                  <Text>
+                                    +({getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`})
+                                  </Text>
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                                    getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                                    <Text> or </Text>}
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                  <Text>+{proficiencyBonus}</Text>
+                                  <Ionicons name="ribbon" size={16} color="black" />
+                                </View>
+                              </View>
                             </View>
+                            {/* Damage Row */}
                             <View style={styles.modalWeaponProperty}>
-                              <Text>Damage: </Text>
-                              <Text>
-                                {getWeaponDamage(mainHandWeapon)}
-                              </Text>
-                            </View>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Skill Modifiers: </Text>
-                              <View style={{ flexDirection: 'row' }}>
+                              <Ionicons name="flash" size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`}
+                                  {getWeaponDamage(mainHandWeapon)}
                                 </Text>
-                                {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
-                                  getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
-                                  <Text> or </Text>}
-                                <Text>
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && `${currentDexModifier} Dex`}
-                                </Text>
+                                <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                                    getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                                    <Text> or </Text>}
+                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                </View>
                               </View>
                             </View>
                             <View style={styles.modalWeaponProperty}>
-                              <Text>Proficiency Modifier: </Text>
-                              <Text>
-                                +{proficiencyBonus} Prof
-                              </Text>
-                            </View>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Damage Type: </Text>
+                              <Text>Type: </Text>
                               <Text style={{ textTransform: 'capitalize' }}>
                                 {mainHandWeapon && mainHandWeapon.name !== 'none'
-                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.damageType || '?'
-                                  : (!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '?')}
+                                  ? weapons.weapons.find(
+                                    w => w.items.find(
+                                      i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()
+                                    ))?.items.find(i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase())?.damageType || '—'
+                                  : (!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '—')}
                               </Text>
                             </View>
                             <View style={styles.modalWeaponProperty}>
                               <Text>Range: </Text>
                               <Text>
                                 {mainHandWeapon && mainHandWeapon.name !== 'none'
-                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.throwRange || '?'
-                                  : '?'}
+                                  ? (weapons.weapons.find(
+                                    w => w.items.find(
+                                      i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()
+                                    ))?.items.find(i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()) as WeaponItem)?.range || '—'
+                                  : '—'}
+                              </Text>
+                            </View>
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Throw Range: </Text>
+                              <Text>
+                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(
+                                    w => w.items.find(
+                                      i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()
+                                    ))?.items.find(i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase())?.throwRange || '—'
+                                  : '—'}
                               </Text>
                             </View>
                             <View style={styles.modalWeaponProperty}>
                               <Text>Properties: </Text>
                               <Text>
                                 {mainHandWeapon && mainHandWeapon.name !== 'none'
-                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.properties.join(', ') || '?'
-                                  : '?'}
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.properties.join(', ') || '—'
+                                  : '—'}
                               </Text>
                             </View>
                           </>
@@ -1214,8 +1343,107 @@ export default function ActionsScreen() {
                       </>
                     }
 
+                    {/* Ranged Weapon Properties Section */}
+                    {(selectedAction.name === 'Ranged Attack') && (
+                      <>
+                        {rangedHandWeapon && rangedHandWeapon.name !== 'none' ? (
+                          <>
+                            {/* Modifiers Row */}
+                            <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
+                              <Ionicons name="dice" size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                                  {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") &&
+                                    getWeaponSkillModifiers(rangedHandWeapon).includes("Dexterity") &&
+                                    <Text> or </Text>}
+                                  {getWeaponSkillModifiers(rangedHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                  <Text>+{proficiencyBonus}</Text>
+                                  <Ionicons name="ribbon" size={16} color="black" />
+                                </View>
+                              </View>
+                            </View>
+                            {/* Damage Row */}
+                            <View style={styles.modalWeaponProperty}>
+                              <Ionicons name="flash" size={20} color="black" />
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <Text>
+                                  {getWeaponDamage(rangedHandWeapon)}
+                                </Text>
+                                <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                                  {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") &&
+                                    getWeaponSkillModifiers(rangedHandWeapon).includes("Dexterity") &&
+                                    <Text> or </Text>}
+                                  {getWeaponSkillModifiers(rangedHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                </View>
+                              </View>
+                            </View>
+                            {/* Type Row */}
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Type: </Text>
+                              <Text style={{ textTransform: 'capitalize' }}>
+                                {rangedHandWeapon && rangedHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name.toLowerCase() === rangedHandWeapon.name.toLowerCase()))?.items.find(i => i.name.toLowerCase() === rangedHandWeapon.name.toLowerCase())?.damageType || '—'
+                                  : '—'}
+                              </Text>
+                            </View>
+                            {/* Range Row */}
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Range: </Text>
+                              <Text>
+                                {rangedHandWeapon && rangedHandWeapon.name !== 'none'
+                                  ? (weapons.weapons.find(w => w.items.find(i => i.name.toLowerCase() === rangedHandWeapon.name.toLowerCase()))?.items.find(i => i.name.toLowerCase() === rangedHandWeapon.name.toLowerCase()) as WeaponItem)?.range || '—'
+                                  : '—'}
+                              </Text>
+                            </View>
+                            {/* Throw Range Row */}
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Throw Range: </Text>
+                              <Text>
+                                {rangedHandWeapon && rangedHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === rangedHandWeapon.name))?.items.find(i => i.name === rangedHandWeapon.name)?.throwRange || '—'
+                                  : '—'}
+                              </Text>
+                            </View>
+                            {/* Properties Row */}
+                            <View style={styles.modalWeaponProperty}>
+                              <Text>Properties: </Text>
+                              <Text>
+                                {rangedHandWeapon && rangedHandWeapon.name !== 'none'
+                                  ? weapons.weapons.find(w => w.items.find(i => i.name === rangedHandWeapon.name))?.items.find(i => i.name === rangedHandWeapon.name)?.properties.join(', ') || '—'
+                                  : '—'}
+                              </Text>
+                            </View>
+                          </>
+                        ) : (
+                          <Text>No Ranged Weapon Equipped</Text>
+                        )}
+                      </>
+                    )}
+
+                    {/* Shove Details */}
+                    {(selectedAction.name === 'Shove') && (
+                      <View>
+                        <View style={styles.modalWeaponProperty}>
+                          <Ionicons name="dice" size={20} color="black" />
+                          <Text>+({calculateModifier(statsData.abilities.find(a => a.name === 'Strength')?.value || 10)} Athle)</Text>
+                        </View>
+                        <View style={styles.modalWeaponProperty}>
+                          <View style={{ flexDirection: 'row' }}>
+                            <Ionicons name="dice-outline" size={20} color="black" />
+                          </View>
+                          <Text>(Athle) or (Acrob)</Text>
+                        </View>
+                      </View>
+                    )}
+
                     {/* Modal Buttons */}
                     <View style={styles.modalButtons}>
+
+                      {/* Commit Button */}
                       <TouchableOpacity
                         style={[
                           styles.modalButtonCommit,
@@ -1231,6 +1459,7 @@ export default function ActionsScreen() {
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>
+
                           <Text>Commit: </Text>
                           {selectedAction.cost.actions === 0 ? null : (
                             <View style={styles.costTextContainer}>

@@ -74,7 +74,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [inputValue, setInputValue] = useState<string>('');
     const [inputValues, setInputValues] = useState<{ [level: number]: string }>({});
-    const [skills, setSkills] = useState<Skill[]>(skillsData);
+    const [skills] = useState<Skill[]>(skillsData);
     const [hasUnfilledHpIncreases, setHasUnfilledHpIncreases] = useState(false);
     const [constitutionModifier, setConstitutionModifier] = useState(0);
 
@@ -493,8 +493,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
             {/* Saving Throws */}
             <View style={styles.savingThrowsContainer}>
-                <View style={styles.rowIconTitle}>
-                    <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
+                <View style={[styles.rowIconTitle, { alignItems: 'center', marginBottom: 5 }]}>
+                    <Ionicons name="hand-left" size={20} color="hotpink" />
                     <Text style={styles.savingThrowsTitle}>Saving Throws</Text>
                 </View>
                 <View style={styles.savingThrowsGrid}>
@@ -523,14 +523,15 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
             {/* Ability Grid */}
             <View style={styles.characterStatsContainer}>
-                <View style={styles.rowIconTitle}>
-                    <Ionicons name="key" size={20} color="white" />
-                    <Text style={styles.characterStatsTitle}>Abilities</Text>
-                </View>
                 <View style={styles.availableAbilityPointsContainer}>
+                    <View style={styles.rowIconTitle}>
+                        <Ionicons name="star" size={20} color="gold" />
+                        <Text style={styles.characterStatsTitle}>Abilities</Text>
+                    </View>
                     <View style={availableAbilityPoints > 0 ? styles.availableAbilityPointsHighlighted : styles.availableAbilityPointsNotHighlighted}>
+                        <Ionicons name="star" size={16} color="white" />
                         <Text style={styles.availableAbilityPoints}>
-                            Available: {availableAbilityPoints}
+                            {availableAbilityPoints}
                         </Text>
                     </View>
                 </View>
@@ -547,7 +548,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Skills */}
             <View style={styles.skillsContainer}>
                 <View style={styles.rowIconTitle}>
-                    <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
+                    <Ionicons name="sparkles" size={20} color="coral" />
                     <Text style={styles.skillsTitle}>Skills</Text>
                 </View>
                 <FlatList

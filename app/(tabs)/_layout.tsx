@@ -46,7 +46,7 @@ export default function TabLayout() {
               options={{
                 title: 'Stats',
                 tabBarIcon: ({ color, focused }) => (
-                  <TabBarIcon name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} />
+                  <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart-outline'} color={color} />
                 ),
               }}
             />
