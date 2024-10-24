@@ -913,16 +913,37 @@ export default function BagScreen() {
                     />
                   </>
                 )}
-                <Text>Name</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Name"
-                  placeholderTextColor="gray"
-                  onChangeText={(text) =>
-                    setNewItem({ ...newItem, name: text })
-                  }
-                  value={newItem.name}
-                />
+
+                {itemTypeValue && itemTypeValue.toLowerCase() === 'custom' && (
+                  <>
+
+                    {/* Name Input */}
+                    <Text>Name</Text>
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="Name"
+                      placeholderTextColor="gray"
+                      onChangeText={(text) =>
+                        setNewItem({ ...newItem, name: text })
+                      }
+                      value={newItem.name}
+                    />
+                    {/* Add details input */}
+                    <Text>Details</Text>
+                    <TextInput
+                      style={[styles.modalInput, styles.detailsInput]}
+                      placeholder="Item Details"
+                      placeholderTextColor="gray"
+                      onChangeText={(text) => setNewItem({ ...newItem, details: text })}
+                      value={newItem.details}
+                      multiline={true}
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                    />
+
+                  </>
+                )}
+                {/* Quantity Input */}
                 <Text>Quantity</Text>
                 <TextInput
                   style={styles.modalInput}
@@ -933,18 +954,6 @@ export default function BagScreen() {
                     setNewItem({ ...newItem, quantity: Number(text) || 1 })
                   }
                   value={newItem.quantity.toString()}
-                />
-                {/* Add details input */}
-                <Text>Details</Text>
-                <TextInput
-                  style={[styles.modalInput, styles.detailsInput]}
-                  placeholder="Item Details"
-                  placeholderTextColor="gray"
-                  onChangeText={(text) => setNewItem({ ...newItem, details: text })}
-                  value={newItem.details}
-                  multiline={true}
-                  numberOfLines={4}
-                  textAlignVertical="top"
                 />
 
                 <TouchableOpacity style={styles.imagePickerButton} onPress={() => pickImage(true)}>

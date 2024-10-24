@@ -207,6 +207,8 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         borderRadius: 8,
         overflow: 'hidden',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
     },
     meleeContainer: {
         flexDirection: 'row',
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
     },
     levelContainerHighlighted: {
         borderWidth: 2,
-        borderColor: 'white',
+        borderColor: 'gold',
     },
     firstRowText: {
         fontSize: 18,
@@ -497,9 +499,9 @@ const styles = StyleSheet.create({
     },
     availableAbilityPointsHighlighted: {
         borderWidth: 2,
-        borderColor: 'white',
+        borderColor: 'rgba(255, 255, 255, 0.3)',
         padding: 5,
-        borderRadius: 8,
+        borderRadius: 4,
         paddingLeft: 10,
         paddingRight: 10,
         flexDirection: 'row',
@@ -568,6 +570,26 @@ const styles = StyleSheet.create({
     saveButtonText: {
         color: 'white',
         fontWeight: 'bold',
+    },
+    twoHandedWeapon: {
+        borderWidth: 2,
+        borderColor: 'gold',
+        borderRadius: 8,
+        padding: 0,
+    },
+    
+    twoHandedLabel: {
+        alignSelf: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        color: 'gold',
+        borderRadius: 4,
+        fontSize: 12,
+        fontWeight: 'bold',
+        padding: 5,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        marginLeft: 5,
+        marginBottom: 5,
     },
 });
 

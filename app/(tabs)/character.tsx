@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
+import weaponData from '../data/weapons.json';
 
 // Import default images
 import defaultHelmetImage from '@equipment/default-helmet.png';
@@ -155,7 +156,6 @@ export default function MeScreen() {
             // If not, unset the main hand weapon
             equipWeapon('mainHand', null);
             setMainHandValue('none');
-            console.log('Main hand weapon was deleted and has been unequipped.');
         }
 
         // Check if the offhand weapon is still in the items list
@@ -167,7 +167,6 @@ export default function MeScreen() {
             // If not, unset the offhand weapon
             equipWeapon('offHand', null);
             setOffHandValue('none');
-            console.log('Offhand weapon was deleted and has been unequipped.');
         }
     }, [items, mainHandWeapon, offHandWeapon, equipWeapon]);
 
@@ -391,63 +390,50 @@ export default function MeScreen() {
     const handleEquipWeapon = (slot: WeaponSlot, weaponName: string | null) => {
         if (!weaponName) return;
 
-        // Handle 'None' selection
-        if (weaponName === 'none' || weaponName === null) {
-            equipWeapon(slot, null);
-            console.log(`No weapon equipped in ${slot === 'mainHand' ? 'Main Hand' : slot === 'offHand' ? 'Offhand' : 'Ranged Hand'}`);
-            return;
+        // Find the weapon details from weapons.json
+        const selectedWeapon = weaponData.weapons
+            .flatMap(category => category.items as unknown as Item[])
+            .find((item: Item) => item.name.toLowerCase() === weaponName.toLowerCase());
+
+        if (!selectedWeapon) return;
+
+        const isSelectedWeaponTwoHanded = selectedWeapon.properties?.includes("Two-handed");
+
+        if (!isSelectedWeaponTwoHanded && (slot !== 'rangedHand')) {
+            if (mainHandWeapon?.name.toLowerCase() === weaponName.toLowerCase()) {
+                equipWeapon('mainHand', null);
+            }
+            if (offHandWeapon?.name.toLowerCase() === weaponName.toLowerCase()) {
+                equipWeapon('offHand', null);
+            }
+            if (rangedHandWeapon?.name.toLowerCase() === weaponName.toLowerCase()) {
+                equipWeapon('rangedHand', null);
+            }
         }
 
-        // Find the selected weapon item
-        const weapon = items.find((item) => item.name.toLowerCase() === weaponName.toLowerCase() && item.type === 'Weapon');
-
-        if (!weapon) {
-            Alert.alert('Weapon not found', 'The selected weapon does not exist.');
-            return;
-        }
-
-        // Load weapon data
-        const weaponData = require('../data/weapons.json');
-        const weaponCategory = weaponData.weapons.find((category: { items: Item[] }) =>
-            category.items.some((item: Item) => item.name.toLowerCase() === weapon.name.toLowerCase())
-        );
-        const weaponItem = weaponCategory?.items.find((item: Item) => item.name.toLowerCase() === weapon.name.toLowerCase());
-
-        // Check if any slot has a Two-handed weapon equipped
-        const isTwoHandedEquipped = (mainHandWeapon && weaponData.weapons.some((category: { items: Item[] }) =>
-            category.items.some((item: Item) => item.name.toLowerCase() === mainHandWeapon.name.toLowerCase() && item.properties?.includes("Two-handed"))
-        )) || (offHandWeapon && weaponData.weapons.some((category: { items: Item[] }) =>
-            category.items.some((item: Item) => item.name.toLowerCase() === offHandWeapon.name.toLowerCase() && item.properties?.includes("Two-handed"))
-        )) || (rangedHandWeapon && weaponData.weapons.some((category: { items: Item[] }) =>
-            category.items.some((item: Item) => item.name.toLowerCase() === rangedHandWeapon.name.toLowerCase() && item.properties?.includes("Two-handed"))
-        ));
-
-        // Unequip Two-handed weapon if any slot has it equipped
-        if (isTwoHandedEquipped) {
+        if (isSelectedWeaponTwoHanded) {
+            // If equipping a two-handed weapon, unequip all slots
             equipWeapon('mainHand', null);
-            setMainHandValue('none');
             equipWeapon('offHand', null);
-            setOffHandValue('none');
             equipWeapon('rangedHand', null);
-            setRangedHandValue('none');
-        }
-
-        // Check if the weapon has the "Two-handed" property
-        if (weaponItem?.properties?.includes("Two-handed")) {
-            equipWeapon('mainHand', null);
-            setMainHandValue('none');
-            equipWeapon('offHand', null);
-            setOffHandValue('none');
-            equipWeapon('rangedHand', null);
-            setRangedHandValue('none');
-        }
-
-        equipWeapon(slot, weapon);
-        if (slot === 'rangedHand') {
-            console.log(`${weapon.name} is equipped in Ranged Hand`);
         } else {
-            console.log(`${weapon.name} is equipped in ${slot === 'mainHand' ? 'Main Hand' : 'Offhand'}`);
+            // If a two-handed weapon is already equipped, unequip it
+            if (mainHandWeapon?.properties?.includes("Two-handed")) {
+                equipWeapon('mainHand', null);
+            }
+            if (offHandWeapon?.properties?.includes("Two-handed")) {
+                equipWeapon('offHand', null);
+            }
+            if (rangedHandWeapon?.properties?.includes("Two-handed")) {
+                equipWeapon('rangedHand', null);
+            }
         }
+
+        // Equip the selected weapon to the specified slot
+        equipWeapon(slot, selectedWeapon);
+        setMainHandValue(mainHandWeapon?.name || 'none');
+        setOffHandValue(offHandWeapon?.name || 'none');
+        setRangedHandValue(rangedHandWeapon?.name || 'none');
     };
 
 
@@ -641,31 +627,42 @@ export default function MeScreen() {
                 <View style={styles.meleeContainer}>
                     {/* Main Hand Weapon */}
                     <TouchableOpacity
-                        style={[styles.weapon, !mainHandWeapon?.name ? { padding: 15 } : {}]}
+                        style={[
+                            styles.weapon,
+                            !mainHandWeapon?.name ? { padding: 15 } : {},
+                            mainHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
+                        ]}
                         onPress={() => setMainHandModalVisible(true)}
                     >
                         {mainHandWeapon?.name && mainHandWeapon?.name !== 'none' ? (
                             (() => {
                                 const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase());
-                                if (weapon && weapon.image && weapon.image !== '') {
-                                    return (
-                                        <Image
-                                            source={{ uri: weapon.image }}
-                                            style={styles.equipmentItemImage}
-                                            resizeMode="contain"
-                                        />
-                                    );
-                                } else {
-                                    return (
-                                        <View style={styles.equipmentItemImage}>
+                                const isTwoHanded = mainHandWeapon.properties?.includes("Two-handed");
+
+                                return (
+                                    <ImageBackground
+                                        source={weapon && weapon.image && weapon.image !== ''
+                                            ? { uri: weapon.image }
+                                            : equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage}
+                                        style={styles.equipmentItemImage}
+                                    >
+                                        {(!weapon?.image || weapon.image === '' || isTwoHanded) && (
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 16,
                                                 textAlign: 'center'
                                             }}>{weapon?.label || mainHandWeapon.name}</Text>
-                                        </View>
-                                    );
-                                }
+                                        )}
+                                        {isTwoHanded && (
+                                            <>
+                                                <View style={styles.twoHandedLabel}>
+                                                    <Ionicons name="hand-left" size={16} color="white" />
+                                                    <Ionicons name="hand-right" size={16} color="white" />
+                                                </View>
+                                            </>
+                                        )}
+                                    </ImageBackground>
+                                );
                             })()
                         ) : (
                             <Image
@@ -678,27 +675,35 @@ export default function MeScreen() {
 
                     {/* Offhand Weapon */}
                     <TouchableOpacity
-                        style={[styles.weapon, !offHandWeapon?.name ? { padding: 15 } : {}]}
+                        style={[
+                            styles.weapon,
+                            !offHandWeapon?.name ? { padding: 15 } : {},
+                            offHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
+                        ]}
                         onPress={() => setOffHandModalVisible(true)}
                     >
                         {offHandWeapon?.name && offHandWeapon?.name !== 'none' ? (
                             (() => {
                                 const weapon = weapons.find((w) => w.value === offHandWeapon.name.toLowerCase());
-                                if (weapon && weapon.image && weapon.image !== '') {
-                                    return (
-                                        <ImageBackground
-                                            source={{ uri: weapon.image }}
-                                            style={styles.equipmentItemImage}
-                                        />
-                                    );
-                                } else {
-                                    return <Text style={{
-                                        color: 'white',
-                                        fontSize: 16,
-                                        marginTop: 10,
-                                        marginLeft: 10
-                                    }}>{weapon?.label}</Text>;
-                                }
+                                const isTwoHanded = offHandWeapon.properties?.includes("Two-handed");
+
+                                return (
+                                    <ImageBackground
+                                        source={weapon && weapon.image && weapon.image !== ''
+                                            ? { uri: weapon.image }
+                                            : equipmentItems.find((item) => item.id === 'offhandMelee')?.defaultImage}
+                                        style={styles.equipmentItemImage}
+                                    >
+                                        {(!weapon?.image || weapon.image === '' || isTwoHanded) && (
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: 16,
+                                                textAlign: 'center'
+                                            }}>{weapon?.label || offHandWeapon.name}</Text>
+                                        )}
+                                        {isTwoHanded && <Text style={styles.twoHandedLabel}>2H</Text>}
+                                    </ImageBackground>
+                                );
                             })()
                         ) : (
                             <ImageBackground
@@ -713,27 +718,42 @@ export default function MeScreen() {
                     .map((item) => (
                         <TouchableOpacity
                             key={item.id}
-                            style={[styles.weapon, !rangedHandWeapon?.name ? { padding: 15 } : {}]}
+                            style={[
+                                styles.weapon,
+                                !rangedHandWeapon?.name ? { padding: 15 } : {},
+                                rangedHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
+                            ]}
                             onPress={() => { setRangedHandModalVisible(true) }}
                         >
-                            {rangedHandWeapon?.name && rangedHandWeapon?.name !== 'none' ? (
+                            {rangedHandWeapon?.name && rangedHandWeapon?.name.toLowerCase() !== 'none' ? (
                                 (() => {
-                                    const weapon = weapons.find((w) => w.value === rangedHandWeapon.name.toLowerCase());
-                                    if (weapon && weapon.image && weapon.image !== '') {
-                                        return (
-                                            <ImageBackground
-                                                source={{ uri: weapon.image }}
-                                                style={styles.equipmentItemImage}
-                                            />
-                                        );
-                                    } else {
-                                        return <Text style={{
-                                            color: 'white',
-                                            fontSize: 16,
-                                            marginTop: 10,
-                                            marginLeft: 10
-                                        }}>{weapon?.label}</Text>;
-                                    }
+                                    const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase());
+                                    const isTwoHanded = rangedHandWeapon.properties?.includes("Two-handed");
+
+                                    return (
+                                        <ImageBackground
+                                            source={weapon && weapon.image && weapon.image !== ''
+                                                ? { uri: weapon.image }
+                                                : equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
+                                            style={styles.equipmentItemImage}
+                                        >
+                                            {(!weapon?.image || weapon.image === '' || isTwoHanded) && (
+                                                <Text style={{
+                                                    color: 'white',
+                                                    fontSize: 16,
+                                                    textAlign: 'center'
+                                                }}>{weapon?.label || rangedHandWeapon.name}</Text>
+                                            )}
+                                            {isTwoHanded && (
+                                                <>
+                                                    <View style={styles.twoHandedLabel}>
+                                                        <Ionicons name="hand-left" size={16} color="white" />
+                                                        <Ionicons name="hand-right" size={16} color="white" />
+                                                    </View>
+                                                </>
+                                            )}
+                                        </ImageBackground>
+                                    );
                                 })()
                             ) : (
                                 <ImageBackground
@@ -878,7 +898,6 @@ export default function MeScreen() {
                                 items={filterEquipableMeleeWeapons()}
                                 setOpen={setOpenMainHandPicker}
                                 setValue={setMainHandValue}
-                                onChangeValue={handleMainHandValueChange}
                                 placeholder="Select a weapon"
                                 containerStyle={{ height: 40, width: '100%' }}
                                 style={{ backgroundColor: '#fafafa' }}
@@ -921,7 +940,6 @@ export default function MeScreen() {
                                 items={filterEquipableOffhandWeapons()}
                                 setOpen={setOpenOffHandPicker}
                                 setValue={setOffHandValue}
-                                onChangeValue={handleOffHandValueChange}
                                 placeholder="Select a weapon"
                                 containerStyle={{ height: 40, width: '100%' }}
                                 style={{ backgroundColor: '#fafafa' }}
@@ -963,7 +981,6 @@ export default function MeScreen() {
                                 items={filterEquipableRangedWeapons()}
                                 setOpen={setOpenRangedHandPicker}
                                 setValue={setRangedHandValue}
-                                onChangeValue={handleRangedHandValueChange}
                                 placeholder="Select a weapon"
                                 containerStyle={{ height: 40, width: '100%' }}
                                 style={{ backgroundColor: '#fafafa' }}

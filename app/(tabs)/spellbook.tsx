@@ -18,17 +18,45 @@ export default function SpellbookScreen() {
         }
     }
 
+
     const classBasedValues = (characterClass: any) => {
-        if (characterClass.value.toLowerCase() === 'artificer') {
-            return 3;
-        } else {
-            return 0;
+        switch (characterClass.value.toLowerCase()) {
+            case 'artificer':
+                return getIntelligenceModifier() + Math.floor(statsData.level / 2);
+            case 'barbarian':
+                return null;
+            case 'bard':
+                const bardClass = classData.find(cls => cls.value.toLowerCase() === 'bard');
+                const bardClassSpellsKnown = bardClass?.spellsKnown && typeof bardClass.spellsKnown === 'object' ?
+                    Object.entries(bardClass.spellsKnown).reduce((acc, [level, spells]) =>
+                        Number(level) <= statsData.level ? spells : acc
+                        , 0) : 0;
+                console.log("bardClassSpellsKnown", bardClassSpellsKnown); // Delete Later
+                return bardClassSpellsKnown ? bardClassSpellsKnown : null;
+            case 'cleric':
+            case 'druid':
+            case 'fighter':
+            case 'monk':
+            case 'paladin':
+            case 'ranger':
+            case 'rogue':
+            case 'sorcerer':
+            case 'warlock':
+            case 'wizard':
+                return 1;
+            default:
+                return 0;
         }
+    }
+
+    const getIntelligenceModifier = () => {
+        const intelligenceAbility = statsData.abilities.find(ability => ability.name.toLowerCase() === 'intelligence');
+        return intelligenceAbility ? Math.floor((intelligenceAbility.value - 10) / 2) : 0;
     }
 
     useEffect(() => {
         handlePreparedSpellSlots();
-    }, [isSpellCaster, statsData.level]);
+    }, [isSpellCaster, statsData.level, statsData.abilities]);
 
     const renderPreparedSpellBlock = () => (
         <TouchableOpacity style={styles.addSpellButton}>

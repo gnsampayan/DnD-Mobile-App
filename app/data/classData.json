@@ -13,7 +13,7 @@
       "4": 3,
       "10": 4
     },
-    "spellsKnown": "lvl++",
+    "spellsKnown": "1 + lvl",
     "preparedSpellSlots": "(Int) + Math.floor(lvl/2)"
   },
   {
@@ -33,8 +33,35 @@
     "primaryAbility": ["Charisma"],
     "savingThrowProficiency": ["Dexterity", "Charisma"],
     "armorProficiency": ["light"],
-    "weaponProficiency": ["simple", "hand crossbow", "longsword", "rapier", "shortsword"],
-    "spellcaster": true
+    "weaponProficiency": ["simple", "crossbow, hand", "longsword", "rapier", "shortsword"],
+    "spellcaster": true,
+    "cantripsKnown": {
+      "1": 2,
+      "4": 3,
+      "10": 4
+    },
+    "spellsKnown": {
+      "1": 4,
+      "2": 5,
+      "3": 6,
+      "4": 7,
+      "5": 8,
+      "6": 9,
+      "7": 10,
+      "8": 11,
+      "9": 12,
+      "10": 14,
+      "11": 15,
+      "12": 15,
+      "13": 16,
+      "14": 18,
+      "15": 19,
+      "16": 19,
+      "17": 20,
+      "18": 22,
+      "19": 22,
+      "20": 22
+    }
   },
   {
     "label": "Cleric",

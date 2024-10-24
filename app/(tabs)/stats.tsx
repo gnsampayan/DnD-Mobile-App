@@ -272,8 +272,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         const allocatedThisLevel = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
         if (allocatedThisLevel <= 0) {
             Alert.alert(
-                'No Recent Allocations',
-                `You have not recently allocated points to ${currentAbility.name} this level.`
+                'Cannot Decrease Any More',
+                `Minimum ${currentAbility.name} value reached.`
             );
             return;
         }
@@ -301,9 +301,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             abilities: updatedAbilities,
             allocationsPerLevel: updatedAllocations,
         });
-
-        // Optionally, you can add a success message
-        Alert.alert('Ability Decreased', `${currentAbility.name} has been decreased by 1.`);
     };
 
     // Function to reset XP and level
@@ -361,6 +358,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             <TouchableOpacity
                 style={[
                     styles.abilityContainer,
+                    { borderColor: hasUnfilledHpIncreases ? 'transparent' : (availableAbilityPoints > 0 ? 'gold' : 'white') }
                 ]}
                 onPress={() => {
                     if (hasUnfilledHpIncreases) { //if level 1 hp increase is not set, don't allow ability point allocation
@@ -410,7 +408,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         const isProficient = raceBonuses.find(bonus => bonus.race === statsData.race)?.proficiencies?.skillProficiency?.includes(item.name.toLowerCase());
         const skillModifier = isProficient ? skillValue + proficiencyBonus : skillValue;
         return (
-            <View style={[styles.skillContainer, isProficient ? { backgroundColor: 'white' } : {}]}>
+            <View style={[styles.skillContainer, isProficient ? { backgroundColor: 'white' } : {},]}>
                 <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>
                     {skillModifier >= 0 ? `+${skillModifier}` : `${skillModifier}`}
                 </Text>
@@ -436,13 +434,13 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         ]}
                         onPress={() => setLevelModalVisible(true)}
                     >
-                        <Ionicons name="link-outline" size={20} color="rgba(255, 255, 255, 0.5)" />
+                        <Ionicons name="school" size={20} color="lightgrey" />
                         <Text style={styles.firstRowText}>Level: {level}</Text>
                     </TouchableOpacity>
 
                     {/* XP */}
                     <TouchableOpacity
-                        style={styles.firstRowContents}
+                        style={[styles.firstRowContents, { borderColor: availableAbilityPoints > 0 ? 'transparent' : 'lightgrey' }]}
                         onPress={() => {
                             if (availableAbilityPoints === 0) {
                                 setModalVisible(true);
@@ -494,7 +492,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Saving Throws */}
             <View style={styles.savingThrowsContainer}>
                 <View style={[styles.rowIconTitle, { alignItems: 'center', marginBottom: 5 }]}>
-                    <Ionicons name="hand-left" size={20} color="hotpink" />
+                    <Ionicons name="flash-off" size={20} color="lightgrey" />
                     <Text style={styles.savingThrowsTitle}>Saving Throws</Text>
                 </View>
                 <View style={styles.savingThrowsGrid}>
@@ -525,11 +523,11 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             <View style={styles.characterStatsContainer}>
                 <View style={styles.availableAbilityPointsContainer}>
                     <View style={styles.rowIconTitle}>
-                        <Ionicons name="star" size={20} color="gold" />
+                        <Ionicons name="star" size={20} color="lightgrey" />
                         <Text style={styles.characterStatsTitle}>Abilities</Text>
                     </View>
                     <View style={availableAbilityPoints > 0 ? styles.availableAbilityPointsHighlighted : styles.availableAbilityPointsNotHighlighted}>
-                        <Ionicons name="star" size={16} color="white" />
+                        <Ionicons name="star" size={16} color={availableAbilityPoints > 0 ? 'gold' : 'lightgrey'} />
                         <Text style={styles.availableAbilityPoints}>
                             {availableAbilityPoints}
                         </Text>
@@ -548,7 +546,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Skills */}
             <View style={styles.skillsContainer}>
                 <View style={styles.rowIconTitle}>
-                    <Ionicons name="sparkles" size={20} color="coral" />
+                    <Ionicons name="sparkles" size={20} color="lightgrey" />
                     <Text style={styles.skillsTitle}>Skills</Text>
                 </View>
                 <FlatList
@@ -601,7 +599,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
             {/* Ability Modification Modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={abilityModalVisible}
                 onRequestClose={() => {

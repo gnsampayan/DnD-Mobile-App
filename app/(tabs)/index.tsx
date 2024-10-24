@@ -1039,7 +1039,7 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{hitDice}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="pulse" size={24} color="lightgrey" />
+                        <Ionicons name="fitness" size={24} color="lightgrey" />
                       </View>
                     </View>
 
@@ -1256,9 +1256,9 @@ export default function ActionsScreen() {
                           }}>
                             <Ionicons name="dice" size={20} color="black" />
                             <Text>{' > '}</Text>
-                            <Ionicons name="dice-outline" size={20} color="black" />
+                            <Ionicons name="flash-off-outline" size={20} color="red" />
                             <Text>{' = '}</Text>
-                            <Ionicons name="checkmark" size={20} color="black" />
+                            <Ionicons name="trophy" size={20} color="black" />
                           </View>
                         )}
 
@@ -1482,9 +1482,9 @@ export default function ActionsScreen() {
                         </View>
                         <View style={styles.modalWeaponProperty}>
                           <View style={{ flexDirection: 'row' }}>
-                            <Ionicons name="dice-outline" size={20} color="black" />
+                            <Ionicons name="flash-off-outline" size={20} color="red" />
                           </View>
-                          <Text>(Athle) or (Acrob)</Text>
+                          <Text>+(Athle) or +(Acrob)</Text>
                         </View>
                       </View>
                     )}
