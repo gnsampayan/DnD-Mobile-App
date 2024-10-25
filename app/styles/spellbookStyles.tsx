@@ -77,6 +77,34 @@ const styles = StyleSheet.create({
         borderStyle: 'solid',
         borderRadius: 8,
     },
+    cantripModal: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 20,
+        minWidth: '80%',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    modalButton: {
+        padding: 10,
+        backgroundColor: 'white',
+        borderRadius: 8,
+    },
+    modalButtonText: {
+        color: 'black',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
 });
 
 export default styles;
