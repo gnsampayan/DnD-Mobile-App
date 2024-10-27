@@ -62,8 +62,7 @@ const styles = StyleSheet.create({
     },
     cantripButtonBackground: {
         flex: 1,
-        backgroundColor: 'white',
-        resizeMode: 'contain',
+        backgroundColor: 'black',
     },
     cantripBlock: {
         padding: 5,

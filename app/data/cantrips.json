@@ -1,11 +1,12 @@
 [
 	{
 		"name": "Acid Splash",
+		"classes": ["Wizard", "Artificer", "Sorcerer"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "60 Feet",
 		"duration": "Instantaneous",
-		"components": "V, S",
+		"components": ["Verbal", "Somatic"],
 		"damage": {
 			"1": "1d4",
 			"5": "2d6",
@@ -13,43 +14,113 @@
 			"17": "4d6"
 		},
 		"savingThrow": "Dexterity",
-		"damageType": "acid",
-		"description": "You hurl a bubble of acid. Choose one creature you can see within range, or choose two creatures you can see within range that are within 5 feet of each other."
+		"damageType": "Acid",
+		"description": "You hurl a bubble of acid. Choose one creature you can see within range, or choose two creatures you can see within range that are within 5ft of each other."
 	},
 	{
 		"name": "Blade Ward",
+		"classes": ["Wizard"],
 		"school": "Abjuration",
 		"castingTime": "1 Action",
 		"range": "Self",
 		"duration": "1 round",
-		"components": "V, S"
+		"components": ["Verbal", "Somatic", "Material"],
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You extend your hand and trace a sigil of warding in the air. Until the end of your next turn, you have resistance against bludgeoning, piercing, and slashing damage dealt by weapon attacks.",
+		"features": {
+			"materialComponent": "A melee weapon worth at least 1 sp",
+			"resistance": "Bludgeoning, Piercing, and Slashing"
+		}
 	},
 	{
 		"name": "Booming Blade",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Self (5-foot radius)",
 		"duration": "1 round",
-		"components": "S, M"
+		"components": ["Somatic", "Material"],
+		"damage": {
+			"5": "1d8",
+			"11": "2d8",
+			"17": "3d8"
+		},
+		"savingThrow": null,
+		"damageType": "Thunder",
+		"description": "You brandish the weapon used in the spell's casting and make a melee attack with it against one creature within 5 feet of you. On a hit, the target suffers the weapon attack's normal effects and then becomes sheathed in booming energy until the start of your next turn. If the target willingly moves 5 feet or more before then, the target takes 1d8 thunder damage, and the spell ends.",
+		"features": {
+			"materialComponent": "A weapon worth at least 1 sp",
+			"meleeBonusDamage": {
+				"5": "1d8",
+				"11": "2d8",
+				"17": "3d8"
+			},
+			"conditionalDamage": {
+				"1": "1d8",
+				"5": "2d8",
+				"11": "3d8",
+				"17": "4d8"
+			}
+		}
 	},
 	{
 		"name": "Chill Touch",
+		"classes": ["Wizard"],
 		"school": "Necromancy",
 		"castingTime": "1 Action",
 		"range": "120 feet",
 		"duration": "1 round",
-		"components": "V, S"
+		"components": ["Verbal", "Somatic"],
+		"damage": {
+			"1": "1d8",
+			"5": "2d8",
+			"11": "3d8",
+			"17": "4d8"
+		},
+		"savingThrow": null,
+		"damageType": "Necrotic",
+		"features": "If the target creature is undead, it also has a disadvantage on attack rolls against you until the end of your next turn.",
+		"description": "You spawn a ghostly, skeletal hand in a creature's location. Make a ranged spell attack against the creature to assail it with the chill of the grave. On a hit, the target takes necrotic damage, and it can't regain hit points until the start of your next turn. The hand also clings to the target."
 	},
 	{
 		"name": "Control Flames",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "60 Feet",
 		"duration": "Instantaneous or 1 hour",
-		"components": "S"
+		"components": "S",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"features": [
+			{
+				"effect": "expand_flame",
+				"damage": "2d8",
+				"damageType": "Fire",
+				"savingThrow": "Dexterity",
+				"details": "You instantaneously expand the flame 5 feet in one direction, provided that wood or other fuel is present in the new location."
+			},
+			{
+				"effect": "extinguish_flame",
+				"details": "You instantaneously extinguish the flames within the cube."
+			},
+			{
+				"effect": "adjust_light",
+				"details": "You double or halve the area of bright light and dim light cast by the flame, change its color, or both. The change lasts for 1 hour."
+			},
+			{
+				"effect": "create_shapes",
+				"details": "You cause simple shapes—such as the vague form of a creature, an inanimate object, or a location—to appear within the flames and animate as you like. The shapes last for 1 hour."
+			}
+		],
+		"description": "If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action. You choose nonmagical flame that you can see within range and that fits within a 5-foot cube. You affect it in one of the following ways:"
 	},
 	{
 		"name": "Create Bonfire",
+		"classes": ["Wizard"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "60 Feet",
@@ -58,6 +129,7 @@
 	},
 	{
 		"name": "Dancing Lights",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "120 feet",
@@ -66,6 +138,7 @@
 	},
 	{
 		"name": "Encode Thoughts",
+		"classes": ["Wizard"],
 		"school": "Enchantment",
 		"castingTime": "1 Action",
 		"range": "Self",
@@ -74,6 +147,7 @@
 	},
 	{
 		"name": "Fire Bolt",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "120 feet",
@@ -82,6 +156,7 @@
 	},
 	{
 		"name": "Friends",
+		"classes": ["Wizard"],
 		"school": "Enchantment",
 		"castingTime": "1 Action",
 		"range": "Self",
@@ -90,6 +165,7 @@
 	},
 	{
 		"name": "Frostbite",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "60 feet",
@@ -98,6 +174,7 @@
 	},
 	{
 		"name": "Green-Flame Blade",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Self (5-foot radius)",
@@ -106,6 +183,7 @@
 	},
 	{
 		"name": "Gust",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -114,6 +192,7 @@
 	},
 	{
 		"name": "Infestation",
+		"classes": ["Wizard"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -122,6 +201,7 @@
 	},
 	{
 		"name": "Light",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Touch",
@@ -130,6 +210,7 @@
 	},
 	{
 		"name": "Lightning Lure",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Self (15-foot radius)",
@@ -138,6 +219,7 @@
 	},
 	{
 		"name": "Mage Hand",
+		"classes": ["Wizard"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -146,6 +228,7 @@
 	},
 	{
 		"name": "Mending",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Minute",
 		"range": "Touch",
@@ -154,6 +237,7 @@
 	},
 	{
 		"name": "Message",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "120 feet",
@@ -162,6 +246,7 @@
 	},
 	{
 		"name": "Mind Sliver",
+		"classes": ["Wizard"],
 		"school": "Enchantment",
 		"castingTime": "1 Action",
 		"range": "60 feet",
@@ -170,6 +255,7 @@
 	},
 	{
 		"name": "Minor Illusion",
+		"classes": ["Wizard"],
 		"school": "Illusion",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -178,6 +264,7 @@
 	},
 	{
 		"name": "Mold Earth",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -186,6 +273,7 @@
 	},
 	{
 		"name": "On/Off (UA)",
+		"classes": ["Wizard"],
 		"school": "Transmutation T",
 		"castingTime": "1 Action",
 		"range": "60 feet",
@@ -194,6 +282,7 @@
 	},
 	{
 		"name": "Poison Spray",
+		"classes": ["Wizard"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "10 feet",
@@ -202,6 +291,7 @@
 	},
 	{
 		"name": "Prestidigitation",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "10 feet",
@@ -210,6 +300,7 @@
 	},
 	{
 		"name": "Ray of Frost",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "60 feet",
@@ -218,6 +309,7 @@
 	},
 	{
 		"name": "Sapping Sting",
+		"classes": ["Wizard"],
 		"school": "Necromancy D",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -226,6 +318,7 @@
 	},
 	{
 		"name": "Shape Water",
+		"classes": ["Wizard"],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "30 feet",
@@ -234,6 +327,7 @@
 	},
 	{
 		"name": "Shocking Grasp",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Touch",
@@ -242,6 +336,7 @@
 	},
 	{
 		"name": "Sword Burst",
+		"classes": ["Wizard"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "Self (5-foot radius)",
@@ -250,6 +345,7 @@
 	},
 	{
 		"name": "Thunderclap",
+		"classes": ["Wizard"],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Self (5-foot radius)",
@@ -258,6 +354,7 @@
 	},
 	{
 		"name": "Toll the Dead",
+		"classes": ["Wizard"],
 		"school": "Necromancy",
 		"castingTime": "1 Action",
 		"range": "60 feet",
@@ -266,6 +363,7 @@
 	},
 	{
 		"name": "True Strike",
+		"classes": ["Wizard"],
 		"school": "Divination",
 		"castingTime": "1 Action",
 		"range": "30 feet",

@@ -488,6 +488,18 @@ const styles = StyleSheet.create({
       width: '100%',
       padding: 5,
     },
+    enemyDiceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 5,
+      borderWidth: 1,
+      borderStyle: 'solid',
+      borderColor: 'red',
+      padding: 1,
+      borderRadius: 50,
+      marginLeft: -2,
+    },
   });
 
   export default styles;

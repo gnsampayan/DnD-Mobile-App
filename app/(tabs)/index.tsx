@@ -157,8 +157,9 @@ export default function ActionsScreen() {
     { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 0, bonus: 1 }, image: defaultHideImage },
     { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
     {
-      id: '4', name: 'Shove',
-      details: 'Push a creature forward 5m or knock it prone. You can only shove creatures up to one size larger than you.',
+      id: '4',
+      name: 'Shove',
+      details: 'Push a creature forward 5m or knock it prone. You can only shove creatures up to one size larger than you. Your roll must be greater than the target\'s roll.',
       cost: { actions: 0, bonus: 1 },
       image: defaultPushImage
     },
@@ -1241,27 +1242,6 @@ export default function ActionsScreen() {
                           )}
                         </View>
 
-                        {/* Shove Success Requirement Legend */}
-                        {(selectedAction.name === 'Shove') && (
-                          <View style={{
-                            flexDirection: 'row',
-                            gap: 5,
-                            alignSelf: 'flex-start',
-                            borderWidth: 1,
-                            borderColor: 'black',
-                            borderRadius: 5,
-                            padding: 5,
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                          }}>
-                            <Ionicons name="dice" size={20} color="black" />
-                            <Text>{' > '}</Text>
-                            <Ionicons name="flash-off-outline" size={20} color="red" />
-                            <Text>{' = '}</Text>
-                            <Ionicons name="trophy" size={20} color="black" />
-                          </View>
-                        )}
-
                       </View>
                     </View>
 
@@ -1475,14 +1455,15 @@ export default function ActionsScreen() {
 
                     {/* Shove Details */}
                     {(selectedAction.name === 'Shove') && (
-                      <View>
-                        <View style={styles.modalWeaponProperty}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                           <Ionicons name="dice" size={20} color="black" />
                           <Text>+({calculateModifier(statsData.abilities.find(a => a.name === 'Strength')?.value || 10)} Athle)</Text>
                         </View>
-                        <View style={styles.modalWeaponProperty}>
-                          <View style={{ flexDirection: 'row' }}>
-                            <Ionicons name="flash-off-outline" size={20} color="red" />
+                        <Text style={{ fontSize: 24 }}>{'>'}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                          <View style={styles.enemyDiceContainer}>
+                            <Ionicons name="dice" size={20} color="red" />
                           </View>
                           <Text>+(Athle) or +(Acrob)</Text>
                         </View>

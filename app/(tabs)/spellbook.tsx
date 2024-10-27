@@ -1,42 +1,51 @@
 // Start of Selection
 
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, Button, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, Button, Alert, ImageSourcePropType } from 'react-native';
 import styles from '@/app/styles/spellbookStyles';
 import classData from '@/app/data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import cantripsData from '@/app/data/cantrips.json';
+import chillTouchImage from '@images/cantrips/chill-touch.png';
+
+// Cantrip images
+import acidSplashImage from '@images/cantrips/acid-splash.png';
+import bladeWardImage from '@images/cantrips/blade-ward.png';
+import boomingBladeImage from '@images/cantrips/booming-blade.png';
+import controlFlamesImage from '@images/cantrips/control-flames.png';
+
+const cantripImages = {
+    'Acid Splash': acidSplashImage,
+    'Blade Ward': bladeWardImage,
+    'Booming Blade': boomingBladeImage,
+    'Chill Touch': chillTouchImage,
+    'Control Flames': controlFlamesImage,
+}
 
 // TODO: Add learned spells from other wizards and scrolls
 const learnedSpellsFromOtherWizards = 0;
 const learnedSpellsFromScrolls = 0;
 
-// TODO: Add cantrip choices for each class and add them to the cantripChoices.json file
-const cantripChoices = {
-    cleric: [
-        { name: 'Light', description: 'Make an object glow like a torch.' },
-        { name: 'Mending', description: 'Repair a single break or tear in an object.' },
-        { name: 'Sacred Flame', description: 'Flame-like radiance descends on a creature.' },
-        { name: 'Thaumaturgy', description: 'Manifest minor wonders, signs of supernatural power.' }
-    ],
-    bard: [
-        { name: 'Dancing Lights', description: 'Create up to four torch-sized lights.' },
-        { name: 'Mage Hand', description: 'Create a spectral hand that can manipulate objects.' },
-        { name: 'Minor Illusion', description: 'Create a sound or an image of an object.' },
-        { name: 'Vicious Mockery', description: 'Unleash a string of insults laced with magic.' }
-    ],
-    wizard: [
-        { name: 'Acid Splash', description: 'Hurl a bubble of acid at one or two creatures.' },
-        { name: 'Fire Bolt', description: 'Hurl a mote of fire at a creature or object.' },
-        { name: 'Mage Hand', description: 'Create a spectral hand that can manipulate objects.' },
-        { name: 'Prestidigitation', description: 'Perform minor magical tricks.' },
-        { name: 'Ray of Frost', description: 'A frigid beam of blue-white light freezes a creature.' }
-    ]
-};
 
 // Key for AsyncStorage
 const CANTRIP_SLOTS_KEY = '@cantrip_slots';
+
+type Cantrip = {
+    name: string;
+    classes: string[];
+    school?: string;
+    castingTime?: string;
+    range?: string;
+    duration?: string;
+    components?: string[];
+    damage?: { [key: string]: string } | null;
+    savingThrow?: string | null;
+    damageType?: string | null;
+    description?: string;
+    features?: string | object[];
+}
 
 export default function SpellbookScreen() {
     const [preparedSpellSlots, setPreparedSpellSlots] = useState<number | null>(null);
@@ -47,9 +56,11 @@ export default function SpellbookScreen() {
     const [openCantripChoice, setOpenCantripChoice] = useState(false);
     const [cantripChoiceValue, setCantripChoiceValue] = useState<string | null>(null);
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
+    const [cantripChoiceFeatures, setCantripChoiceFeatures] = useState<string | object[] | null>(null);
 
     // New state to manage cantrip assignments
     const [cantripSlotsData, setCantripSlotsData] = useState<(string | null)[]>([]);
+
 
     const { statsData, isSpellCaster } = useContext(StatsDataContext);
 
@@ -70,15 +81,20 @@ export default function SpellbookScreen() {
             if (savedSlots !== null) {
                 setCantripSlotsData(JSON.parse(savedSlots));
             } else {
-                // Initialize with nulls if no data is saved
+                const availableCantrips = getAvailableCantrips(statsData.class || '');
                 if (cantripSlots) {
-                    setCantripSlotsData(Array(cantripSlots).fill(null));
+                    setCantripSlotsData(Array(cantripSlots).fill(null).map(() => availableCantrips[0]?.name || null));
                 }
             }
         } catch (error) {
             console.error('Failed to load cantrip slots from storage', error);
         }
     };
+
+    const getCantripImage = (cantripName: string) => {
+        return cantripImages[cantripName as keyof typeof cantripImages] || null;
+    }
+
 
     // Function to save cantrip slots to AsyncStorage
     const saveCantripSlots = async (slots: (string | null)[]) => {
@@ -142,7 +158,7 @@ export default function SpellbookScreen() {
         return abilityValue ? Math.floor((abilityValue.value - 10) / 2) : 0;
     }
 
-    const numColumns = 6;
+    const numColumns = 3;
     const windowWidth = Dimensions.get('window').width;
     const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns;
 
@@ -215,14 +231,15 @@ export default function SpellbookScreen() {
             }}
         >
             <ImageBackground
+                // Start of Selection
                 style={styles.cantripButtonBackground}
-                source={{ uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }}
+                source={cantripSlotsData[index] ? getCantripImage(cantripSlotsData[index]) as ImageSourcePropType : { uri: 'https://via.placeholder.com/150' }}
                 resizeMode="cover"
             >
                 <View style={styles.cantripBlock}>
                     {cantripSlotsData[index] !== null && cantripSlotsData[index] !== '' ? (
                         <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                            {cantripSlotsData[index]}
+                            {(cantripSlotsData[index] && getCantripImage(cantripSlotsData[index])) ? '' : cantripSlotsData[index]}
                         </Text>
                     ) : (
                         <Text style={{ color: 'white' }}>
@@ -353,16 +370,50 @@ export default function SpellbookScreen() {
             return null;
         }
     }
+
+    const getAvailableCantrips = (currentClass: string): Cantrip[] => {
+        return cantripsData.filter(cantrip =>
+            cantrip.classes.map(cls => cls.toLowerCase()).includes(currentClass.toLowerCase())
+        ) as Cantrip[];
+    }
+
+
+    const getDamageFromCantrip = (cantripName: string): string => {
+        const allCantrips = getAvailableCantrips(statsData.class || '');
+        const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
+
+        if (selectedCantrip && selectedCantrip.damage) {
+            if (typeof selectedCantrip.damage === 'object') {
+                return Object.entries(selectedCantrip.damage)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ');
+            } else if (typeof selectedCantrip.damage === 'string') {
+                return selectedCantrip.damage;
+            }
+        }
+        return '-';
+    }
+
+    const getFeaturesFromCantrip = (cantripName: string): string => {
+        const allCantrips = getAvailableCantrips(statsData.class || '');
+        const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
+
+        if (selectedCantrip && selectedCantrip.features) {
+            if (typeof selectedCantrip.features === 'object') {
+                return JSON.stringify(selectedCantrip.features, null, 2);
+            } else if (typeof selectedCantrip.features === 'string') {
+                return selectedCantrip.features;
+            }
+        }
+        return '-';
+    }
+
     const renderCantripChoicesBasedOnLevel = () => {
-        const currentClass = statsData.class?.toLowerCase() as keyof typeof cantripChoices;
-        const allCantrips = cantripChoices[currentClass] || [];
-        // Get all selected cantrips except the one in the current slot
-        const selectedCantrips = cantripSlotsData.filter((cantrip, index) => cantrip && index !== cantripPressedIndex);
-        // Available cantrips are all cantrips minus selected ones
-        const availableCantrips = allCantrips.filter(cantrip => !selectedCantrips.includes(cantrip.name));
-        const handleCantripPreview = (cantrip: { name: string; description: string }) => {
+        const availableCantrips = getAvailableCantrips(statsData.class || '');
+        const handleCantripPreview = (cantrip: { name: string; description: string; features?: string | object[]; damage?: string }) => {
             setCantripChoiceValue(cantrip.name);
-            setCantripChoiceDescription(cantrip.description);
+            setCantripChoiceDescription(cantrip.description || '');
+            setCantripChoiceFeatures(cantrip.features || null);
         }
         return (
             <View>
@@ -387,7 +438,12 @@ export default function SpellbookScreen() {
                                     onChangeValue={(value) => {
                                         const selected = availableCantrips.find(cantrip => cantrip.name === value);
                                         if (selected) {
-                                            handleCantripPreview(selected);
+                                            handleCantripPreview({
+                                                // Start of Selection
+                                                name: selected.name,
+                                                description: selected.description || '',
+                                                features: (selected as Cantrip).features,
+                                            });
                                         }
                                     }}
                                 />
@@ -395,6 +451,11 @@ export default function SpellbookScreen() {
                                 <Text>{cantripChoiceValue}</Text>
                                 <Text>Description:</Text>
                                 <Text>{cantripChoiceDescription}</Text>
+                                {/* Features Section */}
+                                <Text>Features:</Text>
+                                <Text>
+                                    {getFeaturesFromCantrip(cantripChoiceValue ?? '') || ''}
+                                </Text>
 
                                 <Button
                                     title="Assign"
@@ -411,8 +472,17 @@ export default function SpellbookScreen() {
                             <View>
                                 <Text>Selected Cantrip:</Text>
                                 <Text>{cantripSlotsData[cantripPressedIndex]}</Text>
+                                <Text>Damage:</Text>
+                                <Text>
+                                    {getDamageFromCantrip(cantripSlotsData[cantripPressedIndex])?.toString() || ''}
+                                </Text>
                                 <Text>Description:</Text>
-                                <Text>{allCantrips.find(cantrip => cantrip.name === cantripSlotsData[cantripPressedIndex])?.description || ''}</Text>
+                                <Text>{availableCantrips.find(cantrip => cantrip.name === cantripSlotsData[cantripPressedIndex])?.description || ''}</Text>
+                                {/* Features Section */}
+                                <Text>Features:</Text>
+                                <Text>
+                                    {getFeaturesFromCantrip(cantripSlotsData[cantripPressedIndex]) || ''}
+                                </Text>
                             </View>
                         )}
                     </>
@@ -436,6 +506,7 @@ export default function SpellbookScreen() {
         setCantripModalVisible(false);
         setCantripChoiceValue(null);
         setCantripChoiceDescription(null);
+        setCantripChoiceFeatures(null);
         setCantripPressedIndex(null);
     }
 
@@ -471,6 +542,7 @@ export default function SpellbookScreen() {
                             <View style={{ marginBottom: 10, zIndex: 1000 }}>
                                 {renderCantripChoicesBasedOnLevel()}
                             </View>
+                            {/* Unassign Button */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                                 {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' && (
                                     <Button
@@ -489,4 +561,5 @@ export default function SpellbookScreen() {
             </Modal>{/* Reset Confirmation Modal */}
         </View>
     );
-} 
+}
+
