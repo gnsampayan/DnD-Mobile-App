@@ -36,6 +36,9 @@ import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
 
+// Key for AsyncStorage
+const CANTRIP_SLOTS_KEY = '@cantrip_slots';
+
 interface EquipmentItem {
     id: string;
     name: string;
@@ -384,11 +387,23 @@ export default function MeScreen() {
         });
         // Clear AsyncStorage
         clearAsyncStorage();
+        clearCantripSlots();
     };
+
+    const clearCantripSlots = async () => {
+        await AsyncStorage.removeItem(CANTRIP_SLOTS_KEY);
+    }
 
     // Function to handle equipping a weapon
     const handleEquipWeapon = (slot: WeaponSlot, weaponName: string | null) => {
-        if (!weaponName) return;
+        if (weaponName?.toLowerCase() === 'none' || !weaponName) {
+            // Unequip the weapon if "None" is selected
+            equipWeapon(slot, null);
+            if (slot === 'mainHand') setMainHandValue('');
+            if (slot === 'offHand') setOffHandValue('');
+            if (slot === 'rangedHand') setRangedHandValue('');
+            return;
+        }
 
         // Find the weapon details from weapons.json
         const selectedWeapon = weaponData.weapons
@@ -436,40 +451,6 @@ export default function MeScreen() {
         setRangedHandValue(rangedHandWeapon?.name || 'none');
     };
 
-
-    // Function to handle value change in DropDownPicker
-    const handleMainHandValueChange = (value: string | null) => {
-        if (value === 'none' || !value) {
-            equipWeapon('mainHand', null);
-        } else {
-            const weapon = items.find((item) => item.name === value && item.type === 'Weapon');
-            if (weapon) {
-                equipWeapon('mainHand', weapon);
-            }
-        }
-    };
-
-    const handleOffHandValueChange = (value: string | null) => {
-        if (value === 'none' || !value) {
-            equipWeapon('offHand', null);
-        } else {
-            const weapon = items.find((item) => item.name === value && item.type === 'Weapon');
-            if (weapon) {
-                equipWeapon('offHand', weapon);
-            }
-        }
-    };
-
-    const handleRangedHandValueChange = (value: string | null) => {
-        if (value === 'none' || !value) {
-            equipWeapon('rangedHand', null);
-        } else {
-            const weapon = items.find((item) => item.name === value && item.type === 'Weapon');
-            if (weapon) {
-                equipWeapon('rangedHand', weapon);
-            }
-        }
-    };
     const filterEquipableRangedWeapons = () => {
         const rangedCategories = ["Simple Ranged", "Martial Ranged"];
         const weaponData = require('../data/weapons.json');
@@ -853,28 +834,29 @@ export default function MeScreen() {
                                     )}
                                 </View>
                                 {/* Race Features */}
-                                <View>
-                                    <Text>Race Features</Text>
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.skills && <Text>Skills: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.skills}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feat && <Text>Feat: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feat}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feyAncestry && <Text>Fey Ancestry: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feyAncestry}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.trance && <Text>Trance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.trance}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.stoneCunning && <Text>Stone Cunning: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.stoneCunning}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.darkvision && <Text>Darkvision: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.darkvision}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.lucky && <Text>Lucky: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.lucky}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.brave && <Text>Brave: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.brave}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.halflingNimbleness && <Text>Halfling Nimbleness: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.halflingNimbleness}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.gnomeCunning && <Text>Gnome Cunning: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.gnomeCunning}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.relentlessEndurance && <Text>Relentless Endurance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.relentlessEndurance}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.savageAttacks && <Text>Savage Attacks: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.savageAttacks}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.hellishResistance && <Text>Hellish Resistance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.hellishResistance}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.infernalLegacy && <Text>Infernal Legacy: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.infernalLegacy}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.draconicAncestry && <Text>Draconic Ancestry: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.draconicAncestry}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.breathWeapon && <Text>Breath Weapon: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.breathWeapon}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.damageResistance && <Text>Damage Resistance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.damageResistance}</Text>}
-                                    {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.language && <Text>Language: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.language}</Text>}
-                                </View>
-
+                                {statsData.race && (
+                                    <View>
+                                        <Text>Race Features</Text>
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.skills && <Text>Skills: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.skills}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feat && <Text>Feat: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feat}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feyAncestry && <Text>Fey Ancestry: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.feyAncestry}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.trance && <Text>Trance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.trance}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.stoneCunning && <Text>Stone Cunning: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.stoneCunning}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.darkvision && <Text>Darkvision: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.darkvision}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.lucky && <Text>Lucky: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.lucky}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.brave && <Text>Brave: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.brave}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.halflingNimbleness && <Text>Halfling Nimbleness: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.halflingNimbleness}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.gnomeCunning && <Text>Gnome Cunning: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.gnomeCunning}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.relentlessEndurance && <Text>Relentless Endurance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.relentlessEndurance}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.savageAttacks && <Text>Savage Attacks: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.savageAttacks}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.hellishResistance && <Text>Hellish Resistance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.hellishResistance}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.infernalLegacy && <Text>Infernal Legacy: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.infernalLegacy}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.draconicAncestry && <Text>Draconic Ancestry: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.draconicAncestry}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.breathWeapon && <Text>Breath Weapon: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.breathWeapon}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.damageResistance && <Text>Damage Resistance: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.damageResistance}</Text>}
+                                        {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.language && <Text>Language: {raceBonuses.find(bonus => bonus.race === statsData.race)?.features.language}</Text>}
+                                    </View>
+                                )}
                             </View>
                         </TouchableWithoutFeedback>
                     </View>

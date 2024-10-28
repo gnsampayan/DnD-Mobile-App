@@ -754,9 +754,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                                         Total HP Added: {hpIncreases[lvl]}
                                                     </Text>
                                                 )}
-                                                <Text style={styles.modalInputLabel}>
-                                                    Constitution Modifier: {constitutionModifier}
-                                                </Text>
                                             </View>
                                         );
                                     })}

@@ -1,7 +1,6 @@
-// Start of Selection
 
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, Button, Alert, ImageSourcePropType } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, Button, Alert, ImageSourcePropType, ScrollView } from 'react-native';
 import styles from '@/app/styles/spellbookStyles';
 import classData from '@/app/data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
@@ -44,8 +43,9 @@ type Cantrip = {
     savingThrow?: string | null;
     damageType?: string | null;
     description?: string;
-    features?: string | object[];
+    features?: string | Record<string, any>[];
 }
+
 
 export default function SpellbookScreen() {
     const [preparedSpellSlots, setPreparedSpellSlots] = useState<number | null>(null);
@@ -56,9 +56,6 @@ export default function SpellbookScreen() {
     const [openCantripChoice, setOpenCantripChoice] = useState(false);
     const [cantripChoiceValue, setCantripChoiceValue] = useState<string | null>(null);
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
-    const [cantripChoiceFeatures, setCantripChoiceFeatures] = useState<string | object[] | null>(null);
-
-    // New state to manage cantrip assignments
     const [cantripSlotsData, setCantripSlotsData] = useState<(string | null)[]>([]);
 
 
@@ -81,9 +78,9 @@ export default function SpellbookScreen() {
             if (savedSlots !== null) {
                 setCantripSlotsData(JSON.parse(savedSlots));
             } else {
-                const availableCantrips = getAvailableCantrips(statsData.class || '');
+                // Initialize slots as empty
                 if (cantripSlots) {
-                    setCantripSlotsData(Array(cantripSlots).fill(null).map(() => availableCantrips[0]?.name || null));
+                    setCantripSlotsData(Array(cantripSlots).fill(null));
                 }
             }
         } catch (error) {
@@ -177,7 +174,7 @@ export default function SpellbookScreen() {
     );
 
     const renderPreparedSpellBlocksForClass = () => {
-        if (preparedSpellSlots === 0 && preparedSpellSlots !== null) {
+        if (preparedSpellSlots !== null && preparedSpellSlots <= 0) {
             return (
                 <View style={styles.section}>
                     <Text style={styles.label}>Prepared Spells</Text>
@@ -373,7 +370,7 @@ export default function SpellbookScreen() {
 
     const getAvailableCantrips = (currentClass: string): Cantrip[] => {
         return cantripsData.filter(cantrip =>
-            cantrip.classes.map(cls => cls.toLowerCase()).includes(currentClass.toLowerCase())
+            cantrip.classes?.map(cls => cls.toLowerCase()).includes(currentClass.toLowerCase())
         ) as Cantrip[];
     }
 
@@ -393,27 +390,54 @@ export default function SpellbookScreen() {
         }
         return '-';
     }
-
-    const getFeaturesFromCantrip = (cantripName: string): string => {
+    const getFeaturesFromCantrip = (cantripName: string): React.ReactNode => {
         const allCantrips = getAvailableCantrips(statsData.class || '');
         const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
 
         if (selectedCantrip && selectedCantrip.features) {
-            if (typeof selectedCantrip.features === 'object') {
-                return JSON.stringify(selectedCantrip.features, null, 2);
-            } else if (typeof selectedCantrip.features === 'string') {
-                return selectedCantrip.features;
+            if (typeof selectedCantrip.features === 'string') {
+                return (
+                    <Text style={{ marginBottom: 10 }}>
+                        {selectedCantrip.features}
+                    </Text>
+                );
+            } else if (typeof selectedCantrip.features === 'object') {
+                return Object.entries(selectedCantrip.features).map(([key, value], index) => {
+                    if (typeof value === 'object' && value !== null) {
+                        return (
+                            <View key={index} style={{ flexDirection: 'row' }}>
+                                <Text style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
+                                    {key.replace(/([A-Z])/g, ' $1').trim()}:
+                                </Text>
+                                {Object.entries(value).map(([subKey, subValue], subIndex) => (
+                                    <Text key={subIndex} style={{ marginLeft: 10 }}>
+                                        {`${subKey}: ${subValue}`}
+                                    </Text>
+                                ))}
+                            </View>
+                        );
+                    } else {
+                        return (
+                            <View key={index} style={{ flexDirection: 'row', marginBottom: 2 }}>
+                                <Text style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
+                                    {`${key.replace(/([A-Z])/g, ' $1').trim()}: `}
+                                </Text>
+                                <Text>{String(value)}</Text>
+                            </View>
+                        );
+                    }
+                });
             }
         }
-        return '-';
+        return <Text>-</Text>;
     }
 
     const renderCantripChoicesBasedOnLevel = () => {
         const availableCantrips = getAvailableCantrips(statsData.class || '');
+        const unusedCantrips = availableCantrips.filter(cantrip => !cantripSlotsData.includes(cantrip.name));
         const handleCantripPreview = (cantrip: { name: string; description: string; features?: string | object[]; damage?: string }) => {
             setCantripChoiceValue(cantrip.name);
             setCantripChoiceDescription(cantrip.description || '');
-            setCantripChoiceFeatures(cantrip.features || null);
         }
         return (
             <View>
@@ -426,7 +450,7 @@ export default function SpellbookScreen() {
                                 <DropDownPicker
                                     open={openCantripChoice}
                                     value={cantripChoiceValue}
-                                    items={availableCantrips.map(cantrip => ({
+                                    items={unusedCantrips.map(cantrip => ({
                                         label: cantrip.name,
                                         value: cantrip.name
                                     }))}
@@ -436,10 +460,9 @@ export default function SpellbookScreen() {
                                     style={{ marginBottom: 10 }}
                                     zIndex={1000}
                                     onChangeValue={(value) => {
-                                        const selected = availableCantrips.find(cantrip => cantrip.name === value);
+                                        const selected = unusedCantrips.find(cantrip => cantrip.name === value);
                                         if (selected) {
                                             handleCantripPreview({
-                                                // Start of Selection
                                                 name: selected.name,
                                                 description: selected.description || '',
                                                 features: (selected as Cantrip).features,
@@ -447,43 +470,39 @@ export default function SpellbookScreen() {
                                         }
                                     }}
                                 />
-                                <Text>Selected Cantrip:</Text>
-                                <Text>{cantripChoiceValue}</Text>
-                                <Text>Description:</Text>
-                                <Text>{cantripChoiceDescription}</Text>
-                                {/* Features Section */}
-                                <Text>Features:</Text>
-                                <Text>
-                                    {getFeaturesFromCantrip(cantripChoiceValue ?? '') || ''}
-                                </Text>
-
-                                <Button
-                                    title="Assign"
-                                    color="green"
-                                    disabled={cantripChoiceValue === null}
-                                    onPress={() => {
-                                        setCantripInSlot();
-                                    }}
+                                <FlatList
+                                    data={[
+                                        { label: 'Cantrip Slot:', value: (cantripPressedIndex !== null ? cantripPressedIndex : 0) + 1 },
+                                        { label: 'Description:', value: cantripChoiceDescription },
+                                        { label: 'Features:', value: getFeaturesFromCantrip(cantripChoiceValue ?? '') || '' }
+                                    ]}
+                                    renderItem={({ item }) => (
+                                        <View style={{ marginBottom: 10 }}>
+                                            <Text>{item.label}</Text>
+                                            <Text>{item.value}</Text>
+                                        </View>
+                                    )}
+                                    keyExtractor={(item, index) => index.toString()}
                                 />
                             </>
                         )}
                         {/* Show this when the cantrip slot is NOT empty */}
                         {cantripSlotsData[cantripPressedIndex] !== '' && cantripSlotsData[cantripPressedIndex] !== null && (
-                            <View>
-                                <Text>Selected Cantrip:</Text>
-                                <Text>{cantripSlotsData[cantripPressedIndex]}</Text>
-                                <Text>Damage:</Text>
-                                <Text>
-                                    {getDamageFromCantrip(cantripSlotsData[cantripPressedIndex])?.toString() || ''}
-                                </Text>
-                                <Text>Description:</Text>
-                                <Text>{availableCantrips.find(cantrip => cantrip.name === cantripSlotsData[cantripPressedIndex])?.description || ''}</Text>
-                                {/* Features Section */}
-                                <Text>Features:</Text>
-                                <Text>
-                                    {getFeaturesFromCantrip(cantripSlotsData[cantripPressedIndex]) || ''}
-                                </Text>
-                            </View>
+                            <FlatList
+                                data={[
+                                    { label: 'Cantrip Slot:', value: (cantripPressedIndex !== null ? cantripPressedIndex : 0) + 1 },
+                                    { label: 'Damage:', value: getDamageFromCantrip(cantripSlotsData[cantripPressedIndex])?.toString() || '' },
+                                    { label: 'Description:', value: availableCantrips.find(cantrip => cantrip.name === cantripSlotsData[cantripPressedIndex])?.description || '' },
+                                    { label: 'Features:', value: getFeaturesFromCantrip(cantripSlotsData[cantripPressedIndex]) || '' }
+                                ]}
+                                renderItem={({ item }) => (
+                                    <View style={{ marginBottom: 10 }}>
+                                        <Text>{item.label}</Text>
+                                        <Text>{item.value}</Text>
+                                    </View>
+                                )}
+                                keyExtractor={(item, index) => index.toString()}
+                            />
                         )}
                     </>
                 )}
@@ -506,7 +525,6 @@ export default function SpellbookScreen() {
         setCantripModalVisible(false);
         setCantripChoiceValue(null);
         setCantripChoiceDescription(null);
-        setCantripChoiceFeatures(null);
         setCantripPressedIndex(null);
     }
 
@@ -536,30 +554,46 @@ export default function SpellbookScreen() {
                 visible={cantripModalVisible}
             >
                 <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.cantripModal}>
-                            <Text style={[styles.title, { color: 'black' }]}>Cantrip Slot {(cantripPressedIndex !== null ? cantripPressedIndex : 0) + 1}</Text>
-                            <View style={{ marginBottom: 10, zIndex: 1000 }}>
-                                {renderCantripChoicesBasedOnLevel()}
-                            </View>
-                            {/* Unassign Button */}
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                                {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' && (
-                                    <Button
-                                        title="Unassign"
-                                        color="red"
+                    <View style={[styles.modalOverlay, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+                        <TouchableWithoutFeedback>
+                            <View style={[styles.cantripModal, { height: '100%', width: '100%', paddingTop: 60, paddingBottom: 40, justifyContent: 'space-between' }]}>
+                                <View>
+                                    <Text style={[styles.title, { color: 'black' }]}>
+                                        {cantripChoiceValue || (cantripPressedIndex !== null ? cantripSlotsData[cantripPressedIndex] : '')}
+                                    </Text>
+
+                                    <View style={{ paddingBottom: 10, zIndex: 1000 }}>
+                                        {renderCantripChoicesBasedOnLevel()}
+                                    </View>
+                                </View>
+                                {/* Buttons */}
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
+                                    {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (
+                                        <Button
+                                            title="Unassign"
+                                            color="red"
+                                            onPress={() => {
+                                                removeCantripFromSlot();
+                                                setCantripModalVisible(false);
+                                            }}
+                                        />
+                                    ) : <Button
+                                        title="Assign"
+                                        color="green"
+                                        disabled={cantripChoiceValue === null}
                                         onPress={() => {
-                                            removeCantripFromSlot();
-                                            setCantripModalVisible(false);
+                                            setCantripInSlot();
                                         }}
-                                    />
-                                )}
+                                    />}
+                                    <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
+                                        <Text style={{ color: 'black' }}>Close</Text>
+                                    </TouchableWithoutFeedback>
+                                </View>
                             </View>
-                        </View>
+                        </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
-            </Modal>{/* Reset Confirmation Modal */}
+            </Modal>
         </View>
     );
 }
-

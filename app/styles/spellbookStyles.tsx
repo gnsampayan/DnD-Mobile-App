@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
         padding: 20,
-        minWidth: '80%',
     },
     modalOverlay: {
         flex: 1,

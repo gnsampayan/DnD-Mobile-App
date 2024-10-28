@@ -1351,7 +1351,7 @@ export default function ActionsScreen() {
                         ) : (
                           <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
                             <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
-                              <Ionicons name={isUnarmedStrikeProficient ? "dice" : "dice-outline"} size={20} color="black" />
+                              <Ionicons name={"dice"} size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>+({currentStrengthModifier} Str) or +({currentDexModifier} Dex)</Text>
                                 {isUnarmedStrikeProficient &&
