@@ -66,7 +66,7 @@ const getLevelFromXp = (xp: number): number => {
 
 
 const getAbilityPointsFromLevel = (level: number): number => {
-    return level === 1 ? 6 : 6 + (level - 1) * 2;
+    return level === 1 ? 24 : 24 + (level - 1) * 2;
 };
 
 
@@ -77,7 +77,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [skills] = useState<Skill[]>(skillsData);
     const [hasUnfilledHpIncreases, setHasUnfilledHpIncreases] = useState(false);
     const [constitutionModifier, setConstitutionModifier] = useState(0);
-
+    const [abilityAllocationsSaveVisible, setAbilityAllocationsSaveVisible] = useState(false);
+    const [availableAbilityPoints, setAvailableAbilityPoints] = useState(0);
 
     // States for Ability Modification Modal
     const [abilityModalVisible, setAbilityModalVisible] = useState<boolean>(false);
@@ -143,8 +144,16 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         return totalPoints - usedPoints;
     };
 
+    useEffect(() => {
+        const availablePoints = getAvailableAbilityPoints();
+        setAvailableAbilityPoints(availablePoints);
+        if (availablePoints === 0 && Object.keys(allocationsPerLevel).length !== 0) {
+            setAbilityAllocationsSaveVisible(true);
+        } else {
+            setAbilityAllocationsSaveVisible(false);
+        }
+    }, [statsData.level, statsData.abilities]);
 
-    const availableAbilityPoints = getAvailableAbilityPoints();
 
     // Function to handle XP changes
     const handleXpChange = () => {
@@ -163,6 +172,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             };
         }
 
+
         // Update statsData
         updateStatsData({
             ...statsData,
@@ -180,7 +190,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         if (!selectedAbility) return;
 
         // Fetch the latest ability details from context
-        const currentAbility = abilities.find((a) => a.id === selectedAbility.id);
+        const currentAbility = statsData.abilities.find((a) => a.id === selectedAbility.id);
         if (!currentAbility) {
             Alert.alert('Error', 'Selected ability not found.');
             return;
@@ -192,26 +202,19 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return;
         }
 
-        // Determine maximum increment based on level and skipped levels
-        let maxIncrement = 2;
-        let lastAllocatedLevel = 1;
-        for (let i = 2; i <= level; i++) {
-            if (allocationsPerLevel[i]) {
-                maxIncrement += 2 * (i - lastAllocatedLevel);
-                lastAllocatedLevel = i;
-            }
-        }
-        maxIncrement += 2 * (level - lastAllocatedLevel);
-
-        const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
-
-        if (currentAllocation >= maxIncrement) {
-            Alert.alert(
-                'Max Increment Reached',
-                `You cannot increase ${selectedAbility.name} more than ${maxIncrement} points at your current level.`
-            );
+        // Check if ability would exceed maximum of 20
+        if (currentAbility.value >= 20) {
+            Alert.alert('Maximum Value Reached', 'Abilities cannot exceed 20.');
             return;
         }
+
+        // Check level 1 maximum of 15
+        if (level === 1 && currentAbility.value >= 15) {
+            Alert.alert('Level 1 Maximum Reached', 'Abilities cannot exceed 15 at level 1.');
+            return;
+        }
+
+        const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
 
         // Update allocations
         const updatedAllocations = {
@@ -223,7 +226,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         };
 
         // Update abilities
-        const updatedAbilities = abilities.map((ability) => {
+        const updatedAbilities = statsData.abilities.map((ability) => {
             if (ability.id === selectedAbility.id) {
                 return { ...ability, value: ability.value + 1 };
             }
@@ -417,6 +420,16 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         );
     };
 
+    const saveAbilityAllocations = () => {
+        console.log("Data Saved");
+        // Reset allocations
+        const resetAllocations: AllocationHistory = {};
+        updateStatsData({
+            ...statsData,
+            allocationsPerLevel: resetAllocations,
+        });
+        setAbilityAllocationsSaveVisible(false);
+    }
 
 
     return (
@@ -440,9 +453,12 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
                     {/* XP */}
                     <TouchableOpacity
-                        style={[styles.firstRowContents, { borderColor: availableAbilityPoints > 0 ? 'transparent' : 'lightgrey' }]}
+                        style={[styles.firstRowContents, {
+                            borderColor: availableAbilityPoints > 0 ? 'transparent' : abilityAllocationsSaveVisible ? 'transparent' : 'lightgrey',
+                            opacity: abilityAllocationsSaveVisible ? 0.5 : 1
+                        }]}
                         onPress={() => {
-                            if (availableAbilityPoints === 0) {
+                            if (!abilityAllocationsSaveVisible && availableAbilityPoints === 0) {
                                 setModalVisible(true);
                             } else {
                                 Alert.alert(
@@ -452,6 +468,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 );
                             }
                         }}
+                        disabled={abilityAllocationsSaveVisible}
                     >
                         <Text style={styles.firstRowText}>XP: {xp}</Text>
                     </TouchableOpacity>
@@ -526,6 +543,11 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         <Ionicons name="star" size={20} color="lightgrey" />
                         <Text style={styles.characterStatsTitle}>Abilities</Text>
                     </View>
+                    {abilityAllocationsSaveVisible &&
+                        <TouchableOpacity onPress={() => saveAbilityAllocations()} style={styles.abilitySaveButton}>
+                            <Ionicons name="save" size={20} color="white" />
+                            <Text style={styles.saveButtonText}>Save</Text>
+                        </TouchableOpacity>}
                     <View style={availableAbilityPoints > 0 ? styles.availableAbilityPointsHighlighted : styles.availableAbilityPointsNotHighlighted}>
                         <Ionicons name="star" size={16} color={availableAbilityPoints > 0 ? 'gold' : 'lightgrey'} />
                         <Text style={styles.availableAbilityPoints}>
@@ -617,7 +639,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                             <Text style={styles.modalTitle}>{selectedAbility.name}</Text>
                                         </View>
                                         <Text style={styles.modalSubtitle}>
-                                            Current Value: {selectedAbility.value}
+                                            Current Value: {statsData.abilities.find(a => a.id === selectedAbility.id)?.value}
                                         </Text>
                                         <Text style={styles.modalSubtitle}>
                                             Available Points: {availableAbilityPoints}

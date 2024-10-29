@@ -591,6 +591,17 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         marginBottom: 5,
     },
+    abilitySaveButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 4,
+        padding: 5,
+        borderWidth: 2,
+        borderColor: 'gold',
+        borderStyle: 'solid',
+    },
 });
 
 export default styles;

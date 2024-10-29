@@ -1,183 +1,185 @@
 [
-  {
-    "race": "Human",
-    "speed": 30,
-    "features": {
-      "skills": "You gain proficiency in one skill of your choice.",
-      "feat": "You gain one feat of your choice.",
-      "language": "You can speak, read, and write Common and one other language of your choice."
-    },
-    "bonuses": {
-      "strength": 1,
-      "dexterity": 1,
-      "constitution": 1,
-      "intelligence": 1,
-      "wisdom": 1,
-      "charisma": 1
-    },
-    "total": 6
-  },
-  {
-    "race": "Elf",
-    "speed": 30,
-    "proficiencies": {
-      "skillProficiency": ["perception"]
-    },
-    "features": {
-      "feyAncestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
-      "trance": "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. A short rest counts as 8 hours of sleep.",
-      "language": "You can speak, read, and write Common and Elvish."
-    },
-    "bonuses": {
-      "strength": 0,
-      "dexterity": 2,
-      "constitution": 0,
-      "intelligence": 1,
-      "wisdom": 0,
-      "charisma": 0
-    },
-    "total": 3
-  },
-  {
-    "race": "Dwarf",
-    "speed": 25,
-    "proficiencies": {
-      "weaponProficiency": [
-        "battleaxe",
-        "handaxe",
-        "hammer, light",
-        "warhammer"
-      ],
-      "toolProficiency": [
-        "smith's tools",
-        "brewer's supplies",
-        "mason's tools"
-      ]
-    },
-    "features": {
-      "stoneCunning": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus."
-    },
-    "bonuses": {
-      "strength": 2,
-      "dexterity": 0,
-      "constitution": 2,
-      "intelligence": 0,
-      "wisdom": 0,
-      "charisma": 0
-    },
-    "total": 4
-  },
-  {
-    "race": "Halfling",
-    "speed": 25,
-    "features": {
-      "lucky": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll one dice of your choice.",
-      "brave": "You have advantage on saving throws against being frightened.",
-      "halflingNimbleness": "Your small size makes you nimble, and you have advantage on Dexterity (Acrobatics) checks made to avoid being grappled, pinned, or otherwise restrained. You can move through the space of any creature that is of a size larger than yours.",
-      "language": "You can speak, read, and write Common and Halfling."
-    },
-    "bonuses": {
-      "strength": 0,
-      "dexterity": 2,
-      "constitution": 0,
-      "intelligence": 0,
-      "wisdom": 0,
-      "charisma": 1
-    },
-    "total": 3
-  },
-  {
-    "race": "Gnome",
-    "speed": 25,
-    "features": {
-      "gnomeCunning": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."
-    },
-    "bonuses": {
-      "strength": 0,
-      "dexterity": 0,
-      "constitution": 1,
-      "intelligence": 2,
-      "wisdom": 0,
-      "charisma": 0
-    },
-    "total": 3
-  },
-  {
-    "race": "Half-Elf",
-    "speed": 30,
-    "features": {
-      "darkvision": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
-      "feyAncestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
-      "language": "You can speak, read, and write Common, Elvish, and one other language of your choice."
-    },
-    "bonuses": {
-      "strength": 0,
-      "dexterity": 1,
-      "constitution": 0,
-      "intelligence": 1,
-      "wisdom": 0,
-      "charisma": 2
-    },
-    "total": 4
-  },
-  {
-    "race": "Half-Orc",
-    "speed": 30,
-    "proficiencies": {
-      "skillProficiency": ["intimidation"]
-    },
-    "features": {
-      "darkVision": "Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
-      "relentlessEndurance": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.",
-      "savageAttacks": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit.",
-      "language": "You can speak, read, and write Common and Orc."
-    },
-    "bonuses": {
-      "strength": 2,
-      "dexterity": 0,
-      "constitution": 1,
-      "intelligence": 0,
-      "wisdom": 0,
-      "charisma": 0
-    },
-    "total": 3
-  },
-  {
-    "race": "Tiefling",
-    "speed": 30,
-    "features": {
-      "darkvision": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
-      "hellishResistance": "You have resistance to fire damage.",
-      "infernalLegacy": "You know the Thaumaturgy cantrip. Once you reach 3rd level, you can cast the Hellish Rebuke spell as a 2nd-level spell; you must finish a long rest in order to cast the spell again using this trait. Once you reach 5th level, you can also cast the Darkness spell; you must finish a long rest in order to cast the spell again using this trait. Charisma is your spellcasting ability for these spells.",
-      "language": "You can speak, read, and write Common and Infernal."
-    },
-    "bonuses": {
-      "strength": 0,
-      "dexterity": 0,
-      "constitution": 0,
-      "intelligence": 1,
-      "wisdom": 0,
-      "charisma": 2
-    },
-    "total": 3
-  },
-  {
-    "race": "Dragonborn",
-    "speed": 30,
-    "features": {
-      "draconicAncestry": "You have draconic ancestry. Choose one type of dragon from the Draconic Ancestry table. Your breath weapon and damage resistance are determined by the dragon type, as shown in the table.",
-      "breathWeapon": "You can use your action to exhale destructive energy. Your Draconic Ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your Draconic Ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level. After you use your breath weapon, you can't use it again until you complete a short or long rest.",
-      "damageResistance": "You have resistance to the damage type associated with your draconic ancestry.",
-      "language": "You can speak, read, and write Common and Draconic."
-    },
-    "bonuses": {
-      "strength": 2,
-      "dexterity": 0,
-      "constitution": 0,
-      "intelligence": 0,
-      "wisdom": 0,
-      "charisma": 1
-    },
-    "total": 3
-  }
+	{
+		"race": "Human",
+		"speed": 30,
+		"features": {
+			"language": "You can speak, read, and write Common and one other language of your choice."
+		},
+		"bonuses": {
+			"strength": 1,
+			"dexterity": 1,
+			"constitution": 1,
+			"intelligence": 1,
+			"wisdom": 1,
+			"charisma": 1
+		},
+		"total": 6
+	},
+	{
+		"race": "Elf",
+		"speed": 30,
+		"proficiencies": {
+			"skillProficiency": ["perception"]
+		},
+		"features": {
+			"fey ancestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
+			"trance": "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. A short rest counts as 8 hours of sleep.",
+			"language": "You can speak, read, and write Common and Elvish.",
+			"darkvision": "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."
+		},
+		"bonuses": {
+			"strength": 0,
+			"dexterity": 2,
+			"constitution": 0,
+			"intelligence": 0,
+			"wisdom": 0,
+			"charisma": 0
+		},
+		"total": 3
+	},
+	{
+		"race": "Dwarf",
+		"speed": 25,
+		"proficiencies": {
+			"weaponProficiency": [
+				"battleaxe",
+				"handaxe",
+				"hammer, light",
+				"warhammer"
+			],
+			"toolProficiency": ["smith's tools", "brewer's supplies", "mason's tools"]
+		},
+		"features": {
+			"stone cunning": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus.",
+			"darkvision": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
+			"dwarven resilience": "You have advantage on saving throws against poison, and you have resistance against poison damage."
+		},
+		"bonuses": {
+			"strength": 0,
+			"dexterity": 0,
+			"constitution": 2,
+			"intelligence": 0,
+			"wisdom": 0,
+			"charisma": 0
+		},
+		"total": 4
+	},
+	{
+		"race": "Halfling",
+		"speed": 25,
+		"features": {
+			"lucky": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll one dice of your choice.",
+			"brave": "You have advantage on saving throws against being frightened.",
+			"halfling nimbleness": "Your small size makes you nimble, and you have advantage on Dexterity (Acrobatics) checks made to avoid being grappled, pinned, or otherwise restrained. You can move through the space of any creature that is of a size larger than yours.",
+			"language": "You can speak, read, and write Common and Halfling."
+		},
+		"bonuses": {
+			"strength": 0,
+			"dexterity": 2,
+			"constitution": 0,
+			"intelligence": 0,
+			"wisdom": 0,
+			"charisma": 0
+		},
+		"total": 3
+	},
+	{
+		"race": "Gnome",
+		"speed": 25,
+		"features": {
+			"gnome cunning": "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic.",
+			"darkvision": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
+			"langauge": "You can speak, read, and write Common and Gnomish."
+		},
+		"bonuses": {
+			"strength": 0,
+			"dexterity": 0,
+			"constitution": 0,
+			"intelligence": 2,
+			"wisdom": 0,
+			"charisma": 0
+		},
+		"total": 3
+	},
+	{
+		"race": "Half-Elf",
+		"proficiencies": {
+			"skillProficiency": ["perception", "acrobatics"]
+		},
+		"speed": 30,
+		"features": {
+			"darkvision": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
+			"fey ancestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
+			"language": "You can speak, read, and write Common, Elvish, and one other language of your choice."
+		},
+		"bonuses": {
+			"strength": 0,
+			"dexterity": 1,
+			"constitution": 0,
+			"intelligence": 1,
+			"wisdom": 0,
+			"charisma": 2
+		},
+		"total": 4
+	},
+	{
+		"race": "Half-Orc",
+		"speed": 30,
+		"proficiencies": {
+			"skillProficiency": ["intimidation"]
+		},
+		"features": {
+			"darkVision": "Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
+			"relentless endurance": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.",
+			"savage attacks": "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit.",
+			"language": "You can speak, read, and write Common and Orc."
+		},
+		"bonuses": {
+			"strength": 2,
+			"dexterity": 0,
+			"constitution": 1,
+			"intelligence": 0,
+			"wisdom": 0,
+			"charisma": 0
+		},
+		"total": 3
+	},
+	{
+		"race": "Tiefling",
+		"speed": 30,
+		"features": {
+			"darkvision": "Thanks to your infernal heritage, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
+			"hellish resistance": "You have resistance to fire damage.",
+			"infernal legacy": "You know the Thaumaturgy cantrip. Once you reach 3rd level, you can cast the Hellish Rebuke spell as a 2nd-level spell; you must finish a long rest in order to cast the spell again using this trait. Once you reach 5th level, you can also cast the Darkness spell; you must finish a long rest in order to cast the spell again using this trait. Charisma is your spellcasting ability for these spells.",
+			"language": "You can speak, read, and write Common and Infernal."
+		},
+		"bonuses": {
+			"strength": 0,
+			"dexterity": 0,
+			"constitution": 0,
+			"intelligence": 1,
+			"wisdom": 0,
+			"charisma": 2
+		},
+		"total": 3
+	},
+	{
+		"race": "Dragonborn",
+		"speed": 30,
+		"features": {
+			"draconic ancestry": "You have draconic ancestry. Choose one type of dragon from the Draconic Ancestry table. Your breath weapon and damage resistance are determined by the dragon type, as shown in the table.",
+			"breath weapon": "You can use your action to exhale destructive energy. Your Draconic Ancestry determines the size, shape, and damage type of the exhalation. When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your Draconic Ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level. After you use your breath weapon, you can't use it again until you complete a short or long rest.",
+			"damage resistance": "You have resistance to the damage type associated with your draconic ancestry.",
+			"language": "You can speak, read, and write Common and Draconic."
+		},
+		"bonuses": {
+			"strength": 2,
+			"dexterity": 0,
+			"constitution": 0,
+			"intelligence": 0,
+			"wisdom": 0,
+			"charisma": 1
+		},
+		"total": 3
+	}
 ]

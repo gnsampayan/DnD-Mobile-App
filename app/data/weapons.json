@@ -1,377 +1,381 @@
 {
-  "weapons": [
-    {
-      "category": "Simple Melee",
-      "items": [
-        {
-          "name": "Club",
-          "cost": "1 sp",
-          "damage": "1d4",
-          "damageType": "bludgeoning",
-          "weight": "2 lb.",
-          "properties": ["Light"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Dagger",
-          "cost": "2 gp",
-          "damage": "1d4",
-          "damageType": "piercing",
-          "weight": "1 lb.",
-          "properties": ["Finesse", "Thrown", "Light"],
-          "throwRange": "20/60",
-          "skill_modifiers": ["Strength", "Dexterity"]
-        },
-        {
-          "name": "Greatclub",
-          "cost": "2 sp",
-          "damage": "1d8",
-          "damageType": "bludgeoning",
-          "weight": "10 lb.",
-          "properties": ["Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Handaxe",
-          "cost": "5 gp",
-          "damage": "1d6",
-          "damageType": "slashing",
-          "weight": "2 lb.",
-          "properties": ["Light", "Thrown"],
-          "throwRange": "20/60",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Javelin",
-          "cost": "5 sp",
-          "damage": "1d6",
-          "damageType": "piercing",
-          "weight": "2 lb.",
-          "properties": ["Thrown"],
-          "throwRange": "30/120",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Hammer, Light",
-          "cost": "2 gp",
-          "damage": "1d4",
-          "damageType": "bludgeoning",
-          "weight": "2 lb.",
-          "properties": ["Light", "Thrown"],
-          "throwRange": "20/60",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Mace",
-          "cost": "5 gp",
-          "damage": "1d6",
-          "damageType": "bludgeoning",
-          "weight": "4 lb.",
-          "properties": [],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Quarterstaff",
-          "cost": "2 sp",
-          "damage": "1d6",
-          "damageType": "bludgeoning",
-          "weight": "4 lb.",
-          "properties": ["Versatile"],
-          "versatileDamage": "1d8",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Sickle",
-          "cost": "1 gp",
-          "damage": "1d4",
-          "damageType": "slashing",
-          "weight": "2 lb.",
-          "properties": ["Light"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Spear",
-          "cost": "1 gp",
-          "damage": "1d6",
-          "damageType": "piercing",
-          "weight": "3 lb.",
-          "properties": ["Thrown", "Versatile"],
-          "throwRange": "20/60",
-          "versatileDamage": "1d8",
-          "skill_modifiers": ["Strength"]
-        }
-      ]
-    },
-    {
-      "category": "Simple Ranged",
-      "items": [
-        {
-          "name": "Crossbow, light",
-          "cost": "25 gp",
-          "damage": "1d8",
-          "damageType": "piercing",
-          "weight": "5 lb.",
-          "properties": ["Ammunition", "Loading", "Two-handed"],
-          "range": "80/320",
-          "skill_modifiers": ["Dexterity"]
-        },
-        {
-          "name": "Dart",
-          "cost": "5 cp",
-          "damage": "1d4",
-          "damageType": "piercing",
-          "weight": "1/4 lb.",
-          "properties": ["Finesse", "Thrown"],
-          "throwRange": "20/60",
-          "skill_modifiers": ["Strength", "Dexterity"]
-        },
-        {
-          "name": "Shortbow",
-          "cost": "25 gp",
-          "damage": "1d6",
-          "damageType": "piercing",
-          "weight": "2 lb.",
-          "properties": ["Ammunition", "Two-handed"],
-          "range": "80/320",
-          "skill_modifiers": ["Dexterity"]
-        },
-        {
-          "name": "Sling",
-          "cost": "1 sp",
-          "damage": "1d4",
-          "damageType": "bludgeoning",
-          "weight": "—",
-          "properties": ["Ammunition"],
-          "range": "30/120",
-          "skill_modifiers": ["Dexterity"]
-        }
-      ]
-    },
-    {
-      "category": "Martial Melee",
-      "items": [
-        {
-          "name": "Battleaxe",
-          "cost": "10 gp",
-          "damage": "1d8",
-          "damageType": "slashing",
-          "weight": "4 lb.",
-          "properties": ["Versatile"],
-          "versatileDamage": "1d10",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Flail",
-          "cost": "10 gp",
-          "damage": "1d8",
-          "damageType": "bludgeoning",
-          "weight": "2 lb.",
-          "properties": [],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Glaive",
-          "cost": "20 gp",
-          "damage": "1d10",
-          "damageType": "slashing",
-          "weight": "6 lb.",
-          "properties": ["Heavy", "Reach", "Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Greataxe",
-          "cost": "30 gp",
-          "damage": "1d12",
-          "damageType": "slashing",
-          "weight": "7 lb.",
-          "properties": ["Heavy", "Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Greatsword",
-          "cost": "50 gp",
-          "damage": "2d6",
-          "damageType": "slashing",
-          "weight": "6 lb.",
-          "properties": ["Heavy", "Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Halberd",
-          "cost": "20 gp",
-          "damage": "1d10",
-          "damageType": "slashing",
-          "weight": "6 lb.",
-          "properties": ["Heavy", "Reach", "Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Lance",
-          "cost": "10 gp",
-          "damage": "1d12",
-          "damageType": "piercing",
-          "weight": "6 lb.",
-          "properties": ["Reach", "Special"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Longsword",
-          "cost": "15 gp",
-          "damage": "1d8",
-          "damageType": "slashing",
-          "weight": "3 lb.",
-          "properties": ["Versatile"],
-          "versatileDamage": "1d10",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Maul",
-          "cost": "10 gp",
-          "damage": "2d6",
-          "damageType": "bludgeoning",
-          "weight": "10 lb.",
-          "properties": ["Heavy", "Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Morningstar",
-          "cost": "15 gp",
-          "damage": "1d8",
-          "damageType": "piercing",
-          "weight": "4 lb.",
-          "properties": [],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Pike",
-          "cost": "5 gp",
-          "damage": "1d10",
-          "damageType": "piercing",
-          "weight": "18 lb.",
-          "properties": ["Heavy", "Reach", "Two-handed"],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Rapier",
-          "cost": "25 gp",
-          "damage": "1d8",
-          "damageType": "piercing",
-          "weight": "2 lb.",
-          "properties": ["Finesse"],
-          "skill_modifiers": ["Strength", "Dexterity"]
-        },
-        {
-          "name": "Scimitar",
-          "cost": "25 gp",
-          "damage": "1d6",
-          "damageType": "slashing",
-          "weight": "3 lb.",
-          "properties": ["Finesse", "Light"],
-          "skill_modifiers": ["Strength", "Dexterity"]
-        },
-        {
-          "name": "Shortsword",
-          "cost": "10 gp",
-          "damage": "1d6",
-          "damageType": "piercing",
-          "weight": "2 lb.",
-          "properties": ["Finesse", "Light"],
-          "skill_modifiers": ["Strength", "Dexterity"]
-        },
-        {
-          "name": "Trident",
-          "cost": "5 gp",
-          "damage": "1d6",
-          "damageType": "piercing",
-          "weight": "4 lb.",
-          "properties": ["Thrown", "Versatile"],
-          "throwRange": "20/60",
-          "versatileDamage": "1d8",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "War pick",
-          "cost": "5 gp",
-          "damage": "1d8",
-          "damageType": "piercing",
-          "weight": "2 lb.",
-          "properties": [],
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Warhammer",
-          "cost": "15 gp",
-          "damage": "1d8",
-          "damageType": "bludgeoning",
-          "weight": "2 lb.",
-          "properties": ["Versatile"],
-          "versatileDamage": "1d10",
-          "skill_modifiers": ["Strength"]
-        },
-        {
-          "name": "Whip",
-          "cost": "2 gp",
-          "damage": "1d4",
-          "damageType": "slashing",
-          "weight": "3 lb.",
-          "properties": ["Finesse", "Reach"],
-          "skill_modifiers": ["Strength", "Dexterity"]
-        }
-      ]
-    },
-    {
-      "category": "Martial Ranged",
-      "items": [
-        {
-          "name": "Blowgun",
-          "cost": "10 gp",
-          "damage": "1",
-          "damageType": "piercing",
-          "weight": "1 lb.",
-          "properties": ["Ammunition", "Loading"],
-          "range": "25/100",
-          "skill_modifiers": ["Dexterity"]
-        },
-        {
-          "name": "Crossbow, hand",
-          "cost": "75 gp",
-          "damage": "1d6",
-          "damageType": "piercing",
-          "weight": "3 lb.",
-          "properties": ["Ammunition", "Light", "Loading"],
-          "range": "30/120",
-          "skill_modifiers": ["Dexterity"]
-        },
-        {
-          "name": "Crossbow, heavy",
-          "cost": "50 gp",
-          "damage": "1d10",
-          "damageType": "piercing",
-          "weight": "18 lb.",
-          "properties": ["Ammunition", "Heavy", "Loading", "Two-handed"],
-          "range": "100/400",
-          "skill_modifiers": ["Dexterity"]
-        },
-        {
-          "name": "Longbow",
-          "cost": "50 gp",
-          "damage": "1d8",
-          "damageType": "piercing",
-          "weight": "2 lb.",
-          "properties": ["Ammunition", "Heavy", "Two-handed"],
-          "range": "150/600",
-          "skill_modifiers": ["Dexterity"]
-        },
-        {
-          "name": "Net",
-          "cost": "1 gp",
-          "damage": "—",
-          "weight": "3 lb.",
-          "properties": ["Special", "Thrown"],
-          "throwRange": "5/15",
-          "skill_modifiers": ["Dexterity"]
-        }
-      ]
-    }
-  ]
+	"weapons": [
+		{
+			"category": "Custom Weapon",
+			"items": []
+		},
+		{
+			"category": "Simple Melee",
+			"items": [
+				{
+					"name": "Club",
+					"cost": "1 sp",
+					"damage": "1d4",
+					"damageType": "bludgeoning",
+					"weight": "2 lb.",
+					"properties": ["Light"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Dagger",
+					"cost": "2 gp",
+					"damage": "1d4",
+					"damageType": "piercing",
+					"weight": "1 lb.",
+					"properties": ["Finesse", "Thrown", "Light"],
+					"throwRange": "20/60",
+					"skill_modifiers": ["Strength", "Dexterity"]
+				},
+				{
+					"name": "Greatclub",
+					"cost": "2 sp",
+					"damage": "1d8",
+					"damageType": "bludgeoning",
+					"weight": "10 lb.",
+					"properties": ["Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Handaxe",
+					"cost": "5 gp",
+					"damage": "1d6",
+					"damageType": "slashing",
+					"weight": "2 lb.",
+					"properties": ["Light", "Thrown"],
+					"throwRange": "20/60",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Javelin",
+					"cost": "5 sp",
+					"damage": "1d6",
+					"damageType": "piercing",
+					"weight": "2 lb.",
+					"properties": ["Thrown"],
+					"throwRange": "30/120",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Hammer, Light",
+					"cost": "2 gp",
+					"damage": "1d4",
+					"damageType": "bludgeoning",
+					"weight": "2 lb.",
+					"properties": ["Light", "Thrown"],
+					"throwRange": "20/60",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Mace",
+					"cost": "5 gp",
+					"damage": "1d6",
+					"damageType": "bludgeoning",
+					"weight": "4 lb.",
+					"properties": [],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Quarterstaff",
+					"cost": "2 sp",
+					"damage": "1d6",
+					"damageType": "bludgeoning",
+					"weight": "4 lb.",
+					"properties": ["Versatile"],
+					"versatileDamage": "1d8",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Sickle",
+					"cost": "1 gp",
+					"damage": "1d4",
+					"damageType": "slashing",
+					"weight": "2 lb.",
+					"properties": ["Light"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Spear",
+					"cost": "1 gp",
+					"damage": "1d6",
+					"damageType": "piercing",
+					"weight": "3 lb.",
+					"properties": ["Thrown", "Versatile"],
+					"throwRange": "20/60",
+					"versatileDamage": "1d8",
+					"skill_modifiers": ["Strength"]
+				}
+			]
+		},
+		{
+			"category": "Simple Ranged",
+			"items": [
+				{
+					"name": "Crossbow, light",
+					"cost": "25 gp",
+					"damage": "1d8",
+					"damageType": "piercing",
+					"weight": "5 lb.",
+					"properties": ["Ammunition", "Loading", "Two-handed"],
+					"range": "80/320",
+					"skill_modifiers": ["Dexterity"]
+				},
+				{
+					"name": "Dart",
+					"cost": "5 cp",
+					"damage": "1d4",
+					"damageType": "piercing",
+					"weight": "1/4 lb.",
+					"properties": ["Finesse", "Thrown"],
+					"throwRange": "20/60",
+					"skill_modifiers": ["Strength", "Dexterity"]
+				},
+				{
+					"name": "Shortbow",
+					"cost": "25 gp",
+					"damage": "1d6",
+					"damageType": "piercing",
+					"weight": "2 lb.",
+					"properties": ["Ammunition", "Two-handed"],
+					"range": "80/320",
+					"skill_modifiers": ["Dexterity"]
+				},
+				{
+					"name": "Sling",
+					"cost": "1 sp",
+					"damage": "1d4",
+					"damageType": "bludgeoning",
+					"weight": "—",
+					"properties": ["Ammunition"],
+					"range": "30/120",
+					"skill_modifiers": ["Dexterity"]
+				}
+			]
+		},
+		{
+			"category": "Martial Melee",
+			"items": [
+				{
+					"name": "Battleaxe",
+					"cost": "10 gp",
+					"damage": "1d8",
+					"damageType": "slashing",
+					"weight": "4 lb.",
+					"properties": ["Versatile"],
+					"versatileDamage": "1d10",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Flail",
+					"cost": "10 gp",
+					"damage": "1d8",
+					"damageType": "bludgeoning",
+					"weight": "2 lb.",
+					"properties": [],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Glaive",
+					"cost": "20 gp",
+					"damage": "1d10",
+					"damageType": "slashing",
+					"weight": "6 lb.",
+					"properties": ["Heavy", "Reach", "Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Greataxe",
+					"cost": "30 gp",
+					"damage": "1d12",
+					"damageType": "slashing",
+					"weight": "7 lb.",
+					"properties": ["Heavy", "Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Greatsword",
+					"cost": "50 gp",
+					"damage": "2d6",
+					"damageType": "slashing",
+					"weight": "6 lb.",
+					"properties": ["Heavy", "Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Halberd",
+					"cost": "20 gp",
+					"damage": "1d10",
+					"damageType": "slashing",
+					"weight": "6 lb.",
+					"properties": ["Heavy", "Reach", "Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Lance",
+					"cost": "10 gp",
+					"damage": "1d12",
+					"damageType": "piercing",
+					"weight": "6 lb.",
+					"properties": ["Reach", "Special"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Longsword",
+					"cost": "15 gp",
+					"damage": "1d8",
+					"damageType": "slashing",
+					"weight": "3 lb.",
+					"properties": ["Versatile"],
+					"versatileDamage": "1d10",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Maul",
+					"cost": "10 gp",
+					"damage": "2d6",
+					"damageType": "bludgeoning",
+					"weight": "10 lb.",
+					"properties": ["Heavy", "Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Morningstar",
+					"cost": "15 gp",
+					"damage": "1d8",
+					"damageType": "piercing",
+					"weight": "4 lb.",
+					"properties": [],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Pike",
+					"cost": "5 gp",
+					"damage": "1d10",
+					"damageType": "piercing",
+					"weight": "18 lb.",
+					"properties": ["Heavy", "Reach", "Two-handed"],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Rapier",
+					"cost": "25 gp",
+					"damage": "1d8",
+					"damageType": "piercing",
+					"weight": "2 lb.",
+					"properties": ["Finesse"],
+					"skill_modifiers": ["Strength", "Dexterity"]
+				},
+				{
+					"name": "Scimitar",
+					"cost": "25 gp",
+					"damage": "1d6",
+					"damageType": "slashing",
+					"weight": "3 lb.",
+					"properties": ["Finesse", "Light"],
+					"skill_modifiers": ["Strength", "Dexterity"]
+				},
+				{
+					"name": "Shortsword",
+					"cost": "10 gp",
+					"damage": "1d6",
+					"damageType": "piercing",
+					"weight": "2 lb.",
+					"properties": ["Finesse", "Light"],
+					"skill_modifiers": ["Strength", "Dexterity"]
+				},
+				{
+					"name": "Trident",
+					"cost": "5 gp",
+					"damage": "1d6",
+					"damageType": "piercing",
+					"weight": "4 lb.",
+					"properties": ["Thrown", "Versatile"],
+					"throwRange": "20/60",
+					"versatileDamage": "1d8",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "War pick",
+					"cost": "5 gp",
+					"damage": "1d8",
+					"damageType": "piercing",
+					"weight": "2 lb.",
+					"properties": [],
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Warhammer",
+					"cost": "15 gp",
+					"damage": "1d8",
+					"damageType": "bludgeoning",
+					"weight": "2 lb.",
+					"properties": ["Versatile"],
+					"versatileDamage": "1d10",
+					"skill_modifiers": ["Strength"]
+				},
+				{
+					"name": "Whip",
+					"cost": "2 gp",
+					"damage": "1d4",
+					"damageType": "slashing",
+					"weight": "3 lb.",
+					"properties": ["Finesse", "Reach"],
+					"skill_modifiers": ["Strength", "Dexterity"]
+				}
+			]
+		},
+		{
+			"category": "Martial Ranged",
+			"items": [
+				{
+					"name": "Blowgun",
+					"cost": "10 gp",
+					"damage": "1",
+					"damageType": "piercing",
+					"weight": "1 lb.",
+					"properties": ["Ammunition", "Loading"],
+					"range": "25/100",
+					"skill_modifiers": ["Dexterity"]
+				},
+				{
+					"name": "Crossbow, hand",
+					"cost": "75 gp",
+					"damage": "1d6",
+					"damageType": "piercing",
+					"weight": "3 lb.",
+					"properties": ["Ammunition", "Light", "Loading"],
+					"range": "30/120",
+					"skill_modifiers": ["Dexterity"]
+				},
+				{
+					"name": "Crossbow, heavy",
+					"cost": "50 gp",
+					"damage": "1d10",
+					"damageType": "piercing",
+					"weight": "18 lb.",
+					"properties": ["Ammunition", "Heavy", "Loading", "Two-handed"],
+					"range": "100/400",
+					"skill_modifiers": ["Dexterity"]
+				},
+				{
+					"name": "Longbow",
+					"cost": "50 gp",
+					"damage": "1d8",
+					"damageType": "piercing",
+					"weight": "2 lb.",
+					"properties": ["Ammunition", "Heavy", "Two-handed"],
+					"range": "150/600",
+					"skill_modifiers": ["Dexterity"]
+				},
+				{
+					"name": "Net",
+					"cost": "1 gp",
+					"damage": "—",
+					"weight": "3 lb.",
+					"properties": ["Special", "Thrown"],
+					"throwRange": "5/15",
+					"skill_modifiers": ["Dexterity"]
+				}
+			]
+		}
+	]
 }
