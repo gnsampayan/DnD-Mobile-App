@@ -348,6 +348,7 @@ export default function BagScreen() {
 
     // Set the weapons the user is proficient in
     setWeaponsProficientIn(proficientWeapons);
+    console.log(proficientWeapons);
 
     return groupedWeapons;
   };
@@ -471,6 +472,14 @@ export default function BagScreen() {
   // Function to add a new item to the items array
   function addItem() {
     if (newItem.name) {
+
+      // Check if the item already exists in the items array
+      const itemExists = items.some((item) => item.name.toLowerCase() === newItem.name.toLowerCase());
+      if (itemExists) {
+        Alert.alert('Item Already Exists', 'Simply update the quantity instead.');
+        return;
+      }
+
       // Generate new id based on maximum existing id
       const existingIds = items.map((item) => Number(item.id));
       const maxId = existingIds.length > 0 ? Math.max(...existingIds) : -1;
@@ -940,6 +949,12 @@ export default function BagScreen() {
                         if (value) {
                           const capitalizedName = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                           setNewItem({ ...newItem, name: capitalizedName });
+
+                          // Find the weapon properties from the JSON data
+                          const weapon = weapons.weapons.flatMap((category: any) => category.items).find((item: any) => item.name.toLowerCase() === value.toLowerCase());
+                          if (weapon) {
+                            setNewItem((prevItem) => ({ ...prevItem, details: weapon.properties.join(', ') }));
+                          }
                         }
                       }}
                     />
@@ -1002,6 +1017,21 @@ export default function BagScreen() {
                   }
                   value={newItem.quantity.toString()}
                 />
+
+                {/* Show properties of weapon selected in dropdown */}
+                {weaponTypeValue && (
+                  <View style={{ marginBottom: 20 }}>
+                    <Text>Properties:</Text>
+                    {weapons.weapons.flatMap((category: any) => category.items).map((item: any) => {
+                      if (item.name.toLowerCase() === weaponTypeValue.toLowerCase()) {
+                        return item.properties.map((property: string, index: number) => (
+                          <Text key={index}>{property}</Text>
+                        ));
+                      }
+                      return null;
+                    })}
+                  </View>
+                )}
 
                 <TouchableOpacity style={styles.imagePickerButton} onPress={() => pickImage(true)}>
                   <Text style={styles.imagePickerButtonText}>Select Image</Text>

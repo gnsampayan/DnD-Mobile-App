@@ -36,7 +36,7 @@ import defaultSprintImage from '@actions/default-sprint-image.png';
 import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Item } from '../context/ItemEquipmentContext';
+import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 
@@ -134,6 +134,9 @@ export default function ActionsScreen() {
   // Convert available actions to state
   const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
   const [currentBonusActionsAvailable, setCurrentBonusActionsAvailable] = useState<number>(1);
+
+
+  const { weaponsProficientIn } = useItemEquipment();
 
   // Change later to check if character main weapon state is equipped
   const { mainHandWeapon, rangedHandWeapon, offHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
@@ -898,6 +901,7 @@ export default function ActionsScreen() {
     setCurrentDexModifier(getDexModifier());
   }, [statsData.abilities, getStrengthModifier, getDexModifier]);
 
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -1216,7 +1220,7 @@ export default function ActionsScreen() {
                             >
                               <Text>Name: </Text>
                               <Text style={{ textTransform: 'capitalize' }}>
-                                {weaponName}
+                                {weaponName}{weaponsProficientIn.map(w => w.toLowerCase()).includes(weaponName.toLowerCase()) ? '' : ' (Inept)'}
                               </Text>
                             </View>
                           );

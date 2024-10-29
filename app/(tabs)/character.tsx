@@ -619,7 +619,7 @@ export default function MeScreen() {
                             (() => {
                                 const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase());
                                 const isTwoHanded = mainHandWeapon.properties?.includes("Two-handed");
-                                const isProficient = weaponsProficientIn.includes(mainHandWeapon.name.toLowerCase());
+                                const isProficient = weaponsProficientIn.map(w => w.toLowerCase()).includes(mainHandWeapon.name.toLowerCase());
 
                                 return (
                                     <ImageBackground
