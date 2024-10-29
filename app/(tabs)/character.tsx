@@ -837,8 +837,10 @@ export default function MeScreen() {
                                 {statsData.race && (
                                     <View>
                                         <Text>Race Features</Text>
-                                        {Object.entries(raceBonuses.find(race => race.race === statsData.race)?.features || {}).map(([key, value]) => (
-                                            <Text key={key}>{key.charAt(0).toUpperCase() + key.slice(1)}: {value}</Text>
+                                        {raceBonuses.map((race) => (
+                                            race.race === statsData.race && Object.entries(race.features).map(([key, value]) => (
+                                                <Text key={key}>{`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`}</Text>
+                                            ))
                                         ))}
                                     </View>
                                 )}
