@@ -119,7 +119,7 @@ export default function MeScreen() {
         rangedHandWeapon: Item | null;
         equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
     };
-    const { items } = useItemEquipment();
+    const { items, weaponsProficientIn } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
 
     // Local state variables for DropDownPicker values
@@ -619,6 +619,7 @@ export default function MeScreen() {
                             (() => {
                                 const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase());
                                 const isTwoHanded = mainHandWeapon.properties?.includes("Two-handed");
+                                const isProficient = weaponsProficientIn.includes(mainHandWeapon.name.toLowerCase());
 
                                 return (
                                     <ImageBackground
@@ -632,7 +633,7 @@ export default function MeScreen() {
                                                 color: 'white',
                                                 fontSize: 16,
                                                 textAlign: 'center'
-                                            }}>{weapon?.label || mainHandWeapon.name}</Text>
+                                            }}>{weapon?.label || mainHandWeapon.name} {!isProficient && '(Inept)'}</Text>
                                         )}
                                         {isTwoHanded && (
                                             <>
@@ -667,6 +668,7 @@ export default function MeScreen() {
                             (() => {
                                 const weapon = weapons.find((w) => w.value === offHandWeapon.name.toLowerCase());
                                 const isTwoHanded = offHandWeapon.properties?.includes("Two-handed");
+                                const isProficient = weaponsProficientIn.includes(offHandWeapon.name.toLowerCase());
 
                                 return (
                                     <ImageBackground
@@ -680,7 +682,7 @@ export default function MeScreen() {
                                                 color: 'white',
                                                 fontSize: 16,
                                                 textAlign: 'center'
-                                            }}>{weapon?.label || offHandWeapon.name}</Text>
+                                            }}>{weapon?.label || offHandWeapon.name} {!isProficient && '(Inept)'}</Text>
                                         )}
                                         {isTwoHanded && <Text style={styles.twoHandedLabel}>2H</Text>}
                                     </ImageBackground>
@@ -694,6 +696,7 @@ export default function MeScreen() {
                         )}
                     </TouchableOpacity>
                 </View>
+                {/* Ranged Hand Weapon */}
                 {equipmentItems
                     .filter((item) => item.section === 5 && item.id === 'mainRanged')
                     .map((item) => (
@@ -710,6 +713,7 @@ export default function MeScreen() {
                                 (() => {
                                     const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase());
                                     const isTwoHanded = rangedHandWeapon.properties?.includes("Two-handed");
+                                    const isProficient = weaponsProficientIn.includes(rangedHandWeapon.name.toLowerCase());
 
                                     return (
                                         <ImageBackground
@@ -723,7 +727,9 @@ export default function MeScreen() {
                                                     color: 'white',
                                                     fontSize: 16,
                                                     textAlign: 'center'
-                                                }}>{weapon?.label || rangedHandWeapon.name}</Text>
+                                                }}>
+                                                    {weapon?.label || rangedHandWeapon.name} {!isProficient && '(Inept)'}
+                                                </Text>
                                             )}
                                             {isTwoHanded && (
                                                 <>

@@ -1,10 +1,6 @@
 {
 	"weapons": [
 		{
-			"category": "Custom Weapon",
-			"items": []
-		},
-		{
 			"category": "Simple Melee",
 			"items": [
 				{

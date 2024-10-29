@@ -16,6 +16,8 @@ export interface Item {
 // Define the shape of our context
 interface ItemEquipmentContextType {
     items: Item[];
+    weaponsProficientIn: string[];
+    setWeaponsProficientIn: (weapons: string[]) => void;
     loadItems: () => Promise<void>;
     saveItems: (itemsToSave: Item[]) => Promise<void>;
 }
@@ -26,6 +28,7 @@ const ItemEquipmentContext = createContext<ItemEquipmentContextType | undefined>
 // Create a provider component
 export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [items, setItems] = useState<Item[]>([]);
+    const [weaponsProficientIn, setWeaponsProficientInState] = useState<string[]>([]);
 
     // Function to load items from AsyncStorage
     const loadItems = async () => {
@@ -56,11 +59,29 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     };
 
+    // Function to save weaponsProficientIn to AsyncStorage
+    const saveWeaponsProficientIn = async (weapons: string[]) => {
+        try {
+            const jsonString = JSON.stringify(weapons);
+            await AsyncStorage.setItem('weaponsProficientIn', jsonString);
+            setWeaponsProficientInState(weapons);
+        } catch (error) {
+            console.error('Failed to save weaponsProficientIn:', error);
+        }
+    };
+
+    // Function to set weaponsProficientIn and save it to AsyncStorage
+    const setWeaponsProficientIn = (weapons: string[]) => {
+        saveWeaponsProficientIn(weapons);
+    };
+
     return (
         <ItemEquipmentContext.Provider value={{
             items,
             loadItems,
             saveItems,
+            weaponsProficientIn,
+            setWeaponsProficientIn,
         }}>
             {children}
         </ItemEquipmentContext.Provider>

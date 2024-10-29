@@ -112,7 +112,7 @@ export default function BagScreen() {
   });
   const [openItemType, setOpenItemType] = useState(false);
   const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
-  const { saveItems } = useItemEquipment();
+  const { saveItems, setWeaponsProficientIn } = useItemEquipment();
   // Load items from local storage when the component mounts
   useEffect(() => {
     loadItems();
@@ -157,6 +157,7 @@ export default function BagScreen() {
 
   // Function to filter and group weapons based on proficiency
   const filterAndGroupWeapons = () => {
+    const proficientWeapons: string[] = [];
     const groupedWeapons = weapons.weapons.reduce((acc, category) => {
       // Show both simple and martial weapons if race or class is not available
       if (!statsData.race || !statsData.class || statsData.race === '' || statsData.class === '') {
@@ -181,6 +182,7 @@ export default function BagScreen() {
             labelStyle: {
               fontWeight: 'normal',
             },
+            icon: () => <Ionicons name="ribbon" size={12} color="black" />,
           });
         });
       } else if (
@@ -208,7 +210,9 @@ export default function BagScreen() {
             labelStyle: {
               fontWeight: 'normal',
             },
+            icon: () => <Ionicons name="ribbon" size={12} color="black" />,
           });
+          proficientWeapons.push(item.name.toLowerCase());
         });
       }
       return acc;
@@ -218,6 +222,7 @@ export default function BagScreen() {
       parent: string | null;
       selectable: boolean;
       labelStyle?: object;
+      icon?: () => JSX.Element;
     }[]);
 
     // If race and class are available, proceed with class and race specific weapons
@@ -260,9 +265,11 @@ export default function BagScreen() {
                 fontWeight: 'normal',
                 textTransform: 'capitalize',
               },
+              icon: () => <Ionicons name="ribbon" size={12} color="black" />,
             });
             // Add to existingWeaponValues to avoid duplicates in race-specific weapons
             existingWeaponValues.add(weapon.toLowerCase());
+            proficientWeapons.push(weapon.toLowerCase());
           });
         }
       }
@@ -297,11 +304,51 @@ export default function BagScreen() {
                 fontWeight: 'normal',
                 textTransform: 'capitalize',
               },
+              icon: () => <Ionicons name="ribbon" size={12} color="black" />,
             });
+            proficientWeapons.push(weapon.toLowerCase());
           });
         }
       }
+
+      // Add inept weapons grouped by their category
+      weapons.weapons.forEach(category => {
+        const ineptWeapons = category.items.filter(item => !existingWeaponValues.has(item.name.toLowerCase()));
+
+        if (ineptWeapons.length > 0) {
+          // Add the category group label if it doesn't already exist
+          if (!groupedWeapons.some(group => group.value === category.category.toLowerCase())) {
+            groupedWeapons.push({
+              label: category.category,
+              value: category.category.toLowerCase(),
+              parent: null,
+              selectable: false,
+              labelStyle: {
+                fontWeight: 'bold',
+              },
+            });
+          }
+
+          // Add each inept weapon with "(inept)" label
+          ineptWeapons.forEach(item => {
+            groupedWeapons.push({
+              label: item.name,
+              value: item.name.toLowerCase(),
+              parent: category.category.toLowerCase(),
+              selectable: true,
+              labelStyle: {
+                fontWeight: 'normal',
+                textTransform: 'capitalize',
+              },
+            });
+          });
+        }
+      });
     }
+
+    // Set the weapons the user is proficient in
+    setWeaponsProficientIn(proficientWeapons);
+
     return groupedWeapons;
   };
 
