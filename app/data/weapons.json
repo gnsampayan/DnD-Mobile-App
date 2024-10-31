@@ -5,6 +5,7 @@
 			"items": [
 				{
 					"name": "Club",
+					"weaponType": "club",
 					"cost": "1 sp",
 					"damage": "1d4",
 					"damageType": "bludgeoning",
@@ -14,6 +15,7 @@
 				},
 				{
 					"name": "Dagger",
+					"weaponType": "dagger",
 					"cost": "2 gp",
 					"damage": "1d4",
 					"damageType": "piercing",
@@ -24,6 +26,7 @@
 				},
 				{
 					"name": "Greatclub",
+					"weaponType": "greatclub",
 					"cost": "2 sp",
 					"damage": "1d8",
 					"damageType": "bludgeoning",
@@ -33,6 +36,7 @@
 				},
 				{
 					"name": "Handaxe",
+					"weaponType": "handaxe",
 					"cost": "5 gp",
 					"damage": "1d6",
 					"damageType": "slashing",
@@ -43,6 +47,7 @@
 				},
 				{
 					"name": "Javelin",
+					"weaponType": "javelin",
 					"cost": "5 sp",
 					"damage": "1d6",
 					"damageType": "piercing",
@@ -53,6 +58,7 @@
 				},
 				{
 					"name": "Hammer, Light",
+					"weaponType": "hammer",
 					"cost": "2 gp",
 					"damage": "1d4",
 					"damageType": "bludgeoning",
@@ -63,6 +69,7 @@
 				},
 				{
 					"name": "Mace",
+					"weaponType": "mace",
 					"cost": "5 gp",
 					"damage": "1d6",
 					"damageType": "bludgeoning",
@@ -72,6 +79,7 @@
 				},
 				{
 					"name": "Quarterstaff",
+					"weaponType": "quarterstaff",
 					"cost": "2 sp",
 					"damage": "1d6",
 					"damageType": "bludgeoning",
@@ -82,6 +90,7 @@
 				},
 				{
 					"name": "Sickle",
+					"weaponType": "sickle",
 					"cost": "1 gp",
 					"damage": "1d4",
 					"damageType": "slashing",
@@ -91,6 +100,7 @@
 				},
 				{
 					"name": "Spear",
+					"weaponType": "spear",
 					"cost": "1 gp",
 					"damage": "1d6",
 					"damageType": "piercing",
@@ -107,6 +117,7 @@
 			"items": [
 				{
 					"name": "Crossbow, light",
+					"weaponType": "crossbow, light",
 					"cost": "25 gp",
 					"damage": "1d8",
 					"damageType": "piercing",
@@ -117,6 +128,7 @@
 				},
 				{
 					"name": "Dart",
+					"weaponType": "dart",
 					"cost": "5 cp",
 					"damage": "1d4",
 					"damageType": "piercing",
@@ -127,6 +139,7 @@
 				},
 				{
 					"name": "Shortbow",
+					"weaponType": "shortbow",
 					"cost": "25 gp",
 					"damage": "1d6",
 					"damageType": "piercing",
@@ -137,6 +150,7 @@
 				},
 				{
 					"name": "Sling",
+					"weaponType": "sling",
 					"cost": "1 sp",
 					"damage": "1d4",
 					"damageType": "bludgeoning",
@@ -152,6 +166,7 @@
 			"items": [
 				{
 					"name": "Battleaxe",
+					"weaponType": "battleaxe",
 					"cost": "10 gp",
 					"damage": "1d8",
 					"damageType": "slashing",
@@ -162,6 +177,7 @@
 				},
 				{
 					"name": "Flail",
+					"weaponType": "flail",
 					"cost": "10 gp",
 					"damage": "1d8",
 					"damageType": "bludgeoning",
@@ -171,6 +187,7 @@
 				},
 				{
 					"name": "Glaive",
+					"weaponType": "glaive",
 					"cost": "20 gp",
 					"damage": "1d10",
 					"damageType": "slashing",
@@ -180,6 +197,7 @@
 				},
 				{
 					"name": "Greataxe",
+					"weaponType": "greataxe",
 					"cost": "30 gp",
 					"damage": "1d12",
 					"damageType": "slashing",
@@ -189,6 +207,7 @@
 				},
 				{
 					"name": "Greatsword",
+					"weaponType": "greatsword",
 					"cost": "50 gp",
 					"damage": "2d6",
 					"damageType": "slashing",
@@ -198,6 +217,7 @@
 				},
 				{
 					"name": "Halberd",
+					"weaponType": "halberd",
 					"cost": "20 gp",
 					"damage": "1d10",
 					"damageType": "slashing",
@@ -207,6 +227,7 @@
 				},
 				{
 					"name": "Lance",
+					"weaponType": "lance",
 					"cost": "10 gp",
 					"damage": "1d12",
 					"damageType": "piercing",
@@ -216,6 +237,7 @@
 				},
 				{
 					"name": "Longsword",
+					"weaponType": "longsword",
 					"cost": "15 gp",
 					"damage": "1d8",
 					"damageType": "slashing",
@@ -226,6 +248,7 @@
 				},
 				{
 					"name": "Maul",
+					"weaponType": "maul",
 					"cost": "10 gp",
 					"damage": "2d6",
 					"damageType": "bludgeoning",
@@ -235,6 +258,7 @@
 				},
 				{
 					"name": "Morningstar",
+					"weaponType": "morningstar",
 					"cost": "15 gp",
 					"damage": "1d8",
 					"damageType": "piercing",
@@ -244,6 +268,7 @@
 				},
 				{
 					"name": "Pike",
+					"weaponType": "pike",
 					"cost": "5 gp",
 					"damage": "1d10",
 					"damageType": "piercing",
@@ -253,6 +278,7 @@
 				},
 				{
 					"name": "Rapier",
+					"weaponType": "rapier",
 					"cost": "25 gp",
 					"damage": "1d8",
 					"damageType": "piercing",
@@ -262,6 +288,7 @@
 				},
 				{
 					"name": "Scimitar",
+					"weaponType": "scimitar",
 					"cost": "25 gp",
 					"damage": "1d6",
 					"damageType": "slashing",
@@ -271,6 +298,7 @@
 				},
 				{
 					"name": "Shortsword",
+					"weaponType": "shortsword",
 					"cost": "10 gp",
 					"damage": "1d6",
 					"damageType": "piercing",
@@ -280,6 +308,7 @@
 				},
 				{
 					"name": "Trident",
+					"weaponType": "trident",
 					"cost": "5 gp",
 					"damage": "1d6",
 					"damageType": "piercing",
@@ -291,6 +320,7 @@
 				},
 				{
 					"name": "War pick",
+					"weaponType": "war pick",
 					"cost": "5 gp",
 					"damage": "1d8",
 					"damageType": "piercing",
@@ -300,6 +330,7 @@
 				},
 				{
 					"name": "Warhammer",
+					"weaponType": "warhammer",
 					"cost": "15 gp",
 					"damage": "1d8",
 					"damageType": "bludgeoning",
@@ -310,6 +341,7 @@
 				},
 				{
 					"name": "Whip",
+					"weaponType": "whip",
 					"cost": "2 gp",
 					"damage": "1d4",
 					"damageType": "slashing",
@@ -324,6 +356,7 @@
 			"items": [
 				{
 					"name": "Blowgun",
+					"weaponType": "blowgun",
 					"cost": "10 gp",
 					"damage": "1",
 					"damageType": "piercing",
@@ -334,6 +367,7 @@
 				},
 				{
 					"name": "Crossbow, hand",
+					"weaponType": "crossbow, hand",
 					"cost": "75 gp",
 					"damage": "1d6",
 					"damageType": "piercing",
@@ -344,6 +378,7 @@
 				},
 				{
 					"name": "Crossbow, heavy",
+					"weaponType": "crossbow, heavy",
 					"cost": "50 gp",
 					"damage": "1d10",
 					"damageType": "piercing",
@@ -354,6 +389,7 @@
 				},
 				{
 					"name": "Longbow",
+					"weaponType": "longbow",
 					"cost": "50 gp",
 					"damage": "1d8",
 					"damageType": "piercing",
@@ -364,6 +400,7 @@
 				},
 				{
 					"name": "Net",
+					"weaponType": "net",
 					"cost": "1 gp",
 					"damage": "—",
 					"weight": "3 lb.",

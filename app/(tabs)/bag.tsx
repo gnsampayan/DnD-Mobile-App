@@ -54,6 +54,7 @@ interface Food extends BaseItem {
 interface Weapon extends BaseItem {
   damage?: string;
   damageBonus?: string;
+  weaponType?: string;
 }
 
 
@@ -114,6 +115,7 @@ export default function BagScreen() {
     details?: string;
     damage?: string;
     damageBonus?: string;
+    weaponType?: string;
   }>({
     name: '',
     quantity: 1,
@@ -121,6 +123,7 @@ export default function BagScreen() {
     details: '',
     damage: '',
     damageBonus: '',
+    weaponType: '',
   });
   const [openItemType, setOpenItemType] = useState(false);
   const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
@@ -129,7 +132,6 @@ export default function BagScreen() {
   useEffect(() => {
     loadItems();
   }, []);
-  const { getWeaponDamage } = useContext(CharacterContext);
   const [foodUnitsValue, setFoodUnitsValue] = useState<number>(0);
   const [openWeaponType, setOpenWeaponType] = useState(false);
   const [weaponTypeValue, setWeaponTypeValue] = useState<string | null>(null);
@@ -516,12 +518,21 @@ export default function BagScreen() {
         type: itemTypeValue ?? '',
         damage: newItem.damage ?? '',
         damageBonus: newItem.damageBonus ?? '',
+        weaponType: newItem.weaponType ?? '',
       };
 
       const updatedItems = [...items, newItemToAdd];
       setItems(updatedItems);
       saveItems(updatedItems);
-      setNewItem({ name: '', quantity: 1, image: undefined, details: '', damage: '', damageBonus: '' });
+      setNewItem({
+        name: '',
+        quantity: 1,
+        image: undefined,
+        details: '',
+        damage: '',
+        damageBonus: '',
+        weaponType: '',
+      });
       setItemTypeValue(null);
       setModalVisible(false);
     } else {
@@ -864,6 +875,17 @@ export default function BagScreen() {
     return (
       <>
         <Text>Modify Weapon</Text>
+        <Text>Name</Text>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="Name"
+          placeholderTextColor="gray"
+          onChangeText={(text) => {
+            setSelectedWeapon({ ...selectedWeapon, name: text });
+            setNewItem({ ...newItem, name: text });
+          }}
+          value={selectedWeapon.name}
+        />
         <Text>Damage:</Text>
         <TextInput
           style={styles.modalInput}
@@ -999,7 +1021,7 @@ export default function BagScreen() {
                         setWeaponTypeValue(value);
                         if (value) {
                           const capitalizedName = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                          setNewItem({ ...newItem, name: capitalizedName });
+                          setNewItem({ ...newItem, name: capitalizedName, weaponType: value });
 
                           // Find the weapon properties from the JSON data
                           const weapon = weapons.weapons.flatMap((category: any) => category.items).find((item: any) => item.name.toLowerCase() === value.toLowerCase());
@@ -1013,7 +1035,7 @@ export default function BagScreen() {
                     {/* Create Custom Weapon */}
                     {!customWeapon ? (
                       <Button
-                        title="Modify"
+                        title="Set to GM Mode"
                         onPress={() => {
                           setCustomWeapon(true);
                         }}
@@ -1021,7 +1043,7 @@ export default function BagScreen() {
                     ) : (
                       <>
                         <Button
-                          title="Set to Default"
+                          title="Revert to Normal Mode"
                           onPress={() => {
                             setCustomWeapon(false);
                             // Reset the selectedWeapon to default values

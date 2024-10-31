@@ -477,21 +477,14 @@ export default function MeScreen() {
         ];
     };
     const filterEquipableMeleeWeapons = () => {
-        const meleeCategories = ["Simple Melee", "Martial Melee"];
-        const weaponData = require('../data/weapons.json');
-
-        // Get the items created by the user in the bag
+        // Get all weapons from the bag
         const userItems = items.filter((item) => item.type === 'Weapon');
         return [
             { label: 'None', value: 'none' },
-            ...userItems
-                .filter((userItem) =>
-                    weaponData.weapons.some((category: { category: string; items: Item[] }) =>
-                        meleeCategories.includes(category.category) &&
-                        category.items.some((weapon) => weapon.name.toLowerCase() === userItem.name.toLowerCase())
-                    )
-                )
-                .map((item) => ({ label: item.name, value: item.name.toLowerCase() }))
+            ...userItems.map((item) => ({
+                label: item.name,
+                value: item.name.toLowerCase()
+            }))
         ];
     }
 
@@ -622,9 +615,9 @@ export default function MeScreen() {
                     >
                         {mainHandWeapon?.name && mainHandWeapon?.name !== 'none' ? (
                             (() => {
-                                const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase());
+                                const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase() || '');
                                 const isTwoHanded = mainHandWeapon.properties?.includes("Two-handed");
-                                const isProficient = weaponsProficientIn.map(w => w.toLowerCase()).includes(mainHandWeapon.name.toLowerCase());
+                                const isProficient = weaponsProficientIn.map(w => w.toLowerCase()).includes(mainHandWeapon.weaponType?.toLowerCase() || '');
 
                                 return (
                                     <ImageBackground
@@ -671,9 +664,9 @@ export default function MeScreen() {
                     >
                         {offHandWeapon?.name && offHandWeapon?.name !== 'none' ? (
                             (() => {
-                                const weapon = weapons.find((w) => w.value === offHandWeapon.name.toLowerCase());
+                                const weapon = weapons.find((w) => w.value === offHandWeapon.name.toLowerCase() || '');
                                 const isTwoHanded = offHandWeapon.properties?.includes("Two-handed");
-                                const isProficient = weaponsProficientIn.includes(offHandWeapon.name.toLowerCase());
+                                const isProficient = weaponsProficientIn.includes(offHandWeapon.weaponType?.toLowerCase() || '');
 
                                 return (
                                     <ImageBackground
@@ -716,9 +709,9 @@ export default function MeScreen() {
                         >
                             {rangedHandWeapon?.name && rangedHandWeapon?.name.toLowerCase() !== 'none' ? (
                                 (() => {
-                                    const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase());
+                                    const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase() || '');
                                     const isTwoHanded = rangedHandWeapon.properties?.includes("Two-handed");
-                                    const isProficient = weaponsProficientIn.includes(rangedHandWeapon.name.toLowerCase());
+                                    const isProficient = weaponsProficientIn.includes(rangedHandWeapon.weaponType?.toLowerCase() || '');
 
                                     return (
                                         <ImageBackground

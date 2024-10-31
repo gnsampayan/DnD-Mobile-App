@@ -86,7 +86,6 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         if (itemWeapon?.damage) {
             return itemWeapon.damage;
         }
-
         // If not found in items, check weapons data
         const weaponData = weapons.weapons.find(w => w.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase()));
         const weaponItem = weaponData?.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase());

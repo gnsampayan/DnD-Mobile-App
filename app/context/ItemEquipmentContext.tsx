@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 // Define the shape of our Item
 export interface Item {
     id: string;
@@ -12,6 +11,7 @@ export interface Item {
     properties?: string[];
     damage?: string;
     damageBonus?: string;
+    weaponType?: string;
 }
 
 
@@ -79,7 +79,6 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
 
         saveWeaponProficiencies();
     }, [weaponsProficientIn]);
-
 
     // Function to save items to AsyncStorage
     const saveItems = async (itemsToSave: Item[]) => {
