@@ -37,6 +37,7 @@ import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
+import { useActions } from '../context/actionsSpellsContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 
@@ -131,21 +132,20 @@ export default function ActionsScreen() {
   // State to hold movement speed
   const [movementSpeed, setMovementSpeed] = useState<number>(30);
 
-  // Convert available actions to state
-  const [currentActionsAvailable, setCurrentActionsAvailable] = useState<number>(1);
-  const [currentBonusActionsAvailable, setCurrentBonusActionsAvailable] = useState<number>(1);
+  const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
 
   const { weaponsProficientIn } = useItemEquipment();
 
   // Change later to check if character main weapon state is equipped
-  const { mainHandWeapon, rangedHandWeapon, offHandWeapon, getWeaponDamage, getWeaponSkillModifiers } = useContext(CharacterContext) as {
-    mainHandWeapon: Item | null,
-    rangedHandWeapon: Item | null,
-    offHandWeapon: Item | null,
-    getWeaponDamage: (weapon: Item) => string,
-    getWeaponSkillModifiers: (weapon: Item) => string[]
-  };
+  const {
+    mainHandWeapon,
+    rangedHandWeapon,
+    offHandWeapon,
+    getWeaponDamage,
+    getWeaponSkillModifiers,
+    getWeaponProperties,
+  } = useContext(CharacterContext);
   const [isArmed, setIsArmed] = useState(false);
 
   // Update `isArmed` when mainHandWeapon changes
@@ -1051,7 +1051,7 @@ export default function ActionsScreen() {
                   </View>
 
                   {/* Temporary HP Input */}
-                  <View style={[styles.subheaderHpContainer, { borderColor: 'white' }]}>
+                  <View style={styles.subheaderHpContainer}>
                     <TextInput
                       placeholder="0"
                       keyboardType="number-pad"
@@ -1300,6 +1300,8 @@ export default function ActionsScreen() {
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(mainHandWeapon)}
+                                  {/* put custom damage here */}
+                                  {/* put custom damage bonus here */}
                                 </Text>
                                 <View style={{ flexDirection: 'row' }}>
                                   {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
@@ -1347,8 +1349,9 @@ export default function ActionsScreen() {
                               <Text>Properties: </Text>
                               <Text>
                                 {mainHandWeapon && mainHandWeapon.name !== 'none'
-                                  ? weapons.weapons.find(w => w.items.find(i => i.name === mainHandWeapon.name))?.items.find(i => i.name === mainHandWeapon.name)?.properties.join(', ') || '—'
+                                  ? getWeaponProperties(mainHandWeapon).join(', ') || '—'
                                   : '—'}
+                                {/* put custom properties here */}
                               </Text>
                             </View>
                           </>
@@ -1404,6 +1407,8 @@ export default function ActionsScreen() {
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(rangedHandWeapon)}
+                                  {/* put custom damage here */}
+                                  {/* put custom damage bonus here */}
                                 </Text>
                                 <View style={{ flexDirection: 'row' }}>
                                   {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
@@ -1448,6 +1453,7 @@ export default function ActionsScreen() {
                                 {rangedHandWeapon && rangedHandWeapon.name !== 'none'
                                   ? weapons.weapons.find(w => w.items.find(i => i.name === rangedHandWeapon.name))?.items.find(i => i.name === rangedHandWeapon.name)?.properties.join(', ') || '—'
                                   : '—'}
+                                {/* put custom properties here */}
                               </Text>
                             </View>
                           </>

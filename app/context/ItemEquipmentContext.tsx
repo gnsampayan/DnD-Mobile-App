@@ -10,6 +10,8 @@ export interface Item {
     details?: string;
     type?: string;
     properties?: string[];
+    damage?: string;
+    damageBonus?: string;
 }
 
 
@@ -43,10 +45,41 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     };
 
-    // Load items when the component mounts
     useEffect(() => {
+        // Load items
         loadItems();
+
+        // Load weapon proficiencies
+        const loadWeaponProficiencies = async () => {
+            try {
+                const proficienciesJson = await AsyncStorage.getItem('@weapon_proficiencies');
+                if (proficienciesJson) {
+                    setWeaponsProficientIn(JSON.parse(proficienciesJson));
+                } else {
+                    // Initialize with default proficiencies if needed
+                    setWeaponsProficientIn([]);
+                }
+            } catch (error) {
+                console.error('Error loading weapon proficiencies:', error);
+            }
+        };
+
+        loadWeaponProficiencies();
     }, []);
+
+    // Whenever weaponsProficientIn changes, save it to AsyncStorage
+    useEffect(() => {
+        const saveWeaponProficiencies = async () => {
+            try {
+                await AsyncStorage.setItem('@weapon_proficiencies', JSON.stringify(weaponsProficientIn));
+            } catch (error) {
+                console.error('Error saving weapon proficiencies:', error);
+            }
+        };
+
+        saveWeaponProficiencies();
+    }, [weaponsProficientIn]);
+
 
     // Function to save items to AsyncStorage
     const saveItems = async (itemsToSave: Item[]) => {

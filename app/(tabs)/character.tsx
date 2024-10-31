@@ -405,10 +405,15 @@ export default function MeScreen() {
             return;
         }
 
-        // Find the weapon details from weapons.json
-        const selectedWeapon = weaponData.weapons
-            .flatMap(category => category.items as unknown as Item[])
-            .find((item: Item) => item.name.toLowerCase() === weaponName.toLowerCase());
+        // First try to find the weapon in the user's bag
+        let selectedWeapon = items.find(item => item.name.toLowerCase() === weaponName.toLowerCase());
+
+        // If not found in bag, look in weapons.json
+        if (!selectedWeapon) {
+            selectedWeapon = weaponData.weapons
+                .flatMap(category => category.items as unknown as Item[])
+                .find((item: Item) => item.name.toLowerCase() === weaponName.toLowerCase());
+        }
 
         if (!selectedWeapon) return;
 

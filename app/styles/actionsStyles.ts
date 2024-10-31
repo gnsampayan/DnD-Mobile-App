@@ -12,12 +12,10 @@ const styles = StyleSheet.create({
       marginTop: 50,
     },
     subheader: {
-      borderWidth: 2,
-      borderColor: 'white',
-      borderStyle: 'solid',
       borderRadius: 8,
       padding: 5,
       marginTop: 10,
+      backgroundColor: 'rgba(80, 0, 10, 0.2)',
     },
     subheaderTextContainer: {
       flexDirection: 'row',
@@ -165,9 +163,6 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       borderRadius: 8,
       aspectRatio: 1,
-      borderWidth: 2,
-      borderColor: 'white',
-      borderStyle: 'solid',
       overflow: 'hidden',
     },
     modalButtonAddAction: {
@@ -249,7 +244,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       width: '100%',
       height: '100%',
-      borderWidth: 2,
+      borderWidth: 1,
       borderColor: 'white',
       borderStyle: 'solid',
       borderRadius: 8,
@@ -275,14 +270,13 @@ const styles = StyleSheet.create({
       alignSelf: 'center',
       marginBottom: 10,
     },
-    // Add this style to your existing styles
     detailsInput: {
-      height: 100, // Adjust height as needed
-      textAlignVertical: 'top', // Align text to the top
-      borderColor: '#ccc', // Optional: border color
-      borderWidth: 1, // Optional: border width
-      borderRadius: 5, // Optional: border radius
-      padding: 10, // Optional: padding
+      height: 100,
+      textAlignVertical: 'top',
+      borderColor: '#ccc',
+      borderWidth: 1,
+      borderRadius: 5,
+      padding: 10,
     },
     costInputWrapper: {
       flexDirection: 'row',
@@ -320,7 +314,7 @@ const styles = StyleSheet.create({
       borderRadius: 8,
       padding: 10,
       backgroundColor: 'rgba(0, 0, 0, 0.2)',
-      borderWidth: 2,
+      borderWidth: 1,
       borderColor: 'white',
       borderStyle: 'solid',
     },
@@ -364,9 +358,6 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       borderRadius: 8,
       aspectRatio: 1,
-      borderWidth: 2,
-      borderColor: 'white',
-      borderStyle: 'solid', 
       overflow: 'hidden',
     },
     hpButtonImage: {
@@ -386,7 +377,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       padding: 5,
-      borderWidth: 2,
+      borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 8,
       aspectRatio: 1,
@@ -422,13 +413,14 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       flex: 1,
       width: '100%',
-      borderWidth: 2,
+      borderWidth: 1,
       borderStyle: 'solid',
+      borderColor: 'white',
       borderRadius: 8,
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     replenishContainer: {
-      borderWidth: 2,
+      borderWidth: 1,
       borderStyle: 'solid',
       borderRadius: 8,
       aspectRatio: 1,

@@ -14,6 +14,11 @@ import acidSplashImage from '@images/cantrips/acid-splash.png';
 import bladeWardImage from '@images/cantrips/blade-ward.png';
 import boomingBladeImage from '@images/cantrips/booming-blade.png';
 import controlFlamesImage from '@images/cantrips/control-flames.png';
+import { Ionicons } from '@expo/vector-icons';
+import { useActions } from '../context/actionsSpellsContext';
+
+import endActionImage from '@actions/end-action-image-v3.png';
+const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 
 const cantripImages = {
     'Acid Splash': acidSplashImage,
@@ -46,6 +51,11 @@ type Cantrip = {
     features?: string | Record<string, any>[];
 }
 
+interface CastingCost {
+    action: number;
+    bonusAction: number;
+}
+
 
 export default function SpellbookScreen() {
     const [preparedSpellSlots, setPreparedSpellSlots] = useState<number | null>(null);
@@ -57,6 +67,8 @@ export default function SpellbookScreen() {
     const [cantripChoiceValue, setCantripChoiceValue] = useState<string | null>(null);
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
     const [cantripSlotsData, setCantripSlotsData] = useState<(string | null)[]>([]);
+
+    const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
 
     const { statsData, isSpellCaster } = useContext(StatsDataContext);
@@ -215,38 +227,40 @@ export default function SpellbookScreen() {
     }
 
     const handleCantripPress = (index: number) => {
-        console.log('Cantrip pressed', index);
         setCantripModalVisible(true);
         setCantripPressedIndex(index);
     }
-
-    const renderCantripBlock = (index: number) => (
-        <TouchableOpacity
-            style={[styles.addCantripButton, { width: itemWidth }]}
-            onPress={() => {
-                handleCantripPress(index);
-            }}
-        >
-            <ImageBackground
-                // Start of Selection
-                style={styles.cantripButtonBackground}
-                source={cantripSlotsData[index] ? getCantripImage(cantripSlotsData[index]) as ImageSourcePropType : { uri: 'https://via.placeholder.com/150' }}
-                resizeMode="cover"
+    const renderCantripBlock = (index: number) => {
+        const canAfford = canAffordCantrip(cantripSlotsData[index] || '');
+        return (
+            <TouchableOpacity
+                style={[styles.addCantripButton, { width: itemWidth, opacity: canAfford ? 1 : 0.5 }]}
+                onPress={() => {
+                    handleCantripPress(index);
+                }}
+                disabled={!canAfford}
             >
-                <View style={styles.cantripBlock}>
-                    {cantripSlotsData[index] !== null && cantripSlotsData[index] !== '' ? (
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                            {(cantripSlotsData[index] && getCantripImage(cantripSlotsData[index])) ? '' : cantripSlotsData[index]}
-                        </Text>
-                    ) : (
-                        <Text style={{ color: 'white' }}>
-                            Add Cantrip
-                        </Text>
-                    )}
-                </View>
-            </ImageBackground>
-        </TouchableOpacity >
-    )
+                <ImageBackground
+                    // Start of Selection
+                    style={styles.cantripButtonBackground}
+                    source={cantripSlotsData[index] ? getCantripImage(cantripSlotsData[index]) as ImageSourcePropType : { uri: 'https://via.placeholder.com/150' }}
+                    resizeMode="cover"
+                >
+                    <View style={styles.cantripBlock}>
+                        {cantripSlotsData[index] !== null && cantripSlotsData[index] !== '' ? (
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                                {(cantripSlotsData[index] && getCantripImage(cantripSlotsData[index])) ? '' : cantripSlotsData[index]}
+                            </Text>
+                        ) : (
+                            <Text style={{ color: 'white' }}>
+                                Add Cantrip
+                            </Text>
+                        )}
+                    </View>
+                </ImageBackground>
+            </TouchableOpacity >
+        )
+    }
 
     const renderCantripBlocks = () => {
         if (cantripSlots === null || cantripSlots === 0) {
@@ -540,13 +554,148 @@ export default function SpellbookScreen() {
         setCantripPressedIndex(null);
     }
 
+
+    const castCantrip = () => {
+        if (cantripPressedIndex === null) {
+            Alert.alert('Empty Slot', 'Please select a cantrip slot to cast.');
+            return;
+        }
+
+        const assignedCantrip = cantripSlotsData[cantripPressedIndex];
+        if (!assignedCantrip) {
+            Alert.alert('Empty Slot', 'No cantrip is assigned to this slot to cast.');
+            return;
+        }
+
+        // Find the cantrip in cantrips.json
+        const selectedCantrip = cantripsData.find(cantrip => cantrip.name === assignedCantrip);
+        if (!selectedCantrip) {
+            Alert.alert('Invalid Cantrip', 'The assigned cantrip does not exist.');
+            return;
+        }
+
+        // Parse the casting time
+        const { action, bonusAction } = parseCastingTime(selectedCantrip.castingTime);
+
+        // Check if the user has enough actions and bonus actions
+        if (currentActionsAvailable < action) {
+            Alert.alert('Insufficient Actions', 'You do not have enough actions available.');
+            return;
+        }
+
+        if (currentBonusActionsAvailable < bonusAction) {
+            Alert.alert('Insufficient Bonus Actions', 'You do not have enough bonus actions available.');
+            return;
+        }
+
+        // Deduct the action and bonus action costs
+        setCurrentActionsAvailable(prev => prev - action);
+        setCurrentBonusActionsAvailable(prev => prev - bonusAction);
+
+        // Provide feedback to the user
+        Alert.alert('Cantrip Casted', `${assignedCantrip} has been casted.`);
+
+        // Reset modal and selection states
+        setCantripModalVisible(false);
+        setCantripChoiceValue(null);
+        setCantripChoiceDescription(null);
+        setCantripPressedIndex(null);
+    };
+
+    const parseCastingTime = (castingTime: string): CastingCost => {
+        let actionCost = 0;
+        let bonusActionCost = 0;
+
+        if (castingTime.includes("1 Bonus Action")) {
+            bonusActionCost = 1;
+        }
+        if (castingTime.includes("1 Action")) {
+            actionCost = 1;
+        }
+
+        return { action: actionCost, bonusAction: bonusActionCost };
+    };
+
+    const canAffordCantrip = (cantripName: string): boolean => {
+        const selectedCantrip = cantripsData.find(cantrip => cantrip.name === cantripName);
+        if (!selectedCantrip || !selectedCantrip.castingTime) return false;
+
+        const { action, bonusAction } = parseCastingTime(selectedCantrip.castingTime);
+
+        return (
+            currentActionsAvailable >= action &&
+            currentBonusActionsAvailable >= bonusAction
+        );
+    };
+
+    const endTurn = () => {
+        setCurrentActionsAvailable(1);
+        setCurrentBonusActionsAvailable(1);
+    };
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>{statsData.class} Spellbook</Text>
-            {renderPreparedSpellBlocksForClass()}
-            {renderCantripBlocks()}
-            {renderAllKnownSpells()}
-            {renderCastableSpells()}
+        <>
+
+            <View style={styles.container}>
+
+                <View>
+
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <View style={styles.headerLeft}>
+                            <View style={styles.headerTextContainer}>
+                                <Ionicons
+                                    name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
+                                    size={16}
+                                    color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
+                                />
+                                <View style={styles.headerTextBox}>
+                                    <Text style={[
+                                        styles.headerText,
+                                        currentActionsAvailable === 0 && { color: 'black' }
+                                    ]}>
+                                        x{currentActionsAvailable}
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.headerTextContainer}>
+                                <Ionicons
+                                    name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
+                                    size={16}
+                                    color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
+                                />
+                                <View style={styles.headerTextBox}>
+                                    <Text style={[
+                                        styles.headerText,
+                                        currentBonusActionsAvailable === 0 && { color: 'black' }
+                                    ]}>
+                                        x{currentBonusActionsAvailable}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+
+                    <Text style={styles.title}>{statsData.class} Spellbook</Text>
+                    {renderPreparedSpellBlocksForClass()}
+                    {renderCantripBlocks()}
+                    {renderAllKnownSpells()}
+                    {renderCastableSpells()}
+                </View>
+
+
+                {/* Footer Section */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 5 }}>
+                    {/* Footer Button */}
+                    <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
+                        <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
+                            <Text style={styles.footerButtonText}>Next Turn</Text>
+                            <Ionicons name="refresh" size={28} color="white" style={{ marginLeft: 5 }} />
+                        </TouchableOpacity>
+                    </ImageBackground>
+                </View>
+            </View>
+
             {/* Cantrip Modal */}
             <Modal
                 animationType="fade"
@@ -566,6 +715,10 @@ export default function SpellbookScreen() {
                                         {renderCantripChoicesBasedOnLevel()}
                                     </View>
                                 </View>
+                                <Button
+                                    title="Cast"
+                                    onPress={() => castCantrip()}
+                                />
                                 {/* Buttons */}
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                                     {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (
@@ -594,6 +747,7 @@ export default function SpellbookScreen() {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
-        </View>
+
+        </>
     );
 }

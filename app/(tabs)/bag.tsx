@@ -14,6 +14,7 @@ import {
   AlertButton,
   ImageSourcePropType,
   Dimensions,
+  Button,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,6 +26,7 @@ import weapons from '../data/weapons.json';
 import classData from '../data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
 import raceData from '../data/raceData.json';
+import { CharacterContext } from '../context/equipmentActionsContext';
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
@@ -50,7 +52,8 @@ interface Food extends BaseItem {
 }
 
 interface Weapon extends BaseItem {
-  // Additional properties specific to Weapon
+  damage?: string;
+  damageBonus?: string;
 }
 
 
@@ -104,11 +107,20 @@ export default function BagScreen() {
   const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
-  const [newItem, setNewItem] = useState<{ name: string; quantity: number; image?: string; details?: string; }>({
+  const [newItem, setNewItem] = useState<{
+    name: string;
+    quantity: number;
+    image?: string;
+    details?: string;
+    damage?: string;
+    damageBonus?: string;
+  }>({
     name: '',
     quantity: 1,
     image: undefined,
     details: '',
+    damage: '',
+    damageBonus: '',
   });
   const [openItemType, setOpenItemType] = useState(false);
   const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
@@ -117,25 +129,32 @@ export default function BagScreen() {
   useEffect(() => {
     loadItems();
   }, []);
-
-  // Food Units
+  const { getWeaponDamage } = useContext(CharacterContext);
   const [foodUnitsValue, setFoodUnitsValue] = useState<number>(0);
-
-  // Weapon Type
   const [openWeaponType, setOpenWeaponType] = useState(false);
   const [weaponTypeValue, setWeaponTypeValue] = useState<string | null>(null);
   const [weaponTypesOptionsFiltered, setWeaponTypesOptionsFiltered] = useState<{ label: string; value: string; parent?: string; selectable?: boolean }[]>([]);
-
-  // State for weapon proficiency (to be made dynamic later)
-  // Use context for statsData
   const { statsData } = useContext(StatsDataContext);
-
   if (!statsData) {
     // Render a loading indicator or return null
     return null;
   }
   const [isProficientInMartialWeapons, setIsProficientInMartialWeapons] = useState(false);
   const [classSpecificWeapons, setClassSpecificWeapons] = useState<string[]>([]);
+  const [customWeapon, setCustomWeapon] = useState(false);
+  const dataWithAddButton = [...items, null];
+  const [itemModalVisible, setItemModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [modalQuantity, setModalQuantity] = useState<number>(0);
+  const [modalQuantityInput, setModalQuantityInput] = useState<string>('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState<string>('');
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<'details' | null>(null);
+  const [editedDetails, setEditedDetails] = useState<string>('');
+  const [selectedWeapon, setSelectedWeapon] = useState<any>(null);
+
+
 
   useEffect(() => {
     const checkWeaponProficiency = () => {
@@ -149,11 +168,15 @@ export default function BagScreen() {
           !['simple', 'martial'].includes(wp.toLowerCase())
         );
         setClassSpecificWeapons(specificWeapons);
+      } else {
+        // Reset proficiency states if class is deleted or undefined
+        setIsProficientInMartialWeapons(false);
+        setClassSpecificWeapons([]);
       }
     };
 
     checkWeaponProficiency();
-  }, [statsData.class]);
+  }, [statsData.class, statsData.race]);
 
   // Function to filter and group weapons based on proficiency
   const filterAndGroupWeapons = () => {
@@ -348,7 +371,6 @@ export default function BagScreen() {
 
     // Set the weapons the user is proficient in
     setWeaponsProficientIn(proficientWeapons);
-    console.log(proficientWeapons);
 
     return groupedWeapons;
   };
@@ -492,12 +514,14 @@ export default function BagScreen() {
         image: newItem.image ?? undefined,
         details: newItem.details ?? '',
         type: itemTypeValue ?? '',
+        damage: newItem.damage ?? '',
+        damageBonus: newItem.damageBonus ?? '',
       };
 
       const updatedItems = [...items, newItemToAdd];
       setItems(updatedItems);
       saveItems(updatedItems);
-      setNewItem({ name: '', quantity: 1, image: undefined, details: '' });
+      setNewItem({ name: '', quantity: 1, image: undefined, details: '', damage: '', damageBonus: '' });
       setItemTypeValue(null);
       setModalVisible(false);
     } else {
@@ -602,18 +626,7 @@ export default function BagScreen() {
   };
 
 
-  // Prepare data by adding a null item to represent the add button
-  const dataWithAddButton = [...items, null];
 
-  // Existing state variables
-  const [itemModalVisible, setItemModalVisible] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-
-  // State variable for modal quantity (number)
-  const [modalQuantity, setModalQuantity] = useState<number>(0);
-
-  // New state variable for quantity input (string)
-  const [modalQuantityInput, setModalQuantityInput] = useState<string>('');
 
   // Initialize modal quantity and quantity input when selectedItem changes
   useEffect(() => {
@@ -742,10 +755,6 @@ export default function BagScreen() {
   };
 
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState<string>('');
-  const [editingItemId, setEditingItemId] = useState<string | null>(null); // Track which item is being edited
-
   const handleTitleLongPress = (itemId: string) => {
     if (isDefaultItem(itemId)) {
       Alert.alert('Information', 'You cannot edit the name of default items.');
@@ -831,8 +840,7 @@ export default function BagScreen() {
   };
 
 
-  const [editingField, setEditingField] = useState<'details' | null>(null);
-  const [editedDetails, setEditedDetails] = useState<string>('');
+
 
   const saveItemName = () => {
     if (selectedItem && editingItemId) {
@@ -851,6 +859,49 @@ export default function BagScreen() {
       setEditingField(null);
     }
   };
+
+  const renderModifyWeapon = () => {
+    return (
+      <>
+        <Text>Modify Weapon</Text>
+        <Text>Damage:</Text>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="Damage"
+          placeholderTextColor="gray"
+          onChangeText={(text) => {
+            setSelectedWeapon({ ...selectedWeapon, damage: text });
+            setNewItem({ ...newItem, damage: text });
+          }}
+          value={selectedWeapon.damage}
+        />
+        <Text>Damage Bonus</Text>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="Damage Bonus"
+          placeholderTextColor="gray"
+          onChangeText={(text) => {
+            setSelectedWeapon({ ...selectedWeapon, damageBonus: text });
+            setNewItem({ ...newItem, damageBonus: text }); // Update the newItem as well
+          }}
+          value={selectedWeapon.damageBonus || ''}
+        />
+        <Text>Properties:</Text>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="Properties"
+          placeholderTextColor="gray"
+          onChangeText={(text) => {
+            const propertiesArray = text.split(',').map(prop => prop.trim());
+            setSelectedWeapon({ ...selectedWeapon, properties: propertiesArray });
+            setNewItem({ ...newItem, details: text }); // Update the newItem as well
+          }}
+          value={selectedWeapon.properties ? selectedWeapon.properties.join(', ') : ''}
+        />
+      </>
+    );
+  };
+
 
   // Money and Carrying Capacity -- Move to a different file later
   const money = 100;
@@ -954,10 +1005,46 @@ export default function BagScreen() {
                           const weapon = weapons.weapons.flatMap((category: any) => category.items).find((item: any) => item.name.toLowerCase() === value.toLowerCase());
                           if (weapon) {
                             setNewItem((prevItem) => ({ ...prevItem, details: weapon.properties.join(', ') }));
+                            setSelectedWeapon(weapon);
                           }
                         }
                       }}
                     />
+                    {/* Create Custom Weapon */}
+                    {!customWeapon ? (
+                      <Button
+                        title="Modify"
+                        onPress={() => {
+                          setCustomWeapon(true);
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <Button
+                          title="Set to Default"
+                          onPress={() => {
+                            setCustomWeapon(false);
+                            // Reset the selectedWeapon to default values
+                            if (weaponTypeValue) {
+                              const defaultWeapon = weapons.weapons
+                                .flatMap((category: any) => category.items)
+                                .find((item: any) => item.name.toLowerCase() === weaponTypeValue.toLowerCase());
+                              if (defaultWeapon) {
+                                setSelectedWeapon(defaultWeapon);
+                                setNewItem((prevItem) => ({
+                                  ...prevItem,
+                                  name: defaultWeapon.name,
+                                  details: defaultWeapon.properties.join(', '),
+                                  damage: defaultWeapon.damage,
+                                  damageBonus: defaultWeapon.damageBonus || '',
+                                }));
+                              }
+                            }
+                          }}
+                        />
+                        {renderModifyWeapon()}
+                      </>
+                    )}
                   </>
                 )}
                 {(itemTypeValue && itemTypeValue.toLowerCase() === 'food') && (
@@ -976,35 +1063,6 @@ export default function BagScreen() {
                   </>
                 )}
 
-                {itemTypeValue && itemTypeValue.toLowerCase() === 'custom' && (
-                  <>
-
-                    {/* Name Input */}
-                    <Text>Name</Text>
-                    <TextInput
-                      style={styles.modalInput}
-                      placeholder="Name"
-                      placeholderTextColor="gray"
-                      onChangeText={(text) =>
-                        setNewItem({ ...newItem, name: text })
-                      }
-                      value={newItem.name}
-                    />
-                    {/* Add details input */}
-                    <Text>Details</Text>
-                    <TextInput
-                      style={[styles.modalInput, styles.detailsInput]}
-                      placeholder="Item Details"
-                      placeholderTextColor="gray"
-                      onChangeText={(text) => setNewItem({ ...newItem, details: text })}
-                      value={newItem.details}
-                      multiline={true}
-                      numberOfLines={4}
-                      textAlignVertical="top"
-                    />
-
-                  </>
-                )}
                 {/* Quantity Input */}
                 <Text>Quantity</Text>
                 <TextInput

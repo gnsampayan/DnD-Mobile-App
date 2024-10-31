@@ -5,6 +5,8 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: 50,
         padding: 10,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
     },
     title: {
         color: '#fff',
@@ -101,6 +103,54 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        gap: 5,
+    },
+    headerTextContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+    },
+    headerTextBox: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 8,
+        padding: 5,
+    },
+    headerText: {
+        fontSize: 12,
+        color: 'white',
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    footerButtonContainer: {
+        borderRadius: 8,
+        margin: 5,
+        overflow: 'hidden',
+        flex: 1,
+    },
+    footerButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        padding: 10,
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        borderWidth: 1,
+        borderColor: 'white',
+        borderStyle: 'solid',
+    },
+    footerButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 18,
+        textTransform: 'capitalize',
     },
 
 });

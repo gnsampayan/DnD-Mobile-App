@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { ItemEquipmentProvider } from '@/app/context/ItemEquipmentContext';
 import { CharacterProvider } from '@/app/context/equipmentActionsContext';
 import { StatsDataProvider } from '@/app/context/StatsDataContext';
+import { ActionsProvider } from './context/actionsSpellsContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -34,10 +35,12 @@ export default function RootLayout() {
       <StatsDataProvider>
         <ItemEquipmentProvider>
           <CharacterProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
+            <ActionsProvider>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </ActionsProvider>
           </CharacterProvider>
         </ItemEquipmentProvider>
       </StatsDataProvider>

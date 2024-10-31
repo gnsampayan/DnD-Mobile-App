@@ -421,7 +421,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     };
 
     const saveAbilityAllocations = () => {
-        console.log("Data Saved");
         // Reset allocations
         const resetAllocations: AllocationHistory = {};
         updateStatsData({
