@@ -32,6 +32,8 @@ import magicStoneImage from '@images/cantrips/magic-stone.png';
 import mendingImage from '@images/cantrips/mending.png';
 import messageImage from '@images/cantrips/message.png';
 import mindSliverImage from '@images/cantrips/mind-sliver.png';
+import minorIllusionImage from '@images/cantrips/minor-illusion.png';
+import moldEarthImage from '@images/cantrips/mold-earth.png';
 
 
 import { Ionicons } from '@expo/vector-icons';
@@ -65,6 +67,8 @@ const cantripImages = {
     'Mending': mendingImage,
     'Message': messageImage,
     'Mind Sliver': mindSliverImage,
+    'Minor Illusion': minorIllusionImage,
+    'Mold Earth': moldEarthImage,
 }
 
 // TODO: Add learned spells from other wizards and scrolls
@@ -549,7 +553,7 @@ export default function SpellbookScreen() {
                                 <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
                                     {feature.label}
                                 </Text>
-                                <Text style={{ fontSize: 12, lineHeight: 16 }}>
+                                <Text style={{ fontSize: 14, lineHeight: 18 }}>
                                     {description}
                                 </Text>
                             </View>
@@ -895,15 +899,14 @@ export default function SpellbookScreen() {
                 visible={cantripModalVisible}
             >
                 <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
-                    <View style={[styles.modalOverlay, { flex: 1, justifyContent: 'center', alignItems: 'center' }]}>
+                    <View style={[styles.modalOverlay, { flex: 1 }]}>
                         <TouchableWithoutFeedback>
-                            <View style={[styles.cantripModal, { height: '100%', width: '100%', paddingTop: 60, paddingBottom: 40, justifyContent: 'space-between' }]}>
+                            <View style={[styles.cantripModal, { height: '100%', width: '100%', paddingTop: 60, paddingBottom: 40 }]}>
                                 <View>
                                     <Text style={[styles.title, { color: 'black' }]}>
                                         {cantripChoiceValue || (cantripPressedIndex !== null ? cantripSlotsData[cantripPressedIndex] : '')}
                                     </Text>
-
-                                    <View style={{ paddingBottom: 10, zIndex: 1000 }}>
+                                    <View style={{ marginBottom: 10 }}>
                                         {renderCantripChoicesBasedOnLevel()}
                                     </View>
                                 </View>

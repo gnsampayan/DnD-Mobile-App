@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     },
     cantripModal: {
         margin: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#f0f0f0',
         borderRadius: 8,
         padding: 20,
     },
