@@ -99,14 +99,13 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         return weaponData?.damage || '1';
     };
 
-    const getWeaponSkillModifiers = (weapon: Item) => {
+    const getWeaponSkillModifiers = (weapon: Item): string[] => {
         const itemWeapon = findWeaponInItems(weapon.name);
         if (itemWeapon && 'skill_modifiers' in itemWeapon) {
-            return itemWeapon.skill_modifiers;
+            return itemWeapon.skill_modifiers as string[];
         }
-
         const weaponData = findWeaponInData(weapon.name);
-        return weaponData && 'skill_modifiers' in weaponData ? weaponData.skill_modifiers : [];
+        return weaponData && 'skill_modifiers' in weaponData ? weaponData.skill_modifiers as string[] : [];
     };
 
     const getWeaponProperties = (weapon: Item) => {
@@ -132,14 +131,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 rangedHandWeapon: weapons.rangedHandWeapon,
                 equipWeapon,
                 getWeaponDamage,
-                getWeaponSkillModifiers: (weapon: Item): string[] => {
-                    const itemWeapon = findWeaponInItems(weapon.name);
-                    if (itemWeapon && 'skill_modifiers' in itemWeapon) {
-                        return itemWeapon.skill_modifiers as string[];
-                    }
-                    const weaponData = findWeaponInData(weapon.name);
-                    return weaponData && 'skill_modifiers' in weaponData ? weaponData.skill_modifiers as string[] : [];
-                },
+                getWeaponSkillModifiers,
                 getWeaponProperties,
             }}
         >

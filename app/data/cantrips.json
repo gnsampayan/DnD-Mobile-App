@@ -48,7 +48,7 @@
 		"damage": null,
 		"savingThrow": null,
 		"damageType": "Thunder",
-		"description": "You brandish the weapon used in the spell's casting and make a melee attack with it against one creature within 5 feet of you. On a hit, the target suffers the weapon attack's normal effects and then becomes sheathed in booming energy until the start of your next turn. If the target willingly moves 5 feet or more before then, the target takes 1d8 thunder damage, and the spell ends.",
+		"description": "You brandish the weapon used in the spell's casting and make a melee attack with it against one creature within 5 feet of you. On a hit, the target suffers the weapon attack's normal effects and then becomes sheathed in booming energy until the start of your next turn. If the target willingly moves 5 feet or more before then, the target takes (conditional damage) thunder damage, and the spell ends.",
 		"features": {
 			"material component": "A weapon worth at least 1 sp",
 			"melee bonus damage": {
@@ -152,7 +152,8 @@
 		},
 		"savingThrow": "Dexterity",
 		"damageType": "Fire",
-		"description": "You create a bonfire on ground that you can see within range. Until the spell ends, the magic bonfire fills a 5-foot cube. Any creature in the bonfire's space when you cast the spell must succeed on a Dexterity saving throw or take fire damage. A creature must also make the saving throw when it moves into the bonfire's space for the first time on a turn or ends its turn there. The bonfire ignites flammable objects in its area that aren't being worn or carried."
+		"description": "You create a bonfire on ground that you can see within range. Until the spell ends, the magic bonfire fills a 5-foot cube. Any creature in the bonfire's space when you cast the spell must succeed on a Dexterity saving throw or take fire damage. A creature must also make the saving throw when it moves into the bonfire's space for the first time on a turn or ends its turn there.",
+		"features": "The bonfire ignites flammable objects in its area that aren't being worn or carried."
 	},
 	{
 		"name": "Dancing Lights",
@@ -469,40 +470,128 @@
 		"features": "You can use your action to control the hand. You can use the hand to manipulate an object, open an unlocked door or container, stow or retrieve an item from an open container, or pour the contents out of a vial. You can move the hand up to 30 feet each time you use it. The hand can't attack, activate magic items, or carry more than 10 pounds."
 	},
 	{
+		"name": "Magic Stone",
+		"classes": ["Artificer", "Druid", "Warlock"],
+		"subclasses": ["Nature Domain", "Strength Domain"],
+		"school": "Transmutation",
+		"castingTime": "1 Bonus Action",
+		"range": "Touch",
+		"duration": "1 minute",
+		"components": "Verbal, Somatic",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You touch one to three pebbles and imbue them with magic. You or someone else can make a ranged spell attack with one of the pebbles by throwing it or hurling it with a sling. If someone else attacks with a pebble, that attacker adds your spellcasting ability modifier, not the attacker's, to the attack roll. Whether the attack hits or misses, the spell then ends on the stone. If you cast this spell again, the spell ends on any pebbles still affected by your previous casting.",
+		"features": {
+			"pebble throw range": "60 feet",
+			"pebble damage": "On hit, the target takes 1d6 + your spellcasting ability modifier",
+			"pebble damage type": "bludgeoning"
+		}
+	},
+	{
 		"name": "Mending",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Bard", "Cleric", "Druid", "Sorcerer", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Nature Domain",
+			"Strength Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Divine Soul",
+			"Theurgy"
+		],
 		"school": "Transmutation",
 		"castingTime": "1 Minute",
 		"range": "Touch",
 		"duration": "Instantaneous",
-		"components": "V, S, M"
+		"components": "Verbal, Somatic, Material",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "This spell repairs a single break or tear in an object you touch, such as broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage.",
+		"features": {
+			"material component": "two lodestones",
+			"magical objects": "This spell can physically repair a magic item or construct, but the spell can't restore magic to such an object."
+		}
 	},
 	{
 		"name": "Message",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Bard", "Sorcerer", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Psionics"
+		],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "120 feet",
 		"duration": "1 round",
-		"components": "V, S, M"
+		"components": "Verbal, Somatic, Material",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You point your finger toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear.",
+		"features": {
+			"material component": "a short piece of copper wire",
+			"familiar target": "You can cast this spell through solid objects if you are familiar with the target and know it is beyond the barrier.",
+			"impenetrable": "Magical silence, 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood blocks the spell.",
+			"pathing": "The spell doesn't have to follow a straight line and can travel freely around corners or through openings."
+		}
 	},
 	{
 		"name": "Mind Sliver",
-		"classes": ["Wizard"],
+		"classes": ["Sorcerer", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Aberrant Mind"
+		],
 		"school": "Enchantment",
 		"castingTime": "1 Action",
 		"range": "60 feet",
 		"duration": "1 round",
-		"components": "V"
+		"components": "Verbal",
+		"damage": {
+			"1": "1d6",
+			"5": "2d6",
+			"11": "3d6",
+			"17": "4d6"
+		},
+		"savingThrow": "Intelligence",
+		"damageType": "Psychic",
+		"description": "You drive a disorienting spike of psychic energy into the mind of one creature you can see within range. The target must succeed on an Intelligence saving throw or take psychic damage and get disoriented.",
+		"features": {
+			"disoriented": "On a failed saving throw, the target subtracts 1d4 from the next saving throw they make before the end of your next turn."
+		}
 	},
 	{
 		"name": "Minor Illusion",
-		"classes": ["Wizard"],
+		"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Eldritch Knight",
+			"Way of Shadow",
+			"Arcane Trickster",
+			"Giant Soul (Cloud Giant)",
+			"School of Illusion"
+		],
 		"school": "Illusion",
 		"castingTime": "1 Action",
 		"range": "30 feet",
 		"duration": "1 minute",
-		"components": "S, M"
+		"components": "Somatic, Material",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You create a sound or an image of an object within range that lasts for the duration. The illusion also ends if you dismiss it as an action or cast this spell again.",
+		"features": {
+			"material component": "a bit of fleece",
+			"create sound": "If you create a sound, its volume can range from a whisper to a scream. It can be your voice, someone else's voice, a lion's roar, a beating of drums, or any other sound you choose. The sound continues unabated throughout the duration, or you can make discrete sounds at different times before the spell ends.",
+			"create image": "If you create an image of an object — such as a chair, muddy footprints, or a small chest — it must be no larger than a 5-foot cube. The image can't create sound, light, smell, or any other sensory effect. Physical interaction with the image reveals it to be an illusion, because things can pass through it.",
+			"examined": "If a creature uses its action to examine the sound or image, the creature can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the illusion becomes faint to the creature."
+		}
 	},
 	{
 		"name": "Mold Earth",

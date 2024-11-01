@@ -26,6 +26,12 @@ import guidanceImage from '@images/cantrips/guidance.png';
 import gustImage from '@images/cantrips/gust.png';
 import infestationImage from '@images/cantrips/infestation.png';
 import lightImage from '@images/cantrips/light.png';
+import lightningLureImage from '@images/cantrips/lightning-lure.png';
+import mageHandImage from '@images/cantrips/mage-hand.png';
+import magicStoneImage from '@images/cantrips/magic-stone.png';
+import mendingImage from '@images/cantrips/mending.png';
+import messageImage from '@images/cantrips/message.png';
+import mindSliverImage from '@images/cantrips/mind-sliver.png';
 
 
 import { Ionicons } from '@expo/vector-icons';
@@ -53,6 +59,12 @@ const cantripImages = {
     'Gust': gustImage,
     'Infestation': infestationImage,
     'Light': lightImage,
+    'Lightning Lure': lightningLureImage,
+    'Mage Hand': mageHandImage,
+    'Magic Stone': magicStoneImage,
+    'Mending': mendingImage,
+    'Message': messageImage,
+    'Mind Sliver': mindSliverImage,
 }
 
 // TODO: Add learned spells from other wizards and scrolls
@@ -437,7 +449,7 @@ export default function SpellbookScreen() {
                 return selectedCantrip.damage;
             }
         }
-        return '-';
+        return '';
     }
 
 
@@ -447,6 +459,12 @@ export default function SpellbookScreen() {
         const handleCantripPreview = (cantrip: { name: string; description: string; features?: string | object[]; damage?: string }) => {
             setCantripChoiceValue(cantrip.name);
             setCantripChoiceDescription(cantrip.description || '');
+        }
+
+        const getSavingThrowFromCantrip = (cantripName: string): string => {
+            const allCantrips = getAvailableCantrips(statsData.class || '');
+            const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
+            return selectedCantrip?.savingThrow || '';
         }
 
         // Function to normalize features
@@ -528,10 +546,10 @@ export default function SpellbookScreen() {
 
                         return (
                             <View key={index} style={{ marginBottom: 10 }}>
-                                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
                                     {feature.label}
                                 </Text>
-                                <Text style={{ fontSize: 14, lineHeight: 20 }}>
+                                <Text style={{ fontSize: 12, lineHeight: 16 }}>
                                     {description}
                                 </Text>
                             </View>
@@ -575,7 +593,7 @@ export default function SpellbookScreen() {
                                             }
                                         }}
                                     />
-                                    <ScrollView>
+                                    <View>
                                         <View style={{ marginBottom: 10 }}>
                                             <Text style={{ fontWeight: 'bold' }}>Cantrip Slot:</Text>
                                             <Text>
@@ -598,13 +616,13 @@ export default function SpellbookScreen() {
                                                 )}
                                             </View>
                                         )}
-                                    </ScrollView>
+                                    </View>
                                 </View>
                             )}
                         {/* Show this when the cantrip slot is NOT empty */}
                         {cantripSlotsData[cantripPressedIndex] !== '' &&
                             cantripSlotsData[cantripPressedIndex] !== null && (
-                                <ScrollView>
+                                <View>
                                     <View style={{ marginBottom: 10 }}>
                                         <Text style={{ fontWeight: 'bold' }}>Cantrip Slot:</Text>
                                         <Text>
@@ -613,14 +631,26 @@ export default function SpellbookScreen() {
                                                 : 0) + 1}
                                         </Text>
                                     </View>
-                                    <View style={{ marginBottom: 10 }}>
-                                        <Text style={{ fontWeight: 'bold' }}>Damage:</Text>
-                                        <Text>
-                                            {getDamageFromCantrip(
-                                                cantripSlotsData[cantripPressedIndex]
-                                            )?.toString() || ''}
-                                        </Text>
-                                    </View>
+                                    {getDamageFromCantrip(cantripSlotsData[cantripPressedIndex]) && (
+                                        <View style={{ marginBottom: 10 }}>
+                                            <Text style={{ fontWeight: 'bold' }}>Damage:</Text>
+                                            <Text>
+                                                {getDamageFromCantrip(
+                                                    cantripSlotsData[cantripPressedIndex]
+                                                )?.toString()}
+                                            </Text>
+                                        </View>
+                                    )}
+                                    {getSavingThrowFromCantrip(cantripSlotsData[cantripPressedIndex]) && (
+                                        <View style={{ marginBottom: 10 }}>
+                                            <Text style={{ fontWeight: 'bold' }}>Saving Throw:</Text>
+                                            <Text>
+                                                {getSavingThrowFromCantrip(
+                                                    cantripSlotsData[cantripPressedIndex]
+                                                )?.toString()}
+                                            </Text>
+                                        </View>
+                                    )}
                                     <View style={{ marginBottom: 10 }}>
                                         <Text style={{ fontWeight: 'bold' }}>Description:</Text>
                                         <Text>
@@ -645,7 +675,7 @@ export default function SpellbookScreen() {
                                                 )}
                                             </View>
                                         )}
-                                </ScrollView>
+                                </View>
                             )}
                     </>
                 )}
@@ -764,6 +794,24 @@ export default function SpellbookScreen() {
         }
     };
 
+    const renderSpellSaveDC = () => {
+        const classInfo = classData.find(
+            (cls) => cls.value.toLowerCase() === statsData?.class?.toLowerCase()
+        );
+
+        // Get the primary ability for the class
+        const primaryAbility = classInfo?.primaryAbility || '';
+        // Calculate the spellcasting ability modifier
+        const spellcastingModifier = getAbilityModifier(primaryAbility.toString());
+        return (
+            <View style={styles.headerTextContainer}>
+                <Text style={styles.headerText}>spellsave DC:</Text>
+                <View style={styles.headerTextBox}>
+                    <Text style={styles.headerText}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
+                </View>
+            </View>
+        );
+    }
     return (
         <>
 
@@ -805,6 +853,7 @@ export default function SpellbookScreen() {
                                 </View>
                             </View>
                         </View>
+
                         <View style={styles.headerIcons}>
                             <TouchableOpacity onPress={() => setResetModalVisible(true)}>
                                 <Ionicons
@@ -816,6 +865,8 @@ export default function SpellbookScreen() {
                             </TouchableOpacity>
                         </View>
                     </View>
+
+                    {renderSpellSaveDC()}
 
                     <Text style={styles.title}>{statsData.class} Spellbook</Text>
                     {renderPreparedSpellBlocksForClass()}
@@ -858,6 +909,9 @@ export default function SpellbookScreen() {
                                 </View>
                                 {/* Buttons */}
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
+                                    <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
+                                        <Text style={{ color: 'black' }}>Close</Text>
+                                    </TouchableWithoutFeedback>
                                     {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (
                                         <Button
                                             title="Cast"
@@ -872,9 +926,6 @@ export default function SpellbookScreen() {
                                             setCantripInSlot();
                                         }}
                                     />}
-                                    <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
-                                        <Text style={{ color: 'black' }}>Close</Text>
-                                    </TouchableWithoutFeedback>
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>

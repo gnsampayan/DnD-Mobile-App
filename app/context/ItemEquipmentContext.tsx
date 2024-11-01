@@ -12,6 +12,8 @@ export interface Item {
     damage?: string;
     damageBonus?: string;
     weaponType?: string;
+    skill_modifiers?: string[];
+    savingThrow?: string;
 }
 
 
