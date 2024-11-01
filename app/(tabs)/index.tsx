@@ -168,8 +168,8 @@ export default function ActionsScreen() {
   const defaultActions: ActionBlock[] = [
     { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '1', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
-    { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 0, bonus: 1 }, image: defaultHideImage },
-    { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 1, bonus: 0 }, image: defaultJumpImage },
+    { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 0 }, image: defaultJumpImage },
     {
       id: '4',
       name: 'Shove',

@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, Button, Alert, ImageSourcePropType, ScrollView } from 'react-native';
 import styles from '@/app/styles/spellbookStyles';
@@ -14,6 +13,21 @@ import acidSplashImage from '@images/cantrips/acid-splash.png';
 import bladeWardImage from '@images/cantrips/blade-ward.png';
 import boomingBladeImage from '@images/cantrips/booming-blade.png';
 import controlFlamesImage from '@images/cantrips/control-flames.png';
+import createBonfireImage from '@images/cantrips/create-bonfire.png';
+import dancingLightsImage from '@images/cantrips/dancing-lights.png';
+import druidcraftImage from '@images/cantrips/druidcraft.png';
+import eldritchBlastImage from '@images/cantrips/eldritch-blast.png';
+import encodeThoughtsImage from '@images/cantrips/encode-thoughts.png';
+import fireBoltImage from '@images/cantrips/fire-bolt.png';
+import friendsImage from '@images/cantrips/friends.png';
+import frostbiteImage from '@images/cantrips/frostbite.png';
+import greenFlameBladeImage from '@images/cantrips/green-flame-blade.png';
+import guidanceImage from '@images/cantrips/guidance.png';
+import gustImage from '@images/cantrips/gust.png';
+import infestationImage from '@images/cantrips/infestation.png';
+import lightImage from '@images/cantrips/light.png';
+
+
 import { Ionicons } from '@expo/vector-icons';
 import { useActions } from '../context/actionsSpellsContext';
 
@@ -26,6 +40,19 @@ const cantripImages = {
     'Booming Blade': boomingBladeImage,
     'Chill Touch': chillTouchImage,
     'Control Flames': controlFlamesImage,
+    'Create Bonfire': createBonfireImage,
+    'Dancing Lights': dancingLightsImage,
+    'Druidcraft': druidcraftImage,
+    'Eldritch Blast': eldritchBlastImage,
+    'Encode Thoughts': encodeThoughtsImage,
+    'Fire Bolt': fireBoltImage,
+    'Friends': friendsImage,
+    'Frostbite': frostbiteImage,
+    'Green-Flame Blade': greenFlameBladeImage,
+    'Guidance': guidanceImage,
+    'Gust': gustImage,
+    'Infestation': infestationImage,
+    'Light': lightImage,
 }
 
 // TODO: Add learned spells from other wizards and scrolls
@@ -56,6 +83,11 @@ interface CastingCost {
     bonusAction: number;
 }
 
+interface Feature {
+    label: string;
+    description: string;
+}
+
 
 export default function SpellbookScreen() {
     const [preparedSpellSlots, setPreparedSpellSlots] = useState<number | null>(null);
@@ -67,6 +99,7 @@ export default function SpellbookScreen() {
     const [cantripChoiceValue, setCantripChoiceValue] = useState<string | null>(null);
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
     const [cantripSlotsData, setCantripSlotsData] = useState<(string | null)[]>([]);
+    const [resetModalVisible, setResetModalVisible] = useState(false);
 
     const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
@@ -406,47 +439,7 @@ export default function SpellbookScreen() {
         }
         return '-';
     }
-    const getFeaturesFromCantrip = (cantripName: string): React.ReactNode => {
-        const allCantrips = getAvailableCantrips(statsData.class || '');
-        const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
 
-        if (selectedCantrip && selectedCantrip.features) {
-            if (typeof selectedCantrip.features === 'string') {
-                return (
-                    <Text style={{ marginBottom: 10 }}>
-                        {selectedCantrip.features}
-                    </Text>
-                );
-            } else if (typeof selectedCantrip.features === 'object') {
-                return Object.entries(selectedCantrip.features).map(([key, value], index) => {
-                    if (typeof value === 'object' && value !== null) {
-                        return (
-                            <View key={index} style={{ flexDirection: 'row' }}>
-                                <Text style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
-                                    {key.replace(/([A-Z])/g, ' $1').trim()}:
-                                </Text>
-                                {Object.entries(value).map(([subKey, subValue], subIndex) => (
-                                    <Text key={subIndex} style={{ marginLeft: 10 }}>
-                                        {`${subKey}: ${subValue}`}
-                                    </Text>
-                                ))}
-                            </View>
-                        );
-                    } else {
-                        return (
-                            <View key={index} style={{ flexDirection: 'row', marginBottom: 2 }}>
-                                <Text style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>
-                                    {`${key.replace(/([A-Z])/g, ' $1').trim()}: `}
-                                </Text>
-                                <Text>{String(value)}</Text>
-                            </View>
-                        );
-                    }
-                });
-            }
-        }
-        return <Text>-</Text>;
-    }
 
     const renderCantripChoicesBasedOnLevel = () => {
         const availableCantrips = getAvailableCantrips(statsData.class || '');
@@ -455,71 +448,205 @@ export default function SpellbookScreen() {
             setCantripChoiceValue(cantrip.name);
             setCantripChoiceDescription(cantrip.description || '');
         }
+
+        // Function to normalize features
+        const normalizeFeatures = (featuresData: any): Feature[] => {
+            const normalizedFeatures: Feature[] = [];
+
+            if (typeof featuresData === 'string') {
+                // Handle single string feature
+                normalizedFeatures.push({
+                    label: 'Feature',
+                    description: featuresData
+                });
+            }
+            else if (Array.isArray(featuresData)) {
+                if (
+                    featuresData.length > 0 &&
+                    typeof featuresData[0] === 'object' &&
+                    !Array.isArray(featuresData[0])
+                ) {
+                    // Array of objects with 'effect' and 'details'
+                    featuresData.forEach((item: any) => {
+                        normalizedFeatures.push({
+                            label: item.effect || 'Feature',
+                            description: item.details || '',
+                        });
+                    });
+                } else {
+                    // Array of strings
+                    featuresData.forEach((item: string, index: number) => {
+                        normalizedFeatures.push({
+                            label: `Feature ${index + 1}`,
+                            description: item,
+                        });
+                    });
+                }
+            } else if (typeof featuresData === 'object' && featuresData !== null) {
+                // Object with key-value pairs
+                Object.keys(featuresData).forEach((key) => {
+                    const value = featuresData[key];
+                    if (typeof value === 'string') {
+                        normalizedFeatures.push({
+                            label: key.toString(),
+                            description: value.toString(),
+                        });
+                    } else if (typeof value === 'object' && value !== null) {
+                        // Flatten the object into a string without JSON artifacts
+                        const flattenedDescription = Object.entries(value)
+                            .map(([subKey, subValue]) => `${subKey}: ${subValue}`)
+                            .join(', ');
+                        normalizedFeatures.push({
+                            label: key.toString(),
+                            description: flattenedDescription,
+                        });
+                    } else {
+                        normalizedFeatures.push({
+                            label: key.toString(),
+                            description: String(value),
+                        });
+                    }
+                });
+            }
+
+            return normalizedFeatures;
+        };
+
+        // Function to render features
+        const renderFeatures = (featuresData: any) => {
+            if (!featuresData) return null;
+            const features = normalizeFeatures(featuresData);
+
+            return (
+                <View style={{ marginVertical: 10 }}>
+                    {features.map((feature, index) => {
+                        // Ensure description is a string
+                        const description =
+                            typeof feature.description === 'string'
+                                ? feature.description
+                                : JSON.stringify(feature.description);
+
+                        return (
+                            <View key={index} style={{ marginBottom: 10 }}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                                    {feature.label}
+                                </Text>
+                                <Text style={{ fontSize: 14, lineHeight: 20 }}>
+                                    {description}
+                                </Text>
+                            </View>
+                        );
+                    })}
+                </View>
+            );
+        };
+
         return (
             <View>
-                {/* Makes sure the cantrip slot is selected */}
+                {/* Ensure the cantrip slot is selected */}
                 {cantripPressedIndex !== null && (
                     <>
                         {/* Show this when the cantrip slot is empty */}
-                        {(cantripSlotsData[cantripPressedIndex] === '' || cantripSlotsData[cantripPressedIndex] === null) && (
-                            <>
-                                <DropDownPicker
-                                    open={openCantripChoice}
-                                    value={cantripChoiceValue}
-                                    items={unusedCantrips.map(cantrip => ({
-                                        label: cantrip.name,
-                                        value: cantrip.name
-                                    }))}
-                                    setOpen={setOpenCantripChoice}
-                                    setValue={setCantripChoiceValue}
-                                    placeholder="Select a cantrip"
-                                    style={{ marginBottom: 10 }}
-                                    zIndex={1000}
-                                    onChangeValue={(value) => {
-                                        const selected = unusedCantrips.find(cantrip => cantrip.name === value);
-                                        if (selected) {
-                                            handleCantripPreview({
-                                                name: selected.name,
-                                                description: selected.description || '',
-                                                features: (selected as Cantrip).features,
-                                            });
-                                        }
-                                    }}
-                                />
-                                <FlatList
-                                    data={[
-                                        { label: 'Cantrip Slot:', value: (cantripPressedIndex !== null ? cantripPressedIndex : 0) + 1 },
-                                        { label: 'Description:', value: cantripChoiceDescription },
-                                        { label: 'Features:', value: getFeaturesFromCantrip(cantripChoiceValue ?? '') || '' }
-                                    ]}
-                                    renderItem={({ item }) => (
+                        {(cantripSlotsData[cantripPressedIndex] === '' ||
+                            cantripSlotsData[cantripPressedIndex] === null) && (
+                                <View>
+                                    <DropDownPicker
+                                        open={openCantripChoice}
+                                        value={cantripChoiceValue}
+                                        items={unusedCantrips.map((cantrip) => ({
+                                            label: cantrip.name,
+                                            value: cantrip.name,
+                                        }))}
+                                        setOpen={setOpenCantripChoice}
+                                        setValue={setCantripChoiceValue}
+                                        placeholder="Select a cantrip"
+                                        style={{ marginBottom: 10 }}
+                                        zIndex={1000}
+                                        onChangeValue={(value) => {
+                                            const selected = unusedCantrips.find(
+                                                (cantrip) => cantrip.name === value
+                                            );
+                                            if (selected) {
+                                                handleCantripPreview({
+                                                    name: selected.name,
+                                                    description: selected.description || '',
+                                                    features: selected.features,
+                                                });
+                                            }
+                                        }}
+                                    />
+                                    <ScrollView>
                                         <View style={{ marginBottom: 10 }}>
-                                            <Text>{item.label}</Text>
-                                            <Text>{item.value}</Text>
+                                            <Text style={{ fontWeight: 'bold' }}>Cantrip Slot:</Text>
+                                            <Text>
+                                                {(cantripPressedIndex !== null
+                                                    ? cantripPressedIndex
+                                                    : 0) + 1}
+                                            </Text>
                                         </View>
-                                    )}
-                                    keyExtractor={(item, index) => index.toString()}
-                                />
-                            </>
-                        )}
+                                        <View style={{ marginBottom: 10 }}>
+                                            <Text style={{ fontWeight: 'bold' }}>Description:</Text>
+                                            <Text>{cantripChoiceDescription}</Text>
+                                        </View>
+                                        {cantripChoiceValue && (
+                                            <View style={{ marginBottom: 10 }}>
+                                                <Text style={{ fontWeight: 'bold' }}>Features:</Text>
+                                                {renderFeatures(
+                                                    unusedCantrips.find(
+                                                        cantrip => cantrip.name === cantripChoiceValue
+                                                    )?.features
+                                                )}
+                                            </View>
+                                        )}
+                                    </ScrollView>
+                                </View>
+                            )}
                         {/* Show this when the cantrip slot is NOT empty */}
-                        {cantripSlotsData[cantripPressedIndex] !== '' && cantripSlotsData[cantripPressedIndex] !== null && (
-                            <FlatList
-                                data={[
-                                    { label: 'Cantrip Slot:', value: (cantripPressedIndex !== null ? cantripPressedIndex : 0) + 1 },
-                                    { label: 'Damage:', value: getDamageFromCantrip(cantripSlotsData[cantripPressedIndex])?.toString() || '' },
-                                    { label: 'Description:', value: availableCantrips.find(cantrip => cantrip.name === cantripSlotsData[cantripPressedIndex])?.description || '' },
-                                    { label: 'Features:', value: getFeaturesFromCantrip(cantripSlotsData[cantripPressedIndex]) || '' }
-                                ]}
-                                renderItem={({ item }) => (
+                        {cantripSlotsData[cantripPressedIndex] !== '' &&
+                            cantripSlotsData[cantripPressedIndex] !== null && (
+                                <ScrollView>
                                     <View style={{ marginBottom: 10 }}>
-                                        <Text>{item.label}</Text>
-                                        <Text>{item.value}</Text>
+                                        <Text style={{ fontWeight: 'bold' }}>Cantrip Slot:</Text>
+                                        <Text>
+                                            {(cantripPressedIndex !== null
+                                                ? cantripPressedIndex
+                                                : 0) + 1}
+                                        </Text>
                                     </View>
-                                )}
-                                keyExtractor={(item, index) => index.toString()}
-                            />
-                        )}
+                                    <View style={{ marginBottom: 10 }}>
+                                        <Text style={{ fontWeight: 'bold' }}>Damage:</Text>
+                                        <Text>
+                                            {getDamageFromCantrip(
+                                                cantripSlotsData[cantripPressedIndex]
+                                            )?.toString() || ''}
+                                        </Text>
+                                    </View>
+                                    <View style={{ marginBottom: 10 }}>
+                                        <Text style={{ fontWeight: 'bold' }}>Description:</Text>
+                                        <Text>
+                                            {availableCantrips.find(
+                                                (cantrip) =>
+                                                    cantrip.name ===
+                                                    cantripSlotsData[cantripPressedIndex]
+                                            )?.description || ''}
+                                        </Text>
+                                    </View>
+                                    {availableCantrips.find(
+                                        (cantrip) =>
+                                            cantrip.name === cantripSlotsData[cantripPressedIndex]
+                                    )?.features && (
+                                            <View style={{ marginBottom: 10 }}>
+                                                <Text style={{ fontWeight: 'bold' }}>Features:</Text>
+                                                {renderFeatures(
+                                                    availableCantrips.find(
+                                                        (cantrip) =>
+                                                            cantrip.name === cantripSlotsData[cantripPressedIndex]
+                                                    )?.features
+                                                )}
+                                            </View>
+                                        )}
+                                </ScrollView>
+                            )}
                     </>
                 )}
             </View>
@@ -541,18 +668,6 @@ export default function SpellbookScreen() {
         setCantripModalVisible(false);
         setCantripChoiceValue(null);
         setCantripChoiceDescription(null);
-        setCantripPressedIndex(null);
-    }
-
-    const removeCantripFromSlot = () => {
-        if (cantripPressedIndex === null) {
-            Alert.alert('Error', 'No cantrip slot selected.');
-            return;
-        }
-        const updatedCantripSlots = [...cantripSlotsData];
-        updatedCantripSlots[cantripPressedIndex] = '';
-        setCantripSlotsData(updatedCantripSlots);
-        saveCantripSlots(updatedCantripSlots);
         setCantripPressedIndex(null);
     }
 
@@ -594,9 +709,6 @@ export default function SpellbookScreen() {
         setCurrentActionsAvailable(prev => prev - action);
         setCurrentBonusActionsAvailable(prev => prev - bonusAction);
 
-        // Provide feedback to the user
-        Alert.alert('Cantrip Casted', `${assignedCantrip} has been casted.`);
-
         // Reset modal and selection states
         setCantripModalVisible(false);
         setCantripChoiceValue(null);
@@ -633,6 +745,23 @@ export default function SpellbookScreen() {
     const endTurn = () => {
         setCurrentActionsAvailable(1);
         setCurrentBonusActionsAvailable(1);
+    };
+
+    const resetSpellbook = async () => {
+        try {
+            // Reset cantrip slots to an array of nulls
+            const resetCantripSlots = Array(cantripSlots).fill(null).map(() => null);
+            setCantripSlotsData(resetCantripSlots);
+            await AsyncStorage.setItem(CANTRIP_SLOTS_KEY, JSON.stringify(resetCantripSlots));
+
+            // Reset other spell slots and data as needed
+            // You can implement similar reset logic for other spell slots if applicable
+
+            // Close reset confirmation modal
+            setResetModalVisible(false);
+        } catch (error) {
+            console.error('Failed to reset spellbook:', error);
+        }
     };
 
     return (
@@ -676,6 +805,16 @@ export default function SpellbookScreen() {
                                 </View>
                             </View>
                         </View>
+                        <View style={styles.headerIcons}>
+                            <TouchableOpacity onPress={() => setResetModalVisible(true)}>
+                                <Ionicons
+                                    name="warning"
+                                    size={24}
+                                    color="red"
+                                    style={[styles.headerIcon, { color: 'white' }]}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <Text style={styles.title}>{statsData.class} Spellbook</Text>
@@ -717,22 +856,13 @@ export default function SpellbookScreen() {
                                         {renderCantripChoicesBasedOnLevel()}
                                     </View>
                                 </View>
-                                {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' && (
-                                    <Button
-                                        title="Cast"
-                                        onPress={() => castCantrip()}
-                                    />
-                                )}
                                 {/* Buttons */}
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                                     {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (
                                         <Button
-                                            title="Unassign"
-                                            color="red"
-                                            onPress={() => {
-                                                removeCantripFromSlot();
-                                                setCantripModalVisible(false);
-                                            }}
+                                            title="Cast"
+                                            disabled={!cantripSlotsData[cantripPressedIndex] || !canAffordCantrip(cantripSlotsData[cantripPressedIndex])}
+                                            onPress={() => castCantrip()}
                                         />
                                     ) : <Button
                                         title="Assign"
@@ -748,6 +878,27 @@ export default function SpellbookScreen() {
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={resetModalVisible}
+            >
+                <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.resetModal}>
+                            <Text>Are you sure you want to reset your spellbook?</Text>
+                            <Button
+                                title="Reset"
+                                color="red"
+                                onPress={() => {
+                                    resetSpellbook();
+                                    setResetModalVisible(false);
+                                }} />
+                        </View>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>

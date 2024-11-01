@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: 'white',
         borderStyle: 'solid',
         borderRadius: 8,
@@ -152,7 +152,21 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textTransform: 'capitalize',
     },
-
+    headerIcons: {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 10,
+        alignItems: 'center',
+    },
+    headerIcon: {
+        color: 'white',
+    },
+    resetModal: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 20,
+    },
 });
 
 export default styles;
