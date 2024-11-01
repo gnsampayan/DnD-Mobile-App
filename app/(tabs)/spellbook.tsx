@@ -232,13 +232,15 @@ export default function SpellbookScreen() {
     }
     const renderCantripBlock = (index: number) => {
         const canAfford = canAffordCantrip(cantripSlotsData[index] || '');
+        const isEmpty = cantripSlotsData[index] === null || cantripSlotsData[index] === '';
+        const darken = !isEmpty && !canAfford;
         return (
             <TouchableOpacity
-                style={[styles.addCantripButton, { width: itemWidth, opacity: canAfford ? 1 : 0.5 }]}
+                style={[styles.addCantripButton, { width: itemWidth, opacity: darken ? 0.5 : 1 }]}
                 onPress={() => {
                     handleCantripPress(index);
                 }}
-                disabled={!canAfford}
+                disabled={darken}
             >
                 <ImageBackground
                     // Start of Selection
@@ -617,7 +619,7 @@ export default function SpellbookScreen() {
     };
 
     const canAffordCantrip = (cantripName: string): boolean => {
-        const selectedCantrip = cantripsData.find(cantrip => cantrip.name === cantripName);
+        const selectedCantrip = cantripsData.find(cantrip => cantrip.name.toLowerCase() === cantripName.toLowerCase());
         if (!selectedCantrip || !selectedCantrip.castingTime) return false;
 
         const { action, bonusAction } = parseCastingTime(selectedCantrip.castingTime);
@@ -715,10 +717,12 @@ export default function SpellbookScreen() {
                                         {renderCantripChoicesBasedOnLevel()}
                                     </View>
                                 </View>
-                                <Button
-                                    title="Cast"
-                                    onPress={() => castCantrip()}
-                                />
+                                {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' && (
+                                    <Button
+                                        title="Cast"
+                                        onPress={() => castCantrip()}
+                                    />
+                                )}
                                 {/* Buttons */}
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                                     {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (

@@ -59,9 +59,10 @@ interface WeaponItem {
   weight: string;
   properties: string[];
   skill_modifiers: string[];
-  range?: string; // Optional property
+  range?: string;
   throwRange?: string;
   versatileDamage?: string;
+  weaponType?: string;
 }
 
 interface Ability {
@@ -75,6 +76,16 @@ interface AllocationHistory {
   [level: number]: {
     [abilityId: number]: number;
   };
+}
+
+// Define CharacterContextType
+interface CharacterContextType {
+  mainHandWeapon: WeaponItem | null;
+  offHandWeapon: WeaponItem | null;
+  rangedHandWeapon: WeaponItem | null;
+  getWeaponDamage: (weapon: WeaponItem) => string;
+  getWeaponSkillModifiers: (weapon: WeaponItem) => string[];
+  getWeaponProperties: (weapon: WeaponItem) => string[];
 }
 
 interface StatsData {
@@ -145,7 +156,7 @@ export default function ActionsScreen() {
     getWeaponDamage,
     getWeaponSkillModifiers,
     getWeaponProperties,
-  } = useContext(CharacterContext);
+  } = useContext(CharacterContext) as unknown as CharacterContextType;
   const [isArmed, setIsArmed] = useState(false);
 
   // Update `isArmed` when mainHandWeapon changes
@@ -325,7 +336,7 @@ export default function ActionsScreen() {
           .catch(error => console.error('Failed to save proficiency bonus:', error));
       }
     }
-  }, [statsData?.level, proficiencyBonus]);
+  }, [statsData?.level]);
 
   // Load proficiency bonus from AsyncStorage when component mounts
   useEffect(() => {
@@ -1193,20 +1204,12 @@ export default function ActionsScreen() {
                           </TouchableWithoutFeedback>
                         )}
 
-                        {/* Weapon Name Section */}
+                        {/* Weapon Type Section */}
                         {['Attack', 'Ranged Attack'].map((actionType) => {
                           const weapon = actionType === 'Attack' ? mainHandWeapon : rangedHandWeapon;
-                          const weaponName =
+                          const weaponType =
                             weapon && weapon.name !== 'none'
-                              ? weapons.weapons
-                                .find((w) =>
-                                  w.items.some(
-                                    (i) => i.name.toLowerCase() === weapon.name.toLowerCase()
-                                  )
-                                )
-                                ?.items.find(
-                                  (i) => i.name.toLowerCase() === weapon.name.toLowerCase()
-                                )?.name || '?'
+                              ? weapon.weaponType || '?'
                               : '?';
 
                           if (selectedAction.name !== actionType) {
@@ -1216,12 +1219,18 @@ export default function ActionsScreen() {
                           return (
                             <View
                               key={actionType}
-                              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                              style={{ flexDirection: 'column', marginBottom: 5 }}
                             >
-                              <Text>Name: </Text>
-                              <Text style={{ textTransform: 'capitalize' }}>
-                                {weaponName}{weaponsProficientIn.map(w => w.toLowerCase()).includes(weaponName.toLowerCase()) ? '' : ' (Inept)'}
-                              </Text>
+                              <View style={{ flexDirection: 'row' }}>
+                                <Text>Name: </Text>
+                                <Text>{weapon?.name || '?'}</Text>
+                              </View>
+                              <View style={{ flexDirection: 'row' }}>
+                                <Text>Weapon Type: </Text>
+                                <Text style={{ textTransform: 'capitalize' }}>
+                                  {weaponType}{weaponsProficientIn.map(w => w.toLowerCase()).includes(weaponType.toLowerCase()) ? '' : ' (Inept)'}
+                                </Text>
+                              </View>
                             </View>
                           );
                         })}
@@ -1288,10 +1297,12 @@ export default function ActionsScreen() {
                                     <Text> or </Text>}
                                   {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
                                 </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
-                                  <Text>+{proficiencyBonus}</Text>
-                                  <Ionicons name="ribbon" size={16} color="black" />
-                                </View>
+                                {weaponsProficientIn.includes(mainHandWeapon?.weaponType?.toLowerCase() || '') && (
+                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                    <Text>+{proficiencyBonus}</Text>
+                                    <Ionicons name="ribbon" size={16} color="black" />
+                                  </View>
+                                )}
                               </View>
                             </View>
                             {/* Damage Row */}
@@ -1315,33 +1326,33 @@ export default function ActionsScreen() {
                             <View style={styles.modalWeaponProperty}>
                               <Text>Type: </Text>
                               <Text style={{ textTransform: 'capitalize' }}>
-                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
                                   ? weapons.weapons.find(
                                     w => w.items.find(
-                                      i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()
-                                    ))?.items.find(i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase())?.damageType || '—'
+                                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
+                                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase())?.damageType || '—'
                                   : (!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '—')}
                               </Text>
                             </View>
                             <View style={styles.modalWeaponProperty}>
                               <Text>Range: </Text>
                               <Text>
-                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
                                   ? (weapons.weapons.find(
                                     w => w.items.find(
-                                      i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()
-                                    ))?.items.find(i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()) as WeaponItem)?.range || '—'
+                                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
+                                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()) as WeaponItem)?.range || '—'
                                   : '—'}
                               </Text>
                             </View>
                             <View style={styles.modalWeaponProperty}>
                               <Text>Throw Range: </Text>
                               <Text>
-                                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
                                   ? weapons.weapons.find(
                                     w => w.items.find(
-                                      i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase()
-                                    ))?.items.find(i => i.name.toLowerCase() === mainHandWeapon.name.toLowerCase())?.throwRange || '—'
+                                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
+                                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase())?.throwRange || '—'
                                   : '—'}
                               </Text>
                             </View>

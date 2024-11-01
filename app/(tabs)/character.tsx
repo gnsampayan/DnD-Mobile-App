@@ -35,6 +35,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
+import { useActions } from '../context/actionsSpellsContext';
 
 // Key for AsyncStorage
 const CANTRIP_SLOTS_KEY = '@cantrip_slots';
@@ -126,6 +127,13 @@ export default function MeScreen() {
     const [mainHandValue, setMainHandValue] = useState<string>(mainHandWeapon?.name || 'none');
     const [offHandValue, setOffHandValue] = useState<string>(offHandWeapon?.name || 'none');
     const [rangedHandValue, setRangedHandValue] = useState<string>(rangedHandWeapon?.name || 'none');
+
+    const { setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
+
+    const endTurn = () => {
+        setCurrentActionsAvailable(1);
+        setCurrentBonusActionsAvailable(1);
+    };
 
 
     // Update weapons whenever items change
@@ -362,6 +370,7 @@ export default function MeScreen() {
     };
 
     const handleDeleteCharacter = () => {
+        endTurn();
         setRaceValue(null);
         setClassValue(null);
         setImageUri(null);
@@ -399,107 +408,224 @@ export default function MeScreen() {
         if (weaponName?.toLowerCase() === 'none' || !weaponName) {
             // Unequip the weapon if "None" is selected
             equipWeapon(slot, null);
-            if (slot === 'mainHand') setMainHandValue('');
-            if (slot === 'offHand') setOffHandValue('');
-            if (slot === 'rangedHand') setRangedHandValue('');
+            if (slot === 'mainHand') setMainHandValue('none');
+            if (slot === 'offHand') setOffHandValue('none');
+            if (slot === 'rangedHand') setRangedHandValue('none');
             return;
         }
 
-        // First try to find the weapon in the user's bag
-        let selectedWeapon = items.find(item => item.name.toLowerCase() === weaponName.toLowerCase());
+        // Find the selected weapon from the user's bag using weaponName
+        const bagWeapon = items.find(
+            item => item.name.toLowerCase() === weaponName.toLowerCase()
+        );
 
-        // If not found in bag, look in weapons.json
-        if (!selectedWeapon) {
-            selectedWeapon = weaponData.weapons
-                .flatMap(category => category.items as unknown as Item[])
-                .find((item: Item) => item.name.toLowerCase() === weaponName.toLowerCase());
+        if (!bagWeapon) {
+            Alert.alert('Weapon Not Found', 'The selected weapon is not in your bag.');
+            return;
         }
 
-        if (!selectedWeapon) return;
+        // Check if weapon is already equipped in another slot and has quantity of 1
+        const isEquippedInMainHand = mainHandWeapon?.name?.toLowerCase() === weaponName.toLowerCase();
+        const isEquippedInOffHand = offHandWeapon?.name?.toLowerCase() === weaponName.toLowerCase();
+        const isEquippedInRangedHand = rangedHandWeapon?.name?.toLowerCase() === weaponName.toLowerCase();
+        const quantity = bagWeapon.quantity || 1;
 
-        const isSelectedWeaponTwoHanded = selectedWeapon.properties?.includes("Two-handed");
+        if (quantity === 1 && slot !== 'mainHand' && isEquippedInMainHand) {
+            Alert.alert('Already Equipped', 'This weapon is already equipped in your main hand.');
+            return;
+        }
+        if (quantity === 1 && slot !== 'offHand' && isEquippedInOffHand) {
+            Alert.alert('Already Equipped', 'This weapon is already equipped in your off hand.');
+            return;
+        }
+        if (quantity === 1 && slot !== 'rangedHand' && isEquippedInRangedHand) {
+            Alert.alert('Already Equipped', 'This weapon is already equipped in your ranged hand.');
+            return;
+        }
 
-        if (!isSelectedWeaponTwoHanded && (slot !== 'rangedHand')) {
-            if (mainHandWeapon?.name.toLowerCase() === weaponName.toLowerCase()) {
-                equipWeapon('mainHand', null);
-            }
-            if (offHandWeapon?.name.toLowerCase() === weaponName.toLowerCase()) {
-                equipWeapon('offHand', null);
-            }
-            if (rangedHandWeapon?.name.toLowerCase() === weaponName.toLowerCase()) {
-                equipWeapon('rangedHand', null);
-            }
+        // Get the weaponType from the bagWeapon
+        const weaponType = bagWeapon.weaponType;
+
+        if (!weaponType) {
+            Alert.alert('Invalid Weapon', 'The selected weapon does not have a valid weapon type.');
+            return;
+        }
+
+        // Find the complete weapon data using weaponType
+        const weaponDataItem = weaponData.weapons
+            .flatMap(category => category.items as unknown as Item[])
+            .find(item => item.weaponType?.toLowerCase() === weaponType.toLowerCase());
+
+        if (!weaponDataItem) {
+            Alert.alert('Weapon Data Not Found', 'The weapon type does not exist in the weapon data.');
+            return;
+        }
+
+        // Merge properties: weaponDataItem first, then bagWeapon to preserve unique names
+        let selectedWeapon: Item = { ...weaponDataItem, ...bagWeapon };
+
+        // Ensure weaponType is set
+        selectedWeapon.weaponType = weaponType;
+
+        // Check if the selected weapon is two-handed
+        const isSelectedWeaponTwoHanded = selectedWeapon.properties
+            ?.map(prop => prop.toLowerCase())
+            .includes('two-handed');
+
+        // Cannot equip two-handed weapon in offHand
+        if (isSelectedWeaponTwoHanded && slot === 'offHand') {
+            Alert.alert('Cannot Equip', 'Two-handed weapons cannot be equipped in the offhand.');
+            return;
         }
 
         if (isSelectedWeaponTwoHanded) {
-            // If equipping a two-handed weapon, unequip all slots
+            // Equipping a two-handed weapon in mainHand or rangedHand
+
+            // Unequip all weapons
             equipWeapon('mainHand', null);
             equipWeapon('offHand', null);
             equipWeapon('rangedHand', null);
+
+            // Equip the two-handed weapon in the specified slot
+            equipWeapon(slot, selectedWeapon);
         } else {
-            // If a two-handed weapon is already equipped, unequip it
-            if (mainHandWeapon?.properties?.includes("Two-handed")) {
+            // Equipping a one-handed weapon
+
+            // If a two-handed weapon is equipped, unequip it
+            const mainHandTwoHanded = mainHandWeapon?.properties
+                ?.map(prop => prop.toLowerCase())
+                .includes('two-handed');
+            const rangedHandTwoHanded = rangedHandWeapon?.properties
+                ?.map(prop => prop.toLowerCase())
+                .includes('two-handed');
+
+            if (mainHandTwoHanded) {
                 equipWeapon('mainHand', null);
             }
-            if (offHandWeapon?.properties?.includes("Two-handed")) {
-                equipWeapon('offHand', null);
-            }
-            if (rangedHandWeapon?.properties?.includes("Two-handed")) {
+            if (rangedHandTwoHanded) {
                 equipWeapon('rangedHand', null);
             }
+
+            // Equip the selected weapon in the specified slot
+            equipWeapon(slot, selectedWeapon);
         }
 
-        // Equip the selected weapon to the specified slot
-        equipWeapon(slot, selectedWeapon);
-        setMainHandValue(mainHandWeapon?.name || 'none');
-        setOffHandValue(offHandWeapon?.name || 'none');
-        setRangedHandValue(rangedHandWeapon?.name || 'none');
+        // Update the state values
+        if (slot === 'mainHand') {
+            setMainHandValue(selectedWeapon.name);
+        } else if (slot === 'offHand') {
+            setOffHandValue(selectedWeapon.name);
+        } else if (slot === 'rangedHand') {
+            setRangedHandValue(selectedWeapon.name);
+        }
     };
 
-    const filterEquipableRangedWeapons = () => {
-        const rangedCategories = ["Simple Ranged", "Martial Ranged"];
-        const weaponData = require('../data/weapons.json');
 
-        // Get the items created by the user in the bag
-        const userItems = items.filter((item) => item.type === 'Weapon');
+    // Function to filter ranged weapons
+    function filterEquipableRangedWeapons() {
+        // Get all items of type 'weapon' from the bag
+        const allBagItems = items.filter(item => item.type?.toLowerCase() === 'weapon');
 
-        // Filter the user items by checking if they belong to the ranged categories
-        return [
-            { label: 'None', value: 'none' },
-            ...userItems
-                .filter((userItem) =>
-                    weaponData.weapons.some((category: { category: string; items: Item[] }) =>
-                        rangedCategories.includes(category.category) &&
-                        category.items.some((weapon) => weapon.name.toLowerCase() === userItem.name.toLowerCase())
-                    )
-                )
-                .map((item) => ({ label: item.name, value: item.name.toLowerCase() }))
-        ];
-    };
-    const filterEquipableMeleeWeapons = () => {
-        // Get all weapons from the bag
-        const userItems = items.filter((item) => item.type === 'Weapon');
-        return [
-            { label: 'None', value: 'none' },
-            ...userItems.map((item) => ({
-                label: item.name,
-                value: item.name.toLowerCase()
-            }))
-        ];
+        // Get ranged weapon categories from weapons.json
+        const rangedCategories = weaponData.weapons.filter(category =>
+            category.category.toLowerCase().includes('ranged')
+        );
+
+        // Collect all ranged weapon types
+        const rangedWeaponTypes = rangedCategories.flatMap(category =>
+            category.items.map(item => item.weaponType.toLowerCase())
+        );
+
+        // Filter items in the bag that match ranged weapon types
+        const rangedWeapons = allBagItems.filter(item =>
+            rangedWeaponTypes.includes(item.weaponType?.toLowerCase() || '')
+        );
+
+        // Map to DropDownPicker items
+        const rangedWeaponsList = rangedWeapons.map(item => ({
+            label: item.name,
+            value: item.name.toLowerCase(),
+        }));
+
+        // Add 'None' option at the beginning
+        rangedWeaponsList.unshift({
+            label: 'None',
+            value: 'none',
+        });
+
+        return rangedWeaponsList;
+    }
+    // Function to filter melee weapons
+    function filterEquipableMeleeWeapons() {
+        // Get all items of type 'weapon' from the bag
+        const allBagItems = items.filter(item => item.type?.toLowerCase() === 'weapon');
+
+        // Get melee weapon categories from weapons.json
+        const meleeCategories = weaponData.weapons.filter(category =>
+            category.category.toLowerCase().includes('melee')
+        );
+
+        // Collect all melee weapon types
+        const meleeWeaponTypes = meleeCategories.flatMap(category =>
+            category.items.map(item => item.weaponType.toLowerCase())
+        );
+
+        // Filter items in the bag that match melee weapon types
+        const meleeWeapons = allBagItems.filter(item =>
+            meleeWeaponTypes.includes(item.weaponType?.toLowerCase() || '')
+        );
+
+        // Map to DropDownPicker items
+        const meleeWeaponsList = meleeWeapons.map(item => ({
+            label: item.name,
+            value: item.name.toLowerCase() || '',
+        }));
+
+        // Add 'None' option at the beginning
+        meleeWeaponsList.unshift({
+            label: 'None',
+            value: 'none',
+        });
+
+        return meleeWeaponsList;
     }
 
-    const filterEquipableOffhandWeapons = () => {
+    // Function to filter offhand weapons
+    function filterEquipableOffhandWeapons() {
+        // First, get the melee weapons
         const meleeWeapons = filterEquipableMeleeWeapons();
-        const weaponData = require('../data/weapons.json');
 
-        // Filter the melee weapons to only include those with the "Light" property
-        return meleeWeapons.filter((weapon) => {
-            if (weapon.value === 'none') return true; // Keep the 'None' option
-            const weaponDetails = weaponData.weapons
-                .flatMap((category: { category: string; items: Item[] }) => category.items)
-                .find((item: Item) => item.name.toLowerCase() === weapon.value);
-            return weaponDetails && weaponDetails.properties?.includes("Light");
+        // Exclude the 'None' option
+        const validMeleeWeapons = meleeWeapons.filter(weapon => weapon.value !== 'none');
+
+        // Get the weapon data from the JSON file
+        const allWeaponData = weaponData.weapons.flatMap(category => category.items as unknown as Item[]);
+
+        // Filter melee weapons that have the 'Light' property
+        const offhandWeapons = validMeleeWeapons.filter(weapon => {
+            // Find the corresponding weapon in the bag
+            const bagWeapon = items.find(item =>
+                item.name.toLowerCase() === weapon.value
+            );
+
+            // Find the weapon data from JSON using weaponType
+            const weaponDataItem = allWeaponData.find(item =>
+                item.weaponType?.toLowerCase() === bagWeapon?.weaponType?.toLowerCase()
+            );
+
+            // Check if the weapon has the 'Light' property
+            // First check bag item properties, fallback to JSON data properties
+            const properties = bagWeapon?.properties || weaponDataItem?.properties || [];
+            return properties.map(prop => prop.toLowerCase()).includes('light');
         });
+
+        // Add 'None' option at the beginning
+        offhandWeapons.unshift({
+            label: 'None',
+            value: 'none',
+        });
+
+        return offhandWeapons;
     }
 
     // Calculate half of the screen width

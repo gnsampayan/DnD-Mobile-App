@@ -1,7 +1,7 @@
-import React, { createContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { Item, useItemEquipment } from './ItemEquipmentContext'; // Assuming you have an Item interface defined here.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import weapons from '../data/weapons.json';
+import weaponsData from '../data/weapons.json';
 
 export type WeaponSlot = 'mainHand' | 'offHand' | 'rangedHand';
 
@@ -15,44 +15,32 @@ interface CharacterContextProps {
     getWeaponProperties: (weapon: Item) => string[];
 }
 
-export const CharacterContext = createContext<CharacterContextProps>({
-    mainHandWeapon: null,
-    offHandWeapon: null,
-    rangedHandWeapon: null,
-    equipWeapon: () => { },
-    getWeaponDamage: () => '1',
-    getWeaponSkillModifiers: () => [],
-    getWeaponProperties: () => [],
-});
+export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
 
 export const CharacterProvider = ({ children }: { children: ReactNode }) => {
-    const [mainHandWeapon, setMainHandWeapon] = useState<Item | null>(null);
-    const [offHandWeapon, setOffHandWeapon] = useState<Item | null>(null);
-    const [rangedHandWeapon, setRangedHandWeapon] = useState<Item | null>(null);
+    const [weapons, setWeapons] = useState<{
+        mainHandWeapon: Item | null;
+        offHandWeapon: Item | null;
+        rangedHandWeapon: Item | null;
+    }>({
+        mainHandWeapon: null,
+        offHandWeapon: null,
+        rangedHandWeapon: null,
+    });
+
     const { items } = useItemEquipment();
     const [isLoading, setIsLoading] = useState(true);
 
-    // Function to save weapons to AsyncStorage
-    const saveWeaponsToStorage = async () => {
-        try {
-            await AsyncStorage.setItem('mainHandWeapon', JSON.stringify(mainHandWeapon));
-            await AsyncStorage.setItem('offHandWeapon', JSON.stringify(offHandWeapon));
-            await AsyncStorage.setItem('rangedHandWeapon', JSON.stringify(rangedHandWeapon));
-        } catch (error) {
-            console.error('Error saving weapons to AsyncStorage:', error);
-        }
-    };
+    const WEAPONS_STORAGE_KEY = '@equipped_weapons';
 
     // Load weapons from AsyncStorage on component mount
     useEffect(() => {
         const loadWeaponsFromStorage = async () => {
             try {
-                const storedMainHand = await AsyncStorage.getItem('mainHandWeapon');
-                const storedOffHand = await AsyncStorage.getItem('offHandWeapon');
-                const storedRangedHand = await AsyncStorage.getItem('rangedHandWeapon');
-                if (storedMainHand) setMainHandWeapon(JSON.parse(storedMainHand));
-                if (storedOffHand) setOffHandWeapon(JSON.parse(storedOffHand));
-                if (storedRangedHand) setRangedHandWeapon(JSON.parse(storedRangedHand));
+                const storedWeapons = await AsyncStorage.getItem(WEAPONS_STORAGE_KEY);
+                if (storedWeapons) {
+                    setWeapons(JSON.parse(storedWeapons));
+                }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
             } finally {
@@ -66,61 +54,95 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     // Save weapons to AsyncStorage whenever they change
     useEffect(() => {
         if (!isLoading) {
+            const saveWeaponsToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(WEAPONS_STORAGE_KEY, JSON.stringify(weapons));
+                } catch (error) {
+                    console.error('Error saving weapons to AsyncStorage:', error);
+                }
+            };
+
             saveWeaponsToStorage();
         }
-    }, [mainHandWeapon, offHandWeapon, rangedHandWeapon, isLoading]);
+    }, [weapons, isLoading]);
 
     const equipWeapon = (slot: WeaponSlot, weapon: Item | null) => {
-        if (slot === 'mainHand') {
-            setMainHandWeapon(weapon);
-        } else if (slot === 'offHand') {
-            setOffHandWeapon(weapon);
-        } else if (slot === 'rangedHand') {
-            setRangedHandWeapon(weapon);
+        setWeapons((prevWeapons) => ({
+            ...prevWeapons,
+            [`${slot}Weapon`]: weapon,
+        }));
+    };
+
+    const findWeaponInItems = (weaponName: string) => {
+        return items.find((item) => item.name.toLowerCase() === weaponName.toLowerCase());
+    };
+
+    const findWeaponInData = (weaponName: string) => {
+        for (const category of weaponsData.weapons) {
+            const weaponItem = category.items.find(
+                (item) => item.name.toLowerCase() === weaponName.toLowerCase()
+            );
+            if (weaponItem) {
+                return weaponItem;
+            }
         }
+        return null;
     };
 
     const getWeaponDamage = (weapon: Item) => {
-        // First check if weapon exists in items context
-        const itemWeapon = items.find(item => item.name.toLowerCase() === weapon.name.toLowerCase());
+        const itemWeapon = findWeaponInItems(weapon.name);
         if (itemWeapon?.damage) {
             return itemWeapon.damage;
         }
-        // If not found in items, check weapons data
-        const weaponData = weapons.weapons.find(w => w.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase()));
-        const weaponItem = weaponData?.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase());
-        return weaponItem?.damage || '1';
+
+        const weaponData = findWeaponInData(weapon.name);
+        return weaponData?.damage || '1';
     };
 
     const getWeaponSkillModifiers = (weapon: Item) => {
-        const weaponData = weapons.weapons.find(w => w.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase()));
-        const weaponItem = weaponData?.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase());
-        return weaponItem?.skill_modifiers || [];
+        const itemWeapon = findWeaponInItems(weapon.name);
+        if (itemWeapon && 'skill_modifiers' in itemWeapon) {
+            return itemWeapon.skill_modifiers;
+        }
+
+        const weaponData = findWeaponInData(weapon.name);
+        return weaponData && 'skill_modifiers' in weaponData ? weaponData.skill_modifiers : [];
     };
 
     const getWeaponProperties = (weapon: Item) => {
-        // First check if weapon exists in items context
-        const itemWeapon = items.find(item => item.name.toLowerCase() === weapon.name.toLowerCase());
-        if (itemWeapon?.details) {
-            return itemWeapon.details.split(',').map(detail => detail.trim());
+        const itemWeapon = findWeaponInItems(weapon.name);
+        if (itemWeapon?.properties) {
+            return itemWeapon.properties;
         }
 
-        // If not found in items, check weapons data
-        const weaponData = weapons.weapons.find(w => w.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase()));
-        const weaponItem = weaponData?.items.find(i => i.name.toLowerCase() === weapon.name.toLowerCase());
-        return weaponItem?.properties || [];
+        const weaponData = findWeaponInData(weapon.name);
+        return weaponData?.properties || [];
     };
 
+    if (isLoading) {
+        // Optionally render a loading indicator
+        return null;
+    }
+
     return (
-        <CharacterContext.Provider value={{
-            mainHandWeapon,
-            offHandWeapon,
-            rangedHandWeapon,
-            equipWeapon,
-            getWeaponDamage,
-            getWeaponSkillModifiers,
-            getWeaponProperties,
-        }}>
+        <CharacterContext.Provider
+            value={{
+                mainHandWeapon: weapons.mainHandWeapon,
+                offHandWeapon: weapons.offHandWeapon,
+                rangedHandWeapon: weapons.rangedHandWeapon,
+                equipWeapon,
+                getWeaponDamage,
+                getWeaponSkillModifiers: (weapon: Item): string[] => {
+                    const itemWeapon = findWeaponInItems(weapon.name);
+                    if (itemWeapon && 'skill_modifiers' in itemWeapon) {
+                        return itemWeapon.skill_modifiers as string[];
+                    }
+                    const weaponData = findWeaponInData(weapon.name);
+                    return weaponData && 'skill_modifiers' in weaponData ? weaponData.skill_modifiers as string[] : [];
+                },
+                getWeaponProperties,
+            }}
+        >
             {children}
         </CharacterContext.Provider>
     );

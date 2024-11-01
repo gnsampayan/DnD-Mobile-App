@@ -35,7 +35,7 @@
 			"wisdom": 0,
 			"charisma": 0
 		},
-		"total": 3
+		"total": 2
 	},
 	{
 		"race": "Dwarf",
@@ -62,7 +62,7 @@
 			"wisdom": 0,
 			"charisma": 0
 		},
-		"total": 4
+		"total": 2
 	},
 	{
 		"race": "Halfling",
@@ -81,7 +81,7 @@
 			"wisdom": 0,
 			"charisma": 0
 		},
-		"total": 3
+		"total": 2
 	},
 	{
 		"race": "Gnome",
@@ -99,7 +99,7 @@
 			"wisdom": 0,
 			"charisma": 0
 		},
-		"total": 3
+		"total": 2
 	},
 	{
 		"race": "Half-Elf",
