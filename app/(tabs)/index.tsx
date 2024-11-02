@@ -143,7 +143,7 @@ const cantripImages = {
 interface BaseAction {
   id: string;
   name: string;
-  cost: { actions: number; bonus: number };
+  cost: { actions: number; bonus: number; castingTimeText?: string };
   details?: string;
   image?: string | ImageSourcePropType;
 }
@@ -348,7 +348,7 @@ export default function ActionsScreen() {
       return {
         id: `cantrip-${index}`,
         name: cantripName || `Cantrip ${index + 1}`,
-        cost: parseCastingTime(cantrip.castingTime), // Adjust casting time
+        cost: parseCastingTime(cantrip.castingTime),
         details: cantrip.description || '',
         image: cantripImageSource,
         type: 'cantrip',
@@ -356,13 +356,23 @@ export default function ActionsScreen() {
     });
   };
 
-  const parseCastingTime = (castingTime: string | undefined): { actions: number; bonus: number } => {
-    if (castingTime?.toLowerCase().includes('1 bonus action')) {
+  const parseCastingTime = (
+    castingTime: string | undefined): {
+      actions: number;
+      bonus: number;
+      castingTimeText?: string
+    } => {
+    if (!castingTime) {
+      return { actions: 0, bonus: 0 };
+    }
+    const lowerCastingTime = castingTime.toLowerCase();
+    if (lowerCastingTime.includes('bonus action')) {
       return { actions: 0, bonus: 1 };
-    } else if (castingTime?.toLowerCase().includes('1 action')) {
+    } else if (lowerCastingTime.includes('action')) {
       return { actions: 1, bonus: 0 };
     } else {
-      return { actions: 0, bonus: 0 };
+      // Return the original casting time string for other cases
+      return { actions: 0, bonus: 0, castingTimeText: castingTime };
     }
   };
 
@@ -1400,23 +1410,34 @@ export default function ActionsScreen() {
                         {/* Cost Section */}
                         <View style={styles.modalCostContainer}>
                           <Text>Cost: </Text>
-                          {selectedAction.cost.actions === 0 ? null : (
+                          {selectedAction.cost.actions > 0 && (
                             <View style={styles.costTextContainer}>
                               <Text>{selectedAction.cost.actions}</Text>
                               <Ionicons name="ellipse" size={16} color="green" />
                             </View>
                           )}
-                          {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
+                          {selectedAction.cost.actions > 0 && selectedAction.cost.bonus > 0 && (
                             <Text>, </Text>
                           )}
-                          {selectedAction.cost.bonus === 0 ? null : (
+                          {selectedAction.cost.bonus > 0 && (
                             <View style={styles.costTextContainer}>
                               <Text>{selectedAction.cost.bonus}</Text>
                               <Ionicons name="triangle" size={16} color="#FF8C00" />
                             </View>
                           )}
-                        </View>
+                          {selectedAction.cost.castingTimeText && (
+                            <View>
+                              <Text style={{ color: 'black' }}>{selectedAction.cost.castingTimeText}</Text>
+                            </View>
+                          )}
 
+                        </View>
+                        {/* If Cantrip, show this text */}
+                        {('type' in selectedAction && selectedAction.type === 'cantrip') &&
+                          <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
+                            (Detailed in Spellbook)
+                          </Text>
+                        }
                       </View>
                     </View>
 

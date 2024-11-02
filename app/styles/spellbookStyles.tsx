@@ -97,6 +97,12 @@ const styles = StyleSheet.create({
         width: '100%',
         left: 20,
     },
+    cantripLabel: {
+        textTransform: 'uppercase',
+        fontSize: 12,
+        color: '#464646',
+        marginBottom: 2,
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
