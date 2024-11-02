@@ -343,7 +343,7 @@
 		"damageType": null,
 		"description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice. It can roll the die before or after making the ability check. The spell then ends.",
 		"features": {
-			"bonus": "d4"
+			"bonus": "The target adds its d4 to its ability check."
 		}
 	},
 	{
@@ -619,102 +619,454 @@
 		]
 	},
 	{
-		"name": "On/Off (UA)",
-		"classes": ["Wizard"],
-		"school": "Transmutation T",
-		"castingTime": "1 Action",
-		"range": "60 feet",
-		"duration": "Instantaneous",
-		"components": "V, S"
-	},
-	{
 		"name": "Poison Spray",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Druid", "Sorcerer", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Nature Domain",
+			"Strength Domain",
+			"Eldritch Knight",
+			"Arcane Trickster"
+		],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "10 feet",
 		"duration": "Instantaneous",
-		"components": "V, S"
+		"components": "Verbal, Somatic",
+		"damage": {
+			"1": "1d12",
+			"5": "2d12",
+			"11": "3d12",
+			"17": "4d12"
+		},
+		"savingThrow": "Constitution",
+		"damageType": "Poison",
+		"description": "You extend your hand toward a creature you can see within range and project a puff of noxious gas from your palm. The creature must succeed on a Constitution saving throw or take poison damage."
 	},
 	{
 		"name": "Prestidigitation",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Bard", "Sorcerer", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Arcane Archer",
+			"Eldritch Knight",
+			"Arcane Trickster"
+		],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "10 feet",
 		"duration": "Up to 1 hour",
-		"components": "V, S"
+		"components": "Verbal, Somatic",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "This spell is a minor magical trick that novice spellcasters use for practice. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action. You create one of the following magical effects within range:",
+		"features": [
+			"You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor.",
+			"You instantaneously light or snuff out a candle, a torch, or a small campfire.",
+			"You instantaneously clean or soil an object no larger than 1 cubic foot.",
+			"You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour.",
+			"You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.",
+			"You create a nonmagical trinket or an illusory image that can fit in your hand and that lasts until the end of your next turn."
+		]
+	},
+	{
+		"name": "Primal Savagery",
+		"classes": ["Druid"],
+		"subclasses": ["Nature Domain", "Strength Domain"],
+		"school": "Transmutation",
+		"castingTime": "1 Action",
+		"range": "Self (5-foot radius)",
+		"duration": "Instantaneous",
+		"components": "Somatic",
+		"damage": {
+			"1": "1d10",
+			"5": "2d10",
+			"11": "3d10",
+			"17": "4d10"
+		},
+		"savingThrow": null,
+		"damageType": "Acid",
+		"description": "You channel primal magic to cause your teeth or fingernails to sharpen, ready to deliver a corrosive attack.",
+		"features": "Bite or scratch (melee spell attack) one creature within 5 feet of you. On a hit, the target takes acid damage. After you make the attack, your teeth or fingernails return to normal."
+	},
+	{
+		"name": "Produce Flame",
+		"classes": ["Druid"],
+		"subclasses": ["Nature Domain", "Strength Domain"],
+		"school": "Conjuration",
+		"castingTime": "1 Action",
+		"range": "Self",
+		"duration": "10 minutes",
+		"components": "Verbal, Somatic",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "A flickering flame appears in your hand. The flame remains there for the duration and harms neither you nor your equipment. The flame sheds bright light in a 10-foot radius and dim light for an additional 10 feet. The spell ends if you dismiss it as an action or if you cast it again.",
+		"features": {
+			"flame attack": "You can also attack with the flame, although doing so ends the spell. Make a ranged spell attack. On a hit, the target takes fire damage.",
+			"throw range": "30 feet",
+			"flame damage": {
+				"1": "1d8",
+				"5": "2d8",
+				"11": "3d8",
+				"17": "4d8"
+			}
+		}
 	},
 	{
 		"name": "Ray of Frost",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Sorcerer", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Giant Soul (Frost Giant)"
+		],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "60 feet",
 		"duration": "Instantaneous",
-		"components": "V, S"
+		"components": "Verbal, Somatic",
+		"damage": {
+			"1": "1d8",
+			"5": "2d8",
+			"11": "3d8",
+			"17": "4d8"
+		},
+		"savingThrow": null,
+		"damageType": "Cold",
+		"description": "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes cold damage.",
+		"features": {
+			"slowed": "On hit, the target's speed is reduced by 10 feet until the start of your next turn."
+		}
+	},
+	{
+		"name": "Resistance",
+		"classes": ["Artificer", "Cleric", "Druid"],
+		"subclasses": [
+			"Nature Domain",
+			"Strength Domain",
+			"Divine Soul",
+			"Giant Soul (Stone Giant)",
+			"Theurgy"
+		],
+		"school": "Abjuration",
+		"castingTime": "1 Action",
+		"range": "Touch",
+		"duration": "Concentration, up to 1 minute",
+		"components": "Verbal, Somatic, Material",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one saving throw of its choice. It can roll the die before or after making the saving throw. The spell then ends.",
+		"features": {
+			"material component": "a miniature cloak",
+			"bonus": "The target adds its d4 to its saving throw."
+		}
 	},
 	{
 		"name": "Sapping Sting",
-		"classes": ["Wizard"],
-		"school": "Necromancy D",
+		"classes": [],
+		"subclasses": ["Death Domain", "Chronurgy Magic", "Gravity Magic"],
+		"school": "Necromancy",
 		"castingTime": "1 Action",
 		"range": "30 feet",
 		"duration": "Instantaneous",
-		"components": "V, S"
+		"components": "Verbal, Somatic",
+		"damage": {
+			"1": "1d4",
+			"5": "2d4",
+			"11": "3d4",
+			"17": "4d4"
+		},
+		"savingThrow": "Constitution",
+		"damageType": "Necrotic",
+		"description": "You sap the vitality of one creature you can see in range. The target must succeed on a Constitution saving throw or take necrotic damage.",
+		"features": "On hit, the target falls prone."
 	},
 	{
 		"name": "Shape Water",
-		"classes": ["Wizard"],
+		"classes": ["Druid", "Sorcerer", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Nature Domain",
+			"Strength Domain",
+			"Eldritch Knight",
+			"Arcane Trickster"
+		],
 		"school": "Transmutation",
 		"castingTime": "1 Action",
 		"range": "30 feet",
 		"duration": "Instantaneous or 1 hour",
-		"components": "S"
+		"components": "Somatic",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You choose an area of water that you can see within range and that fits within a 5-foot cube. If you cast this spell multiple times, you can have no more than two of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action. You manipulate it in one of the following ways:",
+		"features": [
+			"You instantaneously move or otherwise change the flow of the water as you direct, up to 5 feet in any direction. This movement doesn't have enough force to cause damage.",
+			"You cause the water to form into simple shapes and animate at your direction. This change lasts for 1 hour.",
+			"You change the water's color or opacity. The water must be changed in the same way throughout. This change lasts for 1 hour.",
+			"You freeze the water, provided that there are no creatures in it. The water unfreezes in 1 hour."
+		]
+	},
+	{
+		"name": "Shillelagh",
+		"classes": ["Druid"],
+		"subclasses": [
+			"Nature Domain",
+			"Strength Domain",
+			"Giant Soul (Hill Giant)"
+		],
+		"school": "Transmutation",
+		"castingTime": "1 Bonus Action",
+		"range": "Touch",
+		"duration": "1 minute",
+		"components": "Verbal, Somatic, Material",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "The wood of a club or quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon. The weapon also becomes magical, if it isn't already. The spell ends if you cast it again or if you let go of the weapon.",
+		"features": {
+			"material component": "mistletoe, a shamrock leaf, and a wooden club or quarterstaff",
+			"magic weapon": "Use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon.",
+			"damage die": "The weapon's damage die becomes a d8."
+		}
 	},
 	{
 		"name": "Shocking Grasp",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Sorcerer", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Giant Soul (Storm Giant)"
+		],
 		"school": "Evocation",
 		"castingTime": "1 Action",
 		"range": "Touch",
 		"duration": "Instantaneous",
-		"components": "V, S"
+		"components": "Verbal, Somatic",
+		"damage": {
+			"1": "1d8",
+			"5": "2d8",
+			"11": "3d8",
+			"17": "4d8"
+		},
+		"savingThrow": null,
+		"damageType": "Lightning",
+		"description": "Lightning springs from your hand to deliver a shock to a creature you try to touch. Make a melee spell attack against the target. On a hit, the target takes lightning damage.",
+		"features": {
+			"advantage": "You have advantage on the attack roll if the target is wearing armor made of metal.",
+			"no reactions": "On hit, the target cannot make reactions until the start of your next turn."
+		}
+	},
+	{
+		"name": "Spare the Dying",
+		"classes": ["Artificer", "Cleric"],
+		"subclasses": [
+			"Death Domain",
+			"Grave Domain",
+			"Divine Soul",
+			"The Undying",
+			"Theurgy",
+			"Mage of Witherbloom"
+		],
+		"school": "Necromancy",
+		"castingTime": "1 Action",
+		"range": "Touch",
+		"duration": "Instantaneous",
+		"components": "Verbal, Somatic",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs."
 	},
 	{
 		"name": "Sword Burst",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Sorcerer", "Warlock", "Wizard"],
+		"subclasses": ["Arcana Domain", "Eldritch Knight", "Arcane Trickster"],
 		"school": "Conjuration",
 		"castingTime": "1 Action",
 		"range": "Self (5-foot radius)",
 		"duration": "Instantaneous",
-		"components": "V"
+		"components": "Verbal",
+		"damage": {
+			"1": "1d6",
+			"5": "2d6",
+			"11": "3d6",
+			"17": "4d6"
+		},
+		"savingThrow": "Dexterity",
+		"damageType": "Force",
+		"description": "You create a momentary circle of spectral blades that sweep around you. All other creatures within 5 feet of you must succeed on a Dexterity saving throw or take force damage."
+	},
+	{
+		"name": "Thaumaturgy",
+		"classes": ["Cleric"],
+		"subclasses": ["Drakewarden", "Divine Soul", "Theurgy"],
+		"school": "Transmutation",
+		"castingTime": "1 Action",
+		"range": "30 feet",
+		"duration": "Up to 1 minute",
+		"components": "Verbal",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You manifest a minor wonder, a sign of supernatural power, within range. If you cast this spell multiple times, you can have up to three of its 1-minute effects active at a time, and you can dismiss such an effect as an action. You create one of the following magical effects within range:",
+		"features": [
+			"Your voice booms up to three times as loud as normal for 1 minute.",
+			"You cause flames to flicker, brighten, dim, or change color for 1 minute.",
+			"You cause harmless tremors in the ground for 1 minute.",
+			"You create an instantaneous sound that originates from a point of your choice within range, such as a rumble of thunder, the cry of a raven, or ominous whispers.",
+			"You instantaneously cause an unlocked door or window to fly open or slam shut.",
+			"You alter the appearance of your eyes for 1 minute."
+		]
+	},
+	{
+		"name": "Thorn Whip",
+		"classes": ["Artificer", "Druid"],
+		"subclasses": ["Nature Domain", "Strength Domain"],
+		"school": "Transmutation",
+		"castingTime": "1 Action",
+		"range": "30 feet",
+		"duration": "Instantaneous",
+		"components": "Verbal, Somatic, Material",
+		"damage": {
+			"1": "1d6",
+			"5": "2d6",
+			"11": "3d6",
+			"17": "4d6"
+		},
+		"savingThrow": null,
+		"damageType": "Piercing",
+		"description": "You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack against the target. If the attack hits, the creature takes piercing damage",
+		"features": {
+			"material component": "the stem of a plant with thorns",
+			"pull": "If the creature is Large or smaller, you pull the creature up to 10 feet closer to you."
+		}
 	},
 	{
 		"name": "Thunderclap",
-		"classes": ["Wizard"],
+		"classes": ["Artificer", "Bard", "Druid", "Sorcerer", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Nature Domain",
+			"Strength Domain",
+			"Eldritch Knight",
+			"Arcane Trickster"
+		],
 		"school": "Evocation",
 		"castingTime": "1 Action",
-		"range": "Self (5-foot radius)",
+		"range": "5 feet",
 		"duration": "Instantaneous",
-		"components": "S"
+		"components": "Somatic",
+		"damage": {
+			"1": "1d6",
+			"5": "2d6",
+			"11": "3d6",
+			"17": "4d6"
+		},
+		"savingThrow": "Constitution",
+		"damageType": "Thunder",
+		"description": "You create a burst of thunderous sound that can be heard up to 100 feet away. Each creature within range, other than you, must make a Constitution saving throw or take thunder damage."
 	},
 	{
 		"name": "Toll the Dead",
-		"classes": ["Wizard"],
+		"classes": ["Cleric", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Death Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Divine Soul",
+			"Theurgy"
+		],
 		"school": "Necromancy",
 		"castingTime": "1 Action",
 		"range": "60 feet",
 		"duration": "Instantaneous",
-		"components": "V, S"
+		"components": "Verbal, Somatic",
+		"damage": {
+			"1": "1d8",
+			"5": "2d8",
+			"11": "3d8",
+			"17": "4d8"
+		},
+		"savingThrow": "Wisdom",
+		"damageType": "Necrotic",
+		"description": "You point at one creature you can see within range, and the sound of a dolorous bell fills the air around it for a moment. The target must succeed on a Wisdom saving throw or take necrotic damage.",
+		"features": {
+			"exploit wound": "If the target is missing any of its hit points, you use the conditional damage instead.",
+			"conditional damage": {
+				"1": "1d12",
+				"5": "2d12",
+				"11": "3d12",
+				"17": "4d12"
+			}
+		}
 	},
 	{
 		"name": "True Strike",
-		"classes": ["Wizard"],
+		"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+		"subclasses": [
+			"Arcana Domain",
+			"Eldritch Knight",
+			"Arcane Trickster",
+			"Aberrant Mind"
+		],
 		"school": "Divination",
 		"castingTime": "1 Action",
 		"range": "30 feet",
-		"duration": "Concentration up to 1 round",
-		"components": "S"
+		"duration": "Concentration, up to 1 round",
+		"components": "Somatic",
+		"damage": null,
+		"savingThrow": null,
+		"damageType": null,
+		"description": "You extend your hand and point a finger at a target in range. Your magic grants you a brief insight into the target's defenses.",
+		"features": "On your next turn, you gain advantage on your first attack roll against the target, provided that this spell hasn't ended."
+	},
+	{
+		"name": "Vicious Mockery",
+		"classes": ["Bard"],
+		"subclasses": ["Mage of Silverquill"],
+		"school": "Enchantment",
+		"castingTime": "1 Action",
+		"range": "60 feet",
+		"duration": "Instantaneous",
+		"components": "Verbal",
+		"damage": {
+			"1": "1d4",
+			"5": "2d4",
+			"11": "3d4",
+			"17": "4d4"
+		},
+		"savingThrow": "Wisdom",
+		"damageType": "Psychic",
+		"description": "You unleash a string of insults laced with subtle enchantments at a creature you can see within range. If the target can hear you (though it need not understand you), it must succeed on a Wisdom saving throw or take psychic damage",
+		"features": "On hit, the target has disadvantage on the next attack roll it makes. This effect lasts until the end of the target's next turn."
+	},
+	{
+		"name": "Word of Radiance",
+		"classes": ["Cleric"],
+		"subclasses": ["Divine Soul", "Theurgy"],
+		"school": "Evocation",
+		"castingTime": "1 Action",
+		"range": "5 feet",
+		"duration": "Instantaneous",
+		"components": "Verbal, Material",
+		"damage": {
+			"1": "1d6",
+			"5": "2d6",
+			"11": "3d6",
+			"17": "4d6"
+		},
+		"savingThrow": "Constitution",
+		"damageType": "Radiant",
+		"description": "You utter a divine word, and burning radiance erupts from you. Each creature of your choice that you can see within range must succeed on a Constitution saving throw or take radiant damage.",
+		"features": {
+			"material component": "a holy symbol"
+		}
 	}
 ]

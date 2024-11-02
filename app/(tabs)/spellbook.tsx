@@ -47,6 +47,25 @@ import messageImage from '@images/cantrips/message.png';
 import mindSliverImage from '@images/cantrips/mind-sliver.png';
 import minorIllusionImage from '@images/cantrips/minor-illusion.png';
 import moldEarthImage from '@images/cantrips/mold-earth.png';
+import poisonSprayImage from '@images/cantrips/poison-spray.png';
+import prestidigitationImage from '@images/cantrips/prestidigitation.png';
+import primalSavageryImage from '@images/cantrips/primal-savagery.png';
+import produceFlameImage from '@images/cantrips/produce-flame.png';
+import rayOfFrostImage from '@images/cantrips/ray-of-frost.png';
+import resistanceImage from '@images/cantrips/resistance.png';
+import sappingStingImage from '@images/cantrips/sapping-sting.png';
+import shapeWaterImage from '@images/cantrips/shape-water.png';
+import shillelaghImage from '@images/cantrips/shillelagh.png';
+import shockingGraspImage from '@images/cantrips/shocking-grasp.png';
+import spareTheDyingImage from '@images/cantrips/spare-the-dying.png';
+import swordBurstImage from '@images/cantrips/sword-burst.png';
+import thaumaturgyImage from '@images/cantrips/thaumaturgy.png';
+import thornWhipImage from '@images/cantrips/thorn-whip.png';
+import thunderclapImage from '@images/cantrips/thunderclap.png';
+import tollTheDeadImage from '@images/cantrips/toll-the-dead.png';
+import trueStrikeImage from '@images/cantrips/true-strike.png';
+import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
+import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
 
 
 import { Ionicons } from '@expo/vector-icons';
@@ -82,6 +101,25 @@ const cantripImages = {
     'Mind Sliver': mindSliverImage,
     'Minor Illusion': minorIllusionImage,
     'Mold Earth': moldEarthImage,
+    'Poison Spray': poisonSprayImage,
+    'Prestidigitation': prestidigitationImage,
+    'Primal Savagery': primalSavageryImage,
+    'Produce Flame': produceFlameImage,
+    'Ray of Frost': rayOfFrostImage,
+    'Resistance': resistanceImage,
+    'Sapping Sting': sappingStingImage,
+    'Shape Water': shapeWaterImage,
+    'Shillelagh': shillelaghImage,
+    'Shocking Grasp': shockingGraspImage,
+    'Spare the Dying': spareTheDyingImage,
+    'Sword Burst': swordBurstImage,
+    'Thaumaturgy': thaumaturgyImage,
+    'Thorn Whip': thornWhipImage,
+    'Thunderclap': thunderclapImage,
+    'Toll the Dead': tollTheDeadImage,
+    'True Strike': trueStrikeImage,
+    'Vicious Mockery': viciousMockeryImage,
+    'Word of Radiance': wordOfRadianceImage,
 }
 
 // TODO: Add learned spells from other wizards and scrolls
@@ -618,16 +656,18 @@ export default function SpellbookScreen() {
                                             <Text style={{ fontWeight: 'bold' }}>Description:</Text>
                                             <Text>{cantripChoiceDescription}</Text>
                                         </View>
-                                        {cantripChoiceValue && (
-                                            <View style={{ flex: 1 }}>
-                                                <Text style={{ fontStyle: 'italic' }}>Features:</Text>
-                                                {renderFeatures(
-                                                    unusedCantrips.find(
-                                                        cantrip => cantrip.name === cantripChoiceValue
-                                                    )?.features
-                                                )}
-                                            </View>
-                                        )}
+                                        {cantripChoiceValue && unusedCantrips.find(
+                                            cantrip => cantrip.name === cantripChoiceValue
+                                        )?.features && (
+                                                <View style={{ flex: 1 }}>
+                                                    <Text style={{ fontStyle: 'italic' }}>Features:</Text>
+                                                    {renderFeatures(
+                                                        unusedCantrips.find(
+                                                            cantrip => cantrip.name === cantripChoiceValue
+                                                        )?.features
+                                                    )}
+                                                </View>
+                                            )}
                                     </View>
                                 </View>
                             )}
