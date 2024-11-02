@@ -86,6 +86,7 @@ interface CharacterContextType {
   getWeaponDamage: (weapon: WeaponItem) => string;
   getWeaponSkillModifiers: (weapon: WeaponItem) => string[];
   getWeaponProperties: (weapon: WeaponItem) => string[];
+  getWeaponDamageBonus: (weapon: WeaponItem) => string;
 }
 
 interface StatsData {
@@ -119,7 +120,7 @@ const isUnarmedStrikeProficient = false;
 
 
 export default function ActionsScreen() {
-  const [numColumns, setNumColumns] = useState(3);
+  const [numColumns, setNumColumns] = useState(4);
   const [actions, setActions] = useState<ActionBlock[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newActionName, setNewActionName] = useState('');
@@ -154,6 +155,7 @@ export default function ActionsScreen() {
     rangedHandWeapon,
     offHandWeapon,
     getWeaponDamage,
+    getWeaponDamageBonus,
     getWeaponSkillModifiers,
     getWeaponProperties,
   } = useContext(CharacterContext) as unknown as CharacterContextType;
@@ -977,6 +979,13 @@ export default function ActionsScreen() {
             {/* HP Container */}
 
             <View style={styles.hpContainer}>
+              {/* Replenish Button */}
+              <TouchableOpacity
+                style={styles.replenishContainer}
+                onPress={() => handleHpChange('replenish')}
+              >
+                <Ionicons name="bed" size={18} color="white" />
+              </TouchableOpacity>
               <View style={styles.hpTextContainer}>
                 {hp !== null && hp > 0
                   ?
@@ -1136,14 +1145,6 @@ export default function ActionsScreen() {
 
       {/* Footer Section */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 5 }}>
-
-        {/* Replenish Button */}
-        <TouchableOpacity
-          style={styles.replenishContainer}
-          onPress={() => handleHpChange('replenish')}
-        >
-          <Ionicons name="bed" size={26} color="white" />
-        </TouchableOpacity>
         {/* Footer Button */}
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
           <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
@@ -1311,8 +1312,9 @@ export default function ActionsScreen() {
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(mainHandWeapon)}
-                                  {/* put custom damage here */}
-                                  {/* put custom damage bonus here */}
+                                </Text>
+                                <Text>
+                                  +{getWeaponDamageBonus(mainHandWeapon)}
                                 </Text>
                                 <View style={{ flexDirection: 'row' }}>
                                   {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}

@@ -13,6 +13,7 @@ interface CharacterContextProps {
     getWeaponDamage: (weapon: Item) => string;
     getWeaponSkillModifiers: (weapon: Item) => string[];
     getWeaponProperties: (weapon: Item) => string[];
+    getWeaponDamageBonus: (weapon: Item) => string;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -99,16 +100,24 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         return weaponData?.damage || '1';
     };
 
-    const getWeaponSkillModifiers = (weapon: Item): string[] => {
+    const getWeaponDamageBonus = (weapon: Item) => {
         const itemWeapon = findWeaponInItems(weapon.name);
+        return itemWeapon?.damageBonus || '';
+    };
+    const getWeaponSkillModifiers = (weapon: Item): string[] => {
+        const itemWeapon = findWeaponInItems(weapon.weaponType || '');
         if (itemWeapon && 'skill_modifiers' in itemWeapon) {
             return itemWeapon.skill_modifiers as string[];
         }
-        const weaponData = findWeaponInData(weapon.name);
+        const weaponData = findWeaponInData(weapon.weaponType || '');
         return weaponData && 'skill_modifiers' in weaponData ? weaponData.skill_modifiers as string[] : [];
     };
 
     const getWeaponProperties = (weapon: Item) => {
+        // First, use the properties directly from the weapon object
+        if (weapon.details !== undefined && weapon.details !== null && weapon.details !== '') {
+            return weapon.details.split(',');
+        }
         const itemWeapon = findWeaponInItems(weapon.name);
         if (itemWeapon?.properties) {
             return itemWeapon.properties;
@@ -133,6 +142,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 getWeaponDamage,
                 getWeaponSkillModifiers,
                 getWeaponProperties,
+                getWeaponDamageBonus,
             }}
         >
             {children}

@@ -420,14 +420,10 @@ const styles = StyleSheet.create({
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     replenishContainer: {
-      borderWidth: 1,
-      borderStyle: 'solid',
-      borderRadius: 8,
       aspectRatio: 1,
-      borderColor: 'white',
-      padding: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
       marginLeft: 5,
-      backgroundColor: 'black',
     },
     hpContainer: {
       flexDirection: 'row',
