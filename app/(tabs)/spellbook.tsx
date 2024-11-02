@@ -1,5 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Dimensions, ImageBackground, Modal, TouchableWithoutFeedback, Button, Alert, ImageSourcePropType, ScrollView } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    FlatList,
+    Dimensions,
+    ImageBackground,
+    Modal,
+    TouchableWithoutFeedback,
+    Button,
+    Alert,
+    ImageSourcePropType,
+    ScrollView
+} from 'react-native';
 import styles from '@/app/styles/spellbookStyles';
 import classData from '@/app/data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
@@ -538,9 +551,12 @@ export default function SpellbookScreen() {
         const renderFeatures = (featuresData: any) => {
             if (!featuresData) return null;
             const features = normalizeFeatures(featuresData);
-
             return (
-                <View style={{ marginVertical: 10 }}>
+                <ScrollView
+                    style={{ flex: 1, marginBottom: 80, borderRadius: 8, backgroundColor: 'rgba(0, 0, 0, 0.1)' }}
+                    contentContainerStyle={{ padding: 10 }}
+                    showsVerticalScrollIndicator={true}
+                >
                     {features.map((feature, index) => {
                         // Ensure description is a string
                         const description =
@@ -549,29 +565,29 @@ export default function SpellbookScreen() {
                                 : JSON.stringify(feature.description);
 
                         return (
-                            <View key={index} style={{ marginBottom: 10 }}>
-                                <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                            <View key={index}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 5 }}>
                                     {feature.label}
                                 </Text>
-                                <Text style={{ fontSize: 14, lineHeight: 18 }}>
+                                <Text style={{ fontSize: 16, lineHeight: 20, marginBottom: 10 }}>
                                     {description}
                                 </Text>
                             </View>
                         );
                     })}
-                </View>
+                </ScrollView>
             );
         };
 
         return (
-            <View>
+            <View style={{ flex: 1 }}>
                 {/* Ensure the cantrip slot is selected */}
                 {cantripPressedIndex !== null && (
                     <>
                         {/* Show this when the cantrip slot is empty */}
                         {(cantripSlotsData[cantripPressedIndex] === '' ||
                             cantripSlotsData[cantripPressedIndex] === null) && (
-                                <View>
+                                <View style={{ flex: 1 }}>
                                     <DropDownPicker
                                         open={openCantripChoice}
                                         value={cantripChoiceValue}
@@ -597,22 +613,14 @@ export default function SpellbookScreen() {
                                             }
                                         }}
                                     />
-                                    <View>
-                                        <View style={{ marginBottom: 10 }}>
-                                            <Text style={{ fontWeight: 'bold' }}>Cantrip Slot:</Text>
-                                            <Text>
-                                                {(cantripPressedIndex !== null
-                                                    ? cantripPressedIndex
-                                                    : 0) + 1}
-                                            </Text>
-                                        </View>
+                                    <View style={{ flex: 1 }}>
                                         <View style={{ marginBottom: 10 }}>
                                             <Text style={{ fontWeight: 'bold' }}>Description:</Text>
                                             <Text>{cantripChoiceDescription}</Text>
                                         </View>
                                         {cantripChoiceValue && (
-                                            <View style={{ marginBottom: 10 }}>
-                                                <Text style={{ fontWeight: 'bold' }}>Features:</Text>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{ fontStyle: 'italic' }}>Features:</Text>
                                                 {renderFeatures(
                                                     unusedCantrips.find(
                                                         cantrip => cantrip.name === cantripChoiceValue
@@ -626,15 +634,7 @@ export default function SpellbookScreen() {
                         {/* Show this when the cantrip slot is NOT empty */}
                         {cantripSlotsData[cantripPressedIndex] !== '' &&
                             cantripSlotsData[cantripPressedIndex] !== null && (
-                                <View>
-                                    <View style={{ marginBottom: 10 }}>
-                                        <Text style={{ fontWeight: 'bold' }}>Cantrip Slot:</Text>
-                                        <Text>
-                                            {(cantripPressedIndex !== null
-                                                ? cantripPressedIndex
-                                                : 0) + 1}
-                                        </Text>
-                                    </View>
+                                <View style={{ flex: 1 }}>
                                     {getDamageFromCantrip(cantripSlotsData[cantripPressedIndex]) && (
                                         <View style={{ marginBottom: 10 }}>
                                             <Text style={{ fontWeight: 'bold' }}>Damage:</Text>
@@ -669,8 +669,8 @@ export default function SpellbookScreen() {
                                         (cantrip) =>
                                             cantrip.name === cantripSlotsData[cantripPressedIndex]
                                     )?.features && (
-                                            <View style={{ marginBottom: 10 }}>
-                                                <Text style={{ fontWeight: 'bold' }}>Features:</Text>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{ fontStyle: 'italic' }}>Features:</Text>
                                                 {renderFeatures(
                                                     availableCantrips.find(
                                                         (cantrip) =>
@@ -898,42 +898,36 @@ export default function SpellbookScreen() {
                 transparent={true}
                 visible={cantripModalVisible}
             >
-                <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
-                    <View style={[styles.modalOverlay, { flex: 1 }]}>
-                        <TouchableWithoutFeedback>
-                            <View style={[styles.cantripModal, { height: '100%', width: '100%', paddingTop: 60, paddingBottom: 40 }]}>
-                                <View>
-                                    <Text style={[styles.title, { color: 'black' }]}>
-                                        {cantripChoiceValue || (cantripPressedIndex !== null ? cantripSlotsData[cantripPressedIndex] : '')}
-                                    </Text>
-                                    <View style={{ marginBottom: 10 }}>
-                                        {renderCantripChoicesBasedOnLevel()}
-                                    </View>
-                                </View>
-                                {/* Buttons */}
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
-                                    <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
-                                        <Text style={{ color: 'black' }}>Close</Text>
-                                    </TouchableWithoutFeedback>
-                                    {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (
-                                        <Button
-                                            title="Cast"
-                                            disabled={!cantripSlotsData[cantripPressedIndex] || !canAffordCantrip(cantripSlotsData[cantripPressedIndex])}
-                                            onPress={() => castCantrip()}
-                                        />
-                                    ) : <Button
-                                        title="Assign"
-                                        color="green"
-                                        disabled={cantripChoiceValue === null}
-                                        onPress={() => {
-                                            setCantripInSlot();
-                                        }}
-                                    />}
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
+                <View style={styles.cantripModal}>
+                    <View style={styles.cantripModalContent}>
+                        <Text style={[styles.title, { color: 'black' }]}>
+                            {cantripChoiceValue || (cantripPressedIndex !== null ? cantripSlotsData[cantripPressedIndex] : '')}
+                        </Text>
+                        <View style={{ flex: 1 }}>
+                            {renderCantripChoicesBasedOnLevel()}
+                        </View>
                     </View>
-                </TouchableWithoutFeedback>
+                    {/* Buttons */}
+                    <View style={styles.cantripModalButtonsContainer}>
+                        <TouchableWithoutFeedback onPress={() => setCantripModalVisible(false)}>
+                            <Text style={{ color: 'black' }}>Close</Text>
+                        </TouchableWithoutFeedback>
+                        {cantripPressedIndex !== null && cantripSlotsData[cantripPressedIndex] !== null && cantripSlotsData[cantripPressedIndex] !== '' ? (
+                            <Button
+                                title="Cast"
+                                disabled={!cantripSlotsData[cantripPressedIndex] || !canAffordCantrip(cantripSlotsData[cantripPressedIndex])}
+                                onPress={() => castCantrip()}
+                            />
+                        ) : <Button
+                            title="Assign"
+                            color="green"
+                            disabled={cantripChoiceValue === null}
+                            onPress={() => {
+                                setCantripInSlot();
+                            }}
+                        />}
+                    </View>
+                </View>
             </Modal>
 
             <Modal

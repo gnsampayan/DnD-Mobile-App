@@ -79,10 +79,23 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     cantripModal: {
-        margin: 20,
         backgroundColor: '#f0f0f0',
         borderRadius: 8,
         padding: 20,
+        flex: 1,
+        paddingTop: 60,
+    },
+    cantripModalContent: {
+        flex: 1,
+    },
+    cantripModalButtonsContainer: {
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        flexDirection: 'row',
+        position: 'absolute',
+        bottom: 40,
+        width: '100%',
+        left: 20,
     },
     modalOverlay: {
         flex: 1,
