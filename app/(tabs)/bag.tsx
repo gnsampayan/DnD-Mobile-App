@@ -15,6 +15,7 @@ import {
   ImageSourcePropType,
   Dimensions,
   Button,
+  ScrollView,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -84,27 +85,32 @@ const defaultItems: Item[] = [
     name: 'Bed Roll',
     quantity: 1,
     image: bedrollImage,
-    details: 'A simple bed roll for resting.',
+    details: 'A simple bed roll used for long rests.',
   },
   {
     id: '1',
     name: 'Camping Supplies',
-    quantity: 4,
+    quantity: 1,
     image: campingSuppliesImage,
-    details: 'Supplies needed for camping in the wilderness.',
+    details: 'Food and other supplies needed for camping in the wilderness.',
   },
   {
     id: '2',
     name: 'Coin Pouch',
     quantity: 1,
     image: coinPouchImage,
-    details: 'A small pouch containing coins.',
+    details: 'A small pouch containing coins and other valuables.',
   },
 ];
+
+// Money and Carrying Capacity -- Move to a different file later
+const carryingCapacity = 50;
 
 
 export default function BagScreen() {
   const [numColumns, setNumColumns] = useState(4);
+  const [foodUnits, setFoodUnits] = useState(0);
+  const [money, setMoney] = useState(0);
   const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
@@ -156,7 +162,12 @@ export default function BagScreen() {
   const [editedDetails, setEditedDetails] = useState<string>('');
   const [selectedWeapon, setSelectedWeapon] = useState<any>(null);
 
-
+  useEffect(() => {
+    const campingSupplies = items.find(item => item.id === '1');
+    const coinPouch = items.find(item => item.id === '2');
+    setFoodUnits(campingSupplies ? campingSupplies.quantity : 0);
+    setMoney(coinPouch ? coinPouch.quantity : 0);
+  }, [items]);
 
   useEffect(() => {
     const checkWeaponProficiency = () => {
@@ -661,9 +672,9 @@ export default function BagScreen() {
   };
 
 
-  // Increment quantity by 1
-  const incrementQuantity = () => {
-    const newQuantity = modalQuantity + 1;
+  // Increment quantity by specified number
+  const incrementQuantity = (number: number) => {
+    const newQuantity = modalQuantity + number;
     setModalQuantity(newQuantity);
     setModalQuantityInput(String(newQuantity));
     if (selectedItem) {
@@ -672,10 +683,11 @@ export default function BagScreen() {
   };
 
 
-  // Decrement quantity by 1, minimum of 1
-  const decrementQuantity = () => {
+  // Decrement quantity by specified number or 1, minimum of 1
+  const decrementQuantity = (number: number) => {
     if (modalQuantity > 1) {
-      const newQuantity = modalQuantity - 1;
+      const decrementBy = number;
+      const newQuantity = Math.max(1, modalQuantity - decrementBy);
       setModalQuantity(newQuantity);
       setModalQuantityInput(String(newQuantity));
       if (selectedItem) {
@@ -700,8 +712,12 @@ export default function BagScreen() {
         updateItemQuantity(selectedItem.id, newQuantity);
       }
     } else {
-      // If input is invalid or empty, restore the previous quantity input
-      setModalQuantityInput(String(modalQuantity));
+      // If input is invalid or empty, set quantity to 0
+      setModalQuantity(0);
+      setModalQuantityInput('0');
+      if (selectedItem) {
+        updateItemQuantity(selectedItem.id, 0);
+      }
     }
   };
 
@@ -925,10 +941,6 @@ export default function BagScreen() {
   };
 
 
-  // Money and Carrying Capacity -- Move to a different file later
-  const money = 100;
-  const carryingCapacity = 50;
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -939,8 +951,12 @@ export default function BagScreen() {
             <Text style={styles.headerText}>{carryingCapacity}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons name="diamond" size={14} color="gold" />
+            <Ionicons name="diamond" size={14} color="#b3e2ff" />
             <Text style={styles.headerText}>{money}</Text>
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Ionicons name="restaurant" size={14} color="#fcba03" />
+            <Text style={styles.headerText}>{foodUnits}</Text>
           </View>
         </View>
         <View style={styles.headerIcons}>
@@ -1176,150 +1192,6 @@ export default function BagScreen() {
             </View>
           </View>
         </TouchableWithoutFeedback>
-      </Modal>{/* Reset Confirmation Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={resetModalVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Actions</Text>
-              <Text style={styles.modalText}>
-                Are you sure? This will delete all custom actions. This cannot be undone.
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setResetModalVisible(false)}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonReset}
-                  onPress={resetItems}
-                >
-                  <Ionicons
-                    name="nuclear"
-                    size={24}
-                    color="red"
-                    style={[styles.headerIcon, { color: 'white' }]}
-                  />
-                  <Text style={styles.modalButtonText}>Reset to Default</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>{/* Reset Confirmation Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={resetModalVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Actions</Text>
-              <Text style={styles.modalText}>
-                Are you sure? This will delete all custom actions. This cannot be undone.
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setResetModalVisible(false)}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonReset}
-                  onPress={resetItems}
-                >
-                  <Ionicons
-                    name="nuclear"
-                    size={24}
-                    color="red"
-                    style={[styles.headerIcon, { color: 'white' }]}
-                  />
-                  <Text style={styles.modalButtonText}>Reset to Default</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>{/* Reset Confirmation Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={resetModalVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Actions</Text>
-              <Text style={styles.modalText}>
-                Are you sure? This will delete all custom actions. This cannot be undone.
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setResetModalVisible(false)}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonReset}
-                  onPress={resetItems}
-                >
-                  <Ionicons
-                    name="nuclear"
-                    size={24}
-                    color="red"
-                    style={[styles.headerIcon, { color: 'white' }]}
-                  />
-                  <Text style={styles.modalButtonText}>Reset to Default</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>{/* Reset Confirmation Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={resetModalVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Actions</Text>
-              <Text style={styles.modalText}>
-                Are you sure? This will delete all custom actions. This cannot be undone.
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setResetModalVisible(false)}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonReset}
-                  onPress={resetItems}
-                >
-                  <Ionicons
-                    name="nuclear"
-                    size={24}
-                    color="red"
-                    style={[styles.headerIcon, { color: 'white' }]}
-                  />
-                  <Text style={styles.modalButtonText}>Reset to Default</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
       </Modal>
 
       {/* Item Details Modal */}
@@ -1328,72 +1200,76 @@ export default function BagScreen() {
         transparent={true}
         visible={itemModalVisible}
       >
-        <TouchableWithoutFeedback onPress={() => setItemModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.itemModalContainer}>
-                <TouchableWithoutFeedback onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
-                  {isEditing && editingItemId === selectedItem?.id ? (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.itemModalContainer}>
+            <ScrollView>
+              <TouchableOpacity onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
+                {isEditing && editingItemId === selectedItem?.id ? (
+                  <TextInput
+                    style={styles.modalInput}
+                    value={editedName}
+                    onChangeText={setEditedName}
+                    onBlur={saveItemName}
+                    onSubmitEditing={saveItemName}
+                    autoFocus={true}
+                  />
+                ) : (
+                  <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
+                )}
+              </TouchableOpacity>
+              {selectedItem && (
+                <>
+                  {/* Wrap the image in a TouchableWithoutFeedback */}
+                  <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
+                    {selectedItem.image ? (
+                      <Image
+                        source={
+                          typeof selectedItem.image === 'number'
+                            ? selectedItem.image
+                            : { uri: selectedItem.image }
+                        }
+                        style={styles.itemModalImage}
+                      />
+                    ) : (
+                      <View style={styles.itemModalNoImage}>
+                        <Text>No Image Available</Text>
+                      </View>
+                    )}
+                  </TouchableWithoutFeedback>
+
+                  {/* Details Section */}
+                  {editingField === 'details' && !isDefaultItem(selectedItem.id) ? (
                     <TextInput
-                      style={styles.modalInput}
-                      value={editedName}
-                      onChangeText={setEditedName}
-                      onBlur={saveItemName}
-                      onSubmitEditing={saveItemName}
+                      style={[styles.modalInput, styles.detailsInput]}
+                      value={editedDetails}
+                      onChangeText={setEditedDetails}
+                      keyboardType="default"
+                      onBlur={saveItemDetails}
+                      onSubmitEditing={saveItemDetails}
+                      multiline={true}
+                      textAlignVertical="top"
                       autoFocus={true}
                     />
                   ) : (
-                    <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
-                  )}
-                </TouchableWithoutFeedback>
-                {selectedItem && (
-                  <>
-                    {/* Wrap the image in a TouchableWithoutFeedback */}
-                    <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
-                      {selectedItem.image ? (
-                        <Image
-                          source={
-                            typeof selectedItem.image === 'number'
-                              ? selectedItem.image
-                              : { uri: selectedItem.image }
-                          }
-                          style={styles.itemModalImage}
-                        />
-                      ) : (
-                        <View style={styles.itemModalNoImage}>
-                          <Text>No Image Available</Text>
-                        </View>
-                      )}
+                    <TouchableWithoutFeedback onLongPress={handleDetailsLongPress}>
+                      <Text style={styles.itemModalDetails}>
+                        {selectedItem.details || 'No details available.'}
+                      </Text>
                     </TouchableWithoutFeedback>
+                  )}
 
-                    {/* Details Section */}
-                    {editingField === 'details' && !isDefaultItem(selectedItem.id) ? (
-                      <TextInput
-                        style={[styles.modalInput, styles.detailsInput]}
-                        value={editedDetails}
-                        onChangeText={setEditedDetails}
-                        keyboardType="default"
-                        onBlur={saveItemDetails}
-                        onSubmitEditing={saveItemDetails}
-                        multiline={true}
-                        textAlignVertical="top"
-                        autoFocus={true}
-                      />
-                    ) : (
-                      <TouchableWithoutFeedback onLongPress={handleDetailsLongPress}>
-                        <Text style={styles.itemModalDetails}>
-                          {selectedItem.details || 'No details available.'}
-                        </Text>
-                      </TouchableWithoutFeedback>
-                    )}
-
-                    {/* Quantity Row */}
+                  {/* Quantity Row */}
+                  {/* Hide quantity row for bedroll (item id 0) */}
+                  {selectedItem?.id !== '0' && (
                     <View style={styles.quantityRow}>
                       <TouchableOpacity
-                        onPress={decrementQuantity}
+                        onPress={() => decrementQuantity(1)}
                         style={styles.quantityButton}
                       >
-                        <Text style={styles.quantityButtonText}>−</Text>
+                        <Ionicons name="remove" size={24} color="white" />
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
+                        <Text>-10</Text>
                       </TouchableOpacity>
                       <TextInput
                         style={styles.quantityInput}
@@ -1402,17 +1278,26 @@ export default function BagScreen() {
                         onEndEditing={handleQuantityEndEditing}
                         value={modalQuantityInput}
                       />
+                      <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
+                        <Text>+10</Text>
+                      </TouchableOpacity>
                       <TouchableOpacity
-                        onPress={incrementQuantity}
+                        onPress={() => incrementQuantity(1)}
                         style={styles.quantityButton}
                       >
-                        <Text style={styles.quantityButtonText}>+</Text>
+                        <Ionicons name="add" size={24} color="white" />
                       </TouchableOpacity>
                     </View>
-                  </>
-                )}
-              </View>
-            </TouchableWithoutFeedback>
+                  )}
+                </>
+              )}
+            </ScrollView>
+            <View style={styles.closeButtonContainer}>
+              <Button
+                title="Close"
+                onPress={() => setItemModalVisible(false)}
+              />
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
