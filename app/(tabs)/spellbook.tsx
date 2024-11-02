@@ -19,12 +19,12 @@ import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import cantripsData from '@/app/data/cantrips.json';
-import chillTouchImage from '@images/cantrips/chill-touch.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
 import bladeWardImage from '@images/cantrips/blade-ward.png';
 import boomingBladeImage from '@images/cantrips/booming-blade.png';
+import chillTouchImage from '@images/cantrips/chill-touch.png';
 import controlFlamesImage from '@images/cantrips/control-flames.png';
 import createBonfireImage from '@images/cantrips/create-bonfire.png';
 import dancingLightsImage from '@images/cantrips/dancing-lights.png';
@@ -70,6 +70,7 @@ import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useActions } from '../context/actionsSpellsContext';
+import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
 import endActionImage from '@actions/end-action-image-v3.png';
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
@@ -165,13 +166,13 @@ export default function SpellbookScreen() {
     const [openCantripChoice, setOpenCantripChoice] = useState(false);
     const [cantripChoiceValue, setCantripChoiceValue] = useState<string | null>(null);
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
-    const [cantripSlotsData, setCantripSlotsData] = useState<(string | null)[]>([]);
     const [resetModalVisible, setResetModalVisible] = useState(false);
 
     const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
 
     const { statsData, isSpellCaster } = useContext(StatsDataContext);
+    const { cantripSlotsData, setCantripSlotsData, saveCantripSlots } = useContext(CantripSlotsContext);
 
 
     const characterClass = classData.find(cls => cls.value.toLowerCase() === statsData?.class?.toLowerCase());
@@ -204,15 +205,6 @@ export default function SpellbookScreen() {
         return cantripImages[cantripName as keyof typeof cantripImages] || null;
     }
 
-
-    // Function to save cantrip slots to AsyncStorage
-    const saveCantripSlots = async (slots: (string | null)[]) => {
-        try {
-            await AsyncStorage.setItem(CANTRIP_SLOTS_KEY, JSON.stringify(slots));
-        } catch (error) {
-            console.error('Failed to save cantrip slots to storage', error);
-        }
-    };
 
     useEffect(() => {
         // Whenever cantripSlots or cantripSlotsData changes, ensure they are in sync
@@ -827,9 +819,6 @@ export default function SpellbookScreen() {
             const resetCantripSlots = Array(cantripSlots).fill(null).map(() => null);
             setCantripSlotsData(resetCantripSlots);
             await AsyncStorage.setItem(CANTRIP_SLOTS_KEY, JSON.stringify(resetCantripSlots));
-
-            // Reset other spell slots and data as needed
-            // You can implement similar reset logic for other spell slots if applicable
 
             // Close reset confirmation modal
             setResetModalVisible(false);

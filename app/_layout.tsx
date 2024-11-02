@@ -10,6 +10,7 @@ import { ItemEquipmentProvider } from '@/app/context/ItemEquipmentContext';
 import { CharacterProvider } from '@/app/context/equipmentActionsContext';
 import { StatsDataProvider } from '@/app/context/StatsDataContext';
 import { ActionsProvider } from './context/actionsSpellsContext';
+import { CantripSlotsProvider } from './context/cantripSlotsContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,10 +37,12 @@ export default function RootLayout() {
         <ItemEquipmentProvider>
           <CharacterProvider>
             <ActionsProvider>
-              <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
+              <CantripSlotsProvider>
+                <Stack>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              </CantripSlotsProvider>
             </ActionsProvider>
           </CharacterProvider>
         </ItemEquipmentProvider>

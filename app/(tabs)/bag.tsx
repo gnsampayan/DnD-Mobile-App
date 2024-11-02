@@ -54,7 +54,7 @@ interface Food extends BaseItem {
 
 interface Weapon extends BaseItem {
   damage?: string;
-  damageBonus?: string;
+  attackBonus?: string;
   weaponType?: string;
 }
 
@@ -120,7 +120,7 @@ export default function BagScreen() {
     image?: string;
     details?: string;
     damage?: string;
-    damageBonus?: string;
+    attackBonus?: string;
     weaponType?: string;
   }>({
     name: '',
@@ -128,7 +128,7 @@ export default function BagScreen() {
     image: undefined,
     details: '',
     damage: '',
-    damageBonus: '',
+    attackBonus: '',
     weaponType: '',
   });
   const [openItemType, setOpenItemType] = useState(false);
@@ -528,7 +528,7 @@ export default function BagScreen() {
         details: newItem.details ?? '',
         type: itemTypeValue ?? '',
         damage: newItem.damage ?? '',
-        damageBonus: newItem.damageBonus ?? '',
+        attackBonus: newItem.attackBonus ?? '',
         weaponType: newItem.weaponType ?? '',
       };
 
@@ -541,7 +541,7 @@ export default function BagScreen() {
         image: undefined,
         details: '',
         damage: '',
-        damageBonus: '',
+        attackBonus: '',
         weaponType: '',
       });
       setItemTypeValue(null);
@@ -913,16 +913,16 @@ export default function BagScreen() {
           }}
           value={selectedWeapon.damage}
         />
-        <Text>Damage Bonus</Text>
+        <Text>Attack Bonus</Text>
         <TextInput
           style={styles.modalInput}
-          placeholder="Damage Bonus"
+          placeholder="Attack Bonus"
           placeholderTextColor="gray"
           onChangeText={(text) => {
-            setSelectedWeapon({ ...selectedWeapon, damageBonus: text });
-            setNewItem({ ...newItem, damageBonus: text }); // Update the newItem as well
+            setSelectedWeapon({ ...selectedWeapon, attackBonus: text });
+            setNewItem({ ...newItem, attackBonus: text }); // Update the newItem as well
           }}
-          value={selectedWeapon.damageBonus || ''}
+          value={selectedWeapon.attackBonus || ''}
         />
         <Text>Properties:</Text>
         <TextInput
@@ -1074,7 +1074,7 @@ export default function BagScreen() {
                                   name: defaultWeapon.name,
                                   details: defaultWeapon.properties.join(', '),
                                   damage: defaultWeapon.damage,
-                                  damageBonus: defaultWeapon.damageBonus || '',
+                                  attackBonus: defaultWeapon.attackBonus || '',
                                 }));
                               }
                             }

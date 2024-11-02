@@ -36,6 +36,7 @@ import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
 import { useActions } from '../context/actionsSpellsContext';
+import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
 // Key for AsyncStorage
 const CANTRIP_SLOTS_KEY = '@cantrip_slots';
@@ -134,6 +135,8 @@ export default function MeScreen() {
         setCurrentActionsAvailable(1);
         setCurrentBonusActionsAvailable(1);
     };
+
+    const { setCantripSlotsData } = useContext(CantripSlotsContext);
 
 
     // Update weapons whenever items change

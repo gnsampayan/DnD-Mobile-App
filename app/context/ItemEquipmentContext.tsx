@@ -10,7 +10,7 @@ export interface Item {
     type?: string;
     properties?: string[];
     damage?: string;
-    damageBonus?: string;
+    attackBonus?: string;
     weaponType?: string;
     skill_modifiers?: string[];
     savingThrow?: string;

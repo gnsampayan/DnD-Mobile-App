@@ -13,7 +13,7 @@ interface CharacterContextProps {
     getWeaponDamage: (weapon: Item) => string;
     getWeaponSkillModifiers: (weapon: Item) => string[];
     getWeaponProperties: (weapon: Item) => string[];
-    getWeaponDamageBonus: (weapon: Item) => string;
+    getWeaponAttackBonus: (weapon: Item) => string;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -100,9 +100,9 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         return weaponData?.damage || '1';
     };
 
-    const getWeaponDamageBonus = (weapon: Item) => {
+    const getWeaponAttackBonus = (weapon: Item) => {
         const itemWeapon = findWeaponInItems(weapon.name);
-        return itemWeapon?.damageBonus || '';
+        return itemWeapon?.attackBonus || '';
     };
     const getWeaponSkillModifiers = (weapon: Item): string[] => {
         const itemWeapon = findWeaponInItems(weapon.weaponType || '');
@@ -142,7 +142,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 getWeaponDamage,
                 getWeaponSkillModifiers,
                 getWeaponProperties,
-                getWeaponDamageBonus,
+                getWeaponAttackBonus,
             }}
         >
             {children}

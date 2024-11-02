@@ -22,6 +22,7 @@ import raceBonuses from '../data/raceData.json';
 import { CharacterContext } from '../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
 import StatsDataContext from '../context/StatsDataContext';
+import cantripsData from '../data/cantrips.json';
 
 import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
 import defaultDisengageImage from '@actions/default-disengage-image.png';
@@ -38,8 +39,104 @@ import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { useActions } from '../context/actionsSpellsContext';
+import { CantripSlotsContext } from '../context/cantripSlotsContext';
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
+
+// Cantrip images
+import acidSplashImage from '@images/cantrips/acid-splash.png';
+import bladeWardImage from '@images/cantrips/blade-ward.png';
+import boomingBladeImage from '@images/cantrips/booming-blade.png';
+import chillTouchImage from '@images/cantrips/chill-touch.png';
+import controlFlamesImage from '@images/cantrips/control-flames.png';
+import createBonfireImage from '@images/cantrips/create-bonfire.png';
+import dancingLightsImage from '@images/cantrips/dancing-lights.png';
+import druidcraftImage from '@images/cantrips/druidcraft.png';
+import eldritchBlastImage from '@images/cantrips/eldritch-blast.png';
+import encodeThoughtsImage from '@images/cantrips/encode-thoughts.png';
+import fireBoltImage from '@images/cantrips/fire-bolt.png';
+import friendsImage from '@images/cantrips/friends.png';
+import frostbiteImage from '@images/cantrips/frostbite.png';
+import greenFlameBladeImage from '@images/cantrips/green-flame-blade.png';
+import guidanceImage from '@images/cantrips/guidance.png';
+import gustImage from '@images/cantrips/gust.png';
+import infestationImage from '@images/cantrips/infestation.png';
+import lightImage from '@images/cantrips/light.png';
+import lightningLureImage from '@images/cantrips/lightning-lure.png';
+import mageHandImage from '@images/cantrips/mage-hand.png';
+import magicStoneImage from '@images/cantrips/magic-stone.png';
+import mendingImage from '@images/cantrips/mending.png';
+import messageImage from '@images/cantrips/message.png';
+import mindSliverImage from '@images/cantrips/mind-sliver.png';
+import minorIllusionImage from '@images/cantrips/minor-illusion.png';
+import moldEarthImage from '@images/cantrips/mold-earth.png';
+import poisonSprayImage from '@images/cantrips/poison-spray.png';
+import prestidigitationImage from '@images/cantrips/prestidigitation.png';
+import primalSavageryImage from '@images/cantrips/primal-savagery.png';
+import produceFlameImage from '@images/cantrips/produce-flame.png';
+import rayOfFrostImage from '@images/cantrips/ray-of-frost.png';
+import resistanceImage from '@images/cantrips/resistance.png';
+import sappingStingImage from '@images/cantrips/sapping-sting.png';
+import shapeWaterImage from '@images/cantrips/shape-water.png';
+import shillelaghImage from '@images/cantrips/shillelagh.png';
+import shockingGraspImage from '@images/cantrips/shocking-grasp.png';
+import spareTheDyingImage from '@images/cantrips/spare-the-dying.png';
+import swordBurstImage from '@images/cantrips/sword-burst.png';
+import thaumaturgyImage from '@images/cantrips/thaumaturgy.png';
+import thornWhipImage from '@images/cantrips/thorn-whip.png';
+import thunderclapImage from '@images/cantrips/thunderclap.png';
+import tollTheDeadImage from '@images/cantrips/toll-the-dead.png';
+import trueStrikeImage from '@images/cantrips/true-strike.png';
+import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
+import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
+
+const cantripImages = {
+  'Acid Splash': acidSplashImage,
+  'Blade Ward': bladeWardImage,
+  'Booming Blade': boomingBladeImage,
+  'Chill Touch': chillTouchImage,
+  'Control Flames': controlFlamesImage,
+  'Create Bonfire': createBonfireImage,
+  'Dancing Lights': dancingLightsImage,
+  'Druidcraft': druidcraftImage,
+  'Eldritch Blast': eldritchBlastImage,
+  'Encode Thoughts': encodeThoughtsImage,
+  'Fire Bolt': fireBoltImage,
+  'Friends': friendsImage,
+  'Frostbite': frostbiteImage,
+  'Green-Flame Blade': greenFlameBladeImage,
+  'Guidance': guidanceImage,
+  'Gust': gustImage,
+  'Infestation': infestationImage,
+  'Light': lightImage,
+  'Lightning Lure': lightningLureImage,
+  'Mage Hand': mageHandImage,
+  'Magic Stone': magicStoneImage,
+  'Mending': mendingImage,
+  'Message': messageImage,
+  'Mind Sliver': mindSliverImage,
+  'Minor Illusion': minorIllusionImage,
+  'Mold Earth': moldEarthImage,
+  'Poison Spray': poisonSprayImage,
+  'Prestidigitation': prestidigitationImage,
+  'Primal Savagery': primalSavageryImage,
+  'Produce Flame': produceFlameImage,
+  'Ray of Frost': rayOfFrostImage,
+  'Resistance': resistanceImage,
+  'Sapping Sting': sappingStingImage,
+  'Shape Water': shapeWaterImage,
+  'Shillelagh': shillelaghImage,
+  'Shocking Grasp': shockingGraspImage,
+  'Spare the Dying': spareTheDyingImage,
+  'Sword Burst': swordBurstImage,
+  'Thaumaturgy': thaumaturgyImage,
+  'Thorn Whip': thornWhipImage,
+  'Thunderclap': thunderclapImage,
+  'Toll the Dead': tollTheDeadImage,
+  'True Strike': trueStrikeImage,
+  'Vicious Mockery': viciousMockeryImage,
+  'Word of Radiance': wordOfRadianceImage,
+}
 
 
 // Define the base Action interface
@@ -48,7 +145,7 @@ interface BaseAction {
   name: string;
   cost: { actions: number; bonus: number };
   details?: string;
-  image?: string; // Add optional image property
+  image?: string | ImageSourcePropType;
 }
 
 interface WeaponItem {
@@ -86,7 +183,7 @@ interface CharacterContextType {
   getWeaponDamage: (weapon: WeaponItem) => string;
   getWeaponSkillModifiers: (weapon: WeaponItem) => string[];
   getWeaponProperties: (weapon: WeaponItem) => string[];
-  getWeaponDamageBonus: (weapon: WeaponItem) => string;
+  getWeaponAttackBonus: (weapon: WeaponItem) => string;
 }
 
 interface StatsData {
@@ -137,17 +234,18 @@ export default function ActionsScreen() {
   const [inputHpValue, setInputHpValue] = useState<string>('');
   const [ac, setAc] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
-  // State for new action cost
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
-  // State to hold the current Constitution modifier
   const [currentConModifier, setCurrentConModifier] = useState<number>(0);
-  // State to hold movement speed
   const [movementSpeed, setMovementSpeed] = useState<number>(30);
-
   const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
-
-
   const { weaponsProficientIn } = useItemEquipment();
+  const { cantripSlotsData } = useContext(CantripSlotsContext);
+  // Define state for combined actions
+  const [combinedActions, setCombinedActions] = useState<ActionBlock[]>([]);
+  // Path to the actions.json file
+  const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
+  // Use context for statsData
+  const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
 
   // Change later to check if character main weapon state is equipped
   const {
@@ -155,7 +253,7 @@ export default function ActionsScreen() {
     rangedHandWeapon,
     offHandWeapon,
     getWeaponDamage,
-    getWeaponDamageBonus,
+    getWeaponAttackBonus,
     getWeaponSkillModifiers,
     getWeaponProperties,
   } = useContext(CharacterContext) as unknown as CharacterContextType;
@@ -171,7 +269,7 @@ export default function ActionsScreen() {
     { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '1', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
     { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
-    { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 0 }, image: defaultJumpImage },
+    { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 1 }, image: defaultJumpImage },
     {
       id: '4',
       name: 'Shove',
@@ -186,10 +284,6 @@ export default function ActionsScreen() {
 
   ];
 
-  // Path to the actions.json file
-  const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
-  // Use context for statsData
-  const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
 
   if (!statsData) {
     // Render a loading indicator or return null
@@ -212,7 +306,7 @@ export default function ActionsScreen() {
       if (typeof action.image === 'number') {
         return action.image; // Local image imported via require/import
       } else {
-        return { uri: action.image }; // URI from file system or remote
+        return action.image as string; // URI from file system or remote
       }
     } else {
       return { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' };
@@ -223,6 +317,62 @@ export default function ActionsScreen() {
   const calculateModifier = (score: number): number => {
     return Math.floor((score - 10) / 2);
   };
+  const getCantripImage = (cantripName: string): ImageSourcePropType => {
+    const image = cantripImages[cantripName as keyof typeof cantripImages];
+    if (typeof image === 'number') {
+      return image; // Local image imported via require/import
+    } else if (image) {
+      return { uri: image }; // URI from file system or remote
+    }
+    return { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' };
+  };
+
+  const generateCantripActions = (slotsData: (string | null)[]): ActionBlock[] => {
+    // Filter out empty slots
+    const assignedCantrips = slotsData.filter((cantripName) => cantripName !== null && cantripName !== '');
+    // Map assigned cantrips to ActionBlock format
+    return assignedCantrips.map((cantripName, index) => {
+      const cantrip = cantripsData.find((c) => c.name === cantripName);
+      const cantripImageSource = getCantripImage(cantripName || '');
+      if (!cantrip) {
+        return {
+          id: `cantrip-${index}`,
+          name: '',
+          cost: { actions: 0, bonus: 0 },
+          details: '',
+          image: cantripImageSource,
+          type: 'cantrip',
+        } as ActionBlock;
+      }
+
+      return {
+        id: `cantrip-${index}`,
+        name: cantripName || `Cantrip ${index + 1}`,
+        cost: parseCastingTime(cantrip.castingTime), // Adjust casting time
+        details: cantrip.description || '',
+        image: cantripImageSource,
+        type: 'cantrip',
+      } as ActionBlock;
+    });
+  };
+
+  const parseCastingTime = (castingTime: string | undefined): { actions: number; bonus: number } => {
+    if (castingTime?.toLowerCase().includes('1 bonus action')) {
+      return { actions: 0, bonus: 1 };
+    } else if (castingTime?.toLowerCase().includes('1 action')) {
+      return { actions: 1, bonus: 0 };
+    } else {
+      return { actions: 0, bonus: 0 };
+    }
+  };
+
+  // Update combinedActions whenever actions or cantripSlotsData change
+  useEffect(() => {
+    const cantripActions = generateCantripActions(cantripSlotsData);
+    setCombinedActions([...actions, ...cantripActions]);
+  }, [actions, cantripSlotsData]);
+
+
   // Extract Ability Modifiers from statsData
   useEffect(() => {
     // Get current constitution modifier
@@ -281,6 +431,10 @@ export default function ActionsScreen() {
 
         if (isValid) {
           setActions(parsedActions);
+          // Generate cantrip actions from cantripSlotsData
+          const cantripActions = generateCantripActions(cantripSlotsData);
+          // Combine actions and cantripActions
+          setCombinedActions([...parsedActions, ...cantripActions]);
         } else {
           // If invalid, reset to default actions
           setActions(defaultActions);
@@ -297,6 +451,7 @@ export default function ActionsScreen() {
       setActions(defaultActions);
     }
   };
+
 
   // Load actions from file system when the component mounts
   useEffect(() => {
@@ -412,7 +567,7 @@ export default function ActionsScreen() {
 
     // Delete associated image file if it exists
     if (actionToDelete && actionToDelete.image) {
-      FileSystem.deleteAsync(actionToDelete.image, { idempotent: true }).catch(error => {
+      FileSystem.deleteAsync(actionToDelete.image as string, { idempotent: true }).catch(error => {
         console.error('Failed to delete image file:', error);
       });
     }
@@ -423,6 +578,10 @@ export default function ActionsScreen() {
   };
 
   const handleLongPress = (actionId: string) => {
+    if (actionId.startsWith('cantrip')) {
+      Alert.alert('Information', 'Cantrips cannot be deleted.');
+      return;
+    }
     // Check if the action is a default action
     if (defaultActions.find((action) => action.id === actionId)) {
       Alert.alert('Information', 'Default actions cannot be deleted.');
@@ -449,7 +608,7 @@ export default function ActionsScreen() {
       // Delete any images associated with custom actions
       const imageDeletionPromises = actions.map(action => {
         if (!defaultActions.some(defaultAction => defaultAction.id === action.id) && action.image) {
-          return FileSystem.deleteAsync(action.image, { idempotent: true });
+          return FileSystem.deleteAsync(action.image as string, { idempotent: true });
         }
         return Promise.resolve();
       });
@@ -497,7 +656,7 @@ export default function ActionsScreen() {
             if (action.id === selectedAction.id) {
               // Delete previous image if it exists
               if (action.image) {
-                FileSystem.deleteAsync(action.image, { idempotent: true }).catch(error => {
+                FileSystem.deleteAsync(action.image as string, { idempotent: true }).catch(error => {
                   console.error('Failed to delete old image:', error);
                 });
               }
@@ -515,8 +674,8 @@ export default function ActionsScreen() {
 
   const handleTitleLongPress = () => {
     if (selectedAction) {
-      if (isDefaultAction(selectedAction.id)) {
-        Alert.alert('Information', 'You cannot edit the title of default actions.');
+      if (isDefaultAction(selectedAction.id) || ('type' in selectedAction && selectedAction.type === 'cantrip')) {
+        Alert.alert('Information', 'You cannot edit the title of built-in actions');
         return;
       }
 
@@ -543,8 +702,8 @@ export default function ActionsScreen() {
 
   const handleDetailsLongPress = () => {
     if (selectedAction) {
-      if (isDefaultAction(selectedAction.id)) {
-        Alert.alert('Information', 'You cannot edit the details of default actions.');
+      if (isDefaultAction(selectedAction.id) || ('type' in selectedAction && selectedAction.type === 'cantrip')) {
+        Alert.alert('Information', 'You cannot edit the details of built-in actions');
         return;
       }
 
@@ -607,8 +766,8 @@ export default function ActionsScreen() {
 
   const handleImageLongPress = () => {
     if (selectedAction) {
-      if (isDefaultAction(selectedAction.id)) {
-        Alert.alert('Information', 'You cannot edit the image of default actions.');
+      if (isDefaultAction(selectedAction.id) || ('type' in selectedAction && selectedAction.type === 'cantrip')) {
+        Alert.alert('Information', 'You cannot edit the image of built-in actions');
         return;
       }
 
@@ -623,7 +782,7 @@ export default function ActionsScreen() {
                 onPress: () => {
                   // Delete the image file
                   if (selectedAction.image) {
-                    FileSystem.deleteAsync(selectedAction.image, { idempotent: true }).catch(error => {
+                    FileSystem.deleteAsync(selectedAction.image as string, { idempotent: true }).catch(error => {
                       console.error('Failed to delete image file:', error);
                     });
                   }
@@ -693,6 +852,7 @@ export default function ActionsScreen() {
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
       const offHandWeaponEquipped = offHandWeapon && offHandWeapon.name.toLowerCase() !== 'none';
+      const isCantrip = 'type' in item && item.type === 'cantrip';
 
       return (
         <ImageBackground
@@ -1135,7 +1295,8 @@ export default function ActionsScreen() {
 
       {/* Actions Grid */}
       <FlatList
-        data={dataWithAddButton}
+        // data={dataWithAddButton}
+        data={[...combinedActions, null]}
         renderItem={renderActionBlocks}
         keyExtractor={(item) => (item ? item.id : 'add-button')}
         key={numColumns} // Important for resetting the layout
@@ -1290,6 +1451,11 @@ export default function ActionsScreen() {
                               <Ionicons name="dice" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponAttackBonus(mainHandWeapon) && (
+                                    <Text style={{ marginRight: 5 }}>
+                                      +{getWeaponAttackBonus(mainHandWeapon)}
+                                    </Text>
+                                  )}
                                   <Text>
                                     +({getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`})
                                   </Text>
@@ -1312,9 +1478,6 @@ export default function ActionsScreen() {
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(mainHandWeapon)}
-                                </Text>
-                                <Text>
-                                  +{getWeaponDamageBonus(mainHandWeapon)}
                                 </Text>
                                 <View style={{ flexDirection: 'row' }}>
                                   {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
@@ -1420,8 +1583,6 @@ export default function ActionsScreen() {
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(rangedHandWeapon)}
-                                  {/* put custom damage here */}
-                                  {/* put custom damage bonus here */}
                                 </Text>
                                 <View style={{ flexDirection: 'row' }}>
                                   {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
