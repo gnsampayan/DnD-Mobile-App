@@ -2,9 +2,9 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        height: '100%',
+        width: '100%',
         marginTop: 50,
-        padding: 10,
         flexDirection: 'column',
         justifyContent: 'space-between',
     },
@@ -127,6 +127,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        paddingTop: 10,
+        paddingLeft: 10,
+        paddingRight: 10,
     },
     headerLeft: {
         flexDirection: 'row',
@@ -185,6 +188,24 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 8,
         padding: 20,
+    },
+    spellModal: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 20,
+        width: '100%',
+        height: '100%',
+        paddingTop: 60,
+        position: 'relative',
+    },
+    spellModalButtonsContainer: {
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        flexDirection: 'row',
+        position: 'absolute',
+        bottom: 40,
+        width: '100%',
+        left: 20,
     },
 });
 

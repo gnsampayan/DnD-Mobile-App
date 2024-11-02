@@ -11,7 +11,7 @@ import {
     Button,
     Alert,
     ImageSourcePropType,
-    ScrollView
+    ScrollView,
 } from 'react-native';
 import styles from '@/app/styles/spellbookStyles';
 import classData from '@/app/data/classData.json';
@@ -19,6 +19,7 @@ import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import cantripsData from '@/app/data/cantrips.json';
+import spellsData from '@/app/data/spells.json';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -72,8 +73,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
-import endActionImage from '@actions/end-action-image-v3.png';
-const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 
 const cantripImages = {
     'Acid Splash': acidSplashImage,
@@ -156,6 +155,11 @@ interface Feature {
     description: string;
 }
 
+interface Spell {
+    name: string;
+    level: number;
+    classes: string[];
+}
 
 export default function SpellbookScreen() {
     const [preparedSpellSlots, setPreparedSpellSlots] = useState<number | null>(null);
@@ -168,6 +172,12 @@ export default function SpellbookScreen() {
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
     const [resetModalVisible, setResetModalVisible] = useState(false);
     const [cantripChoiceImage, setCantripChoiceImage] = useState<ImageSourcePropType | null>(null);
+    const [spellModalVisible, setSpellModalVisible] = useState(false);
+    const [spellChoiceInputValue, setSpellChoiceInputValue] = useState<string | null>(null);
+    const [openSpellDropdown, setOpenSpellDropdown] = useState(false);
+
+    // Known Spell Slots
+    const [knownSpellSlotsData, setKnownSpellSlotsData] = useState<Array<Spell> | null>([]);
 
     const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
@@ -175,6 +185,8 @@ export default function SpellbookScreen() {
     const { statsData, isSpellCaster } = useContext(StatsDataContext);
     const { cantripSlotsData, setCantripSlotsData, saveCantripSlots } = useContext(CantripSlotsContext);
 
+    // TODO: make this dynamic
+    const spellLevelAccess = 1;
 
     const characterClass = classData.find(cls => cls.value.toLowerCase() === statsData?.class?.toLowerCase());
 
@@ -183,6 +195,7 @@ export default function SpellbookScreen() {
         getCantripSlotsAmount();
         getAllKnownSpellsSlotsAmount();
         loadCantripSlots();
+        setKnownSpellSlotsData([]);
     }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race]);
 
     // Function to load cantrip slots from AsyncStorage
@@ -270,24 +283,49 @@ export default function SpellbookScreen() {
     const windowWidth = Dimensions.get('window').width;
     const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns;
 
-    const renderSpellBlock = () => (
-        <TouchableOpacity style={[styles.addSpellButton, { width: itemWidth }]}>
-            <ImageBackground
-                style={styles.spellButtonBackground}
-                source={{ uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }}
-                resizeMode="cover"
-            >
-                <View style={styles.spellBlock}>
-                    <Text style={{ color: 'white' }}>Add Spell</Text>
-                </View>
-            </ImageBackground>
-        </TouchableOpacity >
-    );
+    const renderSpellBlock = ({ item }: { item: number | string }) => {
+        if (typeof item === 'string' && item === 'learnSpell') {
+            // Render the "Learn Spell" button
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        console.log('Learn new spell clicked');
+                        // Add your logic for learning a new spell here
+                    }}
+                    style={[styles.addSpellButton, { width: itemWidth }]}
+                >
+                    <View style={[styles.spellBlock, { backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Ionicons name="add" size={46} color="white" />
+                    </View>
+                </TouchableOpacity>
+            );
+        } else {
+            // Render the regular spell block
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        setSpellModalVisible(true);
+                    }}
+                    style={[styles.addSpellButton, { width: itemWidth }]}
+                >
+                    <ImageBackground
+                        style={styles.spellButtonBackground}
+                        source={{ uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }}
+                        resizeMode="cover"
+                    >
+                        <View style={styles.spellBlock}>
+                            <Text style={{ color: 'white' }}>Add Spell</Text>
+                        </View>
+                    </ImageBackground>
+                </TouchableOpacity>
+            );
+        }
+    };
 
     const renderPreparedSpellBlocksForClass = () => {
         if (preparedSpellSlots !== null && preparedSpellSlots <= 0) {
             return (
-                <View style={styles.section}>
+                <View style={[styles.section, { paddingHorizontal: 10 }]}>
                     <Text style={styles.label}>Prepared Spells</Text>
                     <Text style={styles.text}>You can't use any spells yet.</Text>
                 </View>
@@ -297,13 +335,13 @@ export default function SpellbookScreen() {
         } else {
             return (
                 <View style={styles.section}>
-                    <Text style={styles.label}>Prepared Spells</Text>
+                    <Text style={[styles.label, { paddingHorizontal: 10 }]}>Prepared Spells</Text>
                     <FlatList
                         data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => i)}
                         renderItem={renderSpellBlock}
                         keyExtractor={(item) => item.toString()}
-                        numColumns={numColumns}
-                        key={numColumns}
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
                     />
                 </View>
             )
@@ -369,13 +407,13 @@ export default function SpellbookScreen() {
         } else {
             return (
                 <View style={styles.section}>
-                    <Text style={styles.label}>Cantrips</Text>
+                    <Text style={[styles.label, { paddingHorizontal: 10 }]}>Cantrips</Text>
                     <FlatList
                         data={Array.from({ length: cantripSlots || 0 }, (_, i) => i)}
                         renderItem={({ item }) => renderCantripBlock(item)}
                         keyExtractor={(item) => item.toString()}
-                        numColumns={numColumns}
-                        key={numColumns}
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
                     />
                 </View>
             )
@@ -433,31 +471,39 @@ export default function SpellbookScreen() {
                         <Text style={styles.label}>Known Spells</Text>
                         <Text style={styles.text}>You can't learn any spells yet.</Text>
                     </View>
-                )
+                );
             } else if (allKnownSpellsSlots === null) {
                 return null;
             } else {
+                // Generate the data array for the FlatList
+                let data: (number | string)[] = Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => i);
+
+                // If the user's class is Wizard, add an extra item for the "Learn Spell" button
+                if (statsData.class?.toLowerCase() === 'wizard') {
+                    data.push('learnSpell');
+                }
+
                 return (
                     <View style={styles.section}>
-                        <Text style={styles.label}>Known Spells</Text>
+                        <Text style={[styles.label, { paddingHorizontal: 10 }]}>Known Spells</Text>
                         <FlatList
-                            data={Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => i)}
+                            data={data}
                             renderItem={renderSpellBlock}
-                            keyExtractor={(item) => item.toString()}
-                            numColumns={numColumns}
-                            key={numColumns}
+                            keyExtractor={(item, index) => item.toString() + index}
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={false}
                         />
                     </View>
-                )
+                );
             }
         }
-    }
+    };
 
     const renderCastableSpells = () => {
         if (allKnownSpellsSlots !== null && preparedSpellSlots === null) {
             if (allKnownSpellsSlots === 0 && allKnownSpellsSlots !== null) {
                 return (
-                    <View style={styles.section}>
+                    <View style={[styles.section, { paddingHorizontal: 10 }]}>
                         <Text style={styles.label}>Spells</Text>
                         <Text style={styles.text}>You can't cast any spells yet.</Text>
                     </View>
@@ -467,13 +513,13 @@ export default function SpellbookScreen() {
             } else {
                 return (
                     <View style={styles.section}>
-                        <Text style={styles.label}>Spells</Text>
+                        <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells</Text>
                         <FlatList
                             data={Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => i)}
                             renderItem={renderSpellBlock}
                             keyExtractor={(item) => item.toString()}
-                            numColumns={numColumns}
-                            key={numColumns}
+                            horizontal={true}
+                            showsHorizontalScrollIndicator={false}
                         />
                     </View>
                 )
@@ -940,7 +986,7 @@ export default function SpellbookScreen() {
         // Calculate the spellcasting ability modifier
         const spellcastingModifier = getAbilityModifier(primaryAbility.toString());
         return (
-            <View style={styles.headerTextContainer}>
+            <View style={[styles.headerTextContainer, { paddingHorizontal: 10 }]}>
                 <Text style={styles.headerText}>spellsave DC:</Text>
                 <View style={styles.headerTextBox}>
                     <Text style={styles.headerText}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
@@ -948,12 +994,47 @@ export default function SpellbookScreen() {
             </View>
         );
     }
+
+    const assignSpell = (selectedSpell: string | null) => {
+        setSpellModalVisible(false);
+        setSpellChoiceInputValue(null);
+        // Remove reference to undefined spellPressedIndex
+        console.log("Assigning spell", selectedSpell);
+    }
+
+    const cleanSpellList = spellsData
+        .filter(
+            (spellLevel) =>
+                spellLevel.level <= spellLevelAccess
+        )
+        .flatMap((spellLevel) =>
+            spellLevel.spells.map((spell) => ({
+                label: spell,
+                value: spell,
+            }))
+        );
+
+    const renderSpellChoices = () => {
+        return <DropDownPicker
+            open={openSpellDropdown}
+            setOpen={setOpenSpellDropdown}
+            value={spellChoiceInputValue}
+            setValue={setSpellChoiceInputValue}
+            items={cleanSpellList}
+            multiple={false}
+            containerStyle={{ height: 40, marginBottom: 20 }}
+            style={{ backgroundColor: 'white', borderRadius: 8 }}
+            dropDownContainerStyle={{ backgroundColor: 'white', borderRadius: 8 }}
+        />
+    }
+
+    // Main Spellbook Render
     return (
         <>
 
             <View style={styles.container}>
 
-                <View>
+                <ScrollView style={{ flex: 1 }}>
 
                     {/* Header */}
                     <View style={styles.header}>
@@ -1004,24 +1085,16 @@ export default function SpellbookScreen() {
 
                     {renderSpellSaveDC()}
 
-                    <Text style={styles.title}>{statsData.class} Spellbook</Text>
-                    {renderPreparedSpellBlocksForClass()}
-                    {renderCantripBlocks()}
-                    {renderAllKnownSpells()}
-                    {renderCastableSpells()}
-                </View>
+                    <Text style={[styles.title, { paddingHorizontal: 10 }]}>{statsData.class} Spellbook</Text>
+                    <View style={{ flex: 1 }}>
+                        {renderPreparedSpellBlocksForClass()}
+                        {renderCantripBlocks()}
+                        {renderAllKnownSpells()}
+                        {/* For Bards, Rangers, Sorcerers, and Warlocks */}
+                        {renderCastableSpells()}
+                    </View>
+                </ScrollView>
 
-
-                {/* Footer Section */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 5 }}>
-                    {/* Footer Button */}
-                    <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
-                        <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
-                            <Text style={styles.footerButtonText}>Next Turn</Text>
-                            <Ionicons name="refresh" size={28} color="white" style={{ marginLeft: 5 }} />
-                        </TouchableOpacity>
-                    </ImageBackground>
-                </View>
             </View>
 
             {/* Cantrip Modal */}
@@ -1117,6 +1190,35 @@ export default function SpellbookScreen() {
             </Modal>
 
 
+            {/* Spell Modal */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={spellModalVisible}
+            >
+                <View style={styles.spellModal}>
+                    <View style={{ flex: 1 }}>
+                        {renderSpellChoices()}
+                        <ScrollView style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>{spellChoiceInputValue}</Text>
+                        </ScrollView>
+                    </View>
+                    <View style={styles.spellModalButtonsContainer}>
+                        <Button
+                            title="Close"
+                            color="black"
+                            onPress={() => {
+                                setSpellModalVisible(false);
+                                setSpellChoiceInputValue(null);
+                            }}
+                        />
+                        <Button title="Assign" color="green" onPress={() => assignSpell(spellChoiceInputValue)} />
+                    </View>
+                </View>
+
+            </Modal>
+
+
             {/* Reset Modal */}
             <Modal
                 animationType="fade"
@@ -1138,6 +1240,7 @@ export default function SpellbookScreen() {
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
+
 
         </>
     );
