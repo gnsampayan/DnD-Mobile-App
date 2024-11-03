@@ -203,6 +203,24 @@ const styles = StyleSheet.create({
         width: '100%',
         left: 20,
     },
+    preparedSpellModal: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 20,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        marginHorizontal: 20,
+    },
+    preparedSpellModalHeader: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    preparedSpellModalButtonsContainer: {
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        flexDirection: 'row',
+        width: '100%',
+    },
 });
 
 export default styles;

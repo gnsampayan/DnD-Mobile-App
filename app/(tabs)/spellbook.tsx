@@ -178,13 +178,22 @@ export default function SpellbookScreen() {
     const [spellModalVisible, setSpellModalVisible] = useState(false);
     const [spellChoiceInputValue, setSpellChoiceInputValue] = useState<string | null>(null);
     const [openSpellDropdown, setOpenSpellDropdown] = useState(false);
-    const [undoVisible, setUndoVisible] = useState(false);
+    const [preparedSpellModalVisible, setPreparedSpellModalVisible] = useState(false);
 
     // Key for AsyncStorage
     const KNOWN_SPELL_SLOTS_KEY = '@known_spell_slots';
+    const PREPARED_SPELL_SLOTS_KEY = '@prepared_spell_slots';
     // Known Spell Slots
     const [knownSpellSlotsData, setKnownSpellSlotsData] = useState<Array<{ slotIndex: number, spellName: string | null }>>([]);
     const [spellPressedIndex, setSpellPressedIndex] = useState<number | null>(null);
+
+    // Prepared Spell
+    const [openPreparedSpellDropdown, setOpenPreparedSpellDropdown] = useState(false);
+    const [preparedSpellChoiceInputValue, setPreparedSpellChoiceInputValue] = useState<string | null>(null);
+    // Prepared Spell Slots Data for when slots are assigned
+    const [preparedSpellSlotsData, setPreparedSpellSlotsData] = useState<
+        { slotIndex: number; spellName: string | null }[]
+    >([]);
 
     const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
@@ -230,6 +239,55 @@ export default function SpellbookScreen() {
 
         initializeKnownSpellSlots();
     }, [allKnownSpellsSlots]);
+
+    // Initialize preparedSpellSlotsData when preparedSpellSlots changes
+    useEffect(() => {
+        if (preparedSpellSlots !== null) {
+            const slots = Array.from({ length: preparedSpellSlots }, (_, i) => ({
+                slotIndex: i,
+                spellName: null,
+            }));
+            setPreparedSpellSlotsData(slots);
+        }
+    }, [preparedSpellSlots]);
+
+    // Save prepared spells when they change
+    useEffect(() => {
+        const savePreparedSpells = async () => {
+            try {
+                await AsyncStorage.setItem(
+                    PREPARED_SPELL_SLOTS_KEY,
+                    JSON.stringify(preparedSpellSlotsData)
+                );
+            } catch (error) {
+                console.error('Failed to save prepared spell slots:', error);
+            }
+        };
+
+        // Only save if `preparedSpellSlotsData` is not null or empty
+        if (preparedSpellSlotsData && preparedSpellSlotsData.length > 0) {
+            savePreparedSpells();
+        }
+    }, [preparedSpellSlotsData]);
+
+    // Load prepared spells when the component mounts
+    useEffect(() => {
+        const loadPreparedSpells = async () => {
+            try {
+                const savedData = await AsyncStorage.getItem(PREPARED_SPELL_SLOTS_KEY);
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    if (parsedData && parsedData.length > 0) {
+                        setPreparedSpellSlotsData(parsedData);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load prepared spells:', error);
+            }
+        };
+
+        loadPreparedSpells();
+    }, []);
 
     // Function to load cantrip slots from AsyncStorage
     const loadCantripSlots = async () => {
@@ -317,12 +375,23 @@ export default function SpellbookScreen() {
     const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns;
 
     const renderSpellBlock = ({ item }: { item: { slotIndex: number | string; spellName: string | null } }, section?: string) => {
+        // Get the spell name from preparedSpellSlotsData if this is a prepared spell slot
+        let displaySpellName = item.spellName;
+        if (section === "prepared-spells" && preparedSpellSlotsData) {
+            const preparedSpell = preparedSpellSlotsData.find(slot => slot.slotIndex === item.slotIndex);
+            if (preparedSpell) {
+                displaySpellName = preparedSpell.spellName;
+            }
+        }
+
         return (
             <TouchableOpacity
                 onPress={() => {
                     setSpellPressedIndex(item.slotIndex as number);
                     if (section === "known-spells") {
                         setSpellModalVisible(true);
+                    } else if (section === "prepared-spells") {
+                        setPreparedSpellModalVisible(true);
                     }
                 }}
                 style={section === "known-spells" ? { width: "100%", height: 40 } : [styles.addSpellButton, { width: itemWidth }]}
@@ -338,15 +407,12 @@ export default function SpellbookScreen() {
                                 position: 'relative',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                borderColor: section === "known-spells" ? 'rgba(255,255,255,0.3)' : 'white',
-                                paddingHorizontal: section === "known-spells" ? 10 : 0
+                                borderColor: section === "known-spells" ? 'rgba(255, 255, 255, 0.1)' : 'white',
+                                paddingHorizontal: 10
                             }
                         ]}>
-                        <Text style={{ color: 'white', position: 'absolute', top: 10, left: 10 }}>
-                            {typeof item === 'number' ? item + 1 : ''}
-                        </Text>
-                        {item.spellName ? (
-                            <Text style={{ color: 'white', textAlign: 'left', width: '100%' }}>{item.spellName}</Text>
+                        {displaySpellName ? (
+                            <Text style={{ color: 'white' }}>{displaySpellName}</Text>
                         ) : (
                             <Ionicons name="add" size={24} color="white" />
                         )}
@@ -359,9 +425,22 @@ export default function SpellbookScreen() {
     const renderPreparedSpellBlocksForClass = () => {
         if (preparedSpellSlots !== null && preparedSpellSlots <= 0) {
             return (
-                <View style={[styles.section, { paddingHorizontal: 10 }]}>
-                    <Text style={styles.label}>Spells Prepared</Text>
-                    <Text style={styles.text}>You can't use any spells yet.</Text>
+                <View style={[styles.section, {
+                    paddingHorizontal: 10,
+                    borderWidth: 1,
+                    borderColor: '#ffffff1a',
+                    borderRadius: 8,
+                    padding: 10,
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }]}>
+                    <Text style={{ color: 'white', fontSize: 16 }}>
+                        Spells Unavailable
+                    </Text>
+                    <Text style={{ color: 'white', fontSize: 12 }}>
+                        Level up or increase spellcasting ability
+                    </Text>
                 </View>
             );
         } else if (preparedSpellSlots === null) {
@@ -376,7 +455,7 @@ export default function SpellbookScreen() {
                             slotIndex: i,
                             spellName: null
                         }))}
-                        renderItem={renderSpellBlock}
+                        renderItem={({ item }) => renderSpellBlock({ item }, "prepared-spells")}
                         keyExtractor={(item) => item.slotIndex.toString()}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
@@ -504,25 +583,12 @@ export default function SpellbookScreen() {
         return null;
     }
 
-    const handleDecrement = () => {
-        Alert.alert('Undo', 'Are you sure you want to undo this action?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'OK', onPress: () => {
-                    handleLearnMoreSpells(-1);
-                    setUndoVisible(false);
-                }
-            }
-        ]);
-    }
-
     const handleIncrement = () => {
         Alert.alert('Learn Spells', 'Learning a spell will cost you 2 hours and 50gp. This cannot be undone.', [
             { text: 'Cancel', style: 'cancel' },
             {
                 text: '+1 Spell', onPress: () => {
                     handleLearnMoreSpells(1);
-                    setUndoVisible(true);
                 },
                 style: 'default'
             }
@@ -1114,7 +1180,6 @@ export default function SpellbookScreen() {
     const saveKnownSpellSlots = async (slotsData: typeof knownSpellSlotsData) => {
         try {
             await AsyncStorage.setItem(KNOWN_SPELL_SLOTS_KEY, JSON.stringify(slotsData));
-            console.log("Saved known spell slots:", slotsData);
         } catch (error) {
             console.error('Failed to save known spell slots:', error);
         }
@@ -1132,22 +1197,46 @@ export default function SpellbookScreen() {
         );
 
     const renderSpellChoices = () => {
-        // Don't show dropdown if spell slot already has a spell assigned
+        // Don't show dropdown if selected slot already has a spell
         if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
             return null;
         }
-        return <DropDownPicker
-            open={openSpellDropdown}
-            setOpen={setOpenSpellDropdown}
-            value={spellChoiceInputValue}
-            setValue={setSpellChoiceInputValue}
-            items={cleanSpellList}
-            multiple={false}
-            containerStyle={{ height: 40, marginBottom: 20 }}
-            style={{ backgroundColor: 'white', borderRadius: 8 }}
-            dropDownContainerStyle={{ backgroundColor: 'white', borderRadius: 8 }}
-        />
-    }
+
+        // Get the list of assigned spells, excluding the current slot being edited
+        const assignedSpells = knownSpellSlotsData
+            .filter(
+                slot => slot.spellName !== null && slot.slotIndex !== spellPressedIndex
+            )
+            .map(slot => slot.spellName!.toLowerCase());
+
+        // Prepare the list of available spells, excluding assigned ones
+        const availableSpells = spellsData
+            .filter(spellLevel => spellLevel.level <= spellLevelAccess)
+            .flatMap(spellLevel =>
+                spellLevel.spells.filter(spellItem => {
+                    const spellName = typeof spellItem === 'string' ? spellItem : spellItem.name;
+                    return !assignedSpells.includes(spellName.toLowerCase());
+                })
+            )
+            .map(spellItem => ({
+                label: typeof spellItem === 'string' ? spellItem : spellItem.name,
+                value: typeof spellItem === 'string' ? spellItem : spellItem.id,
+            }));
+
+        // Render the dropdown with the filtered list
+        return (
+            <DropDownPicker
+                open={openSpellDropdown}
+                setOpen={setOpenSpellDropdown}
+                value={spellChoiceInputValue}
+                setValue={setSpellChoiceInputValue}
+                items={availableSpells}
+                placeholder="Select a spell"
+                style={{ marginBottom: 10 }}
+                zIndex={1000}
+            />
+        );
+    };
 
     const renderSpellContent = () => {
         // Get spell name either from input or from saved slot
@@ -1167,6 +1256,12 @@ export default function SpellbookScreen() {
                         {/* Basic spell info */}
                         {spell.id && (
                             <Text style={{ fontSize: 26 }}>{spell.id}</Text>
+                        )}
+                        {spell.level && (
+                            <View>
+                                <Text>Level:</Text>
+                                <Text>{spell.level}</Text>
+                            </View>
                         )}
                         {spell.school && (
                             <View>
@@ -1258,6 +1353,95 @@ export default function SpellbookScreen() {
             saveKnownSpellSlots(updatedKnownSpells);
         }
     };
+
+    const preparedSpellOptionsBasedOnClass = () => {
+        if (statsData?.class?.toLowerCase() === 'wizard') {
+            // Get list of known spells
+            const knownSpells = knownSpellSlotsData
+                .filter(slot => slot.spellName !== null)
+                .map(slot => slot.spellName);
+
+            // Return only spells that are in the known spells list
+            return spellsData.flatMap(level =>
+                level.spells
+                    .filter(spell => {
+                        const spellName = typeof spell === 'string' ? spell : spell.name;
+                        return knownSpells.includes(spellName);
+                    })
+                    .map(spell => ({
+                        label: typeof spell === 'string' ? spell : spell.name,
+                        value: typeof spell === 'string' ? spell : spell.id
+                    }))
+            );
+        }
+
+        // For non-wizards, return the cleanSpellList formatted for dropdown
+        return cleanSpellList.map(spell => ({
+            label: spell,
+            value: spell
+        }));
+    }
+
+    const renderPreparedSpellChoices = () => {
+        // Get list of already prepared spells, excluding current slot
+        const preparedSpells = preparedSpellSlotsData
+            .filter(slot => slot.spellName !== null && slot.slotIndex !== spellPressedIndex)
+            .map(slot => slot.spellName!.toLowerCase());
+
+        // Filter out already prepared spells from options
+        const availableSpells = preparedSpellOptionsBasedOnClass()
+            .filter(item => {
+                const spellName = (typeof item.label === 'string' ? item.label : item.label.label).toLowerCase();
+                return !preparedSpells.includes(spellName);
+            })
+            .map(item => ({
+                label: typeof item.label === 'string' ? item.label : item.label.label,
+                value: typeof item.value === 'string' ? item.value : item.value.value
+            }));
+
+        return <DropDownPicker
+            placeholder="Select a spell to prepare"
+            open={openPreparedSpellDropdown}
+            setOpen={setOpenPreparedSpellDropdown}
+            value={preparedSpellChoiceInputValue}
+            setValue={setPreparedSpellChoiceInputValue}
+            items={availableSpells}
+            multiple={false}
+            containerStyle={{ height: 40, marginBottom: 20 }}
+            style={{ backgroundColor: 'white', borderRadius: 8 }}
+            dropDownContainerStyle={{ backgroundColor: 'white', borderRadius: 8 }}
+        />
+    }
+
+
+    const prepareSpellIntoSlot = (slotIndex: number, spellName: string) => {
+        if (slotIndex === null || !spellName) {
+            Alert.alert('Empty Slot', 'Please select a spell and try again.');
+            return;
+        }
+
+        const updatedPreparedSpells = preparedSpellSlotsData.map((slot) =>
+            slot.slotIndex === slotIndex
+                ? { ...slot, spellName: spellName }
+                : slot
+        );
+        const foundSlotIndex = updatedPreparedSpells.findIndex(
+            (slot) => Number(slot.slotIndex) === Number(slotIndex)
+        );
+
+        if (foundSlotIndex !== -1) {
+            updatedPreparedSpells[foundSlotIndex].spellName = spellName;
+            setPreparedSpellSlotsData(updatedPreparedSpells);
+        } else {
+            console.warn('Could not find spell slot with index:', slotIndex);
+        }
+
+        // Reset modal states
+        setPreparedSpellModalVisible(false);
+        setPreparedSpellChoiceInputValue(null);
+        setSpellPressedIndex(null);
+    };
+
 
     // Main Spellbook Render
     return (
@@ -1456,6 +1640,67 @@ export default function SpellbookScreen() {
                     </View>
                 </View>
 
+            </Modal>
+
+
+            {/* Prepared Spell Modal */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={preparedSpellModalVisible}
+            >
+                <TouchableWithoutFeedback onPress={() => setPreparedSpellModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.preparedSpellModal}>
+                            <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: 10
+                            }}
+                            >
+                                <Text style={styles.preparedSpellModalHeader}>
+                                    Spell Slot: {spellPressedIndex !== null ? spellPressedIndex + 1 : ''}
+                                </Text>
+                                <Button
+                                    title="Clear"
+                                    color="#3770ff"
+                                    onPress={() => {
+                                        if (spellPressedIndex !== null) {
+                                            const updatedSlots = preparedSpellSlotsData.map(slot =>
+                                                slot.slotIndex === spellPressedIndex ?
+                                                    { ...slot, spellName: null } :
+                                                    slot
+                                            );
+                                            setPreparedSpellSlotsData(updatedSlots);
+                                            setPreparedSpellModalVisible(false);
+                                        }
+                                    }}
+                                />
+                            </View>
+                            {renderPreparedSpellChoices()}
+                            <View style={styles.preparedSpellModalButtonsContainer}>
+                                <Button
+                                    title="Cancel"
+                                    color="black"
+                                    onPress={() => {
+                                        setPreparedSpellModalVisible(false);
+                                    }}
+                                />
+                                <Button
+                                    title="Prepare"
+                                    color="green"
+                                    disabled={preparedSpellChoiceInputValue === null}
+                                    onPress={() => {
+                                        if (spellPressedIndex !== null && preparedSpellChoiceInputValue !== null) {
+                                            prepareSpellIntoSlot(spellPressedIndex, preparedSpellChoiceInputValue);
+                                        }
+                                    }}
+                                />
+                            </View>
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
             </Modal>
 
 

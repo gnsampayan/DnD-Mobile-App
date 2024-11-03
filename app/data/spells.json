@@ -5,6 +5,7 @@
 			{
 				"id": "Absorb Elements",
 				"name": "Absorb Elements",
+				"level": 1,
 				"school": "Abjuration",
 				"castingTime": "1 reaction, which you take when you recieve acid, cold, fire, lightning, or thunder damage",
 				"range": "Self",
@@ -23,6 +24,7 @@
 			{
 				"id": "Alarm",
 				"name": "Alarm",
+				"level": 1,
 				"school": "Abjuration",
 				"castingTime": "1 minute",
 				"range": "30 feet",
@@ -53,8 +55,8 @@
 			{
 				"id": "Animal Friendship",
 				"name": "Animal Friendship",
-				"school": "Enchantment",
 				"level": 1,
+				"school": "Enchantment",
 				"castingTime": "1 action",
 				"range": "30 feet",
 				"components": ["V", "S", "M"],
@@ -73,8 +75,8 @@
 			{
 				"id": "Armor of Agathys",
 				"name": "Armor of Agathys",
-				"school": "Abjuration",
 				"level": 1,
+				"school": "Abjuration",
 				"castingTime": "1 action",
 				"range": "Self",
 				"components": ["V", "S", "M"],
@@ -96,8 +98,8 @@
 			{
 				"id": "Arms of Hadar",
 				"name": "Arms of Hadar",
-				"school": "Conjuration",
 				"level": 1,
+				"school": "Conjuration",
 				"castingTime": "1 action",
 				"range": "Self (10-foot radius)",
 				"components": ["V", "S"],
@@ -113,8 +115,8 @@
 			{
 				"id": "Bane",
 				"name": "Bane",
-				"school": "Enchantment",
 				"level": 1,
+				"school": "Enchantment",
 				"castingTime": "1 action",
 				"range": "30 feet",
 				"components": ["V", "S", "M"],
@@ -139,8 +141,8 @@
 			{
 				"id": "Beast Bond",
 				"name": "Beast Bond",
-				"school": "Divination",
 				"level": 1,
+				"school": "Divination",
 				"castingTime": "1 action",
 				"range": "Touch",
 				"components": ["V", "S", "M"],
@@ -155,8 +157,8 @@
 			{
 				"id": "Bless",
 				"name": "Bless",
-				"school": "Enchantment",
 				"level": 1,
+				"school": "Enchantment",
 				"castingTime": "1 action",
 				"range": "30 feet",
 				"components": ["V", "S", "M"],
@@ -179,8 +181,8 @@
 			{
 				"id": "Burning Hands",
 				"name": "Burning Hands",
-				"school": "Evocation",
 				"level": 1,
+				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "Self (15-foot cone)",
 				"components": ["V", "S"],
@@ -213,8 +215,8 @@
 			{
 				"id": "Catapult",
 				"name": "Catapult",
-				"school": "Transmutation",
 				"level": 1,
+				"school": "Transmutation",
 				"castingTime": "1 action",
 				"range": "60 feet",
 				"components": ["S"],
@@ -230,8 +232,8 @@
 			{
 				"id": "Cause Fear",
 				"name": "Cause Fear",
-				"school": "Necromancy",
 				"level": 1,
+				"school": "Necromancy",
 				"castingTime": "1 action",
 				"range": "60 feet",
 				"components": ["V"],
@@ -247,8 +249,8 @@
 			{
 				"id": "Ceremony",
 				"name": "Ceremony",
-				"school": "Abjuration",
 				"level": 1,
+				"school": "Abjuration",
 				"castingTime": "1 hour",
 				"range": "Touch",
 				"components": ["V", "S", "M"],
@@ -276,6 +278,7 @@
 			{
 				"id": "Chaos Bolt",
 				"name": "Chaos Bolt",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "120 feet",
@@ -293,6 +296,7 @@
 			{
 				"id": "Charm Person",
 				"name": "Charm Person",
+				"level": 1,
 				"school": "Enchantment",
 				"castingTime": "1 action",
 				"range": "30 feet",
@@ -322,6 +326,7 @@
 			{
 				"id": "Chromatic Orb",
 				"name": "Chromatic Orb",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "90 feet",
@@ -340,6 +345,7 @@
 			{
 				"id": "Color Spray",
 				"name": "Color Spray",
+				"level": 1,
 				"school": "Illusion",
 				"castingTime": "1 action",
 				"range": "Self (15-foot cone)",
@@ -357,6 +363,7 @@
 			{
 				"id": "Command",
 				"name": "Command",
+				"level": 1,
 				"school": "Enchantment",
 				"castingTime": "1 action",
 				"range": "60 feet",
@@ -383,6 +390,7 @@
 			{
 				"id": "Compelled Duel",
 				"name": "Compelled Duel",
+				"level": 1,
 				"school": "Enchantment",
 				"castingTime": "1 bonus action",
 				"range": "30 feet",
@@ -402,6 +410,7 @@
 			{
 				"id": "Comprehend Languages",
 				"name": "Comprehend Languages",
+				"level": 1,
 				"school": "Divination",
 				"castingTime": "1 action",
 				"range": "Self",
@@ -433,6 +442,7 @@
 			{
 				"id": "Create or Destroy Water",
 				"name": "Create or Destroy Water",
+				"level": 1,
 				"school": "Transmutation",
 				"castingTime": "1 action",
 				"range": "30 feet",
@@ -452,6 +462,7 @@
 			{
 				"id": "Cure Wounds",
 				"name": "Cure Wounds",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "Touch",
@@ -489,6 +500,7 @@
 			{
 				"id": "Detect Evil and Good",
 				"name": "Detect Evil and Good",
+				"level": 1,
 				"school": "Divination",
 				"castingTime": "1 action",
 				"range": "Self",
@@ -503,6 +515,7 @@
 			{
 				"id": "Detect Magic",
 				"name": "Detect Magic",
+				"level": 1,
 				"school": "Divination",
 				"castingTime": "1 action",
 				"range": "Self",
@@ -546,6 +559,7 @@
 			{
 				"id": "Detect Poison and Disease",
 				"name": "Detect Poison and Disease",
+				"level": 1,
 				"school": "Divination",
 				"castingTime": "1 action",
 				"range": "Self",
@@ -571,6 +585,7 @@
 			{
 				"id": "Disguise Self",
 				"name": "Disguise Self",
+				"level": 1,
 				"school": "Illusion",
 				"castingTime": "1 action",
 				"range": "Self",
@@ -604,6 +619,7 @@
 			{
 				"id": "Dissonant Whispers",
 				"name": "Dissonant Whispers",
+				"level": 1,
 				"school": "Enchantment",
 				"castingTime": "1 action",
 				"range": "60 feet",
@@ -621,6 +637,7 @@
 			{
 				"id": "Distort Value",
 				"name": "Distort Value",
+				"level": 1,
 				"school": "Illusion",
 				"castingTime": "1 minute",
 				"range": "Touch",
@@ -637,6 +654,7 @@
 			{
 				"id": "Divine Favor",
 				"name": "Divine Favor",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 bonus action",
 				"range": "Self",
@@ -649,6 +667,7 @@
 			{
 				"id": "Earth Tremor",
 				"name": "Earth Tremor",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "10 feet",
@@ -665,6 +684,7 @@
 			{
 				"id": "Ensnaring Strike",
 				"name": "Ensnaring Strike",
+				"level": 1,
 				"school": "Conjuration",
 				"castingTime": "1 bonus action",
 				"range": "Self",
@@ -681,6 +701,7 @@
 			{
 				"id": "Entangle",
 				"name": "Entangle",
+				"level": 1,
 				"school": "Conjuration",
 				"castingTime": "1 action",
 				"range": "90 feet",
@@ -696,6 +717,7 @@
 			{
 				"id": "Expeditious Retreat",
 				"name": "Expeditious Retreat",
+				"level": 1,
 				"school": "Transmutation",
 				"castingTime": "1 bonus action",
 				"range": "Self",
@@ -716,6 +738,7 @@
 			{
 				"id": "Faerie Fire",
 				"name": "Faerie Fire",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "60 feet",
@@ -741,6 +764,7 @@
 			{
 				"id": "False Life",
 				"name": "False Life",
+				"level": 1,
 				"school": "Necromancy",
 				"castingTime": "1 action",
 				"range": "Self",
@@ -771,6 +795,7 @@
 			{
 				"id": "Feather Fall",
 				"name": "Feather Fall",
+				"level": 1,
 				"school": "Transmutation",
 				"castingTime": "1 reaction, which you take when you or a creature within 60 feet of you falls",
 				"range": "60 feet",
@@ -793,6 +818,7 @@
 			{
 				"id": "Find Familiar",
 				"name": "Find Familiar",
+				"level": 1,
 				"school": "Conjuration",
 				"castingTime": "1 hour",
 				"range": "10 feet",
@@ -821,6 +847,7 @@
 			{
 				"id": "Fog Cloud",
 				"name": "Fog Cloud",
+				"level": 1,
 				"school": "Conjuration",
 				"castingTime": "1 action",
 				"range": "120 feet",
@@ -844,6 +871,7 @@
 			{
 				"id": "Frost Fingers",
 				"name": "Frost Fingers",
+				"level": 1,
 				"school": "Evocation",
 				"castingTime": "1 action",
 				"range": "Self (15-foot cone)",
@@ -860,6 +888,7 @@
 			{
 				"id": "Gift of Alacrity",
 				"name": "Gift of Alacrity",
+				"level": 1,
 				"school": "Divination",
 				"castingTime": "1 minute",
 				"range": "Touch",
