@@ -20,6 +20,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import cantripsData from '@/app/data/cantrips.json';
 import spellsData from '@/app/data/spells.json';
+import emptyImage from '@images/cantrips/empty-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -320,7 +321,9 @@ export default function SpellbookScreen() {
             <TouchableOpacity
                 onPress={() => {
                     setSpellPressedIndex(item.slotIndex as number);
-                    setSpellModalVisible(true);
+                    if (section === "known-spells") {
+                        setSpellModalVisible(true);
+                    }
                 }}
                 style={section === "known-spells" ? { width: "100%", height: 40 } : [styles.addSpellButton, { width: itemWidth }]}
             >
@@ -416,18 +419,22 @@ export default function SpellbookScreen() {
                 <ImageBackground
                     // Start of Selection
                     style={styles.cantripButtonBackground}
-                    source={cantripSlotsData[index] ? getCantripImage(cantripSlotsData[index]) as ImageSourcePropType : { uri: 'https://via.placeholder.com/150' }}
+                    source={cantripSlotsData[index]
+                        ? getCantripImage(cantripSlotsData[index]) as ImageSourcePropType
+                        : emptyImage as ImageSourcePropType}
                     resizeMode="cover"
                 >
                     <View style={styles.cantripBlock}>
                         {cantripSlotsData[index] !== null && cantripSlotsData[index] !== '' ? (
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                                {(cantripSlotsData[index] && getCantripImage(cantripSlotsData[index])) ? '' : cantripSlotsData[index]}
+                                {(cantripSlotsData[index] && getCantripImage(cantripSlotsData[index]))
+                                    ? ''
+                                    : cantripSlotsData[index]}
                             </Text>
                         ) : (
-                            <Text style={{ color: 'white' }}>
-                                Add Cantrip
-                            </Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                                <Ionicons name="add" size={24} color="white" />
+                            </View>
                         )}
                     </View>
                 </ImageBackground>
@@ -537,7 +544,7 @@ export default function SpellbookScreen() {
                 // Prepare the data for the FlatList
                 let data = knownSpellSlotsData;
                 return (
-                    <View style={styles.section}>
+                    <View style={[styles.section, { flex: 1 }]}>
                         <View style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between',
@@ -556,7 +563,7 @@ export default function SpellbookScreen() {
                                 <Ionicons name="color-wand" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                        <View style={{ paddingHorizontal: 10, width: '100%' }}>
+                        <ScrollView style={{ paddingHorizontal: 10, flex: 1 }}>
                             {data.map((item, index) => (
                                 <View key={item.slotIndex.toString()}>
                                     {renderSpellBlock({ item }, "known-spells")}
@@ -571,7 +578,7 @@ export default function SpellbookScreen() {
                             }}>
 
                             </View>
-                        </View>
+                        </ScrollView>
                     </View>
                 );
             }
@@ -1306,7 +1313,7 @@ export default function SpellbookScreen() {
                 </View>
 
 
-                <ScrollView style={{ flex: 1 }}>
+                <View style={{ flex: 1 }}>
                     <View style={{ flex: 1 }}>
                         {renderPreparedSpellBlocksForClass()}
                         {renderCantripBlocks()}
@@ -1314,7 +1321,7 @@ export default function SpellbookScreen() {
                         {/* For Bards, Rangers, Sorcerers, and Warlocks */}
                         {renderCastableSpells()}
                     </View>
-                </ScrollView>
+                </View>
 
             </View>
 
@@ -1433,15 +1440,17 @@ export default function SpellbookScreen() {
                                 setSpellChoiceInputValue(null);
                             }}
                         />
-                        <Button
-                            title="Assign"
-                            color="green"
-                            disabled={spellChoiceInputValue === null}
-                            onPress={() => {
-                                assignSpellToSlot();
-                                setSpellModalVisible(false);
-                            }}
-                        />
+                        {spellPressedIndex !== null && !knownSpellSlotsData[spellPressedIndex]?.spellName && (
+                            <Button
+                                title="Assign"
+                                color="green"
+                                disabled={spellChoiceInputValue === null}
+                                onPress={() => {
+                                    assignSpellToSlot();
+                                    setSpellModalVisible(false);
+                                }}
+                            />
+                        )}
                     </View>
                 </View>
 
