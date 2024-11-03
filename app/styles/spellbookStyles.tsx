@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
     addSpellButton: {
         margin: 5,
         aspectRatio: 1,
-        backgroundColor: '#ffffff',
         borderRadius: 8,
         overflow: 'hidden',
         flexGrow: 0,
@@ -38,7 +37,6 @@ const styles = StyleSheet.create({
     },
     spellButtonBackground: {
         flex: 1,
-        backgroundColor: 'white',
         resizeMode: 'contain',
     },
     spellBlock: {
@@ -48,7 +46,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        borderWidth: 2,
+        borderWidth: 1,
         borderColor: 'white',
         borderStyle: 'solid',
         borderRadius: 8,
@@ -127,9 +125,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: 10,
-        paddingLeft: 10,
-        paddingRight: 10,
+        padding: 10,
     },
     headerLeft: {
         flexDirection: 'row',

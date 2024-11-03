@@ -161,6 +161,8 @@ interface Spell {
     classes: string[];
 }
 
+
+
 export default function SpellbookScreen() {
     const [preparedSpellSlots, setPreparedSpellSlots] = useState<number | null>(null);
     const [cantripSlots, setCantripSlots] = useState<number | null>(null);
@@ -176,8 +178,11 @@ export default function SpellbookScreen() {
     const [spellChoiceInputValue, setSpellChoiceInputValue] = useState<string | null>(null);
     const [openSpellDropdown, setOpenSpellDropdown] = useState(false);
 
+    // Key for AsyncStorage
+    const KNOWN_SPELL_SLOTS_KEY = '@known_spell_slots';
     // Known Spell Slots
-    const [knownSpellSlotsData, setKnownSpellSlotsData] = useState<Array<Spell> | null>([]);
+    const [knownSpellSlotsData, setKnownSpellSlotsData] = useState<Array<{ slotIndex: number, spellName: string | null }>>([]);
+    const [spellPressedIndex, setSpellPressedIndex] = useState<number | null>(null);
 
     const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
 
@@ -195,8 +200,29 @@ export default function SpellbookScreen() {
         getCantripSlotsAmount();
         getAllKnownSpellsSlotsAmount();
         loadCantripSlots();
-        setKnownSpellSlotsData([]);
     }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race]);
+
+    useEffect(() => {
+        const initializeKnownSpellSlots = async () => {
+            try {
+                const storedKnownSpells = await AsyncStorage.getItem(KNOWN_SPELL_SLOTS_KEY);
+                if (storedKnownSpells !== null) {
+                    setKnownSpellSlotsData(JSON.parse(storedKnownSpells));
+                } else {
+                    // Initialize with empty slots based on `allKnownSpellsSlots`
+                    const initialSlots = Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => ({
+                        slotIndex: i,
+                        spellName: null,
+                    }));
+                    setKnownSpellSlotsData(initialSlots);
+                }
+            } catch (error) {
+                console.error('Failed to load known spell slots:', error);
+            }
+        };
+
+        initializeKnownSpellSlots();
+    }, [allKnownSpellsSlots]);
 
     // Function to load cantrip slots from AsyncStorage
     const loadCantripSlots = async () => {
@@ -283,43 +309,42 @@ export default function SpellbookScreen() {
     const windowWidth = Dimensions.get('window').width;
     const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns;
 
-    const renderSpellBlock = ({ item }: { item: number | string }) => {
-        if (typeof item === 'string' && item === 'learnSpell') {
-            // Render the "Learn Spell" button
-            return (
-                <TouchableOpacity
-                    onPress={() => {
-                        console.log('Learn new spell clicked');
-                        // Add your logic for learning a new spell here
-                    }}
-                    style={[styles.addSpellButton, { width: itemWidth }]}
+    const renderSpellBlock = ({ item }: { item: { slotIndex: number | string; spellName: string | null } }, section?: string) => {
+        return (
+            <TouchableOpacity
+                onPress={() => {
+                    setSpellPressedIndex(item.slotIndex as number);
+                    setSpellModalVisible(true);
+                }}
+                style={section === "known-spells" ? { width: "100%", height: 40 } : [styles.addSpellButton, { width: itemWidth }]}
+            >
+                <ImageBackground
+                    style={styles.spellButtonBackground}
+                    resizeMode="cover"
                 >
-                    <View style={[styles.spellBlock, { backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }]}>
-                        <Ionicons name="add" size={46} color="white" />
+                    <View style={
+                        [
+                            styles.spellBlock,
+                            {
+                                position: 'relative',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderColor: section === "known-spells" ? 'rgba(255,255,255,0.3)' : 'white',
+                                paddingHorizontal: section === "known-spells" ? 10 : 0
+                            }
+                        ]}>
+                        <Text style={{ color: 'white', position: 'absolute', top: 10, left: 10 }}>
+                            {typeof item === 'number' ? item + 1 : ''}
+                        </Text>
+                        {item.spellName ? (
+                            <Text style={{ color: 'white', textAlign: 'left', width: '100%' }}>{item.spellName}</Text>
+                        ) : (
+                            <Ionicons name="add" size={24} color="white" />
+                        )}
                     </View>
-                </TouchableOpacity>
-            );
-        } else {
-            // Render the regular spell block
-            return (
-                <TouchableOpacity
-                    onPress={() => {
-                        setSpellModalVisible(true);
-                    }}
-                    style={[styles.addSpellButton, { width: itemWidth }]}
-                >
-                    <ImageBackground
-                        style={styles.spellButtonBackground}
-                        source={{ uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }}
-                        resizeMode="cover"
-                    >
-                        <View style={styles.spellBlock}>
-                            <Text style={{ color: 'white' }}>Add Spell</Text>
-                        </View>
-                    </ImageBackground>
-                </TouchableOpacity>
-            );
-        }
+                </ImageBackground>
+            </TouchableOpacity>
+        );
     };
 
     const renderPreparedSpellBlocksForClass = () => {
@@ -337,9 +362,12 @@ export default function SpellbookScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.label, { paddingHorizontal: 10 }]}>Prepared Spells</Text>
                     <FlatList
-                        data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => i)}
+                        data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => ({
+                            slotIndex: i,
+                            spellName: null
+                        }))}
                         renderItem={renderSpellBlock}
-                        keyExtractor={(item) => item.toString()}
+                        keyExtractor={(item) => item.slotIndex.toString()}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                     />
@@ -475,24 +503,28 @@ export default function SpellbookScreen() {
             } else if (allKnownSpellsSlots === null) {
                 return null;
             } else {
-                // Generate the data array for the FlatList
-                let data: (number | string)[] = Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => i);
-
-                // If the user's class is Wizard, add an extra item for the "Learn Spell" button
-                if (statsData.class?.toLowerCase() === 'wizard') {
-                    data.push('learnSpell');
-                }
-
+                // Prepare the data for the FlatList
+                let data = knownSpellSlotsData;
                 return (
                     <View style={styles.section}>
-                        <Text style={[styles.label, { paddingHorizontal: 10 }]}>Known Spells</Text>
-                        <FlatList
-                            data={data}
-                            renderItem={renderSpellBlock}
-                            keyExtractor={(item, index) => item.toString() + index}
-                            horizontal={true}
-                            showsHorizontalScrollIndicator={false}
-                        />
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
+                            <Text style={styles.label}>Known Spells</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    handleLearnMoreSpells();
+                                }}
+                            >
+                                <Text style={{ color: '#586a9f', fontSize: 14 }}>Learn More Spells</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ paddingHorizontal: 10, width: '100%' }}>
+                            {data.map((item, index) => (
+                                <View key={item.slotIndex.toString()}>
+                                    {renderSpellBlock({ item }, "known-spells")}
+                                    {index < data.length - 1 && <View style={{ height: 10 }} />}
+                                </View>
+                            ))}
+                        </View>
                     </View>
                 );
             }
@@ -514,10 +546,10 @@ export default function SpellbookScreen() {
                 return (
                     <View style={styles.section}>
                         <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells</Text>
-                        <FlatList
-                            data={Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => i)}
-                            renderItem={renderSpellBlock}
-                            keyExtractor={(item) => item.toString()}
+                        <FlatList<{ slotIndex: number, spellName: string | null }>
+                            data={Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => ({ slotIndex: i, spellName: null }))}
+                            renderItem={({ item }) => renderSpellBlock({ item })}
+                            keyExtractor={(item) => item.slotIndex.toString()}
                             horizontal={true}
                             showsHorizontalScrollIndicator={false}
                         />
@@ -957,17 +989,18 @@ export default function SpellbookScreen() {
         );
     };
 
-    const endTurn = () => {
-        setCurrentActionsAvailable(1);
-        setCurrentBonusActionsAvailable(1);
-    };
-
     const resetSpellbook = async () => {
         try {
             // Reset cantrip slots to an array of nulls
             const resetCantripSlots = Array(cantripSlots).fill(null).map(() => null);
             setCantripSlotsData(resetCantripSlots);
             await AsyncStorage.setItem(CANTRIP_SLOTS_KEY, JSON.stringify(resetCantripSlots));
+            const resetKnownSpells = Array(allKnownSpellsSlots).fill(0).map((_, index) => ({
+                slotIndex: index,
+                spellName: null
+            }));
+            setKnownSpellSlotsData(resetKnownSpells);
+            await AsyncStorage.setItem(KNOWN_SPELL_SLOTS_KEY, JSON.stringify(resetKnownSpells));
 
             // Close reset confirmation modal
             setResetModalVisible(false);
@@ -995,13 +1028,37 @@ export default function SpellbookScreen() {
         );
     }
 
-    const assignSpell = (selectedSpell: string | null) => {
+    const assignSpellToSlot = () => {
+        if (spellPressedIndex === null || !spellChoiceInputValue) {
+            Alert.alert('Empty Slot', 'Please select a spell and try again.');
+            return;
+        }
+
+        const updatedKnownSpells = [...knownSpellSlotsData];
+        const slotIndex = updatedKnownSpells.findIndex(
+            (slot) => slot.slotIndex === spellPressedIndex
+        );
+
+        if (slotIndex !== -1) {
+            updatedKnownSpells[slotIndex].spellName = spellChoiceInputValue;
+            setKnownSpellSlotsData(updatedKnownSpells);
+            saveKnownSpellSlots(updatedKnownSpells);
+        }
+
+        // Reset modal states
         setSpellModalVisible(false);
         setSpellChoiceInputValue(null);
-        // Remove reference to undefined spellPressedIndex
-        console.log("Assigning spell", selectedSpell);
-    }
+        setSpellPressedIndex(null);
+    };
 
+    const saveKnownSpellSlots = async (slotsData: typeof knownSpellSlotsData) => {
+        try {
+            await AsyncStorage.setItem(KNOWN_SPELL_SLOTS_KEY, JSON.stringify(slotsData));
+            console.log("Saved known spell slots:", slotsData);
+        } catch (error) {
+            console.error('Failed to save known spell slots:', error);
+        }
+    };
     const cleanSpellList = spellsData
         .filter(
             (spellLevel) =>
@@ -1009,12 +1066,16 @@ export default function SpellbookScreen() {
         )
         .flatMap((spellLevel) =>
             spellLevel.spells.map((spell) => ({
-                label: spell,
-                value: spell,
+                label: typeof spell === 'object' ? spell.id : spell,
+                value: typeof spell === 'object' ? spell.id : spell,
             }))
         );
 
     const renderSpellChoices = () => {
+        // Don't show dropdown if spell slot already has a spell assigned
+        if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
+            return null;
+        }
         return <DropDownPicker
             open={openSpellDropdown}
             setOpen={setOpenSpellDropdown}
@@ -1028,63 +1089,159 @@ export default function SpellbookScreen() {
         />
     }
 
+    const renderSpellContent = () => {
+        // Get spell name either from input or from saved slot
+        const spellNameToRender = spellChoiceInputValue ||
+            (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName);
+
+        if (!spellNameToRender) return null;
+
+        return spellsData.map(level => {
+            const spell = level.spells.find(s =>
+                typeof s === 'object' && s.id === spellNameToRender
+            );
+
+            if (spell && typeof spell === 'object') {
+                return (
+                    <View key={spell.id}>
+                        {/* Basic spell info */}
+                        {spell.id && (
+                            <Text style={{ fontSize: 26 }}>{spell.id}</Text>
+                        )}
+                        {spell.school && (
+                            <View>
+                                <Text>School:</Text>
+                                <Text>{spell.school}</Text>
+                            </View>
+                        )}
+                        {spell.castingTime && (
+                            <View>
+                                <Text>Casting Time:</Text>
+                                <Text>{spell.castingTime}</Text>
+                            </View>
+                        )}
+                        {spell.range && (
+                            <View>
+                                <Text>Range:</Text>
+                                <Text>{spell.range}</Text>
+                            </View>
+                        )}
+                        {spell.components && (
+                            <View>
+                                <Text>Components:</Text>
+                                <Text>{spell.components.join(', ')}</Text>
+                            </View>
+                        )}
+                        {spell.duration && (
+                            <View>
+                                <Text>Duration:</Text>
+                                <Text>{spell.duration}</Text>
+                            </View>
+                        )}
+
+                        {/* Description */}
+                        {spell.description && (
+                            <View>
+                                <Text>{spell.description}</Text>
+                            </View>
+                        )}
+
+                        {/* Features */}
+                        {spell.features && typeof spell.features === 'object' && (
+                            <View>
+                                <Text>Features:</Text>
+                                {Object.entries(spell.features).map(([key, value]) => (
+                                    <View key={key}>
+                                        <Text>{key}:</Text>
+                                        <Text>{value}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
+
+                    </View>
+                );
+            }
+            return null;
+        })
+    }
+
+    const handleLearnMoreSpells = () => {
+        // Increase the number of known spell slots by 1
+        if (allKnownSpellsSlots !== null) {
+            const newSlotIndex = allKnownSpellsSlots;
+            const updatedAllKnownSpellsSlots = allKnownSpellsSlots + 1;
+            setAllKnownSpellsSlots(updatedAllKnownSpellsSlots);
+
+            // Update the knownSpellSlotsData with a new slot
+            const updatedKnownSpells = [
+                ...knownSpellSlotsData,
+                { slotIndex: newSlotIndex, spellName: null },
+            ];
+            setKnownSpellSlotsData(updatedKnownSpells);
+
+            // Persist the updated data
+            saveKnownSpellSlots(updatedKnownSpells);
+        }
+    };
+
     // Main Spellbook Render
     return (
         <>
 
             <View style={styles.container}>
 
-                <ScrollView style={{ flex: 1 }}>
 
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View style={styles.headerLeft}>
-                            <View style={styles.headerTextContainer}>
-                                <Ionicons
-                                    name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
-                                    size={16}
-                                    color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
-                                />
-                                <View style={styles.headerTextBox}>
-                                    <Text style={[
-                                        styles.headerText,
-                                        currentActionsAvailable === 0 && { color: 'black' }
-                                    ]}>
-                                        x{currentActionsAvailable}
-                                    </Text>
-                                </View>
-                            </View>
-                            <View style={styles.headerTextContainer}>
-                                <Ionicons
-                                    name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
-                                    size={16}
-                                    color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
-                                />
-                                <View style={styles.headerTextBox}>
-                                    <Text style={[
-                                        styles.headerText,
-                                        currentBonusActionsAvailable === 0 && { color: 'black' }
-                                    ]}>
-                                        x{currentBonusActionsAvailable}
-                                    </Text>
-                                </View>
+                {/* Header */}
+                <View style={styles.header}>
+                    <View style={styles.headerLeft}>
+                        <View style={styles.headerTextContainer}>
+                            <Ionicons
+                                name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
+                                size={16}
+                                color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
+                            />
+                            <View style={styles.headerTextBox}>
+                                <Text style={[
+                                    styles.headerText,
+                                    currentActionsAvailable === 0 && { color: 'black' }
+                                ]}>
+                                    x{currentActionsAvailable}
+                                </Text>
                             </View>
                         </View>
-
-                        <View style={styles.headerIcons}>
-                            <TouchableOpacity onPress={() => setResetModalVisible(true)}>
-                                <Ionicons
-                                    name="warning"
-                                    size={24}
-                                    color="red"
-                                    style={[styles.headerIcon, { color: 'white' }]}
-                                />
-                            </TouchableOpacity>
+                        <View style={styles.headerTextContainer}>
+                            <Ionicons
+                                name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
+                                size={16}
+                                color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
+                            />
+                            <View style={styles.headerTextBox}>
+                                <Text style={[
+                                    styles.headerText,
+                                    currentBonusActionsAvailable === 0 && { color: 'black' }
+                                ]}>
+                                    x{currentBonusActionsAvailable}
+                                </Text>
+                            </View>
                         </View>
                     </View>
 
-                    {renderSpellSaveDC()}
+                    <View style={styles.headerIcons}>
+                        {renderSpellSaveDC()}
+                        <TouchableOpacity onPress={() => setResetModalVisible(true)}>
+                            <Ionicons
+                                name="warning"
+                                size={24}
+                                color="red"
+                                style={[styles.headerIcon, { color: 'white' }]}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </View>
 
+
+                <ScrollView style={{ flex: 1 }}>
                     <Text style={[styles.title, { paddingHorizontal: 10 }]}>{statsData.class} Spellbook</Text>
                     <View style={{ flex: 1 }}>
                         {renderPreparedSpellBlocksForClass()}
@@ -1200,7 +1357,7 @@ export default function SpellbookScreen() {
                     <View style={{ flex: 1 }}>
                         {renderSpellChoices()}
                         <ScrollView style={{ flex: 1 }}>
-                            <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>{spellChoiceInputValue}</Text>
+                            {renderSpellContent()}
                         </ScrollView>
                     </View>
                     <View style={styles.spellModalButtonsContainer}>
@@ -1212,7 +1369,15 @@ export default function SpellbookScreen() {
                                 setSpellChoiceInputValue(null);
                             }}
                         />
-                        <Button title="Assign" color="green" onPress={() => assignSpell(spellChoiceInputValue)} />
+                        <Button
+                            title="Assign"
+                            color="green"
+                            disabled={spellChoiceInputValue === null}
+                            onPress={() => {
+                                assignSpellToSlot();
+                                setSpellModalVisible(false);
+                            }}
+                        />
                     </View>
                 </View>
 

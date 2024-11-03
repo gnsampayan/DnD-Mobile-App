@@ -2,7 +2,23 @@
 	{
 		"level": 1,
 		"spells": [
-			"Absorb Elements",
+			{
+				"id": "Absorb Elements",
+				"school": "Abjuration",
+				"castingTime": "1 reaction, which you take when you recieve acid, cold, fire, lightning, or thunder damage",
+				"range": "Self",
+				"components": ["S"],
+				"duration": "1 round",
+				"description": "The spell captures some of the incoming energy, lessening its effect on you and storing it for your next melee attack. You have resistance to the triggering damage type until the start of your next turn. Also, the first time you hit with a melee attack on your next turn, the target takes extra (conditional) damage of the triggering type, and the spell ends.",
+				"features": {
+					"gain resistance": "to the triggering damage type",
+					"conditional damage": "1d6 per SpLv",
+					"damage type": "based on the triggering damage"
+				},
+				"classes": ["Artificer", "Druid", "Ranger", "Sorcerer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster", "Clockwork Soul"],
+				"feats": ["Artificer Initiate", "Magic Initiate", "Strixhaven Initiate"]
+			},
 			"Alarm",
 			"Animal Friendship",
 			"Armor of Agathys",
