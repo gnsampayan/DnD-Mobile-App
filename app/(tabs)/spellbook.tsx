@@ -177,6 +177,7 @@ export default function SpellbookScreen() {
     const [spellModalVisible, setSpellModalVisible] = useState(false);
     const [spellChoiceInputValue, setSpellChoiceInputValue] = useState<string | null>(null);
     const [openSpellDropdown, setOpenSpellDropdown] = useState(false);
+    const [undoVisible, setUndoVisible] = useState(false);
 
     // Key for AsyncStorage
     const KNOWN_SPELL_SLOTS_KEY = '@known_spell_slots';
@@ -200,7 +201,12 @@ export default function SpellbookScreen() {
         getCantripSlotsAmount();
         getAllKnownSpellsSlotsAmount();
         loadCantripSlots();
-    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race, allKnownSpellsSlots]);
+
+    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race]);
+
+    useEffect(() => {
+        getAllKnownSpellsSlotsAmount();
+    }, [allKnownSpellsSlots]);
 
     useEffect(() => {
         const initializeKnownSpellSlots = async () => {
@@ -351,7 +357,7 @@ export default function SpellbookScreen() {
         if (preparedSpellSlots !== null && preparedSpellSlots <= 0) {
             return (
                 <View style={[styles.section, { paddingHorizontal: 10 }]}>
-                    <Text style={styles.label}>Prepared Spells</Text>
+                    <Text style={styles.label}>Spells Prepared</Text>
                     <Text style={styles.text}>You can't use any spells yet.</Text>
                 </View>
             );
@@ -360,7 +366,7 @@ export default function SpellbookScreen() {
         } else {
             return (
                 <View style={styles.section}>
-                    <Text style={[styles.label, { paddingHorizontal: 10 }]}>Prepared Spells</Text>
+                    <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells Prepared</Text>
                     <FlatList
                         data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => ({
                             slotIndex: i,
@@ -489,6 +495,31 @@ export default function SpellbookScreen() {
         return null;
     }
 
+    const handleDecrement = () => {
+        Alert.alert('Undo', 'Are you sure you want to undo this action?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'OK', onPress: () => {
+                    handleLearnMoreSpells(-1);
+                    setUndoVisible(false);
+                }
+            }
+        ]);
+    }
+
+    const handleIncrement = () => {
+        Alert.alert('Learn Spells', 'Learning a spell will cost you 2 hours and 50gp. This cannot be undone.', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: '+1 Spell', onPress: () => {
+                    handleLearnMoreSpells(1);
+                    setUndoVisible(true);
+                },
+                style: 'default'
+            }
+        ]);
+    }
+
     const renderAllKnownSpells = () => {
         if (allKnownSpellsSlots !== null && preparedSpellSlots === null) {
             return null;
@@ -496,7 +527,7 @@ export default function SpellbookScreen() {
             if (allKnownSpellsSlots === 0 && allKnownSpellsSlots !== null) {
                 return (
                     <View style={styles.section}>
-                        <Text style={styles.label}>Known Spells</Text>
+                        <Text style={styles.label}>Spellbook</Text>
                         <Text style={styles.text}>You can't learn any spells yet.</Text>
                     </View>
                 );
@@ -507,14 +538,22 @@ export default function SpellbookScreen() {
                 let data = knownSpellSlotsData;
                 return (
                     <View style={styles.section}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 10 }}>
-                            <Text style={styles.label}>Known Spells</Text>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingHorizontal: 10,
+                            marginBottom: 5
+                        }}>
+                            <Text style={styles.label}>Spellbook</Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    handleLearnMoreSpells();
+                                    handleIncrement();
                                 }}
+                                style={{ flexDirection: 'row', alignItems: 'center' }}
                             >
-                                <Text style={{ color: '#586a9f', fontSize: 14 }}>Learn More Spells</Text>
+                                <Text style={{ color: 'white' }}>+</Text>
+                                <Ionicons name="color-wand" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
                         <View style={{ paddingHorizontal: 10, width: '100%' }}>
@@ -524,6 +563,14 @@ export default function SpellbookScreen() {
                                     {index < data.length - 1 && <View style={{ height: 10 }} />}
                                 </View>
                             ))}
+                            <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginTop: 15
+                            }}>
+
+                            </View>
                         </View>
                     </View>
                 );
@@ -1170,26 +1217,35 @@ export default function SpellbookScreen() {
         })
     }
 
-    const handleLearnMoreSpells = () => {
-        // Increase the number of known spell slots by 1
+    const handleLearnMoreSpells = (increment: number) => {
+        // Increment or decrement the number of known spell slots
         if (allKnownSpellsSlots !== null) {
-            // Find the maximum existing index
-            const maxIndex = knownSpellSlotsData.reduce((max, slot) =>
-                Math.max(max, slot.slotIndex), -1);
+            // Don't allow negative total slots
+            if (allKnownSpellsSlots + increment < 0) {
+                return;
+            }
 
-            // Use max index + 1 for the new slot
-            const newSlotIndex = maxIndex + 1;
-            const updatedAllKnownSpellsSlots = allKnownSpellsSlots + 1;
+            const updatedAllKnownSpellsSlots = allKnownSpellsSlots + increment;
             setAllKnownSpellsSlots(updatedAllKnownSpellsSlots);
 
-            // Update the knownSpellSlotsData with a new slot
-            const updatedKnownSpells = [
-                ...knownSpellSlotsData,
-                { slotIndex: newSlotIndex, spellName: null },
-            ];
-            setKnownSpellSlotsData(updatedKnownSpells);
+            let updatedKnownSpells;
+            if (increment > 0) {
+                // Adding slots
+                const maxIndex = knownSpellSlotsData.reduce((max, slot) =>
+                    Math.max(max, slot.slotIndex), -1);
 
-            // Persist the updated data
+                const newSlots = Array.from({ length: increment }, (_, i) => ({
+                    slotIndex: maxIndex + 1 + i,
+                    spellName: null
+                }));
+
+                updatedKnownSpells = [...knownSpellSlotsData, ...newSlots];
+            } else {
+                // Removing slots
+                updatedKnownSpells = knownSpellSlotsData.slice(0, knownSpellSlotsData.length + increment);
+            }
+
+            setKnownSpellSlotsData(updatedKnownSpells);
             saveKnownSpellSlots(updatedKnownSpells);
         }
     };
@@ -1251,7 +1307,6 @@ export default function SpellbookScreen() {
 
 
                 <ScrollView style={{ flex: 1 }}>
-                    <Text style={[styles.title, { paddingHorizontal: 10 }]}>{statsData.class} Spellbook</Text>
                     <View style={{ flex: 1 }}>
                         {renderPreparedSpellBlocksForClass()}
                         {renderCantripBlocks()}
