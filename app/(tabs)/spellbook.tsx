@@ -371,6 +371,7 @@ export default function SpellbookScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells Prepared</Text>
                     <FlatList
+                        style={{ marginLeft: 10 }}
                         data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => ({
                             slotIndex: i,
                             spellName: null
@@ -450,6 +451,7 @@ export default function SpellbookScreen() {
                 <View style={styles.section}>
                     <Text style={[styles.label, { paddingHorizontal: 10 }]}>Cantrips</Text>
                     <FlatList
+                        style={{ marginLeft: 10 }}
                         data={Array.from({ length: cantripSlots || 0 }, (_, i) => i)}
                         renderItem={({ item }) => renderCantripBlock(item)}
                         keyExtractor={(item) => item.toString()}
