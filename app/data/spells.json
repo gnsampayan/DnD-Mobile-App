@@ -4,6 +4,7 @@
 		"spells": [
 			{
 				"id": "Absorb Elements",
+				"name": "Absorb Elements",
 				"school": "Abjuration",
 				"castingTime": "1 reaction, which you take when you recieve acid, cold, fire, lightning, or thunder damage",
 				"range": "Self",
@@ -19,44 +20,855 @@
 				"subclasses": ["Eldritch Knight", "Arcane Trickster", "Clockwork Soul"],
 				"feats": ["Artificer Initiate", "Magic Initiate", "Strixhaven Initiate"]
 			},
-			"Alarm",
-			"Animal Friendship",
-			"Armor of Agathys",
-			"Arms of Hadar",
-			"Bane",
-			"Beast Bond",
-			"Bless",
-			"Burning Hands",
-			"Catapult",
-			"Cause Fear",
-			"Ceremony",
-			"Chaos Bolt",
-			"Charm Person",
-			"Chromatic Orb",
-			"Color Spray",
-			"Command",
-			"Compelled Duel",
-			"Comprehend Languages",
-			"Create or Destroy Water",
-			"Cure Wounds",
-			"Detect Evil and Good",
-			"Detect Magic",
-			"Detect Poison and Disease",
-			"Disguise Self",
-			"Dissonant Whispers",
-			"Distort Value",
-			"Divine Favor",
-			"Earth Tremor",
-			"Ensnaring Strike",
-			"Entangle",
-			"Expeditious Retreat",
-			"Faerie Fire",
-			"False Life",
-			"Feather Fall",
-			"Find Familiar",
-			"Fog Cloud",
-			"Frost Fingers",
-			"Gift of Alacrity",
+			{
+				"id": "Alarm",
+				"name": "Alarm",
+				"school": "Abjuration",
+				"castingTime": "1 minute",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "8 hours",
+				"description": "You set an alarm against unwanted intrusion. Choose a door, a window, or an area within range that is no larger than a 20-foot cube. Until the spell ends, an alarm alerts you whenever a Tiny or larger creature touches or enters the warded area. When you cast the spell, you can designate creatures that won't set off the alarm. You also choose whether the alarm is mental or audible.",
+				"features": {
+					"material component": "a tiny bell and a piece of fine silver wire",
+					"ritual": true,
+					"mental alarm": "A mental alarm alerts you with a ping in your mind if you are within 1 mile of the warded area. This ping awakens you if you are sleeping.",
+					"audible alarm": "An audible alarm produces the sound of a hand bell for 10 seconds within 60 feet."
+				},
+				"classes": ["Artificer", "Ranger", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Oath of the Watchers",
+					"Arcane Trickster",
+					"Clockwork Soul"
+				],
+				"races": ["Mark of Warding Dwarf"],
+				"feats": [
+					"Artificer Initiate",
+					"Magic Initiate",
+					"Quicksmithing",
+					"Ritual Caster"
+				]
+			},
+			{
+				"id": "Animal Friendship",
+				"name": "Animal Friendship",
+				"school": "Enchantment",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "24 hours",
+				"description": "This spell lets you convince a beast that you mean it no harm. Choose a beast that you can see within range. It must see and hear you. If the beast's Intelligence is 4 or higher, the spell fails. Otherwise, the beast must succeed on a Wisdom saving throw or be charmed by you for the spell's duration. If you or one of your companions harms the target, the spell ends.",
+				"features": {
+					"material component": "a morsel of food",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you can affect one additional beast for each slot level above 1st."
+				},
+				"classes": ["Bard", "Druid", "Ranger"],
+				"subclasses": ["Nature Domain"],
+				"races": ["Mark of Handling Human", "Yuan-ti Pureblood"],
+				"backgrounds": ["Selesnya Initiate"],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Armor of Agathys",
+				"name": "Armor of Agathys",
+				"school": "Abjuration",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "1 hour",
+				"description": "A protective magical force surrounds you, manifesting as a spectral frost that covers you and your gear. You gain 5 temporary hit points for the duration. If a creature hits you with a melee attack while you have these hit points, the creature takes 5 cold damage.",
+				"features": {
+					"material component": "a cup of water",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, both the temporary hit points and the cold damage increase by 5 for each slot level above 1st."
+				},
+				"classes": ["Warlock"],
+				"subclasses": [
+					"Oath of Conquest",
+					"Clockwork Soul",
+					"Giant Soul (Frost Giant)"
+				],
+				"races": ["Levistus Tiefling", "Mark of Warding Dwarf"],
+				"feats": ["Magic Initiate"]
+			},
+			{
+				"id": "Arms of Hadar",
+				"name": "Arms of Hadar",
+				"school": "Conjuration",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "Self (10-foot radius)",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "You invoke the power of Hadar, the Dark Hunger. Tendrils of dark energy erupt from you and batter all creatures within 10 feet of you. Each creature in that area must make a Strength saving throw. On a failed save, a target takes 2d6 necrotic damage and can't take reactions until its next turn. On a successful save, the creature takes half damage, but suffers no other effect.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+				},
+				"classes": ["Warlock"],
+				"subclasses": ["Aberrant Mind"],
+				"feats": ["Magic Initiate"]
+			},
+			{
+				"id": "Bane",
+				"name": "Bane",
+				"school": "Enchantment",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Up to three creatures of your choice that you can see within range must make Charisma saving throws. Whenever a target that fails this saving throw makes an attack roll or a saving throw before the spell ends, the target must roll a d4 and subtract the number rolled from the attack roll or saving throw.",
+				"features": {
+					"material component": "a drop of blood",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st."
+				},
+				"classes": ["Bard", "Cleric"],
+				"subclasses": [
+					"Ambition Domain",
+					"Grave Domain",
+					"Oath of Vengeance",
+					"Divine Soul",
+					"The Undead",
+					"Onomancy",
+					"Theurgy"
+				],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Beast Bond",
+				"name": "Beast Bond",
+				"school": "Divination",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "You establish a telepathic link with one beast you touch that is friendly to you or charmed by you. The spell fails if the beast's Intelligence score is 4 or higher. Until the spell ends, the link is active while you and the beast are within line of sight of each other. Through the link, the beast can understand your telepathic messages to it, and it can telepathically communicate simple emotions and concepts back to you. While the link is active, the beast gains advantage on attack rolls against any creature within 5 feet of you that you can see.",
+				"features": {
+					"material component": "a bit of fur wrapped in a cloth"
+				},
+				"classes": ["Druid", "Ranger"],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Bless",
+				"name": "Bless",
+				"school": "Enchantment",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw.",
+				"features": {
+					"material component": "a sprinkling of holy water",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st."
+				},
+				"classes": ["Cleric", "Paladin"],
+				"subclasses": [
+					"Life Domain",
+					"Solidarity Domain",
+					"Divine Soul",
+					"Onomancy",
+					"Theurgy"
+				],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Burning Hands",
+				"name": "Burning Hands",
+				"school": "Evocation",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "Self (15-foot cone)",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much damage on a successful one.\n\nThe fire ignites any flammable objects in the area that aren't being worn or carried.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+				},
+				"classes": ["Sorcerer", "Wizard"],
+				"subclasses": [
+					"Light Domain",
+					"Circle of Wildfire",
+					"Eldritch Knight",
+					"Way of the Four Elements",
+					"Way of the Sun Soul",
+					"Arcane Trickster",
+					"Giant Soul (Fire Giant)",
+					"The Fiend",
+					"The Genie (Efreeti)"
+				],
+				"races": [
+					"Abyssal Tiefling",
+					"Fire Genasi",
+					"Mephistopheles Tiefling",
+					"Tiefling (Hellfire)"
+				],
+				"backgrounds": ["Rakdos Cultist"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Catapult",
+				"name": "Catapult",
+				"school": "Transmutation",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["S"],
+				"duration": "Instantaneous",
+				"description": "Choose one object weighing 1 to 5 pounds within range that isn't being worn or carried. The object flies in a straight line up to 90 feet in a direction you choose before falling to the ground, stopping early if it impacts against a solid surface. If the object would strike a creature, that creature must make a Dexterity saving throw. On a failed save, the object strikes the target and stops moving. When the object strikes something, the object and what it strikes each take 3d8 bludgeoning damage.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the maximum weight of objects that you can target with this spell increases by 5 pounds, and the damage increases by 1d8, for each slot level above 1st."
+				},
+				"classes": ["Artificer", "Sorcerer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster", "Clockwork Soul"],
+				"feats": ["Artificer Initiate", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Cause Fear",
+				"name": "Cause Fear",
+				"school": "Necromancy",
+				"level": 1,
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You awaken the sense of mortality in one creature you can see within range. A construct or an undead is immune to this effect. The target must succeed on a Wisdom saving throw or become frightened of you until the spell ends. The frightened target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st. The creatures must be within 30 feet of each other when you target them."
+				},
+				"classes": ["Warlock", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"],
+				"feats": ["Magic Initiate", "Shadow Touched", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Ceremony",
+				"name": "Ceremony",
+				"school": "Abjuration",
+				"level": 1,
+				"castingTime": "1 hour",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You perform a special religious ceremony that is infused with magic. When you cast the spell, choose one of the following rites, the target of which must be within 10 feet of you throughout the casting.",
+				"features": {
+					"material component": "25 gp worth of powdered silver, which the spell consumes",
+					"ritual": true,
+					"atonement": "You touch one willing creature whose alignment has changed, and you make a DC 20 Wisdom (Insight) check. On a successful check, you restore the target to its original alignment.",
+					"bless water": "You touch one vial of water and cause it to become holy water.",
+					"coming of age": "You touch one humanoid who is a young adult. For the next 24 hours, whenever the target makes an ability check, it can roll a d4 and add the number rolled to the ability check. A creature can benefit from this rite only once.",
+					"dedication": "You touch one humanoid who wishes to be dedicated to your god's service. For the next 24 hours, whenever the target makes a saving throw, it can roll a d4 and add the number rolled to the save. A creature can benefit from this rite only once.",
+					"funeral rite": "You touch one corpse, and for the next 7 days, the target can't become undead by any means short of a Wish spell.",
+					"wedding": "You touch adult humanoids willing to be bonded together in marriage. For the next 7 days, each target gains a +2 bonus to AC while they are within 30 feet of each other. A creature can benefit from this rite again only if widowed."
+				},
+				"classes": ["Cleric", "Paladin"],
+				"subclasses": ["Divine Soul", "Theurgy"],
+				"feats": [
+					"Magic Initiate",
+					"Quicksmithing",
+					"Ritual Caster",
+					"Strixhaven Initiate"
+				]
+			},
+			{
+				"id": "Chaos Bolt",
+				"name": "Chaos Bolt",
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "120 feet",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "You hurl an undulating, warbling mass of chaotic energy at one creature in range. Make a ranged spell attack against the target. On a hit, the target takes 2d8 + 1d6 damage. Choose one of the d8s. The number rolled on that die determines the attack's damage type, as shown below. If you roll the same number on both d8s, the chaotic energy leaps from the target to a different creature of your choice within 30 feet of it. Make a new attack roll against the new target, and make a new damage roll, which could cause the chaotic energy to leap again. A creature can be targeted only once by each casting of this spell.",
+				"features": {
+					"damage types": "1: Acid, 2: Cold, 3: Fire, 4: Force, 5: Lightning, 6: Poison, 7: Psychic, 8: Thunder",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, each target takes 1d6 extra damage of the type rolled for each slot level above 1st."
+				},
+				"classes": ["Sorcerer"],
+				"backgrounds": ["Izzet Engineer"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Charm Person",
+				"name": "Charm Person",
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S"],
+				"duration": "1 hour",
+				"description": "You attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw, and does so with advantage if you or your companions are fighting it. If it fails the saving throw, it is charmed by you until the spell ends or until you or your companions do anything harmful to it. The charmed creature regards you as a friendly acquaintance. When the spell ends, the creature knows it was charmed by you.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st. The creatures must be within 30 feet of each other when you target them."
+				},
+				"classes": ["Bard", "Druid", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": [
+					"Trickery Domain",
+					"Eldritch Knight",
+					"Oath of Treachery",
+					"Fey Wanderer",
+					"Arcane Trickster",
+					"Aberrant Mind"
+				],
+				"races": [
+					"Abyssal Tiefling",
+					"Fierna Tiefling",
+					"Tiefling (Devil's Tongue)"
+				],
+				"backgrounds": ["Selesnya Initiate"],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Chromatic Orb",
+				"name": "Chromatic Orb",
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "90 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You hurl a 4-inch-diameter sphere of energy at a creature that you can see within range. You choose acid, cold, fire, lightning, poison, or thunder for the type of orb you create, and then make a ranged spell attack against the target. If the attack hits, the creature takes 3d8 damage of the type you chose.",
+				"features": {
+					"material component": "a diamond worth at least 50 gp",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st."
+				},
+				"classes": ["Sorcerer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"],
+				"backgrounds": ["Prismari Student"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Color Spray",
+				"name": "Color Spray",
+				"school": "Illusion",
+				"castingTime": "1 action",
+				"range": "Self (15-foot cone)",
+				"components": ["V", "S", "M"],
+				"duration": "1 round",
+				"description": "A dazzling array of flashing, colored light springs from your hand. Roll 6d10; the total is how many hit points of creatures this spell can effect. Creatures in a 15-foot cone originating from you are affected in ascending order of their current hit points (ignoring unconscious creatures and creatures that can't see). Starting with the creature that has the lowest current hit points, each creature affected by this spell is blinded until the end of your next turn. Subtract each creature's hit points from the total before moving on to the creature with the next lowest hit points. A creature's hit points must be equal to or less than the remaining total for that creature to be affected.",
+				"features": {
+					"material component": "a pinch of powder or sand that is colored red, yellow, and blue",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, roll an additional 2d10 for each slot level above 1st."
+				},
+				"classes": ["Bard", "Sorcerer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"],
+				"feats": ["Magic Initiate", "Shadow Touched", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Command",
+				"name": "Command",
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V"],
+				"duration": "1 round",
+				"description": "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its next turn. The spell has no effect if the target is undead, if it doesn't understand your language, or if your command is directly harmful to it.\n\nSome typical commands and their effects follow. You might issue a command other than one described here. If you do so, the DM determines how the target behaves. If the target can't follow your command, the spell ends.\n\nApproach: The target moves toward you by the shortest and most direct route, ending its turn if it moves within 5 feet of you.\nDrop: The target drops whatever it is holding and then ends its turn.\nFlee: The target spends its turn moving away from you by the fastest available means.\nGrovel: The target falls prone and then ends its turn.\nHalt: The target doesn't move and takes no actions. A flying creature stays aloft, provided that it is able to do so. If it must move to stay aloft, it flies the minimum distance needed to remain in the air.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you can affect one additional creature for each slot level above 1st. The creatures must be within 30 feet of each other when you target them."
+				},
+				"classes": ["Bard", "Cleric", "Paladin"],
+				"subclasses": [
+					"College of Glamour",
+					"Knowledge Domain",
+					"Order Domain",
+					"Oath of Conquest",
+					"Oath of the Crown",
+					"Divine Soul",
+					"The Fiend",
+					"Theurgy"
+				],
+				"backgrounds": ["Azorius Functionary", "Orzhov Representative"],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Compelled Duel",
+				"name": "Compelled Duel",
+				"school": "Enchantment",
+				"castingTime": "1 bonus action",
+				"range": "30 feet",
+				"components": ["V"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You attempt to compel a creature into a duel. One creature that you can see within range must make a Wisdom saving throw. On a failed save, the creature is drawn to you, compelled by your divine demand. For the duration, it has disadvantage on attack rolls against creatures other than you, and must make a Wisdom saving throw each time it attempts to move to a space that is more than 30 feet away from you; if it succeeds on this saving throw, this spell doesn't restrict the target's movement for that turn.\n\nThe spell ends if you attack any other creature, if you cast a spell that targets a hostile creature other than the target, if a creature friendly to you damages the target or casts a harmful spell on it, or if you end your turn more than 30 feet away from the target.",
+				"classes": ["Paladin"],
+				"subclasses": [
+					"Protection Domain",
+					"Oath of the Crown",
+					"Stone Sorcery"
+				],
+				"races": ["Mark of Sentinel Human"],
+				"backgrounds": ["Gruul Anarch"],
+				"feats": ["Fey Touched", "Greater Dragonmark"]
+			},
+			{
+				"id": "Comprehend Languages",
+				"name": "Comprehend Languages",
+				"school": "Divination",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "1 hour",
+				"description": "For the duration, you understand the literal meaning of any spoken language that you hear. You also understand any written language that you see, but you must be touching the surface on which the words are written. It takes about 1 minute to read one page of text.\n\nThis spell doesn't decode secret messages in a text or a glyph, such as an arcane sigil, that isn't part of a written language.",
+				"features": {
+					"material component": "a pinch of soot and salt",
+					"ritual": true
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": [
+					"City Domain",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Aberrant Mind",
+					"Mage of Lorehold"
+				],
+				"races": ["Mark of Scribing Gnome"],
+				"backgrounds": ["Lorehold Student"],
+				"feats": [
+					"Fey Touched",
+					"Magic Initiate",
+					"Quicksmithing",
+					"Ritual Caster",
+					"Strixhaven Initiate"
+				]
+			},
+			{
+				"id": "Create or Destroy Water",
+				"name": "Create or Destroy Water",
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You either create or destroy water.\n\nCreate Water: You create up to 10 gallons of clean water within range in an open container. Alternatively, the water falls as rain in a 30-foot cube within range, extinguishing exposed flames in the area.\n\nDestroy Water: You destroy up to 10 gallons of water in an open container within range. Alternatively, you destroy fog in a 30-foot cube within range.",
+				"features": {
+					"material component": "a drop of water if creating water or a few grains of sand if destroying it",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you create or destroy 10 additional gallons of water, or the size of the cube increases by 5 feet, for each slot level above 1st."
+				},
+				"classes": ["Cleric", "Druid"],
+				"subclasses": ["Divine Soul", "The Fathomless", "Theurgy"],
+				"races": ["Water Genasi"],
+				"backgrounds": ["Izzet Engineer"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Cure Wounds",
+				"name": "Cure Wounds",
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st."
+				},
+				"classes": [
+					"Artificer",
+					"Bard",
+					"Cleric",
+					"Druid",
+					"Paladin",
+					"Ranger"
+				],
+				"subclasses": [
+					"Life Domain",
+					"Circle of Wildfire",
+					"Divine Soul",
+					"The Celestial",
+					"Theurgy",
+					"Mage of Witherbloom"
+				],
+				"races": ["Abyssal Tiefling", "Mark of Healing Halfling"],
+				"backgrounds": ["Witherbloom Student"],
+				"feats": [
+					"Artificer Initiate",
+					"Gift of the Metallic Dragon",
+					"Magic Initiate",
+					"Strixhaven Initiate"
+				]
+			},
+			{
+				"id": "Detect Evil and Good",
+				"name": "Detect Evil and Good",
+				"school": "Divination",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "For the duration, you know if there is an aberration, celestial, elemental, fey, fiend, or undead within 30 feet of you, as well as where the creature is located. Similarly, you know if there is a place or object within 30 feet of you that has been magically consecrated or desecrated.\n\nThe spell can penetrate most barriers, but it is blocked by 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood or dirt.",
+				"classes": ["Cleric", "Paladin"],
+				"subclasses": ["Divine Soul", "The Genie", "Theurgy"],
+				"races": ["Mark of Detection Half-elf"],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Detect Magic",
+				"name": "Detect Magic",
+				"school": "Divination",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "For the duration, you sense the presence of magic within 30 feet of you. If you sense magic in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magic, and you learn its school of magic, if any.\n\nThe spell can penetrate most barriers, but it is blocked by 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood or dirt.",
+				"features": {
+					"ritual": true
+				},
+				"classes": [
+					"Artificer",
+					"Bard",
+					"Cleric",
+					"Druid",
+					"Paladin",
+					"Ranger",
+					"Sorcerer",
+					"Wizard"
+				],
+				"subclasses": [
+					"Arcana Domain",
+					"Eldritch Knight",
+					"Monster Hunter",
+					"Oath of the Watchers",
+					"Arcane Trickster",
+					"Aberrant Mind",
+					"Divine Soul",
+					"Theurgy"
+				],
+				"races": ["Firbolg", "Mark of Detection Half-elf", "Owlin"],
+				"feats": [
+					"Artificer Initiate",
+					"Drow High Magic",
+					"Fey Touched",
+					"Magic Initiate",
+					"Quicksmithing",
+					"Ritual Caster",
+					"Strixhaven Initiate"
+				]
+			},
+			{
+				"id": "Detect Poison and Disease",
+				"name": "Detect Poison and Disease",
+				"school": "Divination",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "For the duration, you can sense the presence and location of poisons, poisonous creatures, and diseases within 30 feet of you. You also identify the kind of poison, poisonous creature, or disease in each case.\n\nThe spell can penetrate most barriers, but it is blocked by 1 foot of stone, 1 inch of common metal, a thin sheet of lead, or 3 feet of wood or dirt.",
+				"features": {
+					"material component": "a yew leaf",
+					"ritual": true
+				},
+				"classes": ["Cleric", "Druid", "Paladin", "Ranger"],
+				"subclasses": ["Divine Soul", "Theurgy"],
+				"races": ["Mark of Detection Half-elf"],
+				"backgrounds": ["Simic Scientist"],
+				"feats": [
+					"Fey Touched",
+					"Magic Initiate",
+					"Quicksmithing",
+					"Ritual Caster",
+					"Strixhaven Initiate"
+				]
+			},
+			{
+				"id": "Disguise Self",
+				"name": "Disguise Self",
+				"school": "Illusion",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S"],
+				"duration": "1 hour",
+				"description": "You make yourself — including your clothing, armor, weapons, and other belongings on your person — look different until the spell ends or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between. You can't change your body type, so you must adopt a form that has the same basic arrangement of limbs. Otherwise, the extent of the illusion is up to you.\n\nThe changes wrought by this spell fail to hold up to physical inspection. For example, if you use this spell to add a hat to your outfit, objects pass through the hat, and anyone who touches it would feel nothing or would feel your head and hair. If you use this spell to appear thinner than you are, the hand of someone who reaches out to touch you would bump into you while it was seemingly still in midair.\n\nTo discern that you are disguised, a creature can use its action to inspect your appearance and must succeed on an Intelligence (Investigation) check against your spell save DC.",
+				"classes": ["Artificer", "Bard", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Ambition Domain",
+					"Trickery Domain",
+					"Eldritch Knight",
+					"Gloom Stalker",
+					"Arcane Trickster"
+				],
+				"races": [
+					"Dispater Tiefling",
+					"Firbolg",
+					"Hexblood",
+					"Glasya Tiefling",
+					"Mark of Shadow Elf"
+				],
+				"backgrounds": ["Dimir Operative"],
+				"feats": [
+					"Artificer Initiate",
+					"Magic Initiate",
+					"Shadow Touched",
+					"Strixhaven Initiate",
+					"Svirfneblin Magic"
+				]
+			},
+			{
+				"id": "Dissonant Whispers",
+				"name": "Dissonant Whispers",
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V"],
+				"duration": "Instantaneous",
+				"description": "You whisper a discordant melody that only one creature of your choice within range can hear, wracking it with terrible pain. The target must make a Wisdom saving throw. On a failed save, it takes 3d6 psychic damage and must immediately use its reaction, if available, to move as far as its speed allows away from you. The creature doesn't move into obviously dangerous ground, such as a fire or a pit. On a successful save, the target takes half as much damage and doesn't have to move away. A deafened creature automatically succeeds on the save.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+				},
+				"classes": ["Bard"],
+				"subclasses": ["Aberrant Mind", "The Great Old One"],
+				"backgrounds": ["Rakdos Cultist", "Silverquill Student"],
+				"feats": ["Fey Touched", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Distort Value",
+				"name": "Distort Value",
+				"school": "Illusion",
+				"castingTime": "1 minute",
+				"range": "Touch",
+				"components": ["V"],
+				"duration": "8 hours",
+				"description": "You cast this spell on an object no more than 1 foot on a side, doubling the object's perceived value by adding illusory flourishes or polish to it, or reducing its perceived value by half with the help of illusory scratches, dents, and other unsightly features. Anyone examining the object can ascertain its true value with a successful Intelligence (Investigation) check against your spell save DC.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the maximum size of the object increases by 1 foot for each slot level above 1st."
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"],
+				"feats": ["Magic Initiate", "Shadow Touched", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Divine Favor",
+				"name": "Divine Favor",
+				"school": "Evocation",
+				"castingTime": "1 bonus action",
+				"range": "Self",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Your prayer empowers you with divine radiance. Until the spell ends, your weapon attacks deal an extra 1d4 radiant damage on a hit.",
+				"classes": ["Paladin"],
+				"subclasses": ["Strength Domain", "War Domain"]
+			},
+			{
+				"id": "Earth Tremor",
+				"name": "Earth Tremor",
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "10 feet",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "You cause a tremor in the ground within range. Each creature other than you in that area must make a Dexterity saving throw. On a failed save, a creature takes 1d6 bludgeoning damage and is knocked prone. If the ground in that area is loose earth or stone, it becomes difficult terrain until cleared, with each 5-foot-diameter portion requiring at least 1 minute to clear by hand.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+				},
+				"classes": ["Bard", "Druid", "Sorcerer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Ensnaring Strike",
+				"name": "Ensnaring Strike",
+				"school": "Conjuration",
+				"castingTime": "1 bonus action",
+				"range": "Self",
+				"components": ["V"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "The next time you hit a creature with a weapon attack before this spell ends, a writhing mass of thorny vines appears at the point of impact, and the target must succeed on a Strength saving throw or be restrained by the magical vines until the spell ends. A Large or larger creature has advantage on this saving throw. If the target succeeds on the save, the vines shrivel away.\n\nWhile restrained by this spell, the target takes 1d6 piercing damage at the start of each of its turns. A creature restrained by the vines or one that can touch the creature can use its action to make a Strength check against your spell save DC. On a success, the target is freed.",
+				"features": {
+					"higher levels": "If you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
+				},
+				"classes": ["Ranger"],
+				"subclasses": ["Oath of the Ancients"],
+				"backgrounds": ["Azorius Functionary"]
+			},
+			{
+				"id": "Entangle",
+				"name": "Entangle",
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "90 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Grasping weeds and vines sprout from the ground in a 20-foot square starting from a point within range. For the duration, these plants turn the ground in the area into difficult terrain.\n\nA creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained by the entangling plants until the spell ends. A creature restrained by the plants can use its action to make a Strength check against your spell save DC. On a success, it frees itself.\n\nWhen the spell ends, the conjured plants wilt away.",
+				"classes": ["Druid", "Ranger"],
+				"subclasses": ["Primeval Guardian", "Giant Soul (Stone Giant)"],
+				"races": ["Lotusden Halfling"],
+				"backgrounds": ["Golgari Agent", "Quandrix Student"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Expeditious Retreat",
+				"name": "Expeditious Retreat",
+				"school": "Transmutation",
+				"castingTime": "1 bonus action",
+				"range": "Self",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "This spell allows you to move at an incredible pace. When you cast this spell, and then as a bonus action on each of your turns until the spell ends, you can take the Dash action.",
+				"classes": ["Artificer", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Oath of Treachery",
+					"Arcane Trickster",
+					"Clockwork Soul"
+				],
+				"races": ["Mark of Passage Human"],
+				"backgrounds": ["Simic Scientist"],
+				"feats": ["Artificer Initiate", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Faerie Fire",
+				"name": "Faerie Fire",
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Each object in a 20-foot cube within range is outlined in blue, green, or violet light (your choice). Any creature in the area when the spell is cast is also outlined in light if it fails a Dexterity saving throw. For the duration, objects and affected creatures shed dim light in a 10-foot radius.\n\nAny attack roll against an affected creature or object has advantage if the attacker can see it, and the affected creature or object can't benefit from being invisible.",
+				"classes": ["Artificer", "Bard", "Druid"],
+				"subclasses": [
+					"Light Domain",
+					"Twilight Domain",
+					"Swarmkeeper",
+					"The Archfey"
+				],
+				"races": [
+					"Drow",
+					"Fairy",
+					"Half-elf (Drow Descent)",
+					"Mark of Finding Half-orc",
+					"Mark of Finding Human"
+				],
+				"feats": ["Artificer Initiate", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "False Life",
+				"name": "False Life",
+				"school": "Necromancy",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "1 hour",
+				"description": "Bolstering yourself with a necromantic facsimile of life, you gain 1d4 + 4 temporary hit points for the duration.",
+				"features": {
+					"material component": "a small amount of alcohol or distilled spirits",
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, you gain 5 additional temporary hit points for each slot level above 1st."
+				},
+				"classes": ["Artificer", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Death Domain",
+					"Grave Domain",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"The Raven Queen",
+					"The Undead",
+					"The Undying"
+				],
+				"feats": [
+					"Artificer Initiate",
+					"Magic Initiate",
+					"Shadow Touched",
+					"Strixhaven Initiate"
+				]
+			},
+			{
+				"id": "Feather Fall",
+				"name": "Feather Fall",
+				"school": "Transmutation",
+				"castingTime": "1 reaction, which you take when you or a creature within 60 feet of you falls",
+				"range": "60 feet",
+				"components": ["V", "M"],
+				"duration": "1 minute",
+				"description": "Choose up to five falling creatures within range. A falling creature's rate of descent slows to 60 feet per round until the spell ends. If the creature lands before the spell ends, it takes no falling damage and can land on its feet, and the spell ends for that creature.",
+				"features": {
+					"material component": "a small feather or a piece of down"
+				},
+				"classes": ["Artificer", "Bard", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Clockwork Soul",
+					"The Seeker"
+				],
+				"races": ["Air Genasi", "Mark of Storm Half-elf"],
+				"feats": ["Artificer Initiate", "Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Find Familiar",
+				"name": "Find Familiar",
+				"school": "Conjuration",
+				"castingTime": "1 hour",
+				"range": "10 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You gain the service of a familiar, a spirit that takes an animal form you choose: bat, cat, crab, frog (toad), hawk, lizard, octopus, owl, poisonous snake, fish (quipper), rat, raven, sea horse, spider, or weasel. At your DM's choice, the options of an abyssal chicken, an almiraj, a flying monkey, or a tressym may be available. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a celestial, fey, or fiend (your choice) instead of a beast.\n\nYour familiar acts independently of you, but it always obeys your commands. In combat, it rolls its own initiative and acts on its own turn. A familiar can't attack, but it can take other actions as normal.\n\nWhen the familiar drops to 0 hit points, it disappears, leaving behind no physical form. It reappears after you cast this spell again. As an action, you can temporarily dismiss the familiar to a pocket dimension. Alternatively, you can dismiss it forever. As an action while it is temporarily dismissed, you can cause it to reappear in any unoccupied space within 30 feet of you. Whenever the familiar drops to 0 hit points or disappears into the pocket dimension, it leaves behind in its space anything it was wearing or carrying.\n\nWhile your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as an action, you can see through your familiar's eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses that the familiar has. During this time, you are deaf and blind with regard to your own senses.\n\nYou can't have more than one familiar at a time. If you cast this spell while you already have a familiar, you instead cause it to adopt a new form. Choose one of the forms from the above list. Your familiar transforms into the chosen creature.\n\nFinally, when you cast a spell with a range of touch, your familiar can deliver the spell as if it had cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliver the spell when you cast it. If the spell requires an attack roll, you use your attack modifier for the roll.",
+				"features": {
+					"material component": "10 gp worth of charcoal, incense, and herbs that must be consumed by fire in a brass brazier",
+					"ritual": true
+				},
+				"classes": ["Druid", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Pact of the Chain"
+				],
+				"feats": [
+					"Magic Initiate",
+					"Quicksmithing",
+					"Ritual Caster",
+					"Servo Crafting",
+					"Strixhaven Initiate",
+					"Strixhaven Mascot"
+				]
+			},
+			{
+				"id": "Fog Cloud",
+				"name": "Fog Cloud",
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "120 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You create a 20-foot-radius sphere of fog centered on a point within range. The sphere spreads around corners, and its area is heavily obscured. It lasts for the duration or until a wind of moderate or greater speed (at least 10 miles per hour) disperses it.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the radius of the fog increases by 20 feet for each slot level above 1st."
+				},
+				"classes": ["Druid", "Ranger", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Tempest Domain",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Giant Soul (Cloud Giant)",
+					"The Genie (Marid)"
+				],
+				"races": ["Mark of Storm Half-elf", "Triton"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Frost Fingers",
+				"name": "Frost Fingers",
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "Self (15-foot cone)",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "Freezing cold blasts from your fingertips in a 15-foot cone. Each creature in that area must make a Constitution saving throw, taking 2d8 cold damage on a failed save, or half as much on a successful one.\n\nThe cold freezes nonmagical liquids in the area that aren't being worn or carried.",
+				"features": {
+					"higher levels": "When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st."
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"],
+				"feats": ["Magic Initiate", "Strixhaven Initiate"]
+			},
+			{
+				"id": "Gift of Alacrity",
+				"name": "Gift of Alacrity",
+				"school": "Divination",
+				"castingTime": "1 minute",
+				"range": "Touch",
+				"components": ["V", "S"],
+				"duration": "8 hours",
+				"description": "You touch a willing creature. For the duration, the target can add 1d8 to its initiative rolls.",
+				"subclasses": ["Chronurgy Magic"],
+				"feats": ["Fey Touched"]
+			},
 			"Goodberry",
 			"Grease",
 			"Guiding Bolt",

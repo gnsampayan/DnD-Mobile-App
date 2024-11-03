@@ -13,6 +13,7 @@ module.exports = function(api) {
             '@items': './assets/images/items',
             '@actions': './assets/images/actions',
             '@equipment': './assets/images/equipment',
+            '@spells': './assets/images/spells',
           },
         },
       ],
