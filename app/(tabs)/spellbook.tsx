@@ -200,7 +200,7 @@ export default function SpellbookScreen() {
         getCantripSlotsAmount();
         getAllKnownSpellsSlotsAmount();
         loadCantripSlots();
-    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race]);
+    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race, allKnownSpellsSlots]);
 
     useEffect(() => {
         const initializeKnownSpellSlots = async () => {
@@ -995,6 +995,10 @@ export default function SpellbookScreen() {
             const resetCantripSlots = Array(cantripSlots).fill(null).map(() => null);
             setCantripSlotsData(resetCantripSlots);
             await AsyncStorage.setItem(CANTRIP_SLOTS_KEY, JSON.stringify(resetCantripSlots));
+            // Get fresh known spell slots amount
+            getAllKnownSpellsSlotsAmount();
+
+            // Reset known spells with updated amount
             const resetKnownSpells = Array(allKnownSpellsSlots).fill(0).map((_, index) => ({
                 slotIndex: index,
                 spellName: null
@@ -1169,7 +1173,12 @@ export default function SpellbookScreen() {
     const handleLearnMoreSpells = () => {
         // Increase the number of known spell slots by 1
         if (allKnownSpellsSlots !== null) {
-            const newSlotIndex = allKnownSpellsSlots;
+            // Find the maximum existing index
+            const maxIndex = knownSpellSlotsData.reduce((max, slot) =>
+                Math.max(max, slot.slotIndex), -1);
+
+            // Use max index + 1 for the new slot
+            const newSlotIndex = maxIndex + 1;
             const updatedAllKnownSpellsSlots = allKnownSpellsSlots + 1;
             setAllKnownSpellsSlots(updatedAllKnownSpellsSlots);
 
