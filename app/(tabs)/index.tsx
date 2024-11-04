@@ -1580,6 +1580,11 @@ export default function ActionsScreen() {
                               <Ionicons name="dice" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponAttackBonus(rangedHandWeapon) && (
+                                    <Text style={{ marginRight: 5 }}>
+                                      +{getWeaponAttackBonus(rangedHandWeapon)}
+                                    </Text>
+                                  )}
                                   {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
                                   {getWeaponSkillModifiers(rangedHandWeapon).includes("Strength") &&
                                     getWeaponSkillModifiers(rangedHandWeapon).includes("Dexterity") &&
@@ -1679,6 +1684,11 @@ export default function ActionsScreen() {
                               <Ionicons name="dice" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <View style={{ flexDirection: 'row' }}>
+                                  {getWeaponAttackBonus(offHandWeapon) && (
+                                    <Text style={{ marginRight: 5 }}>
+                                      +{getWeaponAttackBonus(offHandWeapon)}
+                                    </Text>
+                                  )}
                                   {getWeaponSkillModifiers(offHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
                                   {getWeaponSkillModifiers(offHandWeapon).includes("Strength") &&
                                     getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") &&
