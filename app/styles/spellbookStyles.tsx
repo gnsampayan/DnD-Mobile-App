@@ -29,11 +29,11 @@ const styles = StyleSheet.create({
     },
     addSpellButton: {
         margin: 5,
-        aspectRatio: 1,
         borderRadius: 8,
         overflow: 'hidden',
         flexGrow: 0,
         flexShrink: 0,
+        height: 80,
     },
     spellButtonBackground: {
         flex: 1,
@@ -213,7 +213,8 @@ const styles = StyleSheet.create({
     },
     preparedSpellModalHeader: {
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: 'normal',
+        color: 'rgba(0, 0, 0, 0.3)',
     },
     preparedSpellModalButtonsContainer: {
         justifyContent: 'space-around',

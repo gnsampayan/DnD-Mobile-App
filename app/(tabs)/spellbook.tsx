@@ -183,6 +183,7 @@ export default function SpellbookScreen() {
     // Key for AsyncStorage
     const KNOWN_SPELL_SLOTS_KEY = '@known_spell_slots';
     const PREPARED_SPELL_SLOTS_KEY = '@prepared_spell_slots';
+
     // Known Spell Slots
     const [knownSpellSlotsData, setKnownSpellSlotsData] = useState<Array<{ slotIndex: number, spellName: string | null }>>([]);
     const [spellPressedIndex, setSpellPressedIndex] = useState<number | null>(null);
@@ -375,12 +376,17 @@ export default function SpellbookScreen() {
     const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns;
 
     const renderSpellBlock = ({ item }: { item: { slotIndex: number | string; spellName: string | null } }, section?: string) => {
-        // Get the spell name from preparedSpellSlotsData if this is a prepared spell slot
+        // Get the spell name based on the section type
         let displaySpellName = item.spellName;
         if (section === "prepared-spells" && preparedSpellSlotsData) {
             const preparedSpell = preparedSpellSlotsData.find(slot => slot.slotIndex === item.slotIndex);
             if (preparedSpell) {
                 displaySpellName = preparedSpell.spellName;
+            }
+        } else if (section === "castable-spells") {
+            const castableSpell = knownSpellSlotsData.find(slot => slot.slotIndex === item.slotIndex);
+            if (castableSpell) {
+                displaySpellName = castableSpell.spellName;
             }
         }
 
@@ -388,7 +394,7 @@ export default function SpellbookScreen() {
             <TouchableOpacity
                 onPress={() => {
                     setSpellPressedIndex(item.slotIndex as number);
-                    if (section === "known-spells") {
+                    if (section === "known-spells" || section === "castable-spells") {
                         setSpellModalVisible(true);
                     } else if (section === "prepared-spells") {
                         setPreparedSpellModalVisible(true);
@@ -631,7 +637,7 @@ export default function SpellbookScreen() {
                                 <Ionicons name="color-wand" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                        <ScrollView style={{ paddingHorizontal: 10, flex: 1 }}>
+                        <ScrollView style={{ paddingHorizontal: 10, flex: 1, marginBottom: 40 }}>
                             {data.map((item, index) => (
                                 <View key={item.slotIndex.toString()}>
                                     {renderSpellBlock({ item }, "known-spells")}
@@ -670,7 +676,7 @@ export default function SpellbookScreen() {
                         <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells</Text>
                         <FlatList<{ slotIndex: number, spellName: string | null }>
                             data={Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => ({ slotIndex: i, spellName: null }))}
-                            renderItem={({ item }) => renderSpellBlock({ item })}
+                            renderItem={({ item }) => renderSpellBlock({ item }, "castable-spells")}
                             keyExtractor={(item) => item.slotIndex.toString()}
                             horizontal={true}
                             showsHorizontalScrollIndicator={false}
@@ -1239,9 +1245,15 @@ export default function SpellbookScreen() {
     };
 
     const renderSpellContent = () => {
-        // Get spell name either from input or from saved slot
-        const spellNameToRender = spellChoiceInputValue ||
-            (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName);
+        // Get spell name based on which modal is open and its corresponding data
+        let spellNameToRender;
+        if (preparedSpellModalVisible) {
+            spellNameToRender = preparedSpellChoiceInputValue ||
+                (spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName);
+        } else {
+            spellNameToRender = spellChoiceInputValue ||
+                (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName);
+        }
 
         if (!spellNameToRender) return null;
 
@@ -1501,8 +1513,8 @@ export default function SpellbookScreen() {
 
                 <View style={{ flex: 1 }}>
                     <View style={{ flex: 1 }}>
-                        {renderPreparedSpellBlocksForClass()}
                         {renderCantripBlocks()}
+                        {renderPreparedSpellBlocksForClass()}
                         {renderAllKnownSpells()}
                         {/* For Bards, Rangers, Sorcerers, and Warlocks */}
                         {renderCastableSpells()}
@@ -1659,26 +1671,35 @@ export default function SpellbookScreen() {
                                 marginBottom: 10
                             }}
                             >
-                                <Text style={styles.preparedSpellModalHeader}>
-                                    Spell Slot: {spellPressedIndex !== null ? spellPressedIndex + 1 : ''}
-                                </Text>
-                                <Button
-                                    title="Clear"
-                                    color="#3770ff"
-                                    onPress={() => {
-                                        if (spellPressedIndex !== null) {
-                                            const updatedSlots = preparedSpellSlotsData.map(slot =>
-                                                slot.slotIndex === spellPressedIndex ?
-                                                    { ...slot, spellName: null } :
-                                                    slot
-                                            );
-                                            setPreparedSpellSlotsData(updatedSlots);
-                                            setPreparedSpellModalVisible(false);
-                                        }
-                                    }}
-                                />
+                                {/* Spell Slot Number */}
+                                <View style={{ borderWidth: 1, borderColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 8, padding: 5, paddingHorizontal: 10 }}>
+                                    <Text style={styles.preparedSpellModalHeader}>
+                                        {spellPressedIndex !== null ? spellPressedIndex + 1 : ''}
+                                    </Text>
+                                </View>
+                                {spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName && (
+                                    <Button
+                                        title="Clear"
+                                        color="#3770ff"
+                                        onPress={() => {
+                                            if (spellPressedIndex !== null) {
+                                                const updatedSlots = preparedSpellSlotsData.map(slot =>
+                                                    slot.slotIndex === spellPressedIndex ?
+                                                        { ...slot, spellName: null } :
+                                                        slot
+                                                );
+                                                setPreparedSpellSlotsData(updatedSlots);
+                                                setPreparedSpellModalVisible(false);
+                                            }
+                                        }}
+                                    />
+                                )}
                             </View>
                             {renderPreparedSpellChoices()}
+
+                            {/* Spell Content */}
+                            {renderSpellContent()}
+
                             <View style={styles.preparedSpellModalButtonsContainer}>
                                 <Button
                                     title="Cancel"
