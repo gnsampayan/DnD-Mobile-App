@@ -1,0 +1,210 @@
+[
+	{
+		"userLevel": 1,
+		"spellSlotSquares": {
+			"SpLv1": 2
+		}
+	},
+	{
+		"userLevel": 2,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 3,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 4,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 5,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 6,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 7,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"userLevel": 8,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		}
+	},
+	{
+		"userLevel": 9,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		}
+	},
+	{
+		"userLevel": 10,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		}
+	},
+	{
+		"userLevel": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1
+		}
+	},
+	{
+		"userLevel": 12,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1
+		}
+	},
+	{
+		"userLevel": 13,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1
+		}
+	},
+	{
+		"userLevel": 14,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1
+		}
+	},
+	{
+		"userLevel": 15,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1
+		}
+	},
+	{
+		"userLevel": 16,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1
+		}
+	},
+	{
+		"userLevel": 17,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		}
+	},
+	{
+		"userLevel": 18,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		}
+	},
+	{
+		"userLevel": 19,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 2,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		}
+	},
+	{
+		"userLevel": 20,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 2,
+			"SpLv7": 2,
+			"SpLv8": 1,
+			"SpLv9": 1
+		}
+	}
+]

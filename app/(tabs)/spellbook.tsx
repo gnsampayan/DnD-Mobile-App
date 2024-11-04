@@ -74,6 +74,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
+// Wizard spell level data
+import wizardSpLvData from '@/app/data/wizardSpLv.json';
+
 
 const cantripImages = {
     'Acid Splash': acidSplashImage,
@@ -445,6 +448,8 @@ export default function SpellbookScreen() {
                         setSpellModalVisible(true);
                     } else if (section === "prepared-spells") {
                         setPreparedSpellModalVisible(true);
+                        setPreparedSpellChoiceInputValue(displaySpellName || null);
+                        setOpenPreparedSpellDropdown(false);
                     }
                 }}
                 style={section === "known-spells" ? { width: "100%", height: 40 } : [styles.addSpellButton, { width: itemWidth }]}
@@ -1504,6 +1509,75 @@ export default function SpellbookScreen() {
     };
 
 
+    // Spell Points
+    const renderSpellPoints = () => {
+        const spellSlotsPerUserLevelPerSpellLevel = wizardSpLvData;
+
+        // Development - Static spent spell slots data
+        // Format: { SpLv1: 2, SpLv4: 1 } means 2 level 1 slots and 1 level 4 slot spent
+        const spentSpellSlots = {
+            SpLv1: 1,
+            // SpLv2: 1, 
+            // SpLv3: 1,
+            // SpLv4: 1  
+        };
+
+        // Get spell slots for current level
+        const currentLevelSlots = spellSlotsPerUserLevelPerSpellLevel.find(
+            level => level.userLevel === statsData.level
+        )?.spellSlotSquares || {};
+
+        return (
+            <View style={{ width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {Object.entries(currentLevelSlots).map(([spellLevel, numSlots]) => {
+                    const slotsSpent = spentSpellSlots[spellLevel as keyof typeof spentSpellSlots] || 0;
+                    const remainingSlots = Number(numSlots) - slotsSpent;
+
+                    return (
+                        <View key={spellLevel} style={{
+                            borderWidth: 1,
+                            borderColor: 'rgba(255, 253, 247, 0.1)',
+                            backgroundColor: 'rgba(124, 124, 124, 0.1)',
+                            borderRadius: 4,
+                            padding: 5,
+                            margin: 3,
+                            flex: 1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingBottom: 10
+                        }}>
+                            <Text style={{ marginBottom: 5, color: 'white', alignSelf: 'center' }}>
+                                {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'][parseInt(spellLevel.replace('SpLv', '')) - 1]}
+                            </Text>
+                            <View style={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                                width: 20
+                            }}>
+                                {[...Array(numSlots)].map((_, slotIndex) => (
+                                    <View
+                                        key={slotIndex}
+                                        style={{
+                                            width: 6,
+                                            height: 6,
+                                            borderWidth: 1,
+                                            borderColor: 'cyan',
+                                            backgroundColor: slotIndex >= remainingSlots ? 'transparent' : 'cyan',
+                                            margin: 2,
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    );
+                })}
+            </View>
+        );
+    }
+
     // Main Spellbook Render
     return (
         <>
@@ -1557,6 +1631,12 @@ export default function SpellbookScreen() {
                             />
                         </TouchableOpacity>
                     </View>
+                </View>
+
+
+                {/* Subheader */}
+                <View style={styles.subheader}>
+                    {renderSpellPoints()}
                 </View>
 
 
@@ -1716,53 +1796,70 @@ export default function SpellbookScreen() {
                 transparent={true}
                 visible={preparedSpellModalVisible}
             >
-                <TouchableWithoutFeedback onPress={() => setPreparedSpellModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.preparedSpellModal}>
-                            <View style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: 10
-                            }}
-                            >
-                                {/* Spell Slot Number */}
-                                <View style={{ borderWidth: 1, borderColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 8, padding: 5, paddingHorizontal: 10 }}>
-                                    <Text style={styles.preparedSpellModalHeader}>
-                                        {spellPressedIndex !== null ? spellPressedIndex + 1 : ''}
-                                    </Text>
-                                </View>
-                                {spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName && (
-                                    <Button
-                                        title="Clear"
-                                        color="#3770ff"
-                                        onPress={() => {
-                                            if (spellPressedIndex !== null) {
-                                                const updatedSlots = preparedSpellSlotsData.map(slot =>
-                                                    slot.slotIndex === spellPressedIndex ?
-                                                        { ...slot, spellName: null } :
-                                                        slot
-                                                );
-                                                setPreparedSpellSlotsData(updatedSlots);
-                                                setPreparedSpellModalVisible(false);
-                                            }
-                                        }}
-                                    />
-                                )}
+                <View style={styles.modalOverlay}>
+                    <View style={styles.preparedSpellModal}>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: 10
+                        }}
+                        >
+                            {/* Spell Slot Number */}
+                            <View style={{ borderWidth: 1, borderColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 8, padding: 5, paddingHorizontal: 10 }}>
+                                <Text style={styles.preparedSpellModalHeader}>
+                                    {spellPressedIndex !== null ? spellPressedIndex + 1 : ''}
+                                </Text>
                             </View>
-                            {renderPreparedSpellChoices()}
-
-                            {/* Spell Content */}
-                            {renderSpellContent()}
-
-                            <View style={styles.preparedSpellModalButtonsContainer}>
+                            {spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName && (
                                 <Button
-                                    title="Cancel"
-                                    color="black"
+                                    title="Clear"
+                                    color="#3770ff"
                                     onPress={() => {
-                                        setPreparedSpellModalVisible(false);
+                                        if (spellPressedIndex !== null) {
+                                            const updatedSlots = preparedSpellSlotsData.map(slot =>
+                                                slot.slotIndex === spellPressedIndex ?
+                                                    { ...slot, spellName: null } :
+                                                    slot
+                                            );
+                                            setPreparedSpellSlotsData(updatedSlots);
+                                            setPreparedSpellModalVisible(false);
+                                        }
                                     }}
                                 />
+                            )}
+                        </View>
+                        {renderPreparedSpellChoices()}
+
+                        <ScrollView style={{ flex: 1, marginBottom: 60 }}>
+                            {/* Spell Content */}
+                            {renderSpellContent()}
+                        </ScrollView>
+
+                        <View style={styles.preparedSpellModalButtonsContainer}>
+                            <Button
+                                title="Cancel"
+                                color="black"
+                                onPress={() => {
+                                    setPreparedSpellModalVisible(false);
+                                    setPreparedSpellChoiceInputValue(null);
+                                }}
+                            />
+                            {spellPressedIndex !== null &&
+                                preparedSpellSlotsData[spellPressedIndex]?.spellName &&
+                                preparedSpellChoiceInputValue === preparedSpellSlotsData[spellPressedIndex]?.spellName ? (
+                                <Button
+                                    title="Cast"
+                                    color="#007cba"
+                                    onPress={() => {
+                                        if (spellPressedIndex !== null && preparedSpellChoiceInputValue !== null) {
+                                            // castPreparedSpell(spellPressedIndex, preparedSpellChoiceInputValue);
+                                            console.log("Casting spell", spellPressedIndex, preparedSpellChoiceInputValue);
+                                            setPreparedSpellModalVisible(false);
+                                        }
+                                    }}
+                                />
+                            ) : (
                                 <Button
                                     title="Prepare"
                                     color="green"
@@ -1773,10 +1870,10 @@ export default function SpellbookScreen() {
                                         }
                                     }}
                                 />
-                            </View>
+                            )}
                         </View>
                     </View>
-                </TouchableWithoutFeedback>
+                </View>
             </Modal>
 
 

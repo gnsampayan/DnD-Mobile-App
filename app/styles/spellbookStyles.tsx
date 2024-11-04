@@ -210,6 +210,10 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'space-between',
         marginHorizontal: 20,
+        position: 'relative',
+        height: '100%',
+        width: '100%',
+        paddingTop: 60,
     },
     preparedSpellModalHeader: {
         fontSize: 16,
@@ -221,6 +225,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         width: '100%',
+        position: 'absolute',
+        bottom: 40,
+        left: 20,
+    },
+    subheader: {
+        borderRadius: 8,
+        marginBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 2
+
+    },
+    subheaderText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'white',
     },
 });
 

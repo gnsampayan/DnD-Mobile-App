@@ -267,7 +267,7 @@ export default function ActionsScreen() {
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
-    { id: '0', name: 'Long Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 0, bonus: 0 }, image: defaultLongRestImage },
+    { id: '0', name: 'Long Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1 }, image: defaultLongRestImage },
     { id: '1', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '2', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
     { id: '3', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
@@ -1313,8 +1313,8 @@ export default function ActionsScreen() {
         {/* Footer Button */}
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
           <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
-            <Text style={styles.footerButtonText}>Next Turn</Text>
-            <Ionicons name="refresh" size={28} color="white" style={{ marginLeft: 5 }} />
+            <Text style={styles.footerButtonText}>Wait 6s</Text>
+            <Ionicons name="hourglass" size={22} color="white" style={{ marginLeft: 5 }} />
           </TouchableOpacity>
         </ImageBackground>
 
@@ -1730,8 +1730,6 @@ export default function ActionsScreen() {
                         onPress={() => {
                           if (selectedAction.name.toLowerCase() === 'long rest') {
                             handleHpChange('replenish');
-                            setCurrentActionsAvailable(1);
-                            setCurrentBonusActionsAvailable(1);
                           }
                           commitAction();
                         }}
