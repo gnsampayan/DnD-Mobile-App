@@ -24,6 +24,7 @@ import weapons from '../data/weapons.json';
 import StatsDataContext from '../context/StatsDataContext';
 import cantripsData from '../data/cantrips.json';
 
+import defaultLongRestImage from '@actions/long-rest-image-v2.png';
 import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
 import defaultDisengageImage from '@actions/default-disengage-image.png';
 import defaultRangedAttackImage from '@actions/default-ranged-attack-image.png';
@@ -266,21 +267,22 @@ export default function ActionsScreen() {
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
-    { id: '0', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
-    { id: '1', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
-    { id: '2', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
-    { id: '3', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 1 }, image: defaultJumpImage },
+    { id: '0', name: 'Long Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 0, bonus: 0 }, image: defaultLongRestImage },
+    { id: '1', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
+    { id: '2', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
+    { id: '3', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '4', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 1 }, image: defaultJumpImage },
     {
-      id: '4',
+      id: '5',
       name: 'Shove',
       details: 'Push a creature forward 5m or knock it prone. You can only shove creatures up to one size larger than you. Your roll must be greater than the target\'s roll.',
       cost: { actions: 0, bonus: 1 },
       image: defaultPushImage
     },
-    { id: '5', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
-    { id: '6', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
-    { id: '7', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
-    { id: '8', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+    { id: '6', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
+    { id: '7', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
+    { id: '8', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
+    { id: '9', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
 
   ];
 
@@ -1149,23 +1151,15 @@ export default function ActionsScreen() {
             {/* HP Container */}
 
             <View style={styles.hpContainer}>
-              {/* Replenish Button */}
-              <TouchableOpacity
-                style={styles.replenishContainer}
-                onPress={() => handleHpChange('replenish')}
-              >
-                <Ionicons name="bed" size={18} color="white" />
-              </TouchableOpacity>
               <View style={styles.hpTextContainer}>
                 {hp !== null && hp > 0
                   ?
-                  <Ionicons name="heart" size={16} color="lightgrey" />
+                  <Text style={[styles.hpText, { marginLeft: 5 }]}>
+                    {hp + tempHp}
+                  </Text>
                   :
                   <Ionicons name="skull" size={16} color="lightgrey" />
                 }
-                <Text style={[styles.hpText, { marginLeft: 5 }]}>
-                  {hp + tempHp}
-                </Text>
                 <Text style={styles.subheaderText}>/{maxHp}</Text>
               </View>
               {(hp !== null && maxHp > 0) && (
@@ -1733,7 +1727,14 @@ export default function ActionsScreen() {
                           (currentActionsAvailable < selectedAction.cost.actions ||
                             currentBonusActionsAvailable < selectedAction.cost.bonus) && { opacity: 0.5 }
                         ]}
-                        onPress={commitAction}
+                        onPress={() => {
+                          if (selectedAction.name.toLowerCase() === 'long rest') {
+                            handleHpChange('replenish');
+                            setCurrentActionsAvailable(1);
+                            setCurrentBonusActionsAvailable(1);
+                          }
+                          commitAction();
+                        }}
                         disabled={
                           !selectedAction ||
                           currentActionsAvailable < selectedAction.cost.actions ||
