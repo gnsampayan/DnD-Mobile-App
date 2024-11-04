@@ -1269,13 +1269,15 @@ export default function SpellbookScreen() {
             )
             .map(slot => slot.spellName!.toLowerCase());
 
-        // Prepare the list of available spells, excluding assigned ones
+        // Prepare the list of available spells, excluding assigned ones and filtering by class
         const availableSpells = spellsData
             .filter(spellLevel => spellLevel.level <= spellLevelAccess)
             .flatMap(spellLevel =>
                 spellLevel.spells.filter(spellItem => {
                     const spellName = typeof spellItem === 'string' ? spellItem : spellItem.name;
-                    return !assignedSpells.includes(spellName.toLowerCase());
+                    const spellClasses = typeof spellItem === 'object' ? spellItem.classes?.map(c => c.toLowerCase()) : [];
+                    return !assignedSpells.includes(spellName.toLowerCase()) &&
+                        (typeof spellItem === 'string' || spellClasses?.includes((statsData?.class || '').toLowerCase()));
                 })
             )
             .map(spellItem => ({
