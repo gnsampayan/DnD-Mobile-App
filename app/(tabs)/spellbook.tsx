@@ -1680,9 +1680,13 @@ export default function SpellbookScreen() {
         // If all checks pass, the user can afford the spell
         return true;
     };
-    const handleCanAffordCastButtonDisabled = () => {
-        const spellName = spellPressedIndex !== null ? knownSpellSlotsData[spellPressedIndex]?.spellName : null;
-        return !canAffordSpell(spellName);
+
+    const handleCanAffordCastButtonDisabled = (spellName: string | null) => {
+        if (!spellName) {
+            return true;
+        } else {
+            return !canAffordSpell(spellName);
+        }
     }
 
     // Main Spellbook Render
@@ -1882,7 +1886,7 @@ export default function SpellbookScreen() {
                 <View style={styles.spellModal}>
                     <View style={{ flex: 1 }}>
                         {renderSpellChoices()}
-                        <ScrollView style={{ flex: 1 }}>
+                        <ScrollView style={{ flex: 1, marginBottom: 60 }}>
                             {renderSpellContent()}
                         </ScrollView>
                     </View>
@@ -1906,17 +1910,21 @@ export default function SpellbookScreen() {
                                 }}
                             />
                         ) : (
-                            <Button
-                                title="Cast"
-                                color="#007cba"
-                                onPress={() => {
-                                    if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
-                                        castSpell(knownSpellSlotsData[spellPressedIndex].spellName.toLowerCase());
-                                    }
-                                    setSpellModalVisible(false);
-                                }}
-                                disabled={handleCanAffordCastButtonDisabled()}
-                            />
+                            statsData?.class?.toLowerCase() !== 'wizard' && (
+                                <Button
+                                    title="Cast"
+                                    color="#007cba"
+                                    onPress={() => {
+                                        if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
+                                            castSpell(knownSpellSlotsData[spellPressedIndex].spellName.toLowerCase());
+                                        }
+                                        setSpellModalVisible(false);
+                                    }}
+                                    disabled={spellPressedIndex !== null
+                                        ? handleCanAffordCastButtonDisabled(knownSpellSlotsData[spellPressedIndex]?.spellName)
+                                        : true}
+                                />
+                            )
                         )}
                     </View>
                 </View>
@@ -1991,7 +1999,7 @@ export default function SpellbookScreen() {
                                             setPreparedSpellModalVisible(false);
                                         }
                                     }}
-                                    disabled={handleCanAffordCastButtonDisabled()}
+                                    disabled={handleCanAffordCastButtonDisabled(preparedSpellSlotsData[spellPressedIndex]?.spellName)}
                                 />
                             ) : (
                                 <Button

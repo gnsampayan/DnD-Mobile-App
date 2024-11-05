@@ -292,7 +292,7 @@ export default function ActionsScreen() {
     { id: '7', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
     { id: '8', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
     { id: '9', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
-    { id: '10', name: 'Reaction', details: 'Instantly respond to a trigger or spend a reaction as needed', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
+    { id: '10', name: 'Reaction', details: 'Instantly respond to a trigger', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
   ];
 
 
@@ -1338,7 +1338,7 @@ export default function ActionsScreen() {
       />
 
       {/* Footer Section */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 5 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         {/* Footer Button */}
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
           <TouchableOpacity style={styles.footerButton} onPress={endTurn}>

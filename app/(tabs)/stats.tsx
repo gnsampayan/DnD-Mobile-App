@@ -546,8 +546,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         <TouchableOpacity onPress={() => saveAbilityAllocations()} style={styles.abilitySaveButton}>
                             <Ionicons name="save" size={20} color="white" />
                             <Text style={styles.saveButtonText}>Save</Text>
-                        </TouchableOpacity>}
-                    <View style={availableAbilityPoints > 0 ? styles.availableAbilityPointsHighlighted : styles.availableAbilityPointsNotHighlighted}>
+                        </TouchableOpacity>
+                    }
+                    <View style={styles.availableAbilityPointsIconAndValue}>
                         <Ionicons name="star" size={16} color={availableAbilityPoints > 0 ? 'gold' : 'lightgrey'} />
                         <Text style={styles.availableAbilityPoints}>
                             {availableAbilityPoints}

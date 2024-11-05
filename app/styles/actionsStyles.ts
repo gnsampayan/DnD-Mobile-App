@@ -303,7 +303,6 @@ const styles = StyleSheet.create({
     },
     footerButtonContainer: {
       borderRadius: 8,
-      margin: 5,
       overflow: 'hidden',
       flex: 1,
     },  

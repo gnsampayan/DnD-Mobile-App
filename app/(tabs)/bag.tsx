@@ -947,16 +947,16 @@ export default function BagScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
-            <MaterialCommunityIcons name="weight-pound" size={18} color="#a8a8a8" />
+            <MaterialCommunityIcons name="weight-pound" size={18} color="lightgrey" />
             <Text style={styles.headerText}>{carryingCapacity}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons name="diamond" size={14} color="#b3e2ff" />
-            <Text style={styles.headerText}>{money}</Text>
+            <Ionicons name="fish" size={16} color="skyblue" />
+            <Text style={styles.headerText}>{foodUnits}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons name="restaurant" size={14} color="#fcba03" />
-            <Text style={styles.headerText}>{foodUnits}</Text>
+            <Ionicons name="server" size={14} color="gold" />
+            <Text style={styles.headerText}>{money}</Text>
           </View>
         </View>
         <View style={styles.headerIcons}>

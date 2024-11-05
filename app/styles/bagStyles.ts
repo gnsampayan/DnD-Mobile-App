@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
       flexDirection: 'column',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      borderWidth: 2,
+      borderWidth: 1,
       borderColor: 'white',
       borderStyle: 'solid',
       borderRadius: 8,

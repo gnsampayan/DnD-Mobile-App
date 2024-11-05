@@ -1742,25 +1742,437 @@
 	{
 		"level": 2,
 		"spells": [
-			"Aganazzar's Scorcher",
-			"Aid",
-			"Alter Self",
-			"Animal Messenger",
-			"Arcane Lock",
-			"Augury",
-			"Barkskin",
-			"Beast Sense",
-			"Blindness/Deafness",
-			"Blur",
-			"Borrowed Knowledge",
-			"Branding Smite",
-			"Calm Emotions",
-			"Cloud of Daggers",
-			"Continual Flame",
-			"Cordon of Arrows",
-			"Crown of Madness",
-			"Darkness",
-			"Darkvision",
+			{
+				"id": "Aganazzar's Scorcher",
+				"name": "Aganazzar's Scorcher",
+				"level": 2,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "A line of roaring flame 30 feet long and 5 feet wide emanates from you in a direction you choose. Each creature in the line must make a Dexterity saving throw. A creature takes 3d8 fire damage on a failed save, or half as much damage on a successful one.",
+				"features": {
+					"material component": "a red dragon's scale",
+					"higher levels": "When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for each slot level above 2nd."
+				},
+				"classes": ["Sorcerer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"]
+			},
+			{
+				"id": "Aid",
+				"name": "Aid",
+				"level": 2,
+				"school": "Abjuration",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "8 hours",
+				"description": "Your spell bolsters your allies with toughness and resolve. Choose up to three creatures within range. Each target's hit point maximum and current hit points increase by 5 for the duration.",
+				"features": {
+					"material component": "a tiny strip of white cloth",
+					"higher levels": "When you cast this spell using a spell slot of 3rd level or higher, a target's hit points increase by an additional 5 for each slot level above 2nd."
+				},
+				"classes": ["Artificer", "Bard", "Cleric", "Paladin", "Ranger"],
+				"subclasses": [
+					"Peace Domain",
+					"Protection Domain",
+					"Solidarity Domain",
+					"Clockwork Soul",
+					"Divine Soul",
+					"Theurgy"
+				],
+				"races": ["Mark of Hospitality Halfling"],
+				"backgrounds": ["Boros Legionnaire", "Selesnya Initiate"]
+			},
+			{
+				"id": "Alter Self",
+				"name": "Alter Self",
+				"level": 2,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You assume a different form. When you cast the spell, choose one of the following options, the effects of which last for the duration of the spell. While the spell lasts, you can end one option as an action to gain the benefits of a different one.",
+				"features": {
+					"aquatic adaptation": "You adapt your body to an aquatic environment, sprouting gills and growing webbing between your fingers. You can breathe underwater and gain a swimming speed equal to your walking speed.",
+					"change appearance": "You transform your appearance. You decide what you look like, including your height, weight, facial features, sound of your voice, hair length, coloration, and distinguishing characteristics, if any. You can make yourself appear as a member of another race, though none of your statistics change. You also can't appear as a creature of a different size than you, and your basic shape stays the same; if you're bipedal, you can't use this spell to become quadrupedal, for instance. At any time for the duration of the spell, you can use your action to change your appearance in this way again.",
+					"natural weapons": "You grow claws, fangs, spines, horns, or a different natural weapon of your choice. Your unarmed strikes deal 1d6 bludgeoning, piercing, or slashing damage, as appropriate to the natural weapon you chose. Finally, the natural weapon is magic and you have a +1 bonus to the attack and damage rolls you make using it"
+				},
+				"classes": ["Artificer", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Circle of the Moon",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Clockwork Soul"
+				],
+				"eldritch_invocations": ["Master of Myriad Forms"],
+				"races": ["Abyssal Tiefling"],
+				"backgrounds": ["Simic Scientist"]
+			},
+			{
+				"id": "Animal Messenger",
+				"name": "Animal Messenger",
+				"level": 2,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "24 hours",
+				"description": "By means of this spell, you use an animal to deliver a message. Choose a Tiny beast you can see within range, such as a squirrel, a blue jay, or a bat. You specify a location, which you must have visited, and a recipient who matches a general description, such as \"a man or woman dressed in the uniform of the town guard\" or \"a red-haired dwarf wearing a pointed hat.\" You also speak a message of up to twenty-five words. The target beast travels for the duration of the spell toward the specified location, covering about 50 miles per 24 hours for a flying messenger, or 25 miles for other animals.\n\nWhen the messenger arrives, it delivers your message to the creature that you described, replicating the sound of your voice. The messenger speaks only to a creature matching the description you gave. If the messenger doesn't reach its destination before the spell ends, the message is lost, and the beast makes its way back to where you cast this spell.",
+				"features": {
+					"material component": "a morsel of food",
+					"higher levels": "If you cast this spell using a spell slot of 3rd level or higher, the duration of the spell increases by 48 hours for each slot level above 2nd.",
+					"ritual": true
+				},
+				"classes": ["Bard", "Druid", "Ranger"],
+				"races": ["Mark of Scribing Gnome"],
+				"backgrounds": ["Selesnya Initiate"]
+			},
+			{
+				"id": "Arcane Lock",
+				"name": "Arcane Lock",
+				"level": 2,
+				"school": "Abjuration",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Until dispelled",
+				"description": "You touch a closed door, window, gate, chest, or other entryway, and it becomes locked for the duration. You and the creatures you designate when you cast this spell can open the object normally. You can also set a password that, when spoken within 5 feet of the object, suppresses this spell for 1 minute. Otherwise, it is impassable until it is broken or the spell is dispelled or suppressed. Casting Knock on the object suppresses Arcane Lock for 10 minutes.\n\nWhile affected by this spell, the object is more difficult to break or force open; the DC to break it or pick any locks on it increases by 10.",
+				"features": {
+					"material component": "gold dust worth at least 25 gp, which the spell consumes"
+				},
+				"classes": ["Artificer", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster", "Clockwork Soul"],
+				"races": ["Mammon Tiefling", "Mark of Warding Dwarf"],
+				"backgrounds": ["Azorius Functionary"]
+			},
+			{
+				"id": "Augury",
+				"name": "Augury",
+				"level": 2,
+				"school": "Divination",
+				"castingTime": "1 minute",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "By casting gem-inlaid sticks, rolling dragon bones, laying out ornate cards, or employing some other divining tool, you receive an omen from an otherworldly entity about the results of a specific course of action that you plan to take within the next 30 minutes. The DM chooses from the following possible omens:\n\nWeal, for good results\nWoe, for bad results\nWeal and woe, for both good and bad results\nNothing, for results that aren't especially good or bad\n\nThe spell doesn't take into account any possible circumstances that might change the outcome, such as the casting of additional spells or the loss or gain of a companion.\n\nIf you cast the spell two or more times before completing your next long rest, there is a cumulative 25 percent chance for each casting after the first that you get a random reading. The DM makes this roll in secret.",
+				"features": {
+					"material component": "specially marked sticks, bones, or similar tokens worth at least 25 gp",
+					"ritual": true
+				},
+				"classes": ["Cleric", "Druid", "Wizard"],
+				"subclasses": [
+					"Path of the Ancestral Guardian",
+					"Knowledge Domain",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Aberrant Mind",
+					"Divine Soul",
+					"Theurgy"
+				]
+			},
+			{
+				"id": "Barkskin",
+				"name": "Barkskin",
+				"level": 2,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You touch a willing creature. Until the spell ends, the target's skin has a rough, bark-like appearance, and the target's AC can't be less than 16, regardless of what kind of armor it is wearing.",
+				"features": {
+					"material component": "a handful of oak bark"
+				},
+				"classes": ["Druid", "Ranger"],
+				"subclasses": ["Nature Domain", "Circle of the Land (Forest)"]
+			},
+			{
+				"id": "Beast Sense",
+				"name": "Beast Sense",
+				"level": 2,
+				"school": "Divination",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["S"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You touch a willing beast. For the duration of the spell, you can use your action to see through the beast's eyes and hear what it hears, and continue to do so until you use your action to return to your normal senses. While perceiving through the beast's senses, you gain the benefits of any special senses possessed by that creature, though you are blinded and deafened to your own surroundings.",
+				"features": {
+					"ritual": true
+				},
+				"classes": ["Druid", "Ranger"],
+				"subclasses": ["Path of the Totem Warrior"],
+				"races": ["Mark of Handling Human"],
+				"backgrounds": ["Gruul Anarch"],
+				"feats": ["Greater Dragonmark"]
+			},
+			{
+				"id": "Blindness/Deafness",
+				"name": "Blindness/Deafness",
+				"level": 2,
+				"school": "Necromancy",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V"],
+				"duration": "1 minute",
+				"description": "You can blind or deafen a foe. Choose one creature that you can see within range to make a Constitution saving throw. If it fails, the target is either blinded or deafened (your choice) for the duration. At the end of each of its turns, the target can make a Constitution saving throw. On a success, the spell ends.",
+				"features": {
+					"upcast": "target one additional creature per slot level above 2nd"
+				},
+				"classes": ["Bard", "Cleric", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Death Domain",
+					"Circle of Spores",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Divine Soul",
+					"The Fiend",
+					"The Undead",
+					"The Undying",
+					"Theurgy"
+				],
+				"feats": ["Svirfneblin Magic"]
+			},
+			{
+				"id": "Blur",
+				"name": "Blur",
+				"level": 2,
+				"school": "Illusion",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight.",
+				"features": {
+					"disadvantage": "on attack rolls against you",
+					"immune": "creatures with blindsight or truesight"
+				},
+				"classes": ["Artificer", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Circle of the Land (Desert)",
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"The Genie (Marid)",
+					"The Hexblade"
+				],
+				"feats": ["Svirfneblin Magic"]
+			},
+			{
+				"id": "Borrowed Knowledge",
+				"name": "Borrowed Knowledge",
+				"level": 2,
+				"school": "Divination",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "1 hour",
+				"description": "You draw on knowledge from spirits of the past. Choose one skill in which you lack proficiency. For the spell's duration, you have proficiency in the chosen skill. The spell ends early if you cast it again.",
+				"features": {
+					"material component": "a book worth at least 25 gp"
+				},
+				"classes": ["Bard", "Cleric", "Warlock", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Aberrant Mind",
+					"Divine Soul",
+					"Theurgy"
+				],
+				"backgrounds": ["Lorehold Student"]
+			},
+			{
+				"id": "Branding Smite",
+				"name": "Branding Smite",
+				"level": 2,
+				"school": "Evocation",
+				"castingTime": "1 bonus action",
+				"range": "Self",
+				"components": ["V"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "The next time you hit a creature with a weapon attack before this spell ends, the weapon gleams with astral radiance as you strike. The attack deals an extra 2d6 radiant damage to the target, which becomes visible if it's invisible, and the target sheds dim light in a 5-foot radius and can't become invisible until the spell ends.",
+				"features": {
+					"extra damage": "2d6 radiant",
+					"target effects": [
+						"becomes visible if invisible",
+						"sheds dim light in 5-foot radius",
+						"can't become invisible"
+					],
+					"higher levels": "Extra damage increases by 1d6 for each slot level above 2nd"
+				},
+				"classes": ["Paladin"],
+				"subclasses": ["Battle Smith", "Stone Sorcery", "The Hexblade"],
+				"races": ["Zariel Tiefling"]
+			},
+			{
+				"id": "Calm Emotions",
+				"name": "Calm Emotions",
+				"level": 2,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You attempt to suppress strong emotions in a group of people. Each humanoid in a 20-foot-radius sphere centered on a point you choose within range must make a Charisma saving throw; a creature can choose to fail this saving throw if it wishes. If a creature fails its saving throw, choose one of the following two effects.\n\nYou can suppress any effect causing a target to be charmed or frightened. When this spell ends, any suppressed effect resumes, provided that its duration has not expired in the meantime.\n\nAlternatively, you can make a target indifferent about creatures of your choice that it is hostile toward. This indifference ends if the target is attacked or harmed by a spell or if it witnesses any of its friends being harmed. When the spell ends, the creature becomes hostile again, unless the DM rules otherwise.",
+				"features": {
+					"area": "20-foot-radius sphere",
+					"saving throw": "Charisma",
+					"effects": [
+						"suppress charmed or frightened effects",
+						"make hostile targets indifferent"
+					]
+				},
+				"classes": ["Bard", "Cleric"],
+				"subclasses": [
+					"Oath of Redemption",
+					"Aberrant Mind",
+					"Divine Soul",
+					"The Archfey",
+					"Theurgy"
+				],
+				"races": ["Mark of Handling Human", "Mark of Hospitality Halfling"],
+				"backgrounds": [
+					"Azorius Functionary",
+					"Selesnya Initiate",
+					"Silverquill Student"
+				]
+			},
+			{
+				"id": "Cloud of Daggers",
+				"name": "Cloud of Daggers",
+				"level": 2,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You fill the air with spinning daggers in a cube 5 feet on each side, centered on a point you choose within range. A creature takes 4d4 slashing damage when it enters the spell's area for the first time on a turn or starts its turn there.",
+				"features": {
+					"material component": "a sliver of glass",
+					"area": "5-foot cube",
+					"damage": "4d4 slashing",
+					"higher levels": "Damage increases by 2d4 for each slot level above 2nd"
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Eldritch Knight", "Arcane Trickster"]
+			},
+			{
+				"id": "Continual Flame",
+				"name": "Continual Flame",
+				"level": 2,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Until dispelled",
+				"description": "A flame, equivalent in brightness to a torch, springs forth from an object that you touch. The effect looks like a regular flame, but it creates no heat and doesn't use oxygen. A continual flame can be covered or hidden but not smothered or quenched.",
+				"features": {
+					"material component": "ruby dust worth 50 gp, which the spell consumes"
+				},
+				"classes": ["Artificer", "Cleric", "Druid", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Arcane Trickster",
+					"Divine Soul",
+					"Theurgy"
+				],
+				"races": ["Mark of Making Human"]
+			},
+			{
+				"id": "Cordon of Arrows",
+				"name": "Cordon of Arrows",
+				"level": 2,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "5 feet",
+				"components": ["V", "S", "M"],
+				"duration": "8 hours",
+				"description": "You plant four pieces of nonmagical ammunition — arrows or crossbow bolts — in the ground within range and lay magic upon them to protect an area. Until the spell ends, whenever a creature other than you comes within 30 feet of the ammunition for the first time on a turn or ends its turn there, one piece of ammunition flies up to strike it. The creature must succeed on a Dexterity saving throw or take 1d6 piercing damage. The piece of ammunition is then destroyed. The spell ends when no ammunition remains.\n\nWhen you cast this spell, you can designate any creatures you choose, and the spell ignores them.",
+				"features": {
+					"material component": "four or more arrows or bolts",
+					"damage": "1d6 piercing",
+					"higher levels": "The amount of ammunition that can be affected increases by two for each slot level above 2nd"
+				},
+				"classes": ["Ranger"]
+			},
+			{
+				"id": "Crown of Madness",
+				"name": "Crown of Madness",
+				"level": 2,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "120 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "One humanoid of your choice that you can see within range must succeed on a Wisdom saving throw or become charmed by you for the duration. While the target is charmed in this way, a twisted crown of jagged iron appears on its head, and a madness glows in its eyes.\n\nThe charmed target must use its action before moving on each of its turns to make a melee attack against a creature other than itself that you mentally choose. The target can act normally on its turn if you choose no creature or if none are within its reach.\n\nOn your subsequent turns, you must use your action to maintain control over the target, or the spell ends. Also, the target can make a Wisdom saving throw at the end of each of its turns. On a success, the spell ends.",
+				"features": null,
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Oathbreaker",
+					"Arcane Trickster",
+					"Aberrant Mind"
+				],
+				"races": ["Baalzebul Tiefling"],
+				"backgrounds": ["Rakdos Cultist"]
+			},
+			{
+				"id": "Darkness",
+				"name": "Darkness",
+				"level": 2,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "M"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "Magical darkness spreads from a point you choose within range to fill a 15-foot-radius sphere for the duration. The darkness spreads around corners. A creature with darkvision can't see through this darkness, and nonmagical light can't illuminate it.\n\nIf the point you choose is on an object you are holding or one that isn't being worn or carried, the darkness emanates from the object and moves with it. Completely covering the source of the darkness with an opaque object, such as a bowl or a helm, blocks the darkness.\n\nIf any of this spell's area overlaps with an area of light created by a spell of 2nd level or lower, the spell that created the light is dispelled.",
+				"features": {
+					"material component": "bat fur and a drop of pitch or piece of coal"
+				},
+				"classes": ["Sorcerer", "Warlock", "Wizard"],
+				"subclasses": [
+					"Circle of the Land (Swamp)",
+					"Eldritch Knight",
+					"Way of Shadow",
+					"Oathbreaker",
+					"Arcane Trickster",
+					"Shadow Magic",
+					"Mage of Silverquill"
+				],
+				"races": [
+					"Abyssal Tiefling",
+					"Drow",
+					"Half-elf (Drow Descent)",
+					"Levistus Tiefling",
+					"Mark of Shadow Elf",
+					"Mul Daya Elf",
+					"Tiefling",
+					"Tiefling (Hellfire)"
+				],
+				"backgrounds": ["Silverquill Student"]
+			},
+			{
+				"id": "Darkvision",
+				"name": "Darkvision",
+				"level": 2,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "8 hours",
+				"description": "You touch a willing creature to grant it the ability to see in the dark. For the duration, that creature has darkvision out to a range of 60 feet.",
+				"features": {
+					"material component": "either a pinch of dried carrot or an agate"
+				},
+				"classes": ["Artificer", "Druid", "Ranger", "Sorcerer", "Wizard"],
+				"subclasses": [
+					"Eldritch Knight",
+					"Way of Shadow",
+					"Arcane Trickster",
+					"Clockwork Soul"
+				]
+			},
 			"Detect Thoughts",
 			"Dragon's Breath",
 			"Dust Devil",
