@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList, ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList, ImageBackground, Button } from 'react-native';
 import styles from '../styles/meStyles'; // Adjust the path if necessary
 import skillsData from '../data/skills.json';
 import xpThresholds from '../data/xpThresholds.json';
@@ -660,6 +660,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                         </View>
                                     </>
                                 )}
+                                <Button title="Close" onPress={() => setAbilityModalVisible(false)} />
                             </View>
                         </TouchableWithoutFeedback>
                     </View>

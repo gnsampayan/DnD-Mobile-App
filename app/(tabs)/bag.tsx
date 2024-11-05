@@ -17,7 +17,7 @@ import {
   Button,
   ScrollView,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
@@ -194,63 +194,53 @@ export default function BagScreen() {
   // Function to filter and group weapons based on proficiency
   const filterAndGroupWeapons = () => {
     const proficientWeapons: string[] = [];
+
+    // Get race-specific weapon proficiencies
+    const characterRace = raceData.find(r => r.race.toLowerCase() === statsData.race?.toLowerCase());
+    const raceSpecificWeapons = characterRace?.proficiencies?.weaponProficiency || [];
+
     const groupedWeapons = weapons.weapons.reduce((acc, category) => {
-      // Show both simple and martial weapons if race or class is not available
-      if (!statsData.race || !statsData.class || statsData.race === '' || statsData.class === '') {
-        // Add group label with bold font
+      // Add group label with bold font
+      acc.push({
+        label: category.category,
+        value: category.category.toLowerCase(),
+        parent: null,
+        selectable: false,
+        labelStyle: {
+          fontWeight: 'bold',
+        },
+      });
+
+      // Add weapons under the current category
+      category.items.forEach(item => {
+        const weaponName = item.name.toLowerCase();
+        const isMartialWeapon = category.category.toLowerCase().includes('martial');
+
+        // Check if user is proficient with this weapon
+        const isProficientWithWeapon =
+          !isMartialWeapon || // Simple weapons
+          isProficientInMartialWeapons || // Martial weapons if class proficient
+          classSpecificWeapons.some(w => w.toLowerCase() === weaponName) || // Class specific
+          raceSpecificWeapons.some(w => w.toLowerCase() === weaponName); // Race specific
+
         acc.push({
-          label: category.category,
-          value: category.category.toLowerCase(),
-          parent: null,
-          selectable: false,
+          label: item.name,
+          value: weaponName,
+          parent: category.category.toLowerCase(),
+          selectable: true,
           labelStyle: {
-            fontWeight: 'bold',
+            fontWeight: 'normal',
           },
+          ...(isProficientWithWeapon && {
+            icon: () => <Ionicons name="ribbon" size={12} color="black" />
+          })
         });
 
-        // Add all weapons under the current category
-        category.items.forEach(item => {
-          acc.push({
-            label: item.name,
-            value: item.name.toLowerCase(),
-            parent: category.category.toLowerCase(),
-            selectable: true,
-            labelStyle: {
-              fontWeight: 'normal',
-            },
-            icon: () => <Ionicons name="ribbon" size={12} color="black" />,
-          });
-        });
-      } else if (
-        isProficientInMartialWeapons ||
-        !category.category.toLowerCase().includes('martial')
-      ) {
-        // Add group label with bold font
-        acc.push({
-          label: category.category,
-          value: category.category.toLowerCase(),
-          parent: null,
-          selectable: false,
-          labelStyle: {
-            fontWeight: 'bold',
-          },
-        });
+        if (isProficientWithWeapon) {
+          proficientWeapons.push(weaponName);
+        }
+      });
 
-        // Add weapons under the current category
-        category.items.forEach(item => {
-          acc.push({
-            label: item.name,
-            value: item.name.toLowerCase(),
-            parent: category.category.toLowerCase(),
-            selectable: true,
-            labelStyle: {
-              fontWeight: 'normal',
-            },
-            icon: () => <Ionicons name="ribbon" size={12} color="black" />,
-          });
-          proficientWeapons.push(item.name.toLowerCase());
-        });
-      }
       return acc;
     }, [] as {
       label: string;
@@ -260,127 +250,6 @@ export default function BagScreen() {
       labelStyle?: object;
       icon?: () => JSX.Element;
     }[]);
-
-    // If race and class are available, proceed with class and race specific weapons
-    if (statsData.race && statsData.class && statsData.race !== '' && statsData.class !== '') {
-      // Create a Set of existing weapon values to avoid duplicates
-      const existingWeaponValues = new Set(
-        groupedWeapons
-          .filter(w => w.selectable)
-          .map(w => w.value.toLowerCase())
-      );
-
-      // Add class-specific weapons, ensuring no duplicates
-      if (classSpecificWeapons.length > 0) {
-        // Filter out class-specific weapons that already exist in main categories
-        const uniqueClassWeapons = classSpecificWeapons.filter(weapon =>
-          !existingWeaponValues.has(weapon.toLowerCase())
-        );
-
-        if (uniqueClassWeapons.length > 0) {
-          // Add the "Class Specific" group label
-          groupedWeapons.push({
-            label: `${statsData.class} Specific`,
-            value: 'class-specific',
-            parent: null,
-            selectable: false,
-            labelStyle: {
-              fontWeight: 'bold',
-              textTransform: 'capitalize',
-            },
-          });
-
-          // Add each unique class-specific weapon
-          uniqueClassWeapons.forEach(weapon => {
-            groupedWeapons.push({
-              label: weapon,
-              value: weapon.toLowerCase(),
-              parent: 'class-specific',
-              selectable: true,
-              labelStyle: {
-                fontWeight: 'normal',
-                textTransform: 'capitalize',
-              },
-              icon: () => <Ionicons name="ribbon" size={12} color="black" />,
-            });
-            // Add to existingWeaponValues to avoid duplicates in race-specific weapons
-            existingWeaponValues.add(weapon.toLowerCase());
-            proficientWeapons.push(weapon.toLowerCase());
-          });
-        }
-      }
-
-      // Add race-specific weapons
-      const characterRace = raceData.find(r => r.race.toLowerCase() === statsData.race?.toLowerCase());
-      if (characterRace && characterRace.proficiencies && characterRace.proficiencies.weaponProficiency) {
-        const raceSpecificWeapons = characterRace.proficiencies.weaponProficiency.filter(weapon =>
-          !existingWeaponValues.has(weapon.toLowerCase())
-        );
-
-        if (raceSpecificWeapons.length > 0) {
-          // Add the "Race Specific" group label
-          groupedWeapons.push({
-            label: `${statsData.race} Specific`,
-            value: 'race-specific',
-            parent: null,
-            selectable: false,
-            labelStyle: {
-              fontWeight: 'bold',
-            },
-          });
-
-          // Add each unique race-specific weapon
-          raceSpecificWeapons.forEach(weapon => {
-            groupedWeapons.push({
-              label: weapon,
-              value: weapon.toLowerCase(),
-              parent: 'race-specific',
-              selectable: true,
-              labelStyle: {
-                fontWeight: 'normal',
-                textTransform: 'capitalize',
-              },
-              icon: () => <Ionicons name="ribbon" size={12} color="black" />,
-            });
-            proficientWeapons.push(weapon.toLowerCase());
-          });
-        }
-      }
-
-      // Add inept weapons grouped by their category
-      weapons.weapons.forEach(category => {
-        const ineptWeapons = category.items.filter(item => !existingWeaponValues.has(item.name.toLowerCase()));
-
-        if (ineptWeapons.length > 0) {
-          // Add the category group label if it doesn't already exist
-          if (!groupedWeapons.some(group => group.value === category.category.toLowerCase())) {
-            groupedWeapons.push({
-              label: category.category,
-              value: category.category.toLowerCase(),
-              parent: null,
-              selectable: false,
-              labelStyle: {
-                fontWeight: 'bold',
-              },
-            });
-          }
-
-          // Add each inept weapon with "(inept)" label
-          ineptWeapons.forEach(item => {
-            groupedWeapons.push({
-              label: item.name,
-              value: item.name.toLowerCase(),
-              parent: category.category.toLowerCase(),
-              selectable: true,
-              labelStyle: {
-                fontWeight: 'normal',
-                textTransform: 'capitalize',
-              },
-            });
-          });
-        }
-      });
-    }
 
     // Set the weapons the user is proficient in
     setWeaponsProficientIn(proficientWeapons);
@@ -947,16 +816,16 @@ export default function BagScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
-            <MaterialCommunityIcons name="weight-pound" size={18} color="lightgrey" />
             <Text style={styles.headerText}>{carryingCapacity}</Text>
+            <MaterialCommunityIcons name="weight-pound" size={24} color="lightgrey" />
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons name="fish" size={16} color="skyblue" />
             <Text style={styles.headerText}>{foodUnits}</Text>
+            <MaterialCommunityIcons name="food-apple" size={24} color="lightgrey" />
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons name="server" size={14} color="gold" />
             <Text style={styles.headerText}>{money}</Text>
+            <MaterialCommunityIcons name="gold" size={24} color="lightgrey" />
           </View>
         </View>
         <View style={styles.headerIcons}>
@@ -1306,3 +1175,7 @@ export default function BagScreen() {
     </View>
   );
 }
+function uuidv4() {
+  throw new Error('Function not implemented.');
+}
+

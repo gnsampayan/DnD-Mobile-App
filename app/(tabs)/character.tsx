@@ -11,10 +11,11 @@ import {
     Dimensions,
     ImageBackground,
     ImageSourcePropType,
+    Button,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
@@ -136,8 +137,7 @@ export default function MeScreen() {
         setCurrentBonusActionsAvailable(1);
     };
 
-    const { setCantripSlotsData } = useContext(CantripSlotsContext);
-
+    const [featuresModalVisible, setFeaturesModalVisible] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -630,6 +630,37 @@ export default function MeScreen() {
 
         return offhandWeapons;
     }
+    const renderRaceFeatures = () => {
+        return (
+            <View style={{ marginBottom: 20, gap: 10 }}>
+                <Text style={styles.label}>Race Features:</Text>
+                {raceBonuses.map((race) => (
+                    race.race === statsData.race && Object.entries(race.features).map(([key, value]) => (
+                        <View
+                            key={`feature-${key}`}
+                            style={{ flexDirection: 'column', gap: 5, backgroundColor: 'rgba(0,0,0,0.1)', padding: 10, borderRadius: 8 }}
+                        >
+                            <Text
+                                key={`label-${key}`}
+                                style={styles.featLabel}
+                            >
+                                {key.charAt(0).toUpperCase() + key.slice(1)}
+                            </Text>
+                            <Text key={`value-${key}`}>{value}</Text>
+                        </View>
+                    ))
+                ))}
+            </View>
+        )
+    }
+    const renderClassFeatures = () => {
+        return (
+            <View>
+                <Text>Class Features</Text>
+                <Text>You have not gained any {statsData.class} features yet.</Text>
+            </View>
+        )
+    }
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
@@ -639,9 +670,11 @@ export default function MeScreen() {
         <View style={styles.container}>
             {/* Section 1: Header */}
             <View style={styles.header}>
-                <View style={{ flexDirection: 'column', gap: 5, marginLeft: 10 }}>
-                    <Text style={{ color: 'white', fontSize: 16, }}>{statsData.race}</Text>
-                    <Text style={{ color: 'white', fontSize: 16, }}>{statsData.class ? statsData.class.charAt(0).toUpperCase() + statsData.class.slice(1) : ''}</Text>
+                <View style={{ flexDirection: 'row', gap: 10, marginLeft: 10, flex: 1 }}>
+                    <TouchableOpacity style={styles.topButton} onPress={() => setFeaturesModalVisible(true)}>
+                        <MaterialIcons name="insights" size={24} color="white" />
+                        <Text style={{ color: 'white', fontSize: 16, }}>Features</Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.headerButtons}>
                     <TouchableOpacity style={styles.userAccountButton}>
@@ -765,8 +798,7 @@ export default function MeScreen() {
                                         {isTwoHanded && (
                                             <>
                                                 <View style={styles.twoHandedLabel}>
-                                                    <Ionicons name="hand-left" size={16} color="white" />
-                                                    <Ionicons name="hand-right" size={16} color="white" />
+                                                    <MaterialIcons name="sign-language" size={24} color="white" />
                                                 </View>
                                             </>
                                         )}
@@ -861,8 +893,7 @@ export default function MeScreen() {
                                             {isTwoHanded && (
                                                 <>
                                                     <View style={styles.twoHandedLabel}>
-                                                        <Ionicons name="hand-left" size={16} color="white" />
-                                                        <Ionicons name="hand-right" size={16} color="white" />
+                                                        <MaterialIcons name="sign-language" size={24} color="white" />
                                                     </View>
                                                 </>
                                             )}
@@ -885,74 +916,58 @@ export default function MeScreen() {
                     <View style={styles.modalOverlay}>
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <View style={styles.modalContainer}>
-                                <Text style={styles.modalTitle}>Character Settings</Text>
-                                <TouchableOpacity onPress={() => {
-                                    Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
-                                        {
-                                            text: 'Cancel',
-                                            style: 'cancel'
-                                        },
-                                        {
-                                            text: 'Delete',
-                                            style: 'destructive',
-                                            onPress: async () => {
-                                                handleDeleteCharacter();
-                                            }
-                                        }
-                                    ])
-                                }}>
-                                    <Text style={{
-                                        color: 'red',
-                                        padding: 10,
-                                        fontSize: 16,
-                                        fontWeight: 'bold',
-                                        borderWidth: 1,
-                                        borderColor: 'red',
-                                        borderRadius: 5
-                                    }}>Delete Character</Text>
-                                </TouchableOpacity>
+                                {statsData.class && statsData.race && (
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            {isRaceConfirmed && <Text style={styles.modalLabel}>{statsData.race}</Text>}
+                                            {isRaceConfirmed && isClassConfirmed && <Text style={styles.modalLabel}>,</Text>}
+                                            {isClassConfirmed && <Text style={[styles.modalLabel, { textTransform: 'capitalize', marginLeft: 5 }]}>{statsData.class}</Text>}
+                                        </View>
+                                        <Ionicons name="trash-bin" size={24} color="red" onPress={() => {
+                                            Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
+                                                { text: 'Cancel', style: 'cancel' },
+                                                { text: 'Delete', style: 'destructive', onPress: async () => handleDeleteCharacter() }
+                                            ]);
+                                        }} />
+                                    </View>
+                                )}
                                 <View style={styles.formContainer}>
                                     <View style={[styles.modalRowContainer, { zIndex: 3000 }]}>
-                                        <Text style={styles.modalLabel}>Race:</Text>
-                                        {isRaceConfirmed ? (
-                                            <Text style={styles.modalLabel}>{statsData.race}</Text>
-                                        ) : (
-                                            <DropDownPicker
-                                                open={openRace}
-                                                value={raceValue}
-                                                items={raceBonuses.map((race) => ({ label: race.race, value: race.race }))}
-                                                setOpen={setOpenRace}
-                                                setValue={setRaceValue}
-                                                placeholder="Select a race"
-                                                containerStyle={{ height: 40, width: 200 }}
-                                                style={{ backgroundColor: '#fafafa' }}
-                                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                                                zIndex={3000}
-                                            />
+                                        {!isRaceConfirmed && (
+                                            <>
+                                                <Text style={styles.modalLabel}>Race:</Text>
+                                                <DropDownPicker
+                                                    open={openRace}
+                                                    value={raceValue}
+                                                    items={raceBonuses.map((race) => ({ label: race.race, value: race.race }))}
+                                                    setOpen={setOpenRace}
+                                                    setValue={setRaceValue}
+                                                    placeholder="Select a race"
+                                                    containerStyle={{ height: 40, width: 200 }}
+                                                    style={{ backgroundColor: '#fafafa' }}
+                                                    dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                                    zIndex={3000}
+                                                />
+                                            </>
                                         )}
                                     </View>
                                     <View style={[styles.modalRowContainer, { zIndex: 2000 }]}>
-                                        <Text style={styles.modalLabel}>Class:</Text>
-                                        {isClassConfirmed ? (
+                                        {!isClassConfirmed && (
                                             <>
-                                                <Text style={styles.modalLabel}>{statsData.class}</Text>
-                                                <View style={[styles.modalRowContainer, { zIndex: 1000 }]}>
-                                                    <Text style={styles.modalLabel}>Hit Dice: {hitDice}</Text>
-                                                </View>
+                                                <Text style={styles.modalLabel}>Class:</Text>
+                                                <DropDownPicker
+                                                    open={openClass}
+                                                    value={classValue}
+                                                    items={classItems}
+                                                    setOpen={setOpenClass}
+                                                    setValue={setClassValue}
+                                                    placeholder="Select a class"
+                                                    containerStyle={{ height: 40, width: 200 }}
+                                                    style={{ backgroundColor: '#fafafa' }}
+                                                    dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                                    zIndex={2000}
+                                                />
                                             </>
-                                        ) : (
-                                            <DropDownPicker
-                                                open={openClass}
-                                                value={classValue}
-                                                items={classItems}
-                                                setOpen={setOpenClass}
-                                                setValue={setClassValue}
-                                                placeholder="Select a class"
-                                                containerStyle={{ height: 40, width: 200 }}
-                                                style={{ backgroundColor: '#fafafa' }}
-                                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                                                zIndex={2000}
-                                            />
                                         )}
                                     </View>
                                     {(!isRaceConfirmed || !isClassConfirmed) && (
@@ -965,18 +980,8 @@ export default function MeScreen() {
                                             <Text style={styles.submitButtonText}>Save Changes</Text>
                                         </TouchableOpacity>
                                     )}
+                                    <Button title="Close" onPress={() => setCharacterModalVisible(false)} />
                                 </View>
-                                {/* Race Features */}
-                                {statsData.race && (
-                                    <View>
-                                        <Text>Race Features</Text>
-                                        {raceBonuses.map((race) => (
-                                            race.race === statsData.race && Object.entries(race.features).map(([key, value]) => (
-                                                <Text key={key}>{`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`}</Text>
-                                            ))
-                                        ))}
-                                    </View>
-                                )}
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
@@ -1021,6 +1026,7 @@ export default function MeScreen() {
                             >
                                 <Text>Save</Text>
                             </TouchableOpacity>
+                            <Button title="Close" onPress={() => setMainHandModalVisible(false)} />
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
@@ -1062,6 +1068,7 @@ export default function MeScreen() {
                             >
                                 <Text>Equip Weapon</Text>
                             </TouchableOpacity>
+                            <Button title="Close" onPress={() => setOffHandModalVisible(false)} />
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
@@ -1103,9 +1110,32 @@ export default function MeScreen() {
                             >
                                 <Text>Equip Weapon</Text>
                             </TouchableOpacity>
+                            <Button title="Close" onPress={() => setRangedHandModalVisible(false)} />
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Features Modal */}
+            <Modal animationType="fade" transparent={true} visible={featuresModalVisible}>
+                <View style={styles.modalContainer}>
+                    <View style={{ flexDirection: 'column', gap: 10 }}>
+                        <Text style={styles.modalTitle}>Features</Text>
+                        <View>
+                            {statsData.race && renderRaceFeatures()}
+                        </View>
+                        <View>
+                            {statsData.class && renderClassFeatures()}
+                        </View>
+                    </View>
+                    <View style={styles.modalButtons}>
+                        <Button
+                            title="Close"
+                            color="black"
+                            onPress={() => setFeaturesModalVisible(false)}
+                        />
+                    </View>
+                </View>
             </Modal>
         </View>
     );

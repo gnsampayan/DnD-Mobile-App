@@ -13,11 +13,17 @@ const styles = StyleSheet.create({
     },
     headerLeft: {
       flexDirection: 'row',
-      gap: 5,
+      gap: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderStyle: 'solid',
+      borderRadius: 8,
+      padding: 10,
     },
     headerText: {
       fontSize: 16,
-      fontWeight: 'bold',
       color: 'white',
     },
     headerIcons: {
@@ -283,9 +289,10 @@ const styles = StyleSheet.create({
       marginBottom: 20,
     },
     headerTextContainer: {
-      flexDirection: 'row',
+      flexDirection: 'column',
       alignItems: 'center',
-      gap: 5,
+      justifyContent: 'center',
+      gap: 10
     },
     closeButtonContainer: {
       position: 'absolute',

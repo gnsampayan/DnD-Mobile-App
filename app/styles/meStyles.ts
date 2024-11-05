@@ -10,6 +10,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 50,
     },
+    topButton: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 10,
+        paddingHorizontal: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'white',
+        flexDirection: 'row',
+        flex: 1,
+        gap: 5,
+    },
     statsHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -114,11 +127,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContainer: {
-        margin: 20,
         backgroundColor: 'white',
         borderRadius: 8,
         padding: 20,
-        gap: 10,
+        paddingTop: 50,
+        position: 'relative',
+        width: '100%',
+        height: '100%',
     },
     modalTitle: {
         fontSize: 18,
@@ -134,8 +149,12 @@ const styles = StyleSheet.create({
     },
     modalButtons: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         gap: 10,
+        position: 'absolute',
+        bottom: 40,
+        width: '100%',
+        left: 20
     },
     modalButtonsColumn: {
         flexDirection: 'column',
@@ -588,6 +607,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'gold',
         borderStyle: 'solid',
+    },
+    label: {
+        fontSize: 14,
+        color: 'black',
+        fontStyle: 'italic',
+    },
+    featLabel: {
+        fontSize: 14,
+        textTransform: 'uppercase',
+        color: '#586a9f',
     },
 });
 

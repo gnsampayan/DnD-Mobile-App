@@ -1247,7 +1247,7 @@ export default function ActionsScreen() {
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
                     {/* AC */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                      <Text style={styles.hpText}>+{currentDexModifier}</Text>
+                      <Text style={styles.hpText}>{currentDexModifier < 0 ? '' : '+'}{currentDexModifier}</Text>
                       <View style={styles.subheaderSideBySide}>
                         <Ionicons name="alert" size={24} color="lightgrey" />
                       </View>
