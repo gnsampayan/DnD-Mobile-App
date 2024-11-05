@@ -75,7 +75,7 @@ import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
 // Wizard spell level data
-import wizardSpLvData from '@/app/data/wizardSpLv.json';
+import wizardTableData from '@/app/data/class-tables/wizardTable.json';
 
 
 const cantripImages = {
@@ -152,6 +152,7 @@ type Cantrip = {
 interface CastingCost {
     action: number;
     bonusAction: number;
+    reaction: number;
 }
 
 interface Feature {
@@ -164,6 +165,10 @@ interface SpellSlot {
     spellName: string | null;
 }
 
+interface Spell {
+    name: string;
+    castingTime: string;
+}
 
 
 export default function SpellbookScreen() {
@@ -201,7 +206,14 @@ export default function SpellbookScreen() {
         { slotIndex: number; spellName: string | null }[]
     >([]);
 
-    const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
+    const {
+        currentActionsAvailable,
+        currentBonusActionsAvailable,
+        currentReactionsAvailable,
+        setCurrentActionsAvailable,
+        setCurrentBonusActionsAvailable,
+        setCurrentReactionsAvailable
+    } = useActions();
 
 
     const { statsData, isSpellCaster } = useContext(StatsDataContext);
@@ -439,7 +451,7 @@ export default function SpellbookScreen() {
                 displaySpellName = castableSpell.spellName;
             }
         }
-
+        const affordable = canAffordSpell(displaySpellName || null);
         return (
             <TouchableOpacity
                 onPress={() => {
@@ -452,7 +464,10 @@ export default function SpellbookScreen() {
                         setOpenPreparedSpellDropdown(false);
                     }
                 }}
-                style={section === "known-spells" ? { width: "100%", height: 40 } : [styles.addSpellButton, { width: itemWidth }]}
+                style={
+                    section === "known-spells" ? { width: "100%", height: 40 } :
+                        [styles.addSpellButton, { width: itemWidth }]
+                }
             >
                 <ImageBackground
                     style={styles.spellButtonBackground}
@@ -465,7 +480,10 @@ export default function SpellbookScreen() {
                                 position: 'relative',
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                borderColor: section === "known-spells" ? 'rgba(255, 255, 255, 0.1)' : 'white',
+                                borderColor: section === "known-spells"
+                                    ? 'rgba(255, 255, 255, 0.1)'
+                                    : (affordable ? 'white'
+                                        : 'rgba(255, 255, 255, 0.1)'),
                                 paddingHorizontal: 10
                             }
                         ]}>
@@ -1134,15 +1152,19 @@ export default function SpellbookScreen() {
     const parseCastingTime = (castingTime: string): CastingCost => {
         let actionCost = 0;
         let bonusActionCost = 0;
+        let reactionCost = 0;
 
-        if (castingTime.includes("1 Bonus Action")) {
+        if (castingTime.toLowerCase().includes("1 bonus action")) {
             bonusActionCost = 1;
         }
-        if (castingTime.includes("1 Action")) {
+        if (castingTime.toLowerCase().includes("1 action")) {
             actionCost = 1;
         }
+        if (castingTime.toLowerCase().includes("1 reaction")) {
+            reactionCost = 1;
+        }
 
-        return { action: actionCost, bonusAction: bonusActionCost };
+        return { action: actionCost, bonusAction: bonusActionCost, reaction: reactionCost };
     };
 
     const canAffordCantrip = (cantripName: string): boolean => {
@@ -1513,7 +1535,7 @@ export default function SpellbookScreen() {
 
     // Spell Points
     const renderSpellPoints = () => {
-        const spellSlotsPerUserLevelPerSpellLevel = wizardSpLvData;
+        const spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
 
         // Development - Static spent spell slots data
         // Format: { SpLv1: 2, SpLv4: 1 } means 2 level 1 slots and 1 level 4 slot spent
@@ -1580,6 +1602,89 @@ export default function SpellbookScreen() {
         );
     }
 
+
+    function castSpell(spellName: string) {
+        // Search through all spell levels
+        for (const levelData of spellsData) {
+            const foundSpell = levelData.spells.find(
+                (spell) => {
+                    if (typeof spell === 'string') return false;
+                    return spell.name.toLowerCase() === spellName.toLowerCase();
+                }
+            );
+            if (foundSpell && typeof foundSpell !== 'string') {
+                const castingTimeString = foundSpell.castingTime;
+
+                // Use parseCastingTime to get the action costs
+                const { action, bonusAction, reaction } = parseCastingTime(castingTimeString);
+
+                // Check if the user has enough actions, bonus actions, and reactions
+                if (action > 0 && currentActionsAvailable < action) {
+                    Alert.alert('Insufficient Actions', 'You do not have enough actions available.');
+                    return;
+                }
+                if (bonusAction > 0 && currentBonusActionsAvailable < bonusAction) {
+                    Alert.alert('Insufficient Bonus Actions', 'You do not have enough bonus actions available.');
+                    return;
+                }
+                if (reaction > 0 && currentReactionsAvailable < reaction) {
+                    Alert.alert('Insufficient Reactions', 'You do not have any reactions available.');
+                    return;
+                }
+
+                // Deduct the action costs
+                if (action > 0) {
+                    setCurrentActionsAvailable(prev => prev - action);
+                }
+                if (bonusAction > 0) {
+                    setCurrentBonusActionsAvailable(prev => prev - bonusAction);
+                }
+                if (reaction > 0) {
+                    setCurrentReactionsAvailable(prev => prev - reaction);
+                }
+
+                return;
+            }
+        }
+
+        console.log("Spell not found:", spellName);
+    }
+
+    const canAffordSpell = (spellName: string | null): boolean => {
+        if (!spellName) return false;
+
+        // Find the spell data
+        let foundSpell: any = null;
+        for (const levelData of spellsData) {
+            const spell = levelData.spells.find(
+                (spell) => {
+                    if (typeof spell === 'string') return false;
+                    return spell.name.toLowerCase() === spellName.toLowerCase();
+                }
+            );
+            if (spell && typeof spell !== 'string') {
+                foundSpell = spell;
+                break;
+            }
+        }
+        if (!foundSpell) return false;
+
+        const castingTimeString = foundSpell.castingTime;
+        const { action, bonusAction, reaction } = parseCastingTime(castingTimeString);
+
+        // Check if user has enough actions
+        if (action > 0 && currentActionsAvailable < action) return false;
+        if (bonusAction > 0 && currentBonusActionsAvailable < bonusAction) return false;
+        if (reaction > 0 && currentReactionsAvailable < reaction) return false;
+
+        // If all checks pass, the user can afford the spell
+        return true;
+    };
+    const handleCanAffordCastButtonDisabled = () => {
+        const spellName = spellPressedIndex !== null ? knownSpellSlotsData[spellPressedIndex]?.spellName : null;
+        return !canAffordSpell(spellName);
+    }
+
     // Main Spellbook Render
     return (
         <>
@@ -1617,6 +1722,21 @@ export default function SpellbookScreen() {
                                     currentBonusActionsAvailable === 0 && { color: 'black' }
                                 ]}>
                                     x{currentBonusActionsAvailable}
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={styles.headerTextContainer}>
+                            <Ionicons
+                                name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
+                                size={16}
+                                color={currentReactionsAvailable > 0 ? "rgb(200, 0, 255)" : "rgba(200, 0, 255, 0.2)"}
+                            />
+                            <View style={styles.headerTextBox}>
+                                <Text style={[
+                                    styles.headerText,
+                                    currentReactionsAvailable === 0 && { color: 'black' }
+                                ]}>
+                                    x{currentReactionsAvailable}
                                 </Text>
                             </View>
                         </View>
@@ -1775,7 +1895,7 @@ export default function SpellbookScreen() {
                                 setSpellChoiceInputValue(null);
                             }}
                         />
-                        {spellPressedIndex !== null && !knownSpellSlotsData[spellPressedIndex]?.spellName && (
+                        {spellPressedIndex !== null && !knownSpellSlotsData[spellPressedIndex]?.spellName ? (
                             <Button
                                 title="Assign"
                                 color="green"
@@ -1784,6 +1904,18 @@ export default function SpellbookScreen() {
                                     assignSpellToSlot();
                                     setSpellModalVisible(false);
                                 }}
+                            />
+                        ) : (
+                            <Button
+                                title="Cast"
+                                color="#007cba"
+                                onPress={() => {
+                                    if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
+                                        castSpell(knownSpellSlotsData[spellPressedIndex].spellName.toLowerCase());
+                                    }
+                                    setSpellModalVisible(false);
+                                }}
+                                disabled={handleCanAffordCastButtonDisabled()}
                             />
                         )}
                     </View>
@@ -1855,11 +1987,11 @@ export default function SpellbookScreen() {
                                     color="#007cba"
                                     onPress={() => {
                                         if (spellPressedIndex !== null && preparedSpellChoiceInputValue !== null) {
-                                            // castPreparedSpell(spellPressedIndex, preparedSpellChoiceInputValue);
-                                            console.log("Casting spell", spellPressedIndex, preparedSpellChoiceInputValue);
+                                            castSpell(preparedSpellChoiceInputValue.toLowerCase());
                                             setPreparedSpellModalVisible(false);
                                         }
                                     }}
+                                    disabled={handleCanAffordCastButtonDisabled()}
                                 />
                             ) : (
                                 <Button

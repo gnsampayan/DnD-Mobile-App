@@ -23,7 +23,7 @@ import { CharacterContext } from '../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
 import StatsDataContext from '../context/StatsDataContext';
 import cantripsData from '../data/cantrips.json';
-
+import reactionImage from '@actions/reaction-image.png';
 import defaultLongRestImage from '@actions/long-rest-image-v2.png';
 import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
 import defaultDisengageImage from '@actions/default-disengage-image.png';
@@ -41,8 +41,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
-const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
-const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -90,6 +88,10 @@ import tollTheDeadImage from '@images/cantrips/toll-the-dead.png';
 import trueStrikeImage from '@images/cantrips/true-strike.png';
 import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
 import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
+
+const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
+const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
+
 
 const cantripImages = {
   'Acid Splash': acidSplashImage,
@@ -144,7 +146,7 @@ const cantripImages = {
 interface BaseAction {
   id: string;
   name: string;
-  cost: { actions: number; bonus: number; castingTimeText?: string };
+  cost: { actions: number; bonus: number; reaction?: number; castingTimeText?: string };
   details?: string;
   image?: string | ImageSourcePropType;
 }
@@ -238,7 +240,14 @@ export default function ActionsScreen() {
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
   const [currentConModifier, setCurrentConModifier] = useState<number>(0);
   const [movementSpeed, setMovementSpeed] = useState<number>(30);
-  const { currentActionsAvailable, currentBonusActionsAvailable, setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
+  const {
+    currentActionsAvailable,
+    currentBonusActionsAvailable,
+    currentReactionsAvailable,
+    setCurrentActionsAvailable,
+    setCurrentBonusActionsAvailable,
+    setCurrentReactionsAvailable
+  } = useActions();
   const { weaponsProficientIn } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
   // Define state for combined actions
@@ -283,7 +292,7 @@ export default function ActionsScreen() {
     { id: '7', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
     { id: '8', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
     { id: '9', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
-
+    { id: '10', name: 'Reaction', details: 'Instantly respond to a trigger or spend a reaction as needed', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
   ];
 
 
@@ -828,15 +837,19 @@ export default function ActionsScreen() {
   // Commit Action Function
   const commitAction = () => {
     if (selectedAction) {
-      const { actions: costActions, bonus: costBonus } = selectedAction.cost;
+      const { actions: costActions, bonus: costBonus, reaction: costReaction } = selectedAction.cost;
 
       if (
         currentActionsAvailable >= costActions &&
-        currentBonusActionsAvailable >= costBonus
+        currentBonusActionsAvailable >= costBonus &&
+        (costReaction !== undefined ? currentReactionsAvailable >= costReaction : true)
       ) {
         // Subtract the cost from available actions
         setCurrentActionsAvailable(prev => prev - costActions);
         setCurrentBonusActionsAvailable(prev => prev - costBonus);
+        if (costReaction !== undefined) {
+          setCurrentReactionsAvailable(prev => prev - costReaction);
+        }
         setActionModalVisible(false);
       } else {
         Alert.alert('Insufficient Resources', 'You do not have enough actions or bonus actions for this.');
@@ -848,6 +861,7 @@ export default function ActionsScreen() {
   const endTurn = () => {
     setCurrentActionsAvailable(1);
     setCurrentBonusActionsAvailable(1);
+    setCurrentReactionsAvailable(1);
   };
 
   const windowWidth = Dimensions.get('window').width;
@@ -858,13 +872,13 @@ export default function ActionsScreen() {
     if (item) {
       const affordable =
         currentActionsAvailable >= item.cost.actions &&
-        currentBonusActionsAvailable >= item.cost.bonus;
+        currentBonusActionsAvailable >= item.cost.bonus &&
+        (item.cost.reaction !== undefined ? currentReactionsAvailable >= item.cost.reaction : true);
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
       const offHandWeaponEquipped = offHandWeapon && offHandWeapon.name.toLowerCase() !== 'none';
-      const isCantrip = 'type' in item && item.type === 'cantrip';
 
       return (
         <ImageBackground
@@ -1122,6 +1136,21 @@ export default function ActionsScreen() {
               </Text>
             </View>
           </View>
+          <View style={styles.headerTextContainer}>
+            <Ionicons
+              name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
+              size={16}
+              color={currentReactionsAvailable > 0 ? "rgb(200, 0, 255)" : "rgba(200, 0, 255, 0.2)"}
+            />
+            <View style={styles.headerTextBox}>
+              <Text style={[
+                styles.headerText,
+                currentReactionsAvailable === 0 && { color: 'black' }
+              ]}>
+                x{currentReactionsAvailable}
+              </Text>
+            </View>
+          </View>
         </View>
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={changeNumColumns}>
@@ -1371,8 +1400,12 @@ export default function ActionsScreen() {
                         )}
 
                         {/* Weapon Type Section */}
-                        {['Attack', 'Ranged Attack'].map((actionType) => {
-                          const weapon = actionType === 'Attack' ? mainHandWeapon : rangedHandWeapon;
+                        {['Attack', 'Ranged Attack', 'Offhand Attack'].map((actionType) => {
+                          const weapon = actionType === 'Attack'
+                            ? mainHandWeapon
+                            : actionType === 'Ranged Attack'
+                              ? rangedHandWeapon
+                              : offHandWeapon;
                           const weaponType =
                             weapon && weapon.name !== 'none'
                               ? weapon.weaponType || '?'
@@ -1417,6 +1450,12 @@ export default function ActionsScreen() {
                             <View style={styles.costTextContainer}>
                               <Text>{selectedAction.cost.bonus}</Text>
                               <Ionicons name="triangle" size={16} color="#FF8C00" />
+                            </View>
+                          )}
+                          {selectedAction.cost.reaction !== undefined && (
+                            <View style={styles.costTextContainer}>
+                              <Text>{selectedAction.cost.reaction}</Text>
+                              <Ionicons name="square" size={16} color="rgb(200, 0, 255)" />
                             </View>
                           )}
                           {selectedAction.cost.castingTimeText && (
@@ -1735,7 +1774,8 @@ export default function ActionsScreen() {
                           styles.modalButtonCommit,
                           selectedAction &&
                           (currentActionsAvailable < selectedAction.cost.actions ||
-                            currentBonusActionsAvailable < selectedAction.cost.bonus) && { opacity: 0.5 }
+                            currentBonusActionsAvailable < selectedAction.cost.bonus ||
+                            selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) && { opacity: 0.5 }
                         ]}
                         onPress={() => {
                           if (selectedAction.name.toLowerCase() === 'long rest') {
@@ -1746,7 +1786,8 @@ export default function ActionsScreen() {
                         disabled={
                           !selectedAction ||
                           currentActionsAvailable < selectedAction.cost.actions ||
-                          currentBonusActionsAvailable < selectedAction.cost.bonus
+                          currentBonusActionsAvailable < selectedAction.cost.bonus ||
+                          selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>
@@ -1765,6 +1806,12 @@ export default function ActionsScreen() {
                             <View style={styles.costTextContainer}>
                               <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.bonus}</Text>
                               <Ionicons name="triangle" size={16} color="#FF8C00" />
+                            </View>
+                          )}
+                          {selectedAction.cost.reaction !== undefined && (
+                            <View style={styles.costTextContainer}>
+                              <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.reaction}</Text>
+                              <Ionicons name="square" size={16} color="rgb(200, 0, 255)" />
                             </View>
                           )}
                         </View>
