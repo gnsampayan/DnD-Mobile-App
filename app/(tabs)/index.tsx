@@ -14,7 +14,7 @@ import {
   ImageSourcePropType,
   Dimensions,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
@@ -1306,7 +1306,7 @@ export default function ActionsScreen() {
                     style={styles.modalButtonSubtract}
                     onPress={() => handleHpChange('subtract')}
                   >
-                    <Ionicons name="flash" size={24} color="white" />
+                    <MaterialCommunityIcons name="skull-crossbones" size={24} color="white" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.modalButtonAdd}
@@ -1495,6 +1495,9 @@ export default function ActionsScreen() {
                       </TouchableWithoutFeedback>
                     )}
 
+
+
+                    {/* Properties Section */}
                     {/* Melee Weapon Properties Section */}
                     {(selectedAction.name === 'Attack') &&
                       <>
@@ -1502,11 +1505,12 @@ export default function ActionsScreen() {
                           <>
                             {/* Attack Roll Row */}
                             <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
-                              <Ionicons name="dice" size={20} color="black" />
+                              <MaterialCommunityIcons name="sword" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <View style={{ flexDirection: 'row' }}>
+                                <View style={{ flexDirection: 'row', gap: 5 }}>
+                                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                                   {getWeaponAttackBonus(mainHandWeapon) && (
-                                    <Text style={{ marginRight: 5 }}>
+                                    <Text>
                                       +{getWeaponAttackBonus(mainHandWeapon)}
                                     </Text>
                                   )}
@@ -1528,7 +1532,7 @@ export default function ActionsScreen() {
                             </View>
                             {/* Damage Row */}
                             <View style={styles.modalWeaponProperty}>
-                              <Ionicons name="flash" size={20} color="black" />
+                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(mainHandWeapon)}
@@ -1588,8 +1592,9 @@ export default function ActionsScreen() {
                         ) : (
                           <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
                             <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
-                              <Ionicons name={"dice"} size={20} color="black" />
+                              <MaterialCommunityIcons name="sword" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                                 <Text>+({currentStrengthModifier} Str) or +({currentDexModifier} Dex)</Text>
                                 {isUnarmedStrikeProficient &&
                                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
@@ -1600,7 +1605,7 @@ export default function ActionsScreen() {
                               </View>
                             </View>
                             <View style={styles.modalWeaponProperty}>
-                              <Ionicons name="flash" size={20} color="black" />
+                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
                               <Text>1+({currentStrengthModifier} Str)</Text>
                             </View>
                           </View>
@@ -1616,7 +1621,7 @@ export default function ActionsScreen() {
                           <>
                             {/* Modifiers Row */}
                             <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
-                              <Ionicons name="dice" size={20} color="black" />
+                              <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <View style={{ flexDirection: 'row' }}>
                                   {getWeaponAttackBonus(rangedHandWeapon) && (
@@ -1638,7 +1643,7 @@ export default function ActionsScreen() {
                             </View>
                             {/* Damage Row */}
                             <View style={styles.modalWeaponProperty}>
-                              <Ionicons name="flash" size={20} color="black" />
+                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(rangedHandWeapon)}
@@ -1700,13 +1705,13 @@ export default function ActionsScreen() {
                     {(selectedAction.name === 'Shove') && (
                       <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                          <Ionicons name="dice" size={20} color="black" />
+                          <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                           <Text>+({calculateModifier(statsData.abilities.find(a => a.name === 'Strength')?.value || 10)} Athle)</Text>
                         </View>
                         <Text style={{ fontSize: 24 }}>{'>'}</Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                           <View style={styles.enemyDiceContainer}>
-                            <Ionicons name="dice" size={20} color="red" />
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="red" />
                           </View>
                           <Text>+(Athle) or +(Acrob)</Text>
                         </View>
@@ -1720,9 +1725,10 @@ export default function ActionsScreen() {
                           <>
                             {/* Modifiers Row */}
                             <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
-                              <Ionicons name="dice" size={20} color="black" />
+                              <MaterialCommunityIcons name="sword" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <View style={{ flexDirection: 'row' }}>
+                                <View style={{ flexDirection: 'row', gap: 5 }}>
+                                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                                   {getWeaponAttackBonus(offHandWeapon) && (
                                     <Text style={{ marginRight: 5 }}>
                                       +{getWeaponAttackBonus(offHandWeapon)}
@@ -1731,7 +1737,7 @@ export default function ActionsScreen() {
                                   {getWeaponSkillModifiers(offHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
                                   {getWeaponSkillModifiers(offHandWeapon).includes("Strength") &&
                                     getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") &&
-                                    <Text> or </Text>}
+                                    <Text>or</Text>}
                                   {getWeaponSkillModifiers(offHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
                                 </View>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
@@ -1742,7 +1748,7 @@ export default function ActionsScreen() {
                             </View>
                             {/* Damage Row */}
                             <View style={styles.modalWeaponProperty}>
-                              <Ionicons name="flash-outline" size={20} color="black" />
+                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text>
                                   {getWeaponDamage(offHandWeapon)}

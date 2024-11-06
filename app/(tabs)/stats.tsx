@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList, ImageBackground, Button } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList, ImageBackground, Button, ImageSourcePropType } from 'react-native';
 import styles from '../styles/meStyles'; // Adjust the path if necessary
 import skillsData from '../data/skills.json';
 import xpThresholds from '../data/xpThresholds.json';
@@ -11,9 +11,10 @@ import constitutionImage from '@images/abilities/constitution.png';
 import intelligenceImage from '@images/abilities/intelligence.png';
 import wisdomImage from '@images/abilities/wisdom.png';
 import charismaImage from '@images/abilities/charisma.png';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import raceBonuses from '../data/raceData.json';
 import classBonuses from '../data/classData.json';
+import xpImage from '@images/xp-image.png';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -361,7 +362,13 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             <TouchableOpacity
                 style={[
                     styles.abilityContainer,
-                    { borderColor: hasUnfilledHpIncreases ? 'transparent' : (availableAbilityPoints > 0 ? 'gold' : 'white') }
+                    {
+                        borderColor:
+                            hasUnfilledHpIncreases ? 'transparent'
+                                : (availableAbilityPoints > 0 ? (selectedAbility && selectedAbility.id === item.id ? 'gold' : 'white')
+                                    : 'rgba(255, 255, 255, 0.1)'),
+                        zIndex: 2000
+                    }
                 ]}
                 onPress={() => {
                     if (hasUnfilledHpIncreases) { //if level 1 hp increase is not set, don't allow ability point allocation
@@ -370,6 +377,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         openAbilityModal(item);
                     }
                 }}
+                disabled={availableAbilityPoints <= 0}
             >
                 <ImageBackground
                     source={abilityImages[item.name]}
@@ -469,7 +477,25 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         }}
                         disabled={abilityAllocationsSaveVisible}
                     >
-                        <Text style={styles.firstRowText}>XP: {xp}</Text>
+                        <ImageBackground
+                            source={xpImage as ImageSourcePropType}
+                            resizeMode='cover'
+                            style={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <View style={{
+                                flexDirection: 'row',
+                            }}>
+                                <MaterialCommunityIcons name="sword-cross" size={20} color="white" />
+                                <Text style={styles.firstRowText}>
+                                    {xp}
+                                </Text>
+
+                            </View>
+                        </ImageBackground>
                     </TouchableOpacity>
 
                     {/* Reset XP */}
@@ -563,6 +589,41 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     columnWrapperStyle={styles.gridRow}
                     contentContainerStyle={styles.gridContainer}
                 />
+                {/* Ability Value Change Modal */}
+                {selectedAbility && abilityModalVisible && (
+                    <View style={styles.abilityModalContainer}>
+                        <View style={[styles.modalSideBySide, { gap: 5, height: 60 }]}>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setAbilityModalVisible(false)
+                                    setSelectedAbility(null)
+                                }}
+                                style={{
+                                    padding: 5,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: 40,
+                                    paddingHorizontal: 10,
+                                    marginHorizontal: 20,
+                                }}
+                            >
+                                <Ionicons name="close" size={24} color="white" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.modalButtonSubtract}
+                                onPress={decrementAbility}
+                            >
+                                <Ionicons name="remove" size={24} color="white" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.modalButtonAdd}
+                                onPress={incrementAbility}
+                            >
+                                <Ionicons name="add" size={24} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
             </View>
 
             {/* Skills */}
@@ -590,79 +651,30 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     setModalVisible(!modalVisible);
                 }}
             >
-                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                            <View style={styles.modalContainer}>
-                                <View style={styles.modalHeader}>
-                                    <Text style={styles.modalTitle}>Current XP: {xp}</Text>
-                                </View>
-                                <TextInput
-                                    style={styles.modalInput}
-                                    placeholder="Enter number"
-                                    keyboardType="number-pad"
-                                    placeholderTextColor="gray"
-                                    onChangeText={setInputValue}
-                                    value={inputValue}
-                                />
-                                <View style={styles.modalButtons}>
-                                    <TouchableOpacity
-                                        style={styles.modalButtonAdd}
-                                        onPress={() => handleXpChange()}
-                                    >
-                                        <Text style={styles.modalButtonText}>Add</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-
-            {/* Ability Modification Modal */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={abilityModalVisible}
-                onRequestClose={() => {
-                    setAbilityModalVisible(false);
-                    setSelectedAbility(null);
-                }}
-            >
-                <TouchableWithoutFeedback onPress={() => setAbilityModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                            <View style={styles.modalContainer}>
-                                {selectedAbility && (
-                                    <>
-                                        <View style={styles.modalHeader}>
-                                            <Text style={styles.modalTitle}>{selectedAbility.name}</Text>
-                                        </View>
-                                        <Text style={styles.modalSubtitle}>
-                                            Current Value: {statsData.abilities.find(a => a.id === selectedAbility.id)?.value}
-                                        </Text>
-                                        <Text style={styles.modalSubtitle}>
-                                            Available Points: {availableAbilityPoints}
-                                        </Text>
-                                        <View style={styles.modalButtons}>
-                                            <TouchableOpacity
-                                                style={styles.modalButtonSubtract}
-                                                onPress={decrementAbility}
-                                            >
-                                                <Text style={styles.modalButtonText}>-</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={styles.modalButtonAdd}
-                                                onPress={incrementAbility}
-                                            >
-                                                <Text style={styles.modalButtonText}>+</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </>
-                                )}
-                                <Button title="Close" onPress={() => setAbilityModalVisible(false)} />
-                            </View>
-                        </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>XP: {xp}</Text>
+                        </View>
+                        <TextInput
+                            style={styles.modalInput}
+                            placeholder="Enter number"
+                            keyboardType="number-pad"
+                            placeholderTextColor="gray"
+                            onChangeText={setInputValue}
+                            value={inputValue}
+                        />
+                        <View style={styles.modalButtons}>
+                            <Button
+                                title="Close"
+                                color='black'
+                                onPress={() => setModalVisible(false)}
+                            />
+                            <Button
+                                title="Gain XP"
+                                onPress={() => handleXpChange()}
+                            />
+                        </View>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>

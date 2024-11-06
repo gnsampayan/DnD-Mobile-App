@@ -14,6 +14,7 @@ module.exports = function(api) {
             '@actions': './assets/images/actions',
             '@equipment': './assets/images/equipment',
             '@spells': './assets/images/spells',
+            '@weapons': './assets/images/weapons',
           },
         },
       ],

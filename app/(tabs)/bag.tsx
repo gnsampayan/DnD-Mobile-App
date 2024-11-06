@@ -17,7 +17,7 @@ import {
   Button,
   ScrollView,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
@@ -27,14 +27,41 @@ import weapons from '../data/weapons.json';
 import classData from '../data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
 import raceData from '../data/raceData.json';
-import { CharacterContext } from '../context/equipmentActionsContext';
+
+
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
 import coinPouchImage from '@items/default-item-coin-pouch.png';
 import addItemImage from '@items/add-item-image.png';
 import DropDownPicker from 'react-native-dropdown-picker';
+
+import spearImage from '@weapons/spear.png';
+import sickleImage from '@weapons/sickle.png';
+import quarterstaffImage from '@weapons/quarterstaff.png';
+import maceImage from '@weapons/mace.png';
+import hammerLightImage from '@weapons/hammer-light.png';
+import javelinImage from '@weapons/javelin.png';
+import handaxeImage from '@weapons/handaxe.png';
+import greatclubImage from '@weapons/greatclub.png';
+import daggerImage from '@weapons/dagger.png';
+import clubImage from '@weapons/club.png';
+
+const weaponImages = {
+  "spear": spearImage,
+  "sickle": sickleImage,
+  "quarterstaff": quarterstaffImage,
+  "mace": maceImage,
+  "hammer, light": hammerLightImage,
+  "javelin": javelinImage,
+  "handaxe": handaxeImage,
+  "greatclub": greatclubImage,
+  "dagger": daggerImage,
+  "club": clubImage,
+};
+
 const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
+
 
 // Define the base Item interface
 interface BaseItem {
@@ -461,9 +488,15 @@ export default function BagScreen() {
   const windowWidth = Dimensions.get('window').width;
   const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns; // 20 for horizontal padding, 10 for gap between items
 
+  const getWeaponImage = (weaponName: string) => {
+    const normalizedName = weaponName.toLowerCase();
+    return weaponImages[normalizedName as keyof typeof weaponImages] || null;
+  };
+
   // Function to render each item in the grid
   const renderItem = ({ item }: { item: Item | null }) => {
     if (item) {
+      const weaponImage = getWeaponImage(item.name.toLowerCase());
       return (
         <TouchableOpacity
           style={[styles.itemContainer, { width: itemWidth }]}
@@ -475,20 +508,30 @@ export default function BagScreen() {
         >
           {/* Display the item as an ImageBackground */}
           <ImageBackground
-            source={
-              item?.image
-                ? typeof item.image === 'number'
-                  ? item.image // Local image imported via require/import
-                  : { uri: item.image } // URI from async storage or remote
-                : { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' }
-            }
+            source={(() => {
+              // If item has an image property
+              if (item?.image) {
+                if (typeof item.image === 'number') {
+                  return item.image as ImageSourcePropType; // Local image imported via require/import
+                }
+                if (typeof item.image === 'string') {
+                  return { uri: item.image } as ImageSourcePropType; // URI from storage/remote
+                }
+                return item.image as ImageSourcePropType; // Already ImageSourcePropType
+              } else if (item.type?.toLowerCase() === 'weapon' && 'weaponType' in item && item.weaponType) {
+                if (weaponImage) {
+                  return weaponImage as ImageSourcePropType;
+                }
+              }
+
+            })()}
             style={styles.itemImageBackground}
             imageStyle={{ borderRadius: 8 }}
             resizeMode="cover"
           >
             <View style={styles.itemContent}>
               <View style={styles.itemTextContainer}>
-                {!item.image && (
+                {!item.image && !weaponImage && (
                   <Text style={styles.itemText}>{item.name}</Text>
                 )}
               </View>
@@ -1100,9 +1143,13 @@ export default function BagScreen() {
                         style={styles.itemModalImage}
                       />
                     ) : (
-                      <View style={styles.itemModalNoImage}>
-                        <Text>No Image Available</Text>
-                      </View>
+                      selectedItem.type?.toLowerCase() === 'weapon' ? (
+                        <Image source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
+                      ) : (
+                        <View style={styles.itemModalNoImage}>
+                          <Text>No Image Available</Text>
+                        </View>
+                      )
                     )}
                   </TouchableWithoutFeedback>
 

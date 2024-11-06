@@ -37,7 +37,31 @@ import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
 import { useActions } from '../context/actionsSpellsContext';
-import { CantripSlotsContext } from '../context/cantripSlotsContext';
+import featuresImage from '@images/features-image.png';
+
+import spearImage from '@weapons/spear.png';
+import sickleImage from '@weapons/sickle.png';
+import quarterstaffImage from '@weapons/quarterstaff.png';
+import maceImage from '@weapons/mace.png';
+import hammerLightImage from '@weapons/hammer-light.png';
+import javelinImage from '@weapons/javelin.png';
+import handaxeImage from '@weapons/handaxe.png';
+import greatclubImage from '@weapons/greatclub.png';
+import daggerImage from '@weapons/dagger.png';
+import clubImage from '@weapons/club.png';
+
+const weaponImages = {
+    "spear": spearImage,
+    "sickle": sickleImage,
+    "quarterstaff": quarterstaffImage,
+    "mace": maceImage,
+    "hammer, light": hammerLightImage,
+    "javelin": javelinImage,
+    "handaxe": handaxeImage,
+    "greatclub": greatclubImage,
+    "dagger": daggerImage,
+    "club": clubImage,
+};
 
 // Key for AsyncStorage
 const CANTRIP_SLOTS_KEY = '@cantrip_slots';
@@ -550,12 +574,6 @@ export default function MeScreen() {
             value: item.name.toLowerCase(),
         }));
 
-        // Add 'None' option at the beginning
-        rangedWeaponsList.unshift({
-            label: 'None',
-            value: 'none',
-        });
-
         return rangedWeaponsList;
     }
     // Function to filter melee weapons
@@ -662,6 +680,11 @@ export default function MeScreen() {
         )
     }
 
+    const getWeaponImage = (weaponName: string) => {
+        const normalizedName = weaponName.toLowerCase();
+        return weaponImages[normalizedName as keyof typeof weaponImages] || null;
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -671,10 +694,20 @@ export default function MeScreen() {
             {/* Section 1: Header */}
             <View style={styles.header}>
                 <View style={{ flexDirection: 'row', gap: 10, marginLeft: 10, flex: 1 }}>
-                    <TouchableOpacity style={styles.topButton} onPress={() => setFeaturesModalVisible(true)}>
-                        <MaterialIcons name="insights" size={24} color="white" />
-                        <Text style={{ color: 'white', fontSize: 16, }}>Features</Text>
-                    </TouchableOpacity>
+                    <ImageBackground
+                        source={featuresImage as ImageSourcePropType}
+                        style={{
+                            flexDirection: 'row',
+                            flex: 1,
+                            gap: 5,
+                        }}
+                        resizeMode="cover"
+                    >
+                        <TouchableOpacity style={styles.topButton} onPress={() => setFeaturesModalVisible(true)}>
+                            <MaterialIcons name="insights" size={24} color="white" />
+                            <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Features</Text>
+                        </TouchableOpacity>
+                    </ImageBackground>
                 </View>
                 <View style={styles.headerButtons}>
                     <TouchableOpacity style={styles.userAccountButton}>
@@ -711,7 +744,7 @@ export default function MeScreen() {
 
                 {/* Section 3 */}
                 <TouchableOpacity
-                    style={{ borderWidth: 2, borderColor: 'white', borderStyle: 'solid', borderRadius: 8 }}
+                    style={{ borderWidth: 1, borderColor: 'white', borderStyle: 'solid', borderRadius: 8 }}
                     onLongPress={handleImageLongPress}
                     onPress={() => setCharacterModalVisible(true)}>
                     <View style={[styles.imageContainer, { width: section3Width }]}>
@@ -719,7 +752,7 @@ export default function MeScreen() {
                             <Image
                                 source={{ uri: imageUri }}
                                 style={styles.image}
-                                resizeMode="contain"
+                                resizeMode="cover"
                             />
                         ) : (
                             <View style={styles.emptyImageContainer}>
@@ -781,19 +814,25 @@ export default function MeScreen() {
                                 const isTwoHanded = mainHandWeapon.properties?.includes("Two-handed");
                                 const isProficient = weaponsProficientIn.map(w => w.toLowerCase()).includes(mainHandWeapon.weaponType?.toLowerCase() || '');
 
+                                const weaponImage = getWeaponImage(mainHandWeapon.name.toLowerCase()) as ImageSourcePropType;
+
                                 return (
                                     <ImageBackground
                                         source={weapon && weapon.image && weapon.image !== ''
                                             ? { uri: weapon.image }
-                                            : equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage}
+                                            : weaponImage ||
+                                            equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage}
                                         style={styles.equipmentItemImage}
                                     >
-                                        {(!weapon?.image || weapon.image === '' || isTwoHanded) && (
+                                        {(!weapon?.image || weapon.image === '' || isTwoHanded) && !weaponImage && (
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 16,
                                                 textAlign: 'center'
-                                            }}>{weapon?.label || mainHandWeapon.name} {!isProficient && '(Inept)'}</Text>
+                                            }}
+                                            >
+                                                {weapon?.label || mainHandWeapon.name} {!isProficient && '(Inept)'}
+                                            </Text>
                                         )}
                                         {isTwoHanded && (
                                             <>
@@ -828,15 +867,17 @@ export default function MeScreen() {
                                 const weapon = weapons.find((w) => w.value === offHandWeapon.name.toLowerCase() || '');
                                 const isTwoHanded = offHandWeapon.properties?.includes("Two-handed");
                                 const isProficient = weaponsProficientIn.includes(offHandWeapon.weaponType?.toLowerCase() || '');
+                                const weaponImage = getWeaponImage(offHandWeapon.name.toLowerCase()) as ImageSourcePropType;
 
                                 return (
                                     <ImageBackground
                                         source={weapon && weapon.image && weapon.image !== ''
                                             ? { uri: weapon.image }
-                                            : equipmentItems.find((item) => item.id === 'offhandMelee')?.defaultImage}
+                                            : weaponImage ||
+                                            equipmentItems.find((item) => item.id === 'offhandMelee')?.defaultImage}
                                         style={styles.equipmentItemImage}
                                     >
-                                        {(!weapon?.image || weapon.image === '' || isTwoHanded) && (
+                                        {(!weapon?.image || weapon.image === '' || isTwoHanded) && !weaponImage && (
                                             <Text style={{
                                                 color: 'white',
                                                 fontSize: 16,
@@ -866,22 +907,28 @@ export default function MeScreen() {
                                 !rangedHandWeapon?.name ? { padding: 15 } : {},
                                 rangedHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
                             ]}
-                            onPress={() => { setRangedHandModalVisible(true) }}
+                            onPress={() => {
+                                setRangedHandModalVisible(true);
+                                setOpenRangedHandPicker(true);
+                                setRangedHandValue(rangedHandWeapon?.name?.toLowerCase() || 'none');
+                            }}
                         >
                             {rangedHandWeapon?.name && rangedHandWeapon?.name.toLowerCase() !== 'none' ? (
                                 (() => {
                                     const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase() || '');
                                     const isTwoHanded = rangedHandWeapon.properties?.includes("Two-handed");
                                     const isProficient = weaponsProficientIn.includes(rangedHandWeapon.weaponType?.toLowerCase() || '');
+                                    const weaponImage = getWeaponImage(rangedHandWeapon.name.toLowerCase()) as ImageSourcePropType;
 
                                     return (
                                         <ImageBackground
                                             source={weapon && weapon.image && weapon.image !== ''
                                                 ? { uri: weapon.image }
-                                                : equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
+                                                : weaponImage ||
+                                                equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
                                             style={styles.equipmentItemImage}
                                         >
-                                            {(!weapon?.image || weapon.image === '' || isTwoHanded) && (
+                                            {(!weapon?.image || weapon.image === '' || isTwoHanded) && !weaponImage && (
                                                 <Text style={{
                                                     color: 'white',
                                                     fontSize: 16,
@@ -1076,44 +1123,51 @@ export default function MeScreen() {
 
             {/* Ranged Hand Weapon Modal */}
             <Modal animationType="fade" transparent={true} visible={rangedHandModalVisible}>
-                <TouchableWithoutFeedback onPress={() => {
-                    setRangedHandModalVisible(false);
-                    setRangedHandValue('none');
-                    setOpenRangedHandPicker(false);
-                }}>
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.modalContainer}>
-                            <Text>Select Ranged Hand Weapon</Text>
-                            <DropDownPicker
-                                open={openRangedHandPicker}
-                                value={rangedHandValue}
-                                items={filterEquipableRangedWeapons()}
-                                setOpen={setOpenRangedHandPicker}
-                                setValue={setRangedHandValue}
-                                placeholder="Select a weapon"
-                                containerStyle={{ height: 40, width: '100%' }}
-                                style={{ backgroundColor: '#fafafa' }}
-                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                            />
-                            <TouchableOpacity
-                                style={{
-                                    padding: 10,
-                                    backgroundColor: 'lightblue',
-                                    borderRadius: 8,
-                                    marginTop: 10,
-                                    alignSelf: 'center',
-                                }}
+                <View style={styles.modalContainer}>
+                    <Text>Select Ranged Hand Weapon</Text>
+                    <DropDownPicker
+                        open={openRangedHandPicker}
+                        value={rangedHandValue}
+                        items={filterEquipableRangedWeapons()}
+                        setOpen={setOpenRangedHandPicker}
+                        setValue={setRangedHandValue}
+                        placeholder="Select a weapon"
+                        containerStyle={{ height: 40, width: '100%' }}
+                        style={{ backgroundColor: '#fafafa' }}
+                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                    />
+                    <View style={styles.modalButtons}>
+                        <Button
+                            title="Close"
+                            color="black"
+                            onPress={() => {
+                                setRangedHandModalVisible(false);
+                                setRangedHandValue('none');
+                                setOpenRangedHandPicker(false);
+                            }}
+                        />
+                        {rangedHandValue.toLowerCase() !== rangedHandWeapon?.name.toLowerCase() ? (
+                            <Button
+                                title="Equip"
+                                color="blue"
                                 onPress={() => {
                                     handleEquipWeapon('rangedHand', rangedHandValue);
                                     setRangedHandModalVisible(false);
                                 }}
-                            >
-                                <Text>Equip Weapon</Text>
-                            </TouchableOpacity>
-                            <Button title="Close" onPress={() => setRangedHandModalVisible(false)} />
-                        </View>
+                                disabled={rangedHandValue === 'none'}
+                            />
+                        ) : (
+                            <Button
+                                title="Unequip"
+                                color="blue"
+                                onPress={() => {
+                                    handleEquipWeapon('rangedHand', 'none');
+                                    setRangedHandModalVisible(false);
+                                }}
+                            />
+                        )}
                     </View>
-                </TouchableWithoutFeedback>
+                </View>
             </Modal>
 
             {/* Features Modal */}
