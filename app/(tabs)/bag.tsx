@@ -46,6 +46,20 @@ import handaxeImage from '@weapons/handaxe.png';
 import greatclubImage from '@weapons/greatclub.png';
 import daggerImage from '@weapons/dagger.png';
 import clubImage from '@weapons/club.png';
+import slingImage from '@weapons/sling.png';
+import shortbowImage from '@weapons/shortbow.png';
+import longbowImage from '@weapons/longbow.png';
+import dartImage from '@weapons/dart.png';
+import crossbowLightImage from '@weapons/crossbow-light.png';
+import crossbowHeavyImage from '@weapons/crossbow-heavy.png';
+import crossbowHandImage from '@weapons/crossbow-hand.png';
+import whipImage from '@weapons/whip.png';
+import warhammerImage from '@weapons/warhammer.png';
+import warpickImage from '@weapons/war-pick.png';
+import tridentImage from '@weapons/trident.png';
+import shortswordImage from '@weapons/shortsword.png';
+import scimitarImage from '@weapons/scimitar.png';
+import rapierImage from '@weapons/rapier.png';
 
 const weaponImages = {
   "spear": spearImage,
@@ -58,6 +72,20 @@ const weaponImages = {
   "greatclub": greatclubImage,
   "dagger": daggerImage,
   "club": clubImage,
+  "sling": slingImage,
+  "shortbow": shortbowImage,
+  "longbow": longbowImage,
+  "dart": dartImage,
+  "crossbow, light": crossbowLightImage,
+  "crossbow, heavy": crossbowHeavyImage,
+  "crossbow, hand": crossbowHandImage,
+  "whip": whipImage,
+  "warhammer": warhammerImage,
+  "war pick": warpickImage,
+  "trident": tridentImage,
+  "shortsword": shortswordImage,
+  "scimitar": scimitarImage,
+  "rapier": rapierImage,
 };
 
 const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
@@ -1144,9 +1172,11 @@ export default function BagScreen() {
                       />
                     ) : (
                       selectedItem.type?.toLowerCase() === 'weapon' ? (
-                        <Image source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
+                        <View style={{ borderRadius: 8, overflow: 'hidden' }}>
+                          <ImageBackground source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
+                        </View>
                       ) : (
-                        <View style={styles.itemModalNoImage}>
+                        <View style={[styles.itemModalNoImage]}>
                           <Text>No Image Available</Text>
                         </View>
                       )

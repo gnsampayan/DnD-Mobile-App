@@ -1312,7 +1312,7 @@ export default function ActionsScreen() {
                     style={styles.modalButtonAdd}
                     onPress={() => handleHpChange('add')}
                   >
-                    <Ionicons name="bandage" size={24} color="white" />
+                    <MaterialCommunityIcons name="heart-plus" size={24} color="white" />
                   </TouchableOpacity>
                 </View>
               </View>

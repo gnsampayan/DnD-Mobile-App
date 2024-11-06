@@ -191,8 +191,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     itemModalImage: {
-      width: '100%',
-      height: 200,
+      maxWidth: '100%',
+      aspectRatio: 1,
       resizeMode: 'contain',
     },
     itemModalNoImage: {
