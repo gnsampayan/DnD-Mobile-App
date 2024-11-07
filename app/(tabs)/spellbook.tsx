@@ -1705,17 +1705,6 @@ export default function SpellbookScreen() {
                     return;
                 }
 
-                // Deduct the action costs
-                if (action > 0) {
-                    setCurrentActionsAvailable(prev => prev - action);
-                }
-                if (bonusAction > 0) {
-                    setCurrentBonusActionsAvailable(prev => prev - bonusAction);
-                }
-                if (reaction > 0) {
-                    setCurrentReactionsAvailable(prev => prev - reaction);
-                }
-
                 // Deduct action costs
                 deductActionCosts(foundSpell.castingTime);
                 return;
@@ -1778,13 +1767,13 @@ export default function SpellbookScreen() {
         const { action, bonusAction, reaction } = parseCastingTime(castingTimeString);
 
         if (action > 0) {
-            setCurrentActionsAvailable(prev => prev - action);
+            setCurrentActionsAvailable(prev => Math.max(prev - action, 0));
         }
         if (bonusAction > 0) {
-            setCurrentBonusActionsAvailable(prev => prev - bonusAction);
+            setCurrentBonusActionsAvailable(prev => Math.max(prev - bonusAction, 0));
         }
         if (reaction > 0) {
-            setCurrentReactionsAvailable(prev => prev - reaction);
+            setCurrentReactionsAvailable(prev => Math.max(prev - reaction, 0));
         }
     };
 
