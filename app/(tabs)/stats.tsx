@@ -240,11 +240,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             abilities: updatedAbilities,
             allocationsPerLevel: updatedAllocations,
         });
-
-        // Check if available points reached 0
-        if (availableAbilityPoints - 1 === 0) {
-            Alert.alert('No More Points', 'You have allocated all available ability points.');
-        }
     };
 
 
@@ -365,7 +360,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     {
                         borderColor:
                             hasUnfilledHpIncreases ? 'transparent'
-                                : (availableAbilityPoints > 0 ? (selectedAbility && selectedAbility.id === item.id ? 'gold' : 'white')
+                                : (availableAbilityPoints > 0 || abilityAllocationsSaveVisible
+                                    ? (selectedAbility && selectedAbility.id === item.id
+                                        ? 'gold' : 'white')
                                     : 'rgba(255, 255, 255, 0.1)'),
                         zIndex: 2000
                     }
@@ -377,7 +374,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         openAbilityModal(item);
                     }
                 }}
-                disabled={availableAbilityPoints <= 0}
+                disabled={availableAbilityPoints <= 0 && !abilityAllocationsSaveVisible}
             >
                 <ImageBackground
                     source={abilityImages[item.name]}
@@ -461,8 +458,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     {/* XP */}
                     <TouchableOpacity
                         style={[styles.firstRowContents, {
-                            borderColor: availableAbilityPoints > 0 ? 'transparent' : abilityAllocationsSaveVisible ? 'transparent' : 'lightgrey',
-                            opacity: abilityAllocationsSaveVisible ? 0.5 : 1
+                            borderColor: availableAbilityPoints > 0 || abilityAllocationsSaveVisible ? 'grey' : 'white',
+                            opacity: availableAbilityPoints > 0 || abilityAllocationsSaveVisible ? 0.5 : 1
                         }]}
                         onPress={() => {
                             if (!abilityAllocationsSaveVisible && availableAbilityPoints === 0) {
@@ -569,7 +566,14 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         <Text style={styles.characterStatsTitle}>Abilities</Text>
                     </View>
                     {abilityAllocationsSaveVisible &&
-                        <TouchableOpacity onPress={() => saveAbilityAllocations()} style={styles.abilitySaveButton}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                saveAbilityAllocations()
+                                setAbilityModalVisible(false)
+                                setSelectedAbility(null)
+
+                            }}
+                            style={styles.abilitySaveButton}>
                             <Ionicons name="save" size={20} color="white" />
                             <Text style={styles.saveButtonText}>Save</Text>
                         </TouchableOpacity>
@@ -800,7 +804,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             </Modal>
 
 
-        </View>
+        </View >
     );
 };
 
