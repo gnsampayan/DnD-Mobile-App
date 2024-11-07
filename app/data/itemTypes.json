@@ -1,27 +1,15 @@
 [
 	{
-		"label": "Object",
-		"value": "Object"
-	},
-	{
-		"label": "Food",
-		"value": "Food"
-	},
-	{
-		"label": "Weapon",
-		"value": "Weapon"
-	},
-	{
-		"label": "Shield",
-		"value": "Shield"
-	},
-	{
 		"label": "Armor",
 		"value": "Armor"
 	},
 	{
-		"label": "Magical Scroll",
-		"value": "Magical Scroll"
+		"label": "Necklace",
+		"value": "Necklace"
+	},
+	{
+		"label": "Object",
+		"value": "Object"
 	},
 	{
 		"label": "Potion",
@@ -32,11 +20,15 @@
 		"value": "Ring"
 	},
 	{
-		"label": "Necklace",
-		"value": "Necklace"
+		"label": "Scroll",
+		"value": "Scroll"
 	},
 	{
-		"label": "Custom",
-		"value": "Custom"
+		"label": "Shield",
+		"value": "Shield"
+	},
+	{
+		"label": "Weapon",
+		"value": "Weapon"
 	}
 ]

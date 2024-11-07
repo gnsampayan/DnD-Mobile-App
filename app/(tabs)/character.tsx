@@ -24,7 +24,7 @@ import weaponData from '../data/weapons.json';
 // Import default images
 import defaultHelmetImage from '@equipment/default-helmet.png';
 import defaultCapeImage from '@equipment/default-cape.png';
-import defaultArmorImage from '@equipment/default-armor.png';
+import defaultChestArmorImage from '@equipment/default-armor.png';
 import defaultGauntletsImage from '@equipment/default-gauntlets.png';
 import defaultBootsImage from '@equipment/default-boots.png';
 import defaultNecklaceImage from '@equipment/default-necklace.png';
@@ -148,7 +148,7 @@ export default function MeScreen() {
         // Section 2 items
         { id: 'helmet', name: 'Helmet', defaultImage: defaultHelmetImage as ImageSourcePropType, section: 2 },
         { id: 'cape', name: 'Cape', defaultImage: defaultCapeImage as ImageSourcePropType, section: 2 },
-        { id: 'armor', name: 'Armor', defaultImage: defaultArmorImage as ImageSourcePropType, section: 2 },
+        { id: 'chestplate', name: 'Chestplate', defaultImage: defaultChestArmorImage as ImageSourcePropType, section: 2 },
         { id: 'gauntlets', name: 'Gauntlets', defaultImage: defaultGauntletsImage as ImageSourcePropType, section: 2 },
         { id: 'boots', name: 'Boots', defaultImage: defaultBootsImage as ImageSourcePropType, section: 2 },
         // Section 4 items
@@ -164,17 +164,14 @@ export default function MeScreen() {
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [equipmentItems, setEquipmentItems] = useState<EquipmentItem[]>(initialEquipmentItems);
     const [characterModalVisible, setCharacterModalVisible] = useState(false);
-
     // State variables for weapon modals
     const [mainHandModalVisible, setMainHandModalVisible] = useState(false);
     const [offHandModalVisible, setOffHandModalVisible] = useState(false);
     const [rangedHandModalVisible, setRangedHandModalVisible] = useState(false);
-
     // State variables for DropDownPicker for each slot
     const [openMainHandPicker, setOpenMainHandPicker] = useState(false);
     const [openOffHandPicker, setOpenOffHandPicker] = useState(false);
     const [openRangedHandPicker, setOpenRangedHandPicker] = useState(false);
-
     // Items and weapons
     const { mainHandWeapon, offHandWeapon, rangedHandWeapon, equipWeapon } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
@@ -182,22 +179,22 @@ export default function MeScreen() {
         rangedHandWeapon: Item | null;
         equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
     };
-    const { items, weaponsProficientIn } = useItemEquipment();
+    const { items, weaponsProficientIn, equippedArmor, setEquippedArmor } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
-
     // Local state variables for DropDownPicker values
     const [mainHandValue, setMainHandValue] = useState<string>(mainHandWeapon?.name || 'none');
     const [offHandValue, setOffHandValue] = useState<string>(offHandWeapon?.name || 'none');
     const [rangedHandValue, setRangedHandValue] = useState<string>(rangedHandWeapon?.name || 'none');
-
     const { setCurrentActionsAvailable, setCurrentBonusActionsAvailable } = useActions();
-
     const endTurn = () => {
         setCurrentActionsAvailable(1);
         setCurrentBonusActionsAvailable(1);
     };
-
     const [featuresModalVisible, setFeaturesModalVisible] = useState(false);
+    const [armorModalVisible, setArmorModalVisible] = useState(false);
+    const [openArmorPicker, setOpenArmorPicker] = useState(false);
+    const [armorValue, setArmorValue] = useState<string | null>(null);
+    const [editingEquipmentSlot, setEditingEquipmentSlot] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -254,9 +251,6 @@ export default function MeScreen() {
         // Render a loading indicator or return null
         return null;
     }
-
-    const { hitDice = 0 } = statsData || {};
-
     // State variables for DropDownPicker
     const [openRace, setOpenRace] = useState(false);
     const [openClass, setOpenClass] = useState(false);
@@ -265,6 +259,7 @@ export default function MeScreen() {
     // State to track if race and class have been confirmed
     const [isRaceConfirmed, setIsRaceConfirmed] = useState<boolean>(!!statsData.race);
     const [isClassConfirmed, setIsClassConfirmed] = useState<boolean>(!!statsData.class);
+
 
 
 
@@ -721,6 +716,25 @@ export default function MeScreen() {
         return weaponImages[normalizedName as keyof typeof weaponImages] || null;
     };
 
+    const getArmorFromBag = () => {
+        return items.filter(item => item.type?.toLowerCase() === 'armor').map(item => ({
+            label: item.name,
+            value: item.name.toLowerCase(),
+        }));
+    }
+
+    const handleEquipArmor = (armorName: string | null) => {
+        if (armorName?.toLowerCase() === 'none' || !armorName) {
+            // Set equipped armor to null
+            setArmorValue(null);
+            console.log('Equipped none');
+            return;
+        }
+        console.log('Equipped', armorName);
+        setEquippedArmor(armorName);
+
+    }
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -762,7 +776,11 @@ export default function MeScreen() {
                             <TouchableOpacity
                                 key={item.id}
                                 style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
-                                onPress={() => { }}
+                                onPress={() => {
+                                    setArmorModalVisible(true);
+                                    // set selected equipment slot that triggered the modal
+                                    setEditingEquipmentSlot(item.id);
+                                }}
                             >
                                 <ImageBackground
                                     source={
@@ -1227,6 +1245,64 @@ export default function MeScreen() {
                     </View>
                 </View>
             </Modal>
+
+
+            {/* Armor Modal */}
+            <Modal animationType="fade" transparent={true} visible={armorModalVisible}>
+                <View style={styles.modalContainer}>
+                    {equippedArmor &&
+                        <>
+                            <View style={{ flexDirection: 'row', gap: 5 }}>
+                                <Text>Equipped</Text>
+                                <Text style={{ textTransform: 'capitalize' }}>
+                                    {editingEquipmentSlot}:
+                                </Text>
+                            </View>
+                            <Text style={{
+                                fontWeight: 'bold',
+                                fontSize: 20,
+                                marginBottom: 10,
+                                textTransform: 'capitalize'
+                            }}>
+                                {equippedArmor}
+                            </Text>
+                        </>
+                    }
+                    <Text>Select Armor</Text>
+                    <DropDownPicker
+                        open={openArmorPicker}
+                        value={armorValue}
+                        items={getArmorFromBag()}
+                        setOpen={setOpenArmorPicker}
+                        setValue={setArmorValue}
+                        placeholder="Select a armor"
+                        containerStyle={{ height: 40, width: '100%' }}
+                        style={{ backgroundColor: '#fafafa' }}
+                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                    />
+                    <View style={styles.modalButtons}>
+                        <Button
+                            title="Close"
+                            color="black"
+                            onPress={() => {
+                                setArmorValue(null);
+                                setArmorModalVisible(false);
+                                setOpenArmorPicker(false);
+                                setEditingEquipmentSlot(null);
+                            }} />
+                        <Button title="Equip" onPress={() => {
+                            handleEquipArmor(armorValue);
+                            setArmorModalVisible(false);
+                            setEditingEquipmentSlot(null);
+                        }} />
+                    </View>
+                </View>
+            </Modal>
+
+
+
+
+
         </View>
     );
 }

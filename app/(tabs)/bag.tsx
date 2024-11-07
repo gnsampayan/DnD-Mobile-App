@@ -27,6 +27,7 @@ import weapons from '../data/weapons.json';
 import classData from '../data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
 import raceData from '../data/raceData.json';
+import armorTypes from '../data/armorTypes.json';
 
 
 
@@ -121,6 +122,7 @@ interface BaseItem {
   image?: string;
   details?: string;
   type?: string;
+  dc?: number;
 }
 
 
@@ -238,6 +240,9 @@ export default function BagScreen() {
   const [editingField, setEditingField] = useState<'details' | null>(null);
   const [editedDetails, setEditedDetails] = useState<string>('');
   const [selectedWeapon, setSelectedWeapon] = useState<any>(null);
+  const [openArmorType, setOpenArmorType] = useState(false);
+  const [armorTypeValue, setArmorTypeValue] = useState<string | null>(null);
+  const [customArmor, setCustomArmor] = useState(false);
 
   useEffect(() => {
     const campingSupplies = items.find(item => item.id === '1');
@@ -907,6 +912,32 @@ export default function BagScreen() {
   };
 
 
+  const getArmorDetails = (armorType: string) => {
+    const armor = armorTypes.find((armor) => armor.value.toLowerCase() === armorType.toLowerCase());
+    return armor ? armor.details : '';
+  };
+
+  const renderModifyArmor = () => {
+    return (
+      <>
+        <Text>Modify Armor</Text>
+        <Text>DC</Text>
+        <TextInput
+          style={styles.modalInput}
+          placeholder="DC"
+          placeholderTextColor="gray"
+          keyboardType="numeric"
+          onChangeText={(text) => {
+            console.log("DC: ", text);
+          }}
+        />
+      </>
+    );
+  };
+
+
+
+  // Main Content
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -980,7 +1011,13 @@ export default function BagScreen() {
                   placeholder="Select an item type"
                   style={{ marginBottom: 10 }}
                   zIndex={2000}
-                  onChangeValue={(value) => setItemTypeValue(value)}
+                  onChangeValue={(value) => {
+                    setItemTypeValue(value);
+                    if (value?.toLowerCase() !== 'weapon') {
+                      setWeaponTypeValue(null);
+                    }
+                    setNewItem({ ...newItem, name: '', details: '' });
+                  }}
                 />
                 {(itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') && (
                   <>
@@ -1015,11 +1052,88 @@ export default function BagScreen() {
                       }}
                     />
                     {/* Create Custom Weapon */}
-                    {!customWeapon ? (
+                    {itemTypeValue?.toLowerCase() === 'weapon'
+                      && weaponTypeValue !== null
+                      && weaponTypeValue !== undefined
+                      && weaponTypeValue !== ''
+                      && (
+                        <>
+                          {!customWeapon ? (
+                            <Button
+                              title="Set to GM Mode"
+                              onPress={() => {
+                                setCustomWeapon(true);
+                              }}
+                            />
+                          ) : (
+                            <>
+                              <Button
+                                title="Revert to Normal Mode"
+                                onPress={() => {
+                                  setCustomWeapon(false);
+                                  // Reset the selectedWeapon to default values
+                                  if (weaponTypeValue) {
+                                    const defaultWeapon = weapons.weapons
+                                      .flatMap((category: any) => category.items)
+                                      .find((item: any) => item.name.toLowerCase() === weaponTypeValue.toLowerCase());
+                                    if (defaultWeapon) {
+                                      setSelectedWeapon(defaultWeapon);
+                                      setNewItem((prevItem) => ({
+                                        ...prevItem,
+                                        name: defaultWeapon.name,
+                                        details: defaultWeapon.properties.join(', '),
+                                        damage: defaultWeapon.damage,
+                                        attackBonus: defaultWeapon.attackBonus || '',
+                                      }));
+                                    }
+                                  }
+                                }}
+                              />
+                              {renderModifyWeapon()}
+                            </>
+                          )}
+
+                        </>
+                      )
+                    }
+                  </>
+                )}
+
+                {/* Armor Dropdown */}
+                {(itemTypeValue && itemTypeValue.toLowerCase() === 'armor') && (
+                  <>
+                    <Text>Armor Type</Text>
+                    <DropDownPicker
+                      open={openArmorType}
+                      value={armorTypeValue}
+                      items={armorTypes}
+                      setOpen={setOpenArmorType}
+                      setValue={setArmorTypeValue}
+                      placeholder="Select an armor type"
+                      containerStyle={{ zIndex: 1000 }}
+                      style={{ marginBottom: 10 }}
+                      onChangeValue={(value) => {
+                        if (value) {
+                          setArmorTypeValue(value);
+                          setNewItem({
+                            ...newItem,
+                            name: value,
+                            details: getArmorDetails(value)
+                          });
+                        }
+                      }}
+                    />
+                  </>
+                )}
+
+                {/* Custom Armor */}
+                {(itemTypeValue && itemTypeValue.toLowerCase() === 'armor') && (
+                  <>
+                    {!customArmor ? (
                       <Button
-                        title="Set to GM Mode"
+                        title="GM Mode"
                         onPress={() => {
-                          setCustomWeapon(true);
+                          setCustomArmor(true);
                         }}
                       />
                     ) : (
@@ -1027,58 +1141,36 @@ export default function BagScreen() {
                         <Button
                           title="Revert to Normal Mode"
                           onPress={() => {
-                            setCustomWeapon(false);
-                            // Reset the selectedWeapon to default values
-                            if (weaponTypeValue) {
-                              const defaultWeapon = weapons.weapons
-                                .flatMap((category: any) => category.items)
-                                .find((item: any) => item.name.toLowerCase() === weaponTypeValue.toLowerCase());
-                              if (defaultWeapon) {
-                                setSelectedWeapon(defaultWeapon);
-                                setNewItem((prevItem) => ({
-                                  ...prevItem,
-                                  name: defaultWeapon.name,
-                                  details: defaultWeapon.properties.join(', '),
-                                  damage: defaultWeapon.damage,
-                                  attackBonus: defaultWeapon.attackBonus || '',
-                                }));
-                              }
-                            }
+                            setCustomArmor(false);
                           }}
                         />
-                        {renderModifyWeapon()}
+                        {renderModifyArmor()}
                       </>
                     )}
                   </>
                 )}
-                {(itemTypeValue && itemTypeValue.toLowerCase() === 'food') && (
-                  <>
-                    <Text>Food Units</Text>
-                    <TextInput
-                      style={styles.modalInput}
-                      placeholder="Food Units"
-                      placeholderTextColor="gray"
-                      keyboardType="number-pad"
-                      onChangeText={(text) =>
-                        setFoodUnitsValue(Number(text) || 0)
-                      }
-                      value={foodUnitsValue.toString()}
-                    />
-                  </>
-                )}
 
-                {/* Quantity Input */}
-                <Text>Quantity</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Quantity"
-                  placeholderTextColor="gray"
-                  keyboardType="number-pad"
-                  onChangeText={(text) =>
-                    setNewItem({ ...newItem, quantity: Number(text) || 1 })
-                  }
-                  value={newItem.quantity.toString()}
-                />
+
+
+                {/* Custom Item Names */}
+                {(itemTypeValue && itemTypeValue.toLowerCase() !== 'weapon')
+                  && customArmor === true && (
+                    <>
+                      <Text>Name</Text>
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Item Name"
+                        placeholderTextColor="gray"
+                        onChangeText={(text) =>
+                          setNewItem({ ...newItem, name: text })
+                        }
+                        value={newItem.name}
+                      />
+                    </>
+                  )}
+
+
+
 
                 {/* Show properties of weapon selected in dropdown */}
                 {weaponTypeValue && (
@@ -1095,15 +1187,8 @@ export default function BagScreen() {
                   </View>
                 )}
 
-                <TouchableOpacity style={styles.imagePickerButton} onPress={() => pickImage(true)}>
-                  <Text style={styles.imagePickerButtonText}>Select Image</Text>
-                </TouchableOpacity>
-                {newItem.image && (
-                  <Image
-                    source={{ uri: newItem.image }}
-                    style={styles.selectedImage}
-                  />
-                )}
+
+                {/* Add Item Button */}
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     style={styles.modalButtonAdd}
@@ -1277,8 +1362,5 @@ export default function BagScreen() {
 
     </View>
   );
-}
-function uuidv4() {
-  throw new Error('Function not implemented.');
 }
 

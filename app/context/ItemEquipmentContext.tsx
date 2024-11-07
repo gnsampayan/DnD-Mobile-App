@@ -14,6 +14,7 @@ export interface Item {
     weaponType?: string;
     skill_modifiers?: string[];
     savingThrow?: string;
+    dc?: number;
 }
 
 
@@ -24,7 +25,12 @@ interface ItemEquipmentContextType {
     setWeaponsProficientIn: (weapons: string[]) => void;
     loadItems: () => Promise<void>;
     saveItems: (itemsToSave: Item[]) => Promise<void>;
+    equippedArmor: string | null;
+    setEquippedArmor: (armor: string | null) => void;
 }
+
+const EQUIPPED_ARMOR_KEY = '@equipped_armor';
+
 
 // Create the context
 const ItemEquipmentContext = createContext<ItemEquipmentContextType | undefined>(undefined);
@@ -33,6 +39,8 @@ const ItemEquipmentContext = createContext<ItemEquipmentContextType | undefined>
 export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [items, setItems] = useState<Item[]>([]);
     const [weaponsProficientIn, setWeaponsProficientInState] = useState<string[]>([]);
+    const [equippedArmor, setEquippedArmor] = useState<string | null>(null);
+
 
     // Function to load items from AsyncStorage
     const loadItems = async () => {
@@ -66,7 +74,19 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         };
 
+        // Load equipped armor
+        const loadEquippedArmor = async () => {
+            const equippedArmor = await AsyncStorage.getItem(EQUIPPED_ARMOR_KEY);
+            if (equippedArmor) {
+                setEquippedArmor(equippedArmor);
+            } else {
+                setEquippedArmor(null);
+            }
+        }
+
+
         loadWeaponProficiencies();
+        loadEquippedArmor();
     }, []);
 
     // Whenever weaponsProficientIn changes, save it to AsyncStorage
@@ -109,6 +129,16 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
         saveWeaponsProficientIn(weapons);
     };
 
+    // Function to save equippedArmor to AsyncStorage
+    const saveEquippedArmor = async (armor: string | null) => {
+        await AsyncStorage.setItem(EQUIPPED_ARMOR_KEY, armor || '');
+    };
+
+    // UseEffect to save equippedArmor to AsyncStorage whenever it changes
+    useEffect(() => {
+        saveEquippedArmor(equippedArmor);
+    }, [equippedArmor]);
+
     return (
         <ItemEquipmentContext.Provider value={{
             items,
@@ -116,6 +146,8 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
             saveItems,
             weaponsProficientIn,
             setWeaponsProficientIn,
+            equippedArmor,
+            setEquippedArmor,
         }}>
             {children}
         </ItemEquipmentContext.Provider>

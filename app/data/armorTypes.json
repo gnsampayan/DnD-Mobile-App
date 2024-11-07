@@ -1,0 +1,17 @@
+[
+	{
+		"label": "Light Armor",
+		"value": "Light Armor",
+		"details": "Crafted from supple leather and reinforced with light padding, this armor allows for flexibility and quiet movement. It provides basic protection without restricting agility, perfect for rogues, rangers, or anyone who values stealth and speed over full defense."
+	},
+	{
+		"label": "Medium Armor",
+		"value": "Medium Armor",
+		"details": "A balance of protection and mobility, medium armor includes layers of hardened leather or chain to guard vital areas while still allowing for maneuverability. Ideal for those who find themselves in the heart of battle but still need to stay agile, like fighters and clerics."
+	},
+	{
+		"label": "Heavy Armor",
+		"value": "Heavy Armor",
+		"details": "Built from interlocking plates of metal, heavy armor offers unparalleled protection against physical attacks. Its weight and rigidity may hinder movement, but for those who can bear it, it serves as a near-impenetrable fortress, favored by knights, paladins, and those who face their foes head-on."
+	}
+]

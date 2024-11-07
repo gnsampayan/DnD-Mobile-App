@@ -14,7 +14,7 @@ import {
   ImageSourcePropType,
   Dimensions,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
@@ -1590,6 +1590,15 @@ export default function ActionsScreen() {
                                 {/* put custom properties here */}
                               </Text>
                             </View>
+                            {mainHandWeapon.versatileDamage &&
+                              <View style={styles.modalWeaponProperty}>
+                                <Text>Versatile: </Text>
+                                <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                  <Text>{mainHandWeapon.versatileDamage}</Text>
+                                  <MaterialIcons name="sign-language" size={20} color="black" />
+                                </View>
+                              </View>
+                            }
                           </>
                         ) : (
                           <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
