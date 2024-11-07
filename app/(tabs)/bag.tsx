@@ -36,6 +36,8 @@ import coinPouchImage from '@items/default-item-coin-pouch.png';
 import addItemImage from '@items/add-item-image.png';
 import DropDownPicker from 'react-native-dropdown-picker';
 
+import missingImage from '@images/missing-image.png';
+
 import spearImage from '@weapons/spear.png';
 import sickleImage from '@weapons/sickle.png';
 import quarterstaffImage from '@weapons/quarterstaff.png';
@@ -60,6 +62,16 @@ import tridentImage from '@weapons/trident.png';
 import shortswordImage from '@weapons/shortsword.png';
 import scimitarImage from '@weapons/scimitar.png';
 import rapierImage from '@weapons/rapier.png';
+import pikeImage from '@weapons/pike.png';
+import morningstarImage from '@weapons/morningstar.png';
+import maulImage from '@weapons/maul.png';
+import longswordImage from '@weapons/longsword.png';
+import lanceImage from '@weapons/lance.png';
+import halberdImage from '@weapons/halberd.png';
+import greatswordImage from '@weapons/greatsword.png';
+import greataxeImage from '@weapons/greataxe.png';
+import glaiveImage from '@weapons/glaive.png';
+import flailImage from '@weapons/flail.png';
 
 const weaponImages = {
   "spear": spearImage,
@@ -86,6 +98,16 @@ const weaponImages = {
   "shortsword": shortswordImage,
   "scimitar": scimitarImage,
   "rapier": rapierImage,
+  "pike": pikeImage,
+  "morningstar": morningstarImage,
+  "maul": maulImage,
+  "longsword": longswordImage,
+  "lance": lanceImage,
+  "halberd": halberdImage,
+  "greatsword": greatswordImage,
+  "greataxe": greataxeImage,
+  "glaive": glaiveImage,
+  "flail": flailImage,
 };
 
 const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
@@ -549,7 +571,11 @@ export default function BagScreen() {
               } else if (item.type?.toLowerCase() === 'weapon' && 'weaponType' in item && item.weaponType) {
                 if (weaponImage) {
                   return weaponImage as ImageSourcePropType;
+                } else {
+                  return missingImage as ImageSourcePropType;
                 }
+              } else {
+                return missingImage as ImageSourcePropType;
               }
 
             })()}

@@ -212,7 +212,9 @@ export default function SpellbookScreen() {
         currentReactionsAvailable,
         setCurrentActionsAvailable,
         setCurrentBonusActionsAvailable,
-        setCurrentReactionsAvailable
+        setCurrentReactionsAvailable,
+        spentSpellSlots,
+        setSpentSpellSlots
     } = useActions();
 
 
@@ -1532,31 +1534,58 @@ export default function SpellbookScreen() {
         setSpellPressedIndex(null);
     };
 
+    const getRemainingSpellSlotsByLevel = () => {
+        const spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
+        const currentLevelData = spellSlotsPerUserLevelPerSpellLevel.find(
+            level => level.userLevel === statsData.level
+        );
+
+        if (!currentLevelData) {
+            console.error(`No spell slot data found for user level ${statsData.level}`);
+            return {};
+        }
+
+        const currentLevelSlots = currentLevelData.spellSlotSquares;
+        console.log('Current Level Slots:', currentLevelSlots);
+
+        const remainingSlots: Record<string, { total: number; remaining: number }> = {};
+
+        Object.entries(currentLevelSlots).forEach(([spellLevelKey, numSlots]) => {
+            const spellLevelMatch = spellLevelKey.match(/^SpLv(\d+)$/);
+            if (!spellLevelMatch) {
+                console.error(`Invalid spell level key: ${spellLevelKey}`);
+                return;
+            }
+            const spellLevel = Number(spellLevelMatch[1]);
+
+            const spentKey = `SpLv${spellLevel}`;
+            const slotsSpent = spentSpellSlots[spentKey] || 0;
+            const totalSlots = Number(numSlots);
+
+            // Ensure slotsSpent does not exceed totalSlots
+            const adjustedSlotsSpent = Math.min(slotsSpent, totalSlots);
+            const remaining = totalSlots - adjustedSlotsSpent;
+
+            remainingSlots[spentKey] = {
+                total: totalSlots,
+                remaining: remaining,
+            };
+
+            console.log(
+                `Spell Level ${spentKey}: ${remainingSlots[spentKey].remaining}/${remainingSlots[spentKey].total} slots remaining (${adjustedSlotsSpent} spent)`
+            );
+        });
+
+        return remainingSlots;
+    };
 
     // Spell Points
     const renderSpellPoints = () => {
-        const spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
-
-        // Development - Static spent spell slots data
-        // Format: { SpLv1: 2, SpLv4: 1 } means 2 level 1 slots and 1 level 4 slot spent
-        const spentSpellSlots = {
-            SpLv1: 1,
-            // SpLv2: 1, 
-            // SpLv3: 1,
-            // SpLv4: 1  
-        };
-
-        // Get spell slots for current level
-        const currentLevelSlots = spellSlotsPerUserLevelPerSpellLevel.find(
-            level => level.userLevel === statsData.level
-        )?.spellSlotSquares || {};
+        const remainingSlots = getRemainingSpellSlotsByLevel();
 
         return (
             <View style={{ width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {Object.entries(currentLevelSlots).map(([spellLevel, numSlots]) => {
-                    const slotsSpent = spentSpellSlots[spellLevel as keyof typeof spentSpellSlots] || 0;
-                    const remainingSlots = Number(numSlots) - slotsSpent;
-
+                {Object.entries(remainingSlots).map(([spellLevel, slotInfo]) => {
                     return (
                         <View key={spellLevel} style={{
                             borderWidth: 1,
@@ -1578,7 +1607,7 @@ export default function SpellbookScreen() {
                                 flexWrap: 'wrap',
                                 width: 20
                             }}>
-                                {[...Array(numSlots)].map((_, slotIndex) => (
+                                {[...Array(slotInfo.total)].map((_, slotIndex) => (
                                     <View
                                         key={slotIndex}
                                         style={{
@@ -1586,7 +1615,7 @@ export default function SpellbookScreen() {
                                             height: 6,
                                             borderWidth: 1,
                                             borderColor: 'cyan',
-                                            backgroundColor: slotIndex >= remainingSlots ? 'transparent' : 'cyan',
+                                            backgroundColor: slotIndex >= slotInfo.remaining ? 'transparent' : 'cyan',
                                             margin: 2,
                                             alignItems: 'center',
                                             justifyContent: 'center'
@@ -1614,6 +1643,50 @@ export default function SpellbookScreen() {
             );
             if (foundSpell && typeof foundSpell !== 'string') {
                 const castingTimeString = foundSpell.castingTime;
+                const spellLevel = Number(foundSpell.level);
+
+                if (isNaN(spellLevel)) {
+                    console.error(`Invalid spell level for spell: ${foundSpell.name}`);
+                    Alert.alert('Spell Data Error', `Invalid level for spell: ${foundSpell.name}`);
+                    return;
+                }
+
+                // Cantrips do not consume spell slots
+                if (spellLevel === 0) {
+                    // Deduct action costs and exit
+                    deductActionCosts(foundSpell.castingTime);
+                    return;
+                }
+                const remainingSlots = getRemainingSpellSlotsByLevel();
+                const spellLevelKey = `SpLv${spellLevel}`;
+                const levelSlots = remainingSlots[spellLevelKey];
+
+                if (!levelSlots) {
+                    Alert.alert('Spell Slot Error', `No spell slot information available for level ${spellLevel}`);
+                    return;
+                }
+
+                if (levelSlots.remaining <= 0) {
+                    Alert.alert('Insufficient Spell Slots', `No remaining spell slots for level ${spellLevel}`);
+                    return;
+                }
+
+                // All checks passed, increment spentSpellSlots safely
+                setSpentSpellSlots(prev => {
+                    const currentSpent = prev[spellLevelKey] || 0;
+                    const totalSlots = levelSlots.total;
+
+                    // Prevent exceeding total slots
+                    if (currentSpent >= totalSlots) {
+                        Alert.alert('Spell Slot Error', `You have already used all spell slots for level ${spellLevel}`);
+                        return prev;
+                    }
+
+                    return {
+                        ...prev,
+                        [spellLevelKey]: currentSpent + 1,
+                    };
+                });
 
                 // Use parseCastingTime to get the action costs
                 const { action, bonusAction, reaction } = parseCastingTime(castingTimeString);
@@ -1643,11 +1716,14 @@ export default function SpellbookScreen() {
                     setCurrentReactionsAvailable(prev => prev - reaction);
                 }
 
+                // Deduct action costs
+                deductActionCosts(foundSpell.castingTime);
                 return;
             }
         }
 
-        console.log("Spell not found:", spellName);
+        console.log('Spell not found:', spellName);
+        Alert.alert('Spell Not Found', `The spell "${spellName}" was not found.`);
     }
 
     const canAffordSpell = (spellName: string | null): boolean => {
@@ -1677,8 +1753,39 @@ export default function SpellbookScreen() {
         if (bonusAction > 0 && currentBonusActionsAvailable < bonusAction) return false;
         if (reaction > 0 && currentReactionsAvailable < reaction) return false;
 
+        // Check if there are enough spell slots left for the spell's level
+        const spellLevel = Number(foundSpell.level);
+        if (isNaN(spellLevel)) return false; // Invalid spell level
+
+        // Cantrips (level 0 spells) do not consume spell slots
+        if (spellLevel === 0) return true;
+
+        const remainingSlots = getRemainingSpellSlotsByLevel();
+        const spellLevelKey = `SpLv${spellLevel}`;
+        const levelSlots = remainingSlots[spellLevelKey];
+
+        // If no slot information is available, cannot cast
+        if (!levelSlots) return false;
+
+        // Check if there are remaining slots
+        if (levelSlots.remaining <= 0) return false;
+
         // If all checks pass, the user can afford the spell
         return true;
+    };
+
+    const deductActionCosts = (castingTimeString: string) => {
+        const { action, bonusAction, reaction } = parseCastingTime(castingTimeString);
+
+        if (action > 0) {
+            setCurrentActionsAvailable(prev => prev - action);
+        }
+        if (bonusAction > 0) {
+            setCurrentBonusActionsAvailable(prev => prev - bonusAction);
+        }
+        if (reaction > 0) {
+            setCurrentReactionsAvailable(prev => prev - reaction);
+        }
     };
 
     const handleCanAffordCastButtonDisabled = (spellName: string | null) => {

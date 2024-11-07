@@ -246,7 +246,9 @@ export default function ActionsScreen() {
     currentReactionsAvailable,
     setCurrentActionsAvailable,
     setCurrentBonusActionsAvailable,
-    setCurrentReactionsAvailable
+    setCurrentReactionsAvailable,
+    spentSpellSlots,
+    setSpentSpellSlots
   } = useActions();
   const { weaponsProficientIn } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
@@ -1786,6 +1788,18 @@ export default function ActionsScreen() {
                         onPress={() => {
                           if (selectedAction.name.toLowerCase() === 'long rest') {
                             handleHpChange('replenish');
+                            setSpentSpellSlots({
+                              ...spentSpellSlots,
+                              SpLv1: 0,
+                              SpLv2: 0,
+                              SpLv3: 0,
+                              SpLv4: 0,
+                              SpLv5: 0,
+                              SpLv6: 0,
+                              SpLv7: 0,
+                              SpLv8: 0,
+                              SpLv9: 0
+                            });
                           }
                           commitAction();
                         }}
@@ -1799,27 +1813,38 @@ export default function ActionsScreen() {
                         <View style={styles.modalButtonTextContainer}>
 
                           <Text>Commit: </Text>
-                          {selectedAction.cost.actions === 0 ? null : (
+                          {selectedAction.name.toLowerCase() !== 'long rest' ? (
+                            <>
+                              {
+                                selectedAction.cost.actions === 0 ? null : (
+                                  <View style={styles.costTextContainer}>
+                                    <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.actions}</Text>
+                                    <Ionicons name="ellipse" size={16} color="green" />
+                                  </View>
+                                )
+                              }
+                              {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
+                                <Text>, </Text>
+                              )}
+                              {selectedAction.cost.bonus === 0 ? null : (
+                                <View style={styles.costTextContainer}>
+                                  <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.bonus}</Text>
+                                  <Ionicons name="triangle" size={16} color="#FF8C00" />
+                                </View>
+                              )}
+                              {selectedAction.cost.reaction !== undefined && (
+                                <View style={styles.costTextContainer}>
+                                  <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.reaction}</Text>
+                                  <Ionicons name="square" size={16} color="rgb(200, 0, 255)" />
+                                </View>
+                              )}
+                            </>
+                          ) :
                             <View style={styles.costTextContainer}>
-                              <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.actions}</Text>
-                              <Ionicons name="ellipse" size={16} color="green" />
+                              <Text style={styles.modalButtonTextBlack}>8 hours</Text>
                             </View>
-                          )}
-                          {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
-                            <Text>, </Text>
-                          )}
-                          {selectedAction.cost.bonus === 0 ? null : (
-                            <View style={styles.costTextContainer}>
-                              <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.bonus}</Text>
-                              <Ionicons name="triangle" size={16} color="#FF8C00" />
-                            </View>
-                          )}
-                          {selectedAction.cost.reaction !== undefined && (
-                            <View style={styles.costTextContainer}>
-                              <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.reaction}</Text>
-                              <Ionicons name="square" size={16} color="rgb(200, 0, 255)" />
-                            </View>
-                          )}
+                          }
+
                         </View>
                       </TouchableOpacity>
                     </View>
