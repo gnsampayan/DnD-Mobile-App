@@ -536,7 +536,7 @@ export default function SpellbookScreen() {
             return (
                 <View style={styles.section}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
-                        <MaterialCommunityIcons name="book-check" size={20} color="white" />
+                        <MaterialCommunityIcons name="book-check" size={24} color="lightgrey" />
                         <Text style={styles.label}>
                             Prepared Spells
                         </Text>
@@ -603,7 +603,7 @@ export default function SpellbookScreen() {
                         ) : (
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
                                 <Text style={{ color: 'white' }}>+</Text>
-                                <Ionicons name="sparkles" size={20} color="white" />
+                                <MaterialCommunityIcons name="shimmer" size={20} color="white" />
                             </View>
                         )}
                     </View>
@@ -620,7 +620,7 @@ export default function SpellbookScreen() {
         return (
             <View style={styles.section}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
-                    <Ionicons name="sparkles" size={20} color="white" />
+                    <MaterialCommunityIcons name="shimmer" size={24} color="lightgrey" />
                     <Text style={styles.label}>
                         Cantrips
                     </Text>
@@ -716,7 +716,7 @@ export default function SpellbookScreen() {
                             marginBottom: 5
                         }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                <MaterialCommunityIcons name="book" size={20} color="white" />
+                                <MaterialCommunityIcons name="book" size={24} color="lightgrey" />
                                 <Text style={styles.label}>
                                     Spellbook
                                 </Text>
@@ -776,7 +776,7 @@ export default function SpellbookScreen() {
                 return (
                     <View style={[styles.section, { flex: 1, marginBottom: 50 }]}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
-                            <MaterialCommunityIcons name="auto-fix" size={20} color="white" />
+                            <MaterialCommunityIcons name="auto-fix" size={24} color="lightgrey" />
                             <Text style={styles.label}>
                                 Spells
                             </Text>
@@ -1254,9 +1254,10 @@ export default function SpellbookScreen() {
         const spellcastingModifier = getAbilityModifier(primaryAbility.toString());
         return (
             <View style={[styles.headerTextContainer, { paddingHorizontal: 10 }]}>
-                <Text style={styles.headerText}>spellsave DC:</Text>
-                <View style={styles.headerTextBox}>
+                <Text style={styles.headerText}>SpSv DC:</Text>
+                <View style={[styles.headerTextBox, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}>
                     <Text style={styles.headerText}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
+                    <MaterialCommunityIcons name="shield-star" size={20} color="lightgrey" />
                 </View>
             </View>
         );

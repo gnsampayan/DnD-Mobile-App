@@ -531,7 +531,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Saving Throws */}
             <View style={styles.savingThrowsContainer}>
                 <View style={[styles.rowIconTitle, { alignItems: 'center', marginBottom: 5 }]}>
-                    <Ionicons name="flash-off" size={20} color="lightgrey" />
+                    <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey" />
                     <Text style={styles.savingThrowsTitle}>Saving Throws</Text>
                 </View>
                 <View style={styles.savingThrowsGrid}>
@@ -562,7 +562,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             <View style={styles.characterStatsContainer}>
                 <View style={styles.availableAbilityPointsContainer}>
                     <View style={styles.rowIconTitle}>
-                        <Ionicons name="star" size={20} color="lightgrey" />
+                        <MaterialCommunityIcons name="lightning-bolt" size={24} color="lightgrey" />
                         <Text style={styles.characterStatsTitle}>Abilities</Text>
                     </View>
                     {abilityAllocationsSaveVisible &&
@@ -579,10 +579,13 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         </TouchableOpacity>
                     }
                     <View style={styles.availableAbilityPointsIconAndValue}>
-                        <Ionicons name="star" size={16} color={availableAbilityPoints > 0 ? 'gold' : 'lightgrey'} />
+                        {availableAbilityPoints > 0 &&
+                            <Text style={{ color: 'white' }}>+</Text>
+                        }
                         <Text style={styles.availableAbilityPoints}>
                             {availableAbilityPoints}
                         </Text>
+                        <MaterialCommunityIcons name="lightning-bolt" size={20} color={availableAbilityPoints > 0 ? 'gold' : 'lightgrey'} />
                     </View>
                 </View>
                 <FlatList
@@ -633,7 +636,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Skills */}
             <View style={styles.skillsContainer}>
                 <View style={styles.rowIconTitle}>
-                    <Ionicons name="sparkles" size={20} color="lightgrey" />
+                    <MaterialCommunityIcons name="target" size={24} color="lightgrey" />
                     <Text style={styles.skillsTitle}>Skills</Text>
                 </View>
                 <FlatList

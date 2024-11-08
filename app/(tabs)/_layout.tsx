@@ -27,7 +27,7 @@ export default function TabLayout() {
         options={{
           title: 'Actions',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'dice' : 'dice-outline'} color={color} />
+            <TabBarIcon name={focused ? 'run-fast' : 'run'} color={color} family="MaterialCommunityIcons" />
           ),
         }}
       />
@@ -35,10 +35,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="spellbook"
         options={{
-          title: 'Spellbook',
+          title: 'Spells',
           href: isSpellCaster ? undefined : null,
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'book' : 'book-outline'} color={color} />
+            <TabBarIcon name={focused ? 'star-shooting' : 'star-shooting-outline'} color={color} family="MaterialCommunityIcons" />
           ),
         }}
       />
@@ -47,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: 'Inventory',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'bag' : 'bag-outline'} color={color} />
+            <TabBarIcon name={focused ? 'bag-personal' : 'bag-personal-outline'} color={color} family="MaterialCommunityIcons" />
           ),
         }}
       />

@@ -4,6 +4,7 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       padding: 10,
+      backgroundColor: 'black',
     },
     header: {
       flexDirection: 'row',
@@ -13,14 +14,14 @@ const styles = StyleSheet.create({
     },
     headerLeft: {
       flexDirection: 'row',
-      gap: 10,
+      gap: 5,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
       borderColor: 'rgba(255, 255, 255, 0.1)',
       borderStyle: 'solid',
       borderRadius: 8,
-      padding: 10,
+      padding: 5,
     },
     headerText: {
       fontSize: 16,
@@ -285,14 +286,18 @@ const styles = StyleSheet.create({
       textAlignVertical: 'top',
     },
     itemModalDetails: {
-      fontSize: 14,
+      fontSize: 18,
       marginBottom: 20,
+      marginTop: 10,
     },
     headerTextContainer: {
-      flexDirection: 'column',
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 10
+      gap: 5,
+      padding: 5,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      borderRadius: 4,
     },
     closeButtonContainer: {
       position: 'absolute',

@@ -1217,7 +1217,7 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{ac}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="shield" size={24} color="lightgrey" />
+                        <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey" />
                       </View>
                     </View>
                   </View>

@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         flexDirection: 'column',
         justifyContent: 'space-between',
-        backgroundColor: '#030b10',
+        backgroundColor: 'black',
     },
     title: {
         color: '#fff',
@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     },
     label: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
     },
     text: {

@@ -945,15 +945,15 @@ export default function BagScreen() {
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{carryingCapacity}</Text>
-            <MaterialCommunityIcons name="weight-pound" size={24} color="lightgrey" />
+            <MaterialCommunityIcons name="weight-pound" size={20} color="lightgrey" />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{foodUnits}</Text>
-            <MaterialCommunityIcons name="food-apple" size={24} color="lightgrey" />
+            <MaterialCommunityIcons name="food-apple" size={20} color="lightgrey" />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{money}</Text>
-            <MaterialCommunityIcons name="gold" size={24} color="lightgrey" />
+            <MaterialCommunityIcons name="gold" size={20} color="lightgrey" />
           </View>
         </View>
         <View style={styles.headerIcons}>
@@ -1253,7 +1253,46 @@ export default function BagScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.itemModalContainer}>
-            <ScrollView>
+            <ScrollView style={{ flex: 1 }}>
+
+
+
+              {/* Quantity Row */}
+              <>
+                <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 14, fontStyle: 'italic', color: 'gray' }}>Quantity</Text>
+                </View>
+                <View style={styles.quantityRow}>
+                  <TouchableOpacity
+                    onPress={() => decrementQuantity(1)}
+                    style={styles.quantityButton}
+                  >
+                    <Ionicons name="remove" size={24} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
+                    <Text>-10</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.quantityInput}
+                    keyboardType="number-pad"
+                    onChangeText={handleQuantityChange}
+                    onEndEditing={handleQuantityEndEditing}
+                    value={modalQuantityInput}
+                  />
+                  <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
+                    <Text>+10</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => incrementQuantity(1)}
+                    style={styles.quantityButton}
+                  >
+                    <Ionicons name="add" size={24} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </>
+
+
+
               <TouchableOpacity onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
                 {isEditing && editingItemId === selectedItem?.id ? (
                   <TextInput
@@ -1268,19 +1307,25 @@ export default function BagScreen() {
                   <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
                 )}
               </TouchableOpacity>
+
+
+
+
               {selectedItem && (
                 <>
                   {/* Wrap the image in a TouchableWithoutFeedback */}
                   <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
                     {selectedItem.image ? (
-                      <Image
-                        source={
-                          typeof selectedItem.image === 'number'
-                            ? selectedItem.image
-                            : { uri: selectedItem.image }
-                        }
-                        style={styles.itemModalImage}
-                      />
+                      <View style={{ borderRadius: 8, overflow: 'hidden' }}>
+                        <ImageBackground
+                          source={
+                            typeof selectedItem.image === 'number'
+                              ? selectedItem.image
+                              : { uri: selectedItem.image }
+                          }
+                          style={styles.itemModalImage}
+                        />
+                      </View>
                     ) : (
                       selectedItem.type?.toLowerCase() === 'weapon' ? (
                         <View style={{ borderRadius: 8, overflow: 'hidden' }}>
@@ -1315,37 +1360,7 @@ export default function BagScreen() {
                     </TouchableWithoutFeedback>
                   )}
 
-                  {/* Quantity Row */}
-                  {/* Hide quantity row for bedroll (item id 0) */}
-                  {selectedItem?.id !== '0' && (
-                    <View style={styles.quantityRow}>
-                      <TouchableOpacity
-                        onPress={() => decrementQuantity(1)}
-                        style={styles.quantityButton}
-                      >
-                        <Ionicons name="remove" size={24} color="white" />
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
-                        <Text>-10</Text>
-                      </TouchableOpacity>
-                      <TextInput
-                        style={styles.quantityInput}
-                        keyboardType="number-pad"
-                        onChangeText={handleQuantityChange}
-                        onEndEditing={handleQuantityEndEditing}
-                        value={modalQuantityInput}
-                      />
-                      <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
-                        <Text>+10</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => incrementQuantity(1)}
-                        style={styles.quantityButton}
-                      >
-                        <Ionicons name="add" size={24} color="white" />
-                      </TouchableOpacity>
-                    </View>
-                  )}
+
                 </>
               )}
             </ScrollView>
