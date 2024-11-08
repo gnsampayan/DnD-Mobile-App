@@ -1,0 +1,22 @@
+[
+	{
+		"paladinLevel": 3,
+		"spells": ["bane", "hunter's mark"]
+	},
+	{
+		"paladinLevel": 5,
+		"spells": ["hold person", "misty step"]
+	},
+	{
+		"paladinLevel": 9,
+		"spells": ["haste", "protection from energy"]
+	},
+	{
+		"paladinLevel": 13,
+		"spells": ["banishment", "dimension door"]
+	},
+	{
+		"paladinLevel": 17,
+		"spells": ["hold monster", "scrying"]
+	}
+]

@@ -1,0 +1,122 @@
+[
+	{
+		"userLevel": 1,
+		"features": ["Rage", "Unarmored Defense"],
+		"rages": 2,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 2,
+		"features": ["Reckless Attack", "Danger Sense"],
+		"rages": 2,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 3,
+		"features": ["Primal Path"],
+		"rages": 3,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 4,
+		"features": ["Ability Score Improvement"],
+		"rages": 3,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 5,
+		"features": ["Extra Attack", "Fast Movement"],
+		"rages": 3,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 6,
+		"features": ["Path Feature"],
+		"rages": 4,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 7,
+		"features": ["Feral Instinct"],
+		"rages": 4,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 8,
+		"features": ["Ability Score Improvement"],
+		"rages": 4,
+		"rageDamage": "+2"
+	},
+	{
+		"userLevel": 9,
+		"features": ["Brutal Critical (1 die)"],
+		"rages": 4,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 10,
+		"features": ["Path Feature"],
+		"rages": 4,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 11,
+		"features": ["Relentless Rage"],
+		"rages": 4,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 12,
+		"features": ["Ability Score Improvement"],
+		"rages": 5,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 13,
+		"features": ["Brutal Critical (2 dice)"],
+		"rages": 5,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 14,
+		"features": ["Path Feature"],
+		"rages": 5,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 15,
+		"features": ["Persistent Rage"],
+		"rages": 5,
+		"rageDamage": "+3"
+	},
+	{
+		"userLevel": 16,
+		"features": ["Ability Score Improvement"],
+		"rages": 5,
+		"rageDamage": "+4"
+	},
+	{
+		"userLevel": 17,
+		"features": ["Brutal Critical (3 dice)"],
+		"rages": 6,
+		"rageDamage": "+4"
+	},
+	{
+		"userLevel": 18,
+		"features": ["Indomitable Might"],
+		"rages": 6,
+		"rageDamage": "+4"
+	},
+	{
+		"userLevel": 19,
+		"features": ["Ability Score Improvement"],
+		"rages": 6,
+		"rageDamage": "+4"
+	},
+	{
+		"userLevel": 20,
+		"features": ["Primal Champion"],
+		"rages": "Unlimited",
+		"rageDamage": "+4"
+	}
+]

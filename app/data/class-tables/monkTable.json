@@ -1,0 +1,142 @@
+[
+	{
+		"userLevel": 1,
+		"martialArts": "1d4",
+		"kiPoints": null,
+		"unarmoredMovement": null,
+		"features": ["Unarmored Defense", "Martial Arts"]
+	},
+	{
+		"userLevel": 2,
+		"martialArts": "1d4",
+		"kiPoints": 2,
+		"unarmoredMovement": "+10 ft.",
+		"features": ["Ki", "Unarmored Movement"]
+	},
+	{
+		"userLevel": 3,
+		"martialArts": "1d4",
+		"kiPoints": 3,
+		"unarmoredMovement": "+10 ft.",
+		"features": ["Monastic Tradition", "Deflect Missiles"]
+	},
+	{
+		"userLevel": 4,
+		"martialArts": "1d4",
+		"kiPoints": 4,
+		"unarmoredMovement": "+10 ft.",
+		"features": ["Ability Score Improvement", "Slow Fall"]
+	},
+	{
+		"userLevel": 5,
+		"martialArts": "1d6",
+		"kiPoints": 5,
+		"unarmoredMovement": "+10 ft.",
+		"features": ["Extra Attack", "Stunning Strike"]
+	},
+	{
+		"userLevel": 6,
+		"martialArts": "1d6",
+		"kiPoints": 6,
+		"unarmoredMovement": "+15 ft.",
+		"features": ["Ki-Empowered Strikes", "Monastic Tradition feature"]
+	},
+	{
+		"userLevel": 7,
+		"martialArts": "1d6",
+		"kiPoints": 7,
+		"unarmoredMovement": "+15 ft.",
+		"features": ["Evasion", "Stillness of Mind"]
+	},
+	{
+		"userLevel": 8,
+		"martialArts": "1d6",
+		"kiPoints": 8,
+		"unarmoredMovement": "+15 ft.",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 9,
+		"martialArts": "1d6",
+		"kiPoints": 9,
+		"unarmoredMovement": "+15 ft.",
+		"features": ["Unarmored Movement improvement"]
+	},
+	{
+		"userLevel": 10,
+		"martialArts": "1d6",
+		"kiPoints": 10,
+		"unarmoredMovement": "+20 ft.",
+		"features": ["Purity of Body"]
+	},
+	{
+		"userLevel": 11,
+		"martialArts": "1d8",
+		"kiPoints": 11,
+		"unarmoredMovement": "+20 ft.",
+		"features": ["Monastic Tradition feature"]
+	},
+	{
+		"userLevel": 12,
+		"martialArts": "1d8",
+		"kiPoints": 12,
+		"unarmoredMovement": "+20 ft.",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 13,
+		"martialArts": "1d8",
+		"kiPoints": 13,
+		"unarmoredMovement": "+20 ft.",
+		"features": ["Tongue of the Sun and Moon"]
+	},
+	{
+		"userLevel": 14,
+		"martialArts": "1d8",
+		"kiPoints": 14,
+		"unarmoredMovement": "+25 ft.",
+		"features": ["Diamond Soul"]
+	},
+	{
+		"userLevel": 15,
+		"martialArts": "1d8",
+		"kiPoints": 15,
+		"unarmoredMovement": "+25 ft.",
+		"features": ["Timeless Body"]
+	},
+	{
+		"userLevel": 16,
+		"martialArts": "1d8",
+		"kiPoints": 16,
+		"unarmoredMovement": "+25 ft.",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 17,
+		"martialArts": "1d10",
+		"kiPoints": 17,
+		"unarmoredMovement": "+25 ft.",
+		"features": ["Monastic Tradition feature"]
+	},
+	{
+		"userLevel": 18,
+		"martialArts": "1d10",
+		"kiPoints": 18,
+		"unarmoredMovement": "+30 ft.",
+		"features": ["Empty Body"]
+	},
+	{
+		"userLevel": 19,
+		"martialArts": "1d10",
+		"kiPoints": 19,
+		"unarmoredMovement": "+30 ft.",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 20,
+		"martialArts": "1d10",
+		"kiPoints": 20,
+		"unarmoredMovement": "+30 ft.",
+		"features": ["Perfect Self"]
+	}
+]

@@ -1,0 +1,102 @@
+[
+	{
+		"userLevel": 1,
+		"sneakAttack": "1d6",
+		"features": ["Expertise", "Sneak Attack", "Thieves' Cant"]
+	},
+	{
+		"userLevel": 2,
+		"sneakAttack": "1d6",
+		"features": ["Cunning Action"]
+	},
+	{
+		"userLevel": 3,
+		"sneakAttack": "2d6",
+		"features": ["Roguish Archetype"]
+	},
+	{
+		"userLevel": 4,
+		"sneakAttack": "2d6",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 5,
+		"sneakAttack": "3d6",
+		"features": ["Uncanny Dodge"]
+	},
+	{
+		"userLevel": 6,
+		"sneakAttack": "3d6",
+		"features": ["Expertise"]
+	},
+	{
+		"userLevel": 7,
+		"sneakAttack": "4d6",
+		"features": ["Evasion"]
+	},
+	{
+		"userLevel": 8,
+		"sneakAttack": "4d6",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 9,
+		"sneakAttack": "5d6",
+		"features": ["Roguish Archetype feature"]
+	},
+	{
+		"userLevel": 10,
+		"sneakAttack": "5d6",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 11,
+		"sneakAttack": "6d6",
+		"features": ["Reliable Talent"]
+	},
+	{
+		"userLevel": 12,
+		"sneakAttack": "6d6",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 13,
+		"sneakAttack": "7d6",
+		"features": ["Roguish Archetype feature"]
+	},
+	{
+		"userLevel": 14,
+		"sneakAttack": "7d6",
+		"features": ["Blindsense"]
+	},
+	{
+		"userLevel": 15,
+		"sneakAttack": "8d6",
+		"features": ["Slippery Mind"]
+	},
+	{
+		"userLevel": 16,
+		"sneakAttack": "8d6",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 17,
+		"sneakAttack": "9d6",
+		"features": ["Roguish Archetype feature"]
+	},
+	{
+		"userLevel": 18,
+		"sneakAttack": "9d6",
+		"features": ["Elusive"]
+	},
+	{
+		"userLevel": 19,
+		"sneakAttack": "10d6",
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 20,
+		"sneakAttack": "10d6",
+		"features": ["Stroke of Luck"]
+	}
+]

@@ -1,0 +1,180 @@
+[
+	{
+		"userLevel": 1,
+		"features": ["Favored Enemy", "Natural Explorer"],
+		"spellSlotSquares": null
+	},
+	{
+		"userLevel": 2,
+		"features": ["Fighting Style", "Spellcasting"],
+		"spellSlotSquares": {
+			"SpLv1": 2
+		}
+	},
+	{
+		"userLevel": 3,
+		"features": ["Ranger Archetype", "Primeval Awareness"],
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 4,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 5,
+		"features": ["Extra Attack"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 6,
+		"features": ["Favored Enemy and Natural Explorer improvements"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 7,
+		"features": ["Ranger Archetype feature"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 8,
+		"features": ["Ability Score Improvement", "Land's Stride"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 9,
+		"features": null,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 10,
+		"features": ["Natural Explorer improvement", "Hide in Plain Sight"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 11,
+		"features": ["Ranger Archetype feature"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 12,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 13,
+		"features": null,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"userLevel": 14,
+		"features": ["Favored Enemy improvement", "Vanish"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"userLevel": 15,
+		"features": ["Ranger Archetype feature"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		}
+	},
+	{
+		"userLevel": 16,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		}
+	},
+	{
+		"userLevel": 17,
+		"features": null,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		}
+	},
+	{
+		"userLevel": 18,
+		"features": ["Feral Senses"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		}
+	},
+	{
+		"userLevel": 19,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		}
+	},
+	{
+		"userLevel": 20,
+		"features": ["Foe Slayer"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		}
+	}
+]

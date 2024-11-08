@@ -1,0 +1,230 @@
+[
+	{
+		"userLevel": 1,
+		"spellSlotSquares": {
+			"SpLv1": 2
+		},
+		"features": ["Druidic", "Spellcasting"]
+	},
+	{
+		"userLevel": 2,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		},
+		"features": ["Wild Shape", "Druid Circle"]
+	},
+	{
+		"userLevel": 3,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		},
+		"features": null
+	},
+	{
+		"userLevel": 4,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		},
+		"features": ["Wild Shape Improvement", "Ability Score Improvement"]
+	},
+	{
+		"userLevel": 5,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		},
+		"features": null
+	},
+	{
+		"userLevel": 6,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		},
+		"features": ["Druid Circle Feature"]
+	},
+	{
+		"userLevel": 7,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 8,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		},
+		"features": ["Wild Shape Improvement", "Ability Score Improvement"]
+	},
+	{
+		"userLevel": 9,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 10,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		},
+		"features": ["Druid Circle Feature"]
+	},
+	{
+		"userLevel": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 12,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 13,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 14,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1
+		},
+		"features": ["Druid Circle Feature"]
+	},
+	{
+		"userLevel": 15,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 16,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 17,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 18,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Timeless Body", "Beast Spells"]
+	},
+	{
+		"userLevel": 19,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 2,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 20,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 2,
+			"SpLv7": 2,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Archdruid"]
+	}
+]

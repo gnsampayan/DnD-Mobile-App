@@ -1,0 +1,82 @@
+[
+	{
+		"userLevel": 1,
+		"features": ["Fighting Style", "Second Wind"]
+	},
+	{
+		"userLevel": 2,
+		"features": ["Action Surge (one use)"]
+	},
+	{
+		"userLevel": 3,
+		"features": ["Martial Archetype"]
+	},
+	{
+		"userLevel": 4,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 5,
+		"features": ["Extra Attack"]
+	},
+	{
+		"userLevel": 6,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 7,
+		"features": ["Martial Archetype feature"]
+	},
+	{
+		"userLevel": 8,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 9,
+		"features": ["Indomitable (one use)"]
+	},
+	{
+		"userLevel": 10,
+		"features": ["Martial Archetype feature"]
+	},
+	{
+		"userLevel": 11,
+		"features": ["Extra Attack (2)"]
+	},
+	{
+		"userLevel": 12,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 13,
+		"features": ["Indomitable (two uses)"]
+	},
+	{
+		"userLevel": 14,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 15,
+		"features": ["Martial Archetype feature"]
+	},
+	{
+		"userLevel": 16,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 17,
+		"features": ["Action Surge (two uses)", "Indomitable (three uses)"]
+	},
+	{
+		"userLevel": 18,
+		"features": ["Martial Archetype feature"]
+	},
+	{
+		"userLevel": 19,
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 20,
+		"features": ["Extra Attack (3)"]
+	}
+]

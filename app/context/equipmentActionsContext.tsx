@@ -67,6 +67,42 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [weapons, isLoading]);
 
+
+
+    // Update weapon slots when items change
+    useEffect(() => {
+        // Check if equipped weapons are still in items
+        setWeapons((prevWeapons) => {
+            const updatedWeapons = { ...prevWeapons };
+
+            // Helper function to check if a weapon is in items
+            const isWeaponInItems = (weapon: Item | null) => {
+                if (!weapon) return false;
+                return items.some((item) => item.id === weapon.id);
+            };
+
+            // Check mainHandWeapon
+            if (prevWeapons.mainHandWeapon && !isWeaponInItems(prevWeapons.mainHandWeapon)) {
+                updatedWeapons.mainHandWeapon = null;
+            }
+
+            // Check offHandWeapon
+            if (prevWeapons.offHandWeapon && !isWeaponInItems(prevWeapons.offHandWeapon)) {
+                updatedWeapons.offHandWeapon = null;
+            }
+
+            // Check rangedHandWeapon
+            if (prevWeapons.rangedHandWeapon && !isWeaponInItems(prevWeapons.rangedHandWeapon)) {
+                updatedWeapons.rangedHandWeapon = null;
+            }
+
+            return updatedWeapons;
+        });
+    }, [items]);
+
+
+
+
     const equipWeapon = (slot: WeaponSlot, weapon: Item | null) => {
         setWeapons((prevWeapons) => ({
             ...prevWeapons,

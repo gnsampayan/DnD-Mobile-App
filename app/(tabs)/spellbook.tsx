@@ -76,6 +76,14 @@ import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
 // Wizard spell level data
 import wizardTableData from '@/app/data/class-tables/wizardTable.json';
+import warlockTableData from '@/app/data/class-tables/warlockTable.json';
+import sorcererTableData from '@/app/data/class-tables/sorcererTable.json';
+import artificerTableData from '@/app/data/class-tables/artificerTable.json';
+import bardTableData from '@/app/data/class-tables/bardTable.json';
+import clericTableData from '@/app/data/class-tables/clericTable.json';
+import druidTableData from '@/app/data/class-tables/druidTable.json';
+import rangerTableData from '@/app/data/class-tables/rangerTable.json';
+import paladinTableData from '@/app/data/class-tables/paladinTable.json';
 
 
 const cantripImages = {
@@ -1574,19 +1582,61 @@ export default function SpellbookScreen() {
     };
 
     const getRemainingSpellSlotsByLevel = () => {
-        const spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
+        let spellSlotsPerUserLevelPerSpellLevel;
+        switch (statsData.class) {
+            case 'wizard':
+                spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
+                break;
+            case 'warlock':
+                spellSlotsPerUserLevelPerSpellLevel = warlockTableData;
+                break;
+            case 'sorcerer':
+                spellSlotsPerUserLevelPerSpellLevel = sorcererTableData;
+                break;
+            case 'artificer':
+                spellSlotsPerUserLevelPerSpellLevel = artificerTableData;
+                break;
+            case 'bard':
+                spellSlotsPerUserLevelPerSpellLevel = bardTableData;
+                break;
+            case 'cleric':
+                spellSlotsPerUserLevelPerSpellLevel = clericTableData;
+                break;
+            case 'druid':
+                spellSlotsPerUserLevelPerSpellLevel = druidTableData;
+                break;
+            case 'ranger':
+                spellSlotsPerUserLevelPerSpellLevel = rangerTableData;
+                break;
+            case 'paladin':
+                spellSlotsPerUserLevelPerSpellLevel = paladinTableData;
+                break;
+
+            default:
+                // Default to wizard -- change this later
+                spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
+                return {};
+        }
+
         const currentLevelData = spellSlotsPerUserLevelPerSpellLevel.find(
             level => level.userLevel === statsData.level
         );
 
-        if (!currentLevelData) {
-            console.error(`No spell slot data found for user level ${statsData.level}`);
-            return {};
+        const remainingSlots: Record<string, { total: number; remaining: number }> = {};
+
+        // If no level data or no spell slots, return all levels with 0 slots
+        if (!currentLevelData || !currentLevelData.spellSlotSquares) {
+            for (let i = 1; i <= 9; i++) {
+                const spentKey = `SpLv${i}`;
+                remainingSlots[spentKey] = {
+                    total: 0,
+                    remaining: 0
+                };
+            }
+            return remainingSlots;
         }
 
         const currentLevelSlots = currentLevelData.spellSlotSquares;
-
-        const remainingSlots: Record<string, { total: number; remaining: number }> = {};
 
         Object.entries(currentLevelSlots).forEach(([spellLevelKey, numSlots]) => {
             const spellLevelMatch = spellLevelKey.match(/^SpLv(\d+)$/);
@@ -1608,8 +1658,18 @@ export default function SpellbookScreen() {
                 total: totalSlots,
                 remaining: remaining,
             };
-
         });
+
+        // Fill in any missing spell levels with 0 slots
+        for (let i = 1; i <= 9; i++) {
+            const spentKey = `SpLv${i}`;
+            if (!remainingSlots[spentKey]) {
+                remainingSlots[spentKey] = {
+                    total: 0,
+                    remaining: 0
+                };
+            }
+        }
 
         return remainingSlots;
     };

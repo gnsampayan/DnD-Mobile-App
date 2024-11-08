@@ -1,0 +1,222 @@
+[
+	{
+		"userLevel": 1,
+		"spellSlotSquares": {
+			"SpLv1": 2
+		},
+		"features": ["Magical Tinkering", "Spellcasting"],
+		"infusionsKnown": null,
+		"infusedItems": null
+	},
+	{
+		"userLevel": 2,
+		"spellSlotSquares": {
+			"SpLv1": 2
+		},
+		"features": ["Infuse Item"],
+		"infusionsKnown": 4,
+		"infusedItems": 2
+	},
+	{
+		"userLevel": 3,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		},
+		"features": ["Artificer Specialist", "The Right Tool for the Job"],
+		"infusionsKnown": 4,
+		"infusedItems": 2
+	},
+	{
+		"userLevel": 4,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		},
+		"features": ["Ability Score Improvement"],
+		"infusionsKnown": 4,
+		"infusedItems": 2
+	},
+	{
+		"userLevel": 5,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		},
+		"features": ["Artificer Special feature"],
+		"infusionsKnown": 4,
+		"infusedItems": 2
+	},
+	{
+		"userLevel": 6,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		},
+		"features": ["Tool Expertise"],
+		"infusionsKnown": 6,
+		"infusedItems": 3
+	},
+	{
+		"userLevel": 7,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		},
+		"features": ["Flash of Genius"],
+		"infusionsKnown": 6,
+		"infusedItems": 3
+	},
+	{
+		"userLevel": 8,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		},
+		"features": ["Ability Score Improvement"],
+		"infusionsKnown": 6,
+		"infusedItems": 3
+	},
+	{
+		"userLevel": 9,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		},
+		"features": ["Artificer Special feature"],
+		"infusionsKnown": 6,
+		"infusedItems": 3
+	},
+	{
+		"userLevel": 10,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		},
+		"features": ["Magic Item Adept"],
+		"infusionsKnown": 8,
+		"infusedItems": 4
+	},
+	{
+		"userLevel": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		},
+		"features": ["Spell-Storing Item"],
+		"infusionsKnown": 8,
+		"infusedItems": 4
+	},
+	{
+		"userLevel": 12,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		},
+		"features": ["Ability Score Improvement"],
+		"infusionsKnown": 8,
+		"infusedItems": 4
+	},
+	{
+		"userLevel": 13,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		},
+		"features": null,
+		"infusionsKnown": 8,
+		"infusedItems": 4
+	},
+	{
+		"userLevel": 14,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		},
+		"features": ["Magic Item Savant"],
+		"infusionsKnown": 10,
+		"infusedItems": 5
+	},
+	{
+		"userLevel": 15,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		},
+		"features": ["Artificer Special feature"],
+		"infusionsKnown": 10,
+		"infusedItems": 5
+	},
+	{
+		"userLevel": 16,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		},
+		"features": ["Ability Score Improvement"],
+		"infusionsKnown": 10,
+		"infusedItems": 5
+	},
+	{
+		"userLevel": 17,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		},
+		"features": null,
+		"infusionsKnown": 12,
+		"infusedItems": 6
+	},
+	{
+		"userLevel": 18,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		},
+		"features": ["Magic Item Master"],
+		"infusionsKnown": 12,
+		"infusedItems": 6
+	},
+	{
+		"userLevel": 19,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		},
+		"features": ["Ability Score Improvement"],
+		"infusionsKnown": 12,
+		"infusedItems": 6
+	},
+	{
+		"userLevel": 20,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		},
+		"features": ["Soul of Artifice"],
+		"infusionsKnown": 12,
+		"infusedItems": 6
+	}
+]

@@ -154,12 +154,20 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
     // UseEffect to save equippedArmor to AsyncStorage whenever it changes
     useEffect(() => {
         saveEquippedArmor(equippedArmor);
-    }, [equippedArmor]);
+        // If the equippedArmor is not in the items list, set it to null
+        if (equippedArmor && !items.some((item) => item.name.toLowerCase() === equippedArmor.toLowerCase())) {
+            setEquippedArmor(null);
+        }
+    }, [equippedArmor, items]);
 
     // UseEffect to save equippedShield to AsyncStorage whenever it changes
     useEffect(() => {
         saveEquippedShield(equippedShield);
-    }, [equippedShield]);
+        // If the equippedShield is not in the items list, set it to null
+        if (equippedShield && !items.some((item) => item.name.toLowerCase() === equippedShield.toLowerCase())) {
+            setEquippedShield(null);
+        }
+    }, [equippedShield, items]);
 
     return (
         <ItemEquipmentContext.Provider value={{

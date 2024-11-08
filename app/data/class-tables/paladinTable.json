@@ -1,0 +1,180 @@
+[
+	{
+		"userLevel": 1,
+		"features": ["Divine Sense", "Lay on Hands"],
+		"spellSlotSquares": null
+	},
+	{
+		"userLevel": 2,
+		"features": ["Fighting Style", "Spellcasting", "Divine Smite"],
+		"spellSlotSquares": {
+			"SpLv1": 2
+		}
+	},
+	{
+		"userLevel": 3,
+		"features": ["Divine Health", "Sacred Oath"],
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 4,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 5,
+		"features": ["Extra Attack"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 6,
+		"features": ["Aura of Protection"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 7,
+		"features": ["Sacred Oath feature"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 8,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 9,
+		"features": null,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 10,
+		"features": ["Aura of Courage"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 11,
+		"features": ["Improved Divine Smite"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 12,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 13,
+		"features": null,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"userLevel": 14,
+		"features": ["Cleansing Touch"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"userLevel": 15,
+		"features": ["Sacred Oath feature"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		}
+	},
+	{
+		"userLevel": 16,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		}
+	},
+	{
+		"userLevel": 17,
+		"features": null,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		}
+	},
+	{
+		"userLevel": 18,
+		"features": ["Aura improvements"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		}
+	},
+	{
+		"userLevel": 19,
+		"features": ["Ability Score Improvement"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		}
+	},
+	{
+		"userLevel": 20,
+		"features": ["Sacred Oath feature"],
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		}
+	}
+]

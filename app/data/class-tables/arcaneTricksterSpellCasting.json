@@ -1,0 +1,170 @@
+[
+	{
+		"rogueLevel": 3,
+		"cantripsKnown": 3,
+		"spellsKnown": 3,
+		"spellSlots": {
+			"SpLv1": 2
+		}
+	},
+	{
+		"rogueLevel": 4,
+		"cantripsKnown": 3,
+		"spellsKnown": 4,
+		"spellSlots": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"rogueLevel": 5,
+		"cantripsKnown": 3,
+		"spellsKnown": 4,
+		"spellSlots": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"rogueLevel": 6,
+		"cantripsKnown": 3,
+		"spellsKnown": 4,
+		"spellSlots": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"rogueLevel": 7,
+		"cantripsKnown": 3,
+		"spellsKnown": 5,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"rogueLevel": 8,
+		"cantripsKnown": 3,
+		"spellsKnown": 6,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"rogueLevel": 9,
+		"cantripsKnown": 3,
+		"spellsKnown": 6,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"rogueLevel": 10,
+		"cantripsKnown": 4,
+		"spellsKnown": 7,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"rogueLevel": 11,
+		"cantripsKnown": 4,
+		"spellsKnown": 8,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"rogueLevel": 12,
+		"cantripsKnown": 4,
+		"spellsKnown": 8,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"rogueLevel": 13,
+		"cantripsKnown": 4,
+		"spellsKnown": 9,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"rogueLevel": 14,
+		"cantripsKnown": 4,
+		"spellsKnown": 10,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"rogueLevel": 15,
+		"cantripsKnown": 4,
+		"spellsKnown": 10,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"rogueLevel": 16,
+		"cantripsKnown": 4,
+		"spellsKnown": 11,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"rogueLevel": 17,
+		"cantripsKnown": 4,
+		"spellsKnown": 11,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"rogueLevel": 18,
+		"cantripsKnown": 4,
+		"spellsKnown": 11,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"rogueLevel": 19,
+		"cantripsKnown": 4,
+		"spellsKnown": 12,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"rogueLevel": 20,
+		"cantripsKnown": 4,
+		"spellsKnown": 13,
+		"spellSlots": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	}
+]

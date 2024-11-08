@@ -1294,6 +1294,18 @@ export default function BagScreen() {
                         }
                         value={newItem.name}
                       />
+
+                      <Text>Details</Text>
+                      <TextInput
+                        style={[styles.modalInput, styles.detailsInput]}
+                        placeholder="Item Details"
+                        placeholderTextColor="gray"
+                        onChangeText={(text) =>
+                          setNewItem({ ...newItem, details: text })
+                        }
+                        value={newItem.details}
+                        multiline={true}
+                      />
                     </>
                   )}
 

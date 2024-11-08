@@ -1,0 +1,230 @@
+[
+	{
+		"userLevel": 1,
+		"spellSlotSquares": {
+			"SpLv1": 2
+		},
+		"features": ["Spellcasting", "Bardic Inspiration (d6)"]
+	},
+	{
+		"userLevel": 2,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		},
+		"features": ["Jack of All Trades", "Song of Rest (d6)"]
+	},
+	{
+		"userLevel": 3,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		},
+		"features": ["Bard College", "Expertise"]
+	},
+	{
+		"userLevel": 4,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 5,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		},
+		"features": ["Bardic Inspiration (d8)", "Font of Inspiration"]
+	},
+	{
+		"userLevel": 6,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		},
+		"features": ["Countercharm", "Bard College feature"]
+	},
+	{
+		"userLevel": 7,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 8,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 2
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 9,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 1
+		},
+		"features": ["Song of Rest (d8)"]
+	},
+	{
+		"userLevel": 10,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2
+		},
+		"features": ["Bardic Inspiration (d10)", "Expertise", "Magical Secrets"]
+	},
+	{
+		"userLevel": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1
+		},
+		"features": null
+	},
+	{
+		"userLevel": 12,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 13,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1
+		},
+		"features": ["Song of Rest (d10)"]
+	},
+	{
+		"userLevel": 14,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1
+		},
+		"features": ["Magical Secrets", "Bard College feature"]
+	},
+	{
+		"userLevel": 15,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1
+		},
+		"features": ["Bardic Inspiration (d12)"]
+	},
+	{
+		"userLevel": 16,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 17,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 2,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Song of Rest (d12)"]
+	},
+	{
+		"userLevel": 18,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 1,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Magical Secrets"]
+	},
+	{
+		"userLevel": 19,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 2,
+			"SpLv7": 1,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Ability Score Improvement"]
+	},
+	{
+		"userLevel": 20,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 3,
+			"SpLv5": 3,
+			"SpLv6": 2,
+			"SpLv7": 2,
+			"SpLv8": 1,
+			"SpLv9": 1
+		},
+		"features": ["Superior Inspiration"]
+	}
+]

@@ -59,6 +59,9 @@ const styles = StyleSheet.create({
     },
     itemText: {
       fontSize: 14,
+      color: 'black',
+      fontWeight: 'bold',
+      textAlign: 'center',
     },
     quantityContainer: {
       padding: 5,
