@@ -4,9 +4,10 @@ const styles = StyleSheet.create({
     container: {
         height: '100%',
         width: '100%',
-        marginTop: 50,
+        paddingTop: 50,
         flexDirection: 'column',
         justifyContent: 'space-between',
+        backgroundColor: '#030b10',
     },
     title: {
         color: '#fff',
@@ -18,7 +19,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-        marginBottom: 5,
     },
     text: {
         color: '#fff',

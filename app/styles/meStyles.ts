@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        gap: 5,
+        gap: 10,
     },
     firstRowContents: {
         borderRadius: 8,

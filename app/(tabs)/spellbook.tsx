@@ -70,7 +70,7 @@ import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
 import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
 
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 
@@ -492,7 +492,16 @@ export default function SpellbookScreen() {
                         {displaySpellName ? (
                             <Text style={{ color: 'white' }}>{displaySpellName}</Text>
                         ) : (
-                            <Ionicons name="add" size={24} color="white" />
+                            <>
+                                <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <Text style={{ color: 'white' }}>+</Text>
+                                    <MaterialCommunityIcons name="auto-fix" size={20} color="white" />
+                                </View>
+                            </>
                         )}
                     </View>
                 </ImageBackground>
@@ -526,7 +535,12 @@ export default function SpellbookScreen() {
         } else {
             return (
                 <View style={styles.section}>
-                    <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells Prepared</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
+                        <MaterialCommunityIcons name="book-check" size={20} color="white" />
+                        <Text style={styles.label}>
+                            Prepared Spells
+                        </Text>
+                    </View>
                     <FlatList
                         style={{ marginLeft: 10 }}
                         data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => ({
@@ -588,7 +602,8 @@ export default function SpellbookScreen() {
                             </Text>
                         ) : (
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                                <Ionicons name="add" size={24} color="white" />
+                                <Text style={{ color: 'white' }}>+</Text>
+                                <Ionicons name="sparkles" size={20} color="white" />
                             </View>
                         )}
                     </View>
@@ -604,7 +619,12 @@ export default function SpellbookScreen() {
 
         return (
             <View style={styles.section}>
-                <Text style={[styles.label, { paddingHorizontal: 10 }]}>Cantrips</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
+                    <Ionicons name="sparkles" size={20} color="white" />
+                    <Text style={styles.label}>
+                        Cantrips
+                    </Text>
+                </View>
                 <FlatList
                     style={{ marginLeft: 10 }}
                     data={Array.from({ length: cantripSlots }, (_, i) => i)}
@@ -659,7 +679,7 @@ export default function SpellbookScreen() {
     }
 
     const handleIncrement = () => {
-        Alert.alert('Learn Spells', 'Learning a spell will cost you 2 hours and 50gp. This cannot be undone.', [
+        Alert.alert('Learn Spells', 'Learning a spell will cost you 2 hours and 50gp and must be learned from another wizard or a scroll.', [
             { text: 'Cancel', style: 'cancel' },
             {
                 text: '+1 Spell', onPress: () => {
@@ -695,15 +715,28 @@ export default function SpellbookScreen() {
                             paddingHorizontal: 10,
                             marginBottom: 5
                         }}>
-                            <Text style={styles.label}>Spellbook</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                <MaterialCommunityIcons name="book" size={20} color="white" />
+                                <Text style={styles.label}>
+                                    Spellbook
+                                </Text>
+                            </View>
                             <TouchableOpacity
                                 onPress={() => {
                                     handleIncrement();
                                 }}
-                                style={{ flexDirection: 'row', alignItems: 'center' }}
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    paddingHorizontal: 10,
+                                    paddingVertical: 5,
+                                    borderWidth: 1,
+                                    borderColor: 'white',
+                                    borderRadius: 8
+                                }}
                             >
                                 <Text style={{ color: 'white' }}>+</Text>
-                                <Ionicons name="color-wand" size={20} color="white" />
+                                <MaterialCommunityIcons name="book-education" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={{ paddingHorizontal: 10, flex: 1, marginBottom: 40 }}>
@@ -742,7 +775,12 @@ export default function SpellbookScreen() {
             } else {
                 return (
                     <View style={[styles.section, { flex: 1, marginBottom: 50 }]}>
-                        <Text style={[styles.label, { paddingHorizontal: 10 }]}>Spells</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
+                            <MaterialCommunityIcons name="auto-fix" size={20} color="white" />
+                            <Text style={styles.label}>
+                                Spells
+                            </Text>
+                        </View>
                         <FlatList<{ slotIndex: number, spellName: string | null }>
                             style={{ paddingHorizontal: 10, flex: 1 }}
                             contentContainerStyle={{ paddingBottom: 10 }}
@@ -1546,7 +1584,6 @@ export default function SpellbookScreen() {
         }
 
         const currentLevelSlots = currentLevelData.spellSlotSquares;
-        console.log('Current Level Slots:', currentLevelSlots);
 
         const remainingSlots: Record<string, { total: number; remaining: number }> = {};
 
@@ -1571,9 +1608,6 @@ export default function SpellbookScreen() {
                 remaining: remaining,
             };
 
-            console.log(
-                `Spell Level ${spentKey}: ${remainingSlots[spentKey].remaining}/${remainingSlots[spentKey].total} slots remaining (${adjustedSlotsSpent} spent)`
-            );
         });
 
         return remainingSlots;
@@ -1711,7 +1745,6 @@ export default function SpellbookScreen() {
             }
         }
 
-        console.log('Spell not found:', spellName);
         Alert.alert('Spell Not Found', `The spell "${spellName}" was not found.`);
     }
 
