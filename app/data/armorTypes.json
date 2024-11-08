@@ -2,16 +2,127 @@
 	{
 		"label": "Light Armor",
 		"value": "Light Armor",
-		"details": "Crafted from supple leather and reinforced with light padding, this armor allows for flexibility and quiet movement. It provides basic protection without restricting agility, perfect for rogues, rangers, or anyone who values stealth and speed over full defense."
+		"versions": {
+			"Padded": {
+				"cost": 5,
+				"ac": 11,
+				"dexModApplied": true,
+				"maxDexBonus": null,
+				"stealthDisadvantage": null,
+				"weight": 8,
+				"strengthRequirement": null
+			},
+			"Leather": {
+				"cost": 10,
+				"ac": 11,
+				"dexModApplied": true,
+				"maxDexBonus": null,
+				"stealthDisadvantage": null,
+				"weight": 10,
+				"strengthRequirement": null
+			},
+			"Studded Leather": {
+				"cost": 45,
+				"ac": 12,
+				"dexModApplied": true,
+				"maxDexBonus": null,
+				"stealthDisadvantage": null,
+				"weight": 13,
+				"strengthRequirement": null
+			}
+		}
 	},
 	{
 		"label": "Medium Armor",
 		"value": "Medium Armor",
-		"details": "A balance of protection and mobility, medium armor includes layers of hardened leather or chain to guard vital areas while still allowing for maneuverability. Ideal for those who find themselves in the heart of battle but still need to stay agile, like fighters and clerics."
+		"versions": {
+			"Hide": {
+				"cost": 10,
+				"ac": 12,
+				"dexModApplied": true,
+				"maxDexBonus": 2,
+				"stealthDisadvantage": null,
+				"weight": 12,
+				"strengthRequirement": null
+			},
+			"Chain Shirt": {
+				"cost": 50,
+				"ac": 13,
+				"dexModApplied": true,
+				"maxDexBonus": 2,
+				"stealthDisadvantage": null,
+				"weight": 20,
+				"strengthRequirement": null
+			},
+			"Scale Mail": {
+				"cost": 50,
+				"ac": 14,
+				"dexModApplied": true,
+				"maxDexBonus": 2,
+				"stealthDisadvantage": true,
+				"weight": 45,
+				"strengthRequirement": null
+			},
+			"Breastplate": {
+				"cost": 400,
+				"ac": 14,
+				"dexModApplied": true,
+				"maxDexBonus": 2,
+				"stealthDisadvantage": null,
+				"weight": 20,
+				"strengthRequirement": null
+			},
+			"Half Plate": {
+				"cost": 750,
+				"ac": 15,
+				"dexModApplied": true,
+				"maxDexBonus": 2,
+				"stealthDisadvantage": true,
+				"weight": 40,
+				"strengthRequirement": null
+			}
+		}
 	},
 	{
 		"label": "Heavy Armor",
 		"value": "Heavy Armor",
-		"details": "Built from interlocking plates of metal, heavy armor offers unparalleled protection against physical attacks. Its weight and rigidity may hinder movement, but for those who can bear it, it serves as a near-impenetrable fortress, favored by knights, paladins, and those who face their foes head-on."
+		"versions": {
+			"Ring Mail": {
+				"cost": 30,
+				"ac": 14,
+				"dexModApplied": false,
+				"maxDexBonus": null,
+				"stealthDisadvantage": true,
+				"weight": 40,
+				"strengthRequirement": null
+			},
+			"Chain Mail": {
+				"cost": 75,
+				"ac": 16,
+				"dexModApplied": false,
+				"maxDexBonus": null,
+				"stealthDisadvantage": true,
+				"weight": 55,
+				"strengthRequirement": 13
+			},
+			"Splint": {
+				"cost": 200,
+				"ac": 17,
+				"dexModApplied": false,
+				"maxDexBonus": null,
+				"stealthDisadvantage": true,
+				"weight": 60,
+				"strengthRequirement": 15
+			},
+			"Plate": {
+				"cost": 1500,
+				"ac": 18,
+				"dexModApplied": false,
+				"maxDexBonus": null,
+				"stealthDisadvantage": true,
+				"weight": 65,
+				"strengthRequirement": 15
+			}
+		}
 	}
 ]

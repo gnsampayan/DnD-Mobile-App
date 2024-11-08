@@ -636,7 +636,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Skills */}
             <View style={styles.skillsContainer}>
                 <View style={styles.rowIconTitle}>
-                    <MaterialCommunityIcons name="target" size={24} color="lightgrey" />
+                    <MaterialCommunityIcons name="bullseye-arrow" size={24} color="lightgrey" />
                     <Text style={styles.skillsTitle}>Skills</Text>
                 </View>
                 <FlatList

@@ -15,19 +15,14 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
 import weaponData from '../data/weapons.json';
 
 // Import default images
-import defaultHelmetImage from '@equipment/default-helmet.png';
-import defaultCapeImage from '@equipment/default-cape.png';
 import defaultChestArmorImage from '@equipment/default-armor.png';
-import defaultGauntletsImage from '@equipment/default-gauntlets.png';
-import defaultBootsImage from '@equipment/default-boots.png';
-import defaultNecklaceImage from '@equipment/default-necklace.png';
 import defaultRingImage from '@equipment/default-ring.png';
 import defaultMeleeWeaponImage from '@equipment/default-melee.png';
 import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
@@ -146,15 +141,9 @@ export default function MeScreen() {
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
         // Section 2 items
-        { id: 'helmet', name: 'Helmet', defaultImage: defaultHelmetImage as ImageSourcePropType, section: 2 },
-        { id: 'cape', name: 'Cape', defaultImage: defaultCapeImage as ImageSourcePropType, section: 2 },
-        { id: 'chestplate', name: 'Chestplate', defaultImage: defaultChestArmorImage as ImageSourcePropType, section: 2 },
-        { id: 'gauntlets', name: 'Gauntlets', defaultImage: defaultGauntletsImage as ImageSourcePropType, section: 2 },
-        { id: 'boots', name: 'Boots', defaultImage: defaultBootsImage as ImageSourcePropType, section: 2 },
+        { id: 'armor', name: 'Armor', defaultImage: defaultChestArmorImage as ImageSourcePropType, section: 2 },
         // Section 4 items
-        { id: 'necklace', name: 'Necklace', defaultImage: defaultNecklaceImage as ImageSourcePropType, section: 4 },
-        { id: 'ring1', name: 'Ring 1', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
-        { id: 'ring2', name: 'Ring 2', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
+        { id: 'shield', name: 'Shield', defaultImage: defaultRingImage as ImageSourcePropType, section: 4 },
         // Section 5 items
         { id: 'mainMelee', name: 'Main Melee', defaultImage: defaultMeleeWeaponImage as ImageSourcePropType, section: 5 },
         { id: 'offhandMelee', name: 'Offhand Melee', defaultImage: defaultOffhandWeaponImage as ImageSourcePropType, section: 5 },
@@ -727,12 +716,13 @@ export default function MeScreen() {
         if (armorName?.toLowerCase() === 'none' || !armorName) {
             // Set equipped armor to null
             setArmorValue(null);
-            console.log('Equipped none');
+            setEquippedArmor(null);
+            setArmorModalVisible(false);
             return;
         }
-        console.log('Equipped', armorName);
         setEquippedArmor(armorName);
-
+        setArmorModalVisible(false);
+        setEditingEquipmentSlot(null);
     }
 
     // Calculate half of the screen width
@@ -778,7 +768,6 @@ export default function MeScreen() {
                                 style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
                                 onPress={() => {
                                     setArmorModalVisible(true);
-                                    // set selected equipment slot that triggered the modal
                                     setEditingEquipmentSlot(item.id);
                                 }}
                             >
@@ -789,9 +778,7 @@ export default function MeScreen() {
                                             : item.defaultImage
                                     }
                                     style={styles.equipmentItemImage}
-                                >
-                                    {/* Optional: Add overlay or text */}
-                                </ImageBackground>
+                                />
                             </TouchableOpacity>
                         ))}
                 </View>
@@ -1249,54 +1236,64 @@ export default function MeScreen() {
 
             {/* Armor Modal */}
             <Modal animationType="fade" transparent={true} visible={armorModalVisible}>
-                <View style={styles.modalContainer}>
-                    {equippedArmor &&
-                        <>
-                            <View style={{ flexDirection: 'row', gap: 5 }}>
-                                <Text>Equipped</Text>
-                                <Text style={{ textTransform: 'capitalize' }}>
-                                    {editingEquipmentSlot}:
-                                </Text>
-                            </View>
-                            <Text style={{
-                                fontWeight: 'bold',
-                                fontSize: 20,
-                                marginBottom: 10,
-                                textTransform: 'capitalize'
-                            }}>
-                                {equippedArmor}
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={styles.modalContainer}>
+                        <View style={{ flexDirection: 'row', gap: 5 }}>
+                            <Text style={{ textTransform: 'capitalize' }}>
+                                {editingEquipmentSlot && editingEquipmentSlot}: {!equippedArmor && '(None)'}
                             </Text>
-                        </>
-                    }
-                    <Text>Select Armor</Text>
-                    <DropDownPicker
-                        open={openArmorPicker}
-                        value={armorValue}
-                        items={getArmorFromBag()}
-                        setOpen={setOpenArmorPicker}
-                        setValue={setArmorValue}
-                        placeholder="Select a armor"
-                        containerStyle={{ height: 40, width: '100%' }}
-                        style={{ backgroundColor: '#fafafa' }}
-                        dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                    />
-                    <View style={styles.modalButtons}>
-                        <Button
-                            title="Close"
-                            color="black"
-                            onPress={() => {
-                                setArmorValue(null);
-                                setArmorModalVisible(false);
-                                setOpenArmorPicker(false);
-                                setEditingEquipmentSlot(null);
+                        </View>
+                        {equippedArmor &&
+                            <>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <View style={{ flexDirection: 'column' }}>
+                                        <Text style={{
+                                            fontWeight: 'bold',
+                                            fontSize: 20,
+                                            marginBottom: 10,
+                                            textTransform: 'capitalize'
+                                        }}>
+                                            {equippedArmor}
+                                        </Text>
+                                    </View>
+
+                                    <Button title="Unequip" onPress={() => {
+                                        handleEquipArmor(null);
+                                    }} />
+                                </View>
+                            </>
+                        }
+                        <Text style={{ marginBottom: 5 }}>Select Armor</Text>
+                        <DropDownPicker
+                            open={openArmorPicker}
+                            value={armorValue}
+                            items={getArmorFromBag()}
+                            setOpen={setOpenArmorPicker}
+                            setValue={setArmorValue}
+                            placeholder="Select a armor"
+                            containerStyle={{ height: 40, width: '100%' }}
+                            style={{ backgroundColor: '#fafafa' }}
+                            dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                        />
+
+
+
+                        <View style={styles.modalButtons}>
+                            <Button
+                                title="Close"
+                                color="black"
+                                onPress={() => {
+                                    setArmorValue(null);
+                                    setArmorModalVisible(false);
+                                    setOpenArmorPicker(false);
+                                    setEditingEquipmentSlot(null);
+                                }} />
+                            <Button title="Equip" onPress={() => {
+                                handleEquipArmor(armorValue);
                             }} />
-                        <Button title="Equip" onPress={() => {
-                            handleEquipArmor(armorValue);
-                            setArmorModalVisible(false);
-                            setEditingEquipmentSlot(null);
-                        }} />
+                        </View>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
 
 

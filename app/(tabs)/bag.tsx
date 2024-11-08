@@ -73,6 +73,8 @@ import greatswordImage from '@weapons/greatsword.png';
 import greataxeImage from '@weapons/greataxe.png';
 import glaiveImage from '@weapons/glaive.png';
 import flailImage from '@weapons/flail.png';
+import netImage from '@weapons/net.png';
+import battleaxeImage from '@weapons/battleaxe.png';
 
 const weaponImages = {
   "spear": spearImage,
@@ -109,6 +111,8 @@ const weaponImages = {
   "greataxe": greataxeImage,
   "glaive": glaiveImage,
   "flail": flailImage,
+  "net": netImage,
+  "battleaxe": battleaxeImage,
 };
 
 const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
@@ -217,7 +221,6 @@ export default function BagScreen() {
   useEffect(() => {
     loadItems();
   }, []);
-  const [foodUnitsValue, setFoodUnitsValue] = useState<number>(0);
   const [openWeaponType, setOpenWeaponType] = useState(false);
   const [weaponTypeValue, setWeaponTypeValue] = useState<string | null>(null);
   const [weaponTypesOptionsFiltered, setWeaponTypesOptionsFiltered] = useState<{ label: string; value: string; parent?: string; selectable?: boolean }[]>([]);
@@ -242,7 +245,9 @@ export default function BagScreen() {
   const [selectedWeapon, setSelectedWeapon] = useState<any>(null);
   const [openArmorType, setOpenArmorType] = useState(false);
   const [armorTypeValue, setArmorTypeValue] = useState<string | null>(null);
-  const [customArmor, setCustomArmor] = useState(false);
+  const [armorTypesOptionsFiltered, setArmorTypesOptionsFiltered] = useState<
+    { label: string; value: string; parent?: string; selectable?: boolean }[]
+  >([]);
 
   useEffect(() => {
     const campingSupplies = items.find(item => item.id === '1');
@@ -344,6 +349,10 @@ export default function BagScreen() {
     if (itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') {
       const groupedAndFilteredWeapons = filterAndGroupWeapons();
       setWeaponTypesOptionsFiltered(groupedAndFilteredWeapons as { label: string; value: string; parent?: string | undefined; selectable?: boolean | undefined }[]);
+    }
+    if (itemTypeValue && itemTypeValue.toLowerCase() === 'armor') {
+      const groupedArmorTypes = filterAndGroupArmorTypes();
+      setArmorTypesOptionsFiltered(groupedArmorTypes as { label: string; value: string; parent?: string; selectable?: boolean }[]);
     }
   }, [itemTypeValue, isProficientInMartialWeapons, classSpecificWeapons, statsData.race, statsData.class]);
 
@@ -912,29 +921,46 @@ export default function BagScreen() {
   };
 
 
-  const getArmorDetails = (armorType: string) => {
-    const armor = armorTypes.find((armor) => armor.value.toLowerCase() === armorType.toLowerCase());
-    return armor ? armor.details : '';
-  };
+  const filterAndGroupArmorTypes = () => {
+    const groupedArmors = armorTypes.reduce(
+      (acc, category) => {
+        // Add group label with bold font
+        acc.push({
+          label: category.label,
+          value: category.label.toLowerCase(),
+          parent: null,
+          selectable: false,
+          labelStyle: {
+            fontWeight: 'bold',
+          },
+        });
 
-  const renderModifyArmor = () => {
-    return (
-      <>
-        <Text>Modify Armor</Text>
-        <Text>DC</Text>
-        <TextInput
-          style={styles.modalInput}
-          placeholder="DC"
-          placeholderTextColor="gray"
-          keyboardType="numeric"
-          onChangeText={(text) => {
-            console.log("DC: ", text);
-          }}
-        />
-      </>
+        // Add armors under the current category
+        Object.entries(category.versions).forEach(([armorName]) => {
+          acc.push({
+            label: armorName,
+            value: armorName,
+            parent: category.label.toLowerCase(),
+            selectable: true,
+            labelStyle: {
+              fontWeight: 'normal',
+            },
+          });
+        });
+
+        return acc;
+      },
+      [] as {
+        label: string;
+        value: string;
+        parent: string | null;
+        selectable: boolean;
+        labelStyle?: object;
+      }[]
     );
-  };
 
+    return groupedArmors;
+  };
 
 
   // Main Content
@@ -1106,7 +1132,7 @@ export default function BagScreen() {
                     <DropDownPicker
                       open={openArmorType}
                       value={armorTypeValue}
-                      items={armorTypes}
+                      items={armorTypesOptionsFiltered}
                       setOpen={setOpenArmorType}
                       setValue={setArmorTypeValue}
                       placeholder="Select an armor type"
@@ -1118,7 +1144,7 @@ export default function BagScreen() {
                           setNewItem({
                             ...newItem,
                             name: value,
-                            details: getArmorDetails(value)
+                            // details: getArmorDetails(value)
                           });
                         }
                       }}
@@ -1126,35 +1152,9 @@ export default function BagScreen() {
                   </>
                 )}
 
-                {/* Custom Armor */}
-                {(itemTypeValue && itemTypeValue.toLowerCase() === 'armor') && (
-                  <>
-                    {!customArmor ? (
-                      <Button
-                        title="GM Mode"
-                        onPress={() => {
-                          setCustomArmor(true);
-                        }}
-                      />
-                    ) : (
-                      <>
-                        <Button
-                          title="Revert to Normal Mode"
-                          onPress={() => {
-                            setCustomArmor(false);
-                          }}
-                        />
-                        {renderModifyArmor()}
-                      </>
-                    )}
-                  </>
-                )}
-
-
-
                 {/* Custom Item Names */}
                 {(itemTypeValue && itemTypeValue.toLowerCase() !== 'weapon')
-                  && customArmor === true && (
+                  && (itemTypeValue && itemTypeValue.toLowerCase() !== 'armor') && (
                     <>
                       <Text>Name</Text>
                       <TextInput

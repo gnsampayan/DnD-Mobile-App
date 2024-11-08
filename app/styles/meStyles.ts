@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     section2: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'flex-start',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         gap: 10,
     },
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     section4: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'flex-start',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         gap: 10,
     },

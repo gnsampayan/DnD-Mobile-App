@@ -41,6 +41,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
+import armorTypes from '../data/armorTypes.json';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -250,7 +251,7 @@ export default function ActionsScreen() {
     spentSpellSlots,
     setSpentSpellSlots
   } = useActions();
-  const { weaponsProficientIn } = useItemEquipment();
+  const { weaponsProficientIn, equippedArmor } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
   // Define state for combined actions
   const [combinedActions, setCombinedActions] = useState<ActionBlock[]>([]);
@@ -296,6 +297,8 @@ export default function ActionsScreen() {
     { id: '9', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
     { id: '10', name: 'Reaction', details: 'Instantly respond to a trigger', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
   ];
+
+  const [armorStealthDisadvantage, setArmorStealthDisadvantage] = useState<boolean>(false);
 
 
   if (!statsData) {
@@ -481,18 +484,71 @@ export default function ActionsScreen() {
     loadActions();
   }, []);
 
-  // Calculate AC based on Dexterity
+  // Calculate AC based on Dexterity and equipped armor
   useEffect(() => {
     if (statsData.abilities) {
       const dexterity = statsData.abilities.find(
-        (ability) => ability.name === 'Dexterity'
+        (ability) => ability.name.toLowerCase() === 'dexterity'
       );
+
       if (dexterity) {
         const dexModifier = Math.floor((dexterity.value - 10) / 2);
-        setAc(10 + dexModifier);
+
+        if (!equippedArmor) {
+          // No armor equipped
+          setAc(10 + dexModifier);
+          return;
+        }
+
+        // Initialize armorFound as null
+        let armorFound = null;
+
+        // Convert equippedArmor to lowercase for comparison
+        const equippedArmorLower = equippedArmor.toLowerCase();
+
+        // Loop through armorTypes to find the equipped armor (case-insensitive)
+        for (const type of armorTypes) {
+          if (type.versions) {
+            // Get the keys of the versions and find the matching key (case-insensitive)
+            const armorKey = Object.keys(type.versions).find(
+              (key) => key.toLowerCase() === equippedArmorLower
+            );
+            if (armorKey) {
+              armorFound = type.versions[armorKey as keyof typeof type.versions];
+              break;
+            }
+          }
+        }
+
+        // Debug statements
+        console.log('Equipped Armor:', equippedArmor);
+        console.log('Armor Found:', armorFound);
+
+        if (armorFound) {
+          const armorStats = armorFound;
+
+          // Set the stealth disadvantage state
+          setArmorStealthDisadvantage(armorStats.stealthDisadvantage === true);
+
+          let totalAc = armorStats.ac;
+          if (armorStats.dexModApplied) {
+            // Apply dex modifier up to max if specified
+            const dexBonus =
+              armorStats.maxDexBonus !== null
+                ? Math.min(dexModifier, armorStats.maxDexBonus)
+                : dexModifier;
+            totalAc += dexBonus;
+          }
+          // Debug statement
+          console.log('Total AC with Armor:', totalAc);
+          setAc(totalAc);
+        } else {
+          // Armor not found; default to base AC
+          setAc(10 + dexModifier);
+        }
       }
     }
-  }, [statsData]);
+  }, [statsData, equippedArmor]);
 
   const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
 
@@ -1153,6 +1209,16 @@ export default function ActionsScreen() {
               </Text>
             </View>
           </View>
+          {/* Show if stealth disadvantage from equipped armor */}
+          {armorStealthDisadvantage && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity onPress={() => {
+                Alert.alert('Stealth Disadvantage', 'Your equipped armor imposes disadvantage on Dexterity (Stealth) checks.');
+              }}>
+                <MaterialCommunityIcons name="incognito-off" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={changeNumColumns}>
