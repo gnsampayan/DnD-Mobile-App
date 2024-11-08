@@ -531,7 +531,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             {/* Saving Throws */}
             <View style={styles.savingThrowsContainer}>
                 <View style={[styles.rowIconTitle, { alignItems: 'center', marginBottom: 5 }]}>
-                    <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey" />
+                    <View style={{ padding: 2, borderRadius: 14, borderWidth: 1, borderColor: 'lightgrey' }}>
+                        <MaterialCommunityIcons name="dice-d20" size={20} color="lightgrey" />
+                    </View>
                     <Text style={styles.savingThrowsTitle}>Saving Throws</Text>
                 </View>
                 <View style={styles.savingThrowsGrid}>

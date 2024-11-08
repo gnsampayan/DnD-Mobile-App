@@ -439,8 +439,8 @@ export default function SpellbookScreen() {
 
 
     const getAbilityModifier = (abilityName: string) => {
-        const abilityValue = statsData.abilities.find(ability => ability.name.toLowerCase() === abilityName.toLowerCase());
-        return abilityValue ? Math.floor((abilityValue.value - 10) / 2) : 0;
+        const abilityValue = statsData?.abilities?.find(ability => ability?.name?.toLowerCase() === abilityName?.toLowerCase());
+        return abilityValue ? Math.floor((abilityValue?.value - 10) / 2) : 0;
     }
 
     const numColumns = 3;
@@ -807,8 +807,9 @@ export default function SpellbookScreen() {
     }
 
     const getAvailableCantrips = (currentClass: string): Cantrip[] => {
+        if (!currentClass) return [];
         return cantripsData.filter(cantrip =>
-            cantrip.classes?.map(cls => cls.toLowerCase()).includes(currentClass.toLowerCase())
+            cantrip.classes?.map(cls => cls?.toLowerCase()).includes(currentClass?.toLowerCase())
         ) as Cantrip[];
     }
 
@@ -1253,19 +1254,36 @@ export default function SpellbookScreen() {
 
     const renderSpellSaveDC = () => {
         const classInfo = classData.find(
-            (cls) => cls.value.toLowerCase() === statsData?.class?.toLowerCase()
+            (cls) => cls?.value?.toLowerCase() === statsData?.class?.toLowerCase()
         );
 
-        // Get the primary ability for the class
-        const primaryAbility = classInfo?.primaryAbility || '';
+        // Get the primary abilities for the class
+        const primaryAbilities = classInfo?.primaryAbility || [];
+
+        // Find appropriate spellcasting ability, avoiding STR/DEX/CON
+        let spellcastingAbility = '';
+        if (Array.isArray(primaryAbilities)) {
+            spellcastingAbility = primaryAbilities.find(ability =>
+                !['Strength', 'Dexterity', 'Constitution'].includes(ability)
+            ) || primaryAbilities[primaryAbilities.length - 1];
+        } else {
+            spellcastingAbility = primaryAbilities;
+        }
+
         // Calculate the spellcasting ability modifier
-        const spellcastingModifier = getAbilityModifier(primaryAbility.toString());
+        const spellcastingModifier = getAbilityModifier(spellcastingAbility);
+
         return (
             <View style={[styles.headerTextContainer, { paddingHorizontal: 10 }]}>
-                <Text style={styles.headerText}>SpSv DC:</Text>
-                <View style={[styles.headerTextBox, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}>
-                    <Text style={[styles.headerText, { fontSize: 18 }]}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
-                    <MaterialCommunityIcons name="skull-scan" size={20} color="lightgrey" />
+                <View style={[styles.headerTextBox, {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 5,
+                    paddingVertical: 0,
+                    backgroundColor: 'transparent'
+                }]}>
+                    <Text style={[styles.headerText, { fontSize: 16 }]}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
+                    <MaterialCommunityIcons name="skull-scan" size={16} color="lightgrey" />
                 </View>
             </View>
         );

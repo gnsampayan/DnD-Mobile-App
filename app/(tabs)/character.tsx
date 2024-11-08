@@ -72,6 +72,7 @@ import glaiveImage from '@weapons/glaive.png';
 import flailImage from '@weapons/flail.png';
 import netImage from '@weapons/net.png';
 import battleaxeImage from '@weapons/battleaxe.png';
+import blowgunImage from '@weapons/blowgun.png';
 
 const weaponImages = {
     "spear": spearImage,
@@ -110,6 +111,7 @@ const weaponImages = {
     "flail": flailImage,
     "net": netImage,
     "battleaxe": battleaxeImage,
+    "blowgun": blowgunImage,
 };
 
 // Key for AsyncStorage
@@ -484,7 +486,7 @@ export default function MeScreen() {
 
         // Find the selected weapon from the user's bag using weaponName
         const bagWeapon = items.find(
-            item => item.name.toLowerCase() === weaponName.toLowerCase()
+            item => item?.name?.toLowerCase() === weaponName?.toLowerCase()
         );
 
         if (!bagWeapon) {
@@ -522,7 +524,7 @@ export default function MeScreen() {
         // Find the complete weapon data using weaponType
         const weaponDataItem = weaponData.weapons
             .flatMap(category => category.items as unknown as Item[])
-            .find(item => item.weaponType?.toLowerCase() === weaponType.toLowerCase());
+            .find(item => item.weaponType?.toLowerCase() === weaponType?.toLowerCase());
 
         if (!weaponDataItem) {
             Alert.alert('Weapon Data Not Found', 'The weapon type does not exist in the weapon data.');
@@ -795,6 +797,7 @@ export default function MeScreen() {
         }));
     }
 
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -828,30 +831,8 @@ export default function MeScreen() {
 
             {/* Section 2, 3, and 4: Main Content */}
             <View style={styles.mainContent}>
-                {/* Section 2 */}
-                <View style={styles.section2}>
-                    {equipmentItems
-                        .filter((item) => item.section === 2)
-                        .map((item) => (
-                            <TouchableOpacity
-                                key={item.id}
-                                style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
-                                onPress={() => {
-                                    setArmorModalVisible(true);
-                                    setEditingEquipmentSlot(item.id);
-                                }}
-                            >
-                                <ImageBackground
-                                    source={
-                                        item.customImageUri
-                                            ? { uri: item.customImageUri }
-                                            : item.defaultImage
-                                    }
-                                    style={styles.equipmentItemImage}
-                                />
-                            </TouchableOpacity>
-                        ))}
-                </View>
+
+
 
                 {/* Section 3 */}
                 <TouchableOpacity
@@ -882,31 +863,95 @@ export default function MeScreen() {
                     </View>
                 </TouchableOpacity>
 
-                {/* Section 4 */}
-                <View style={styles.section4}>
-                    {equipmentItems
-                        .filter((item) => item.section === 4)
-                        .map((item) => (
-                            <TouchableOpacity
-                                key={item.id}
-                                style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
-                                onPress={() => {
-                                    setShieldModalVisible(true);
-                                }}
-                            >
-                                <ImageBackground
-                                    source={
-                                        item.customImageUri
-                                            ? { uri: item.customImageUri }
-                                            : item.defaultImage
-                                    }
-                                    style={styles.equipmentItemImage}
+
+
+                {/* Section 2 */}
+                <View style={styles.section2}>
+
+
+
+                    {/* Feats */}
+                    <View style={{
+                        flexDirection: 'column',
+                        gap: 10,
+                        flex: 1,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderStyle: 'solid',
+                        borderRadius: 8,
+                        width: screenWidth - section3Width - 32,
+                        paddingVertical: 5,
+                        paddingHorizontal: 10,
+                    }}>
+                        <Text style={[styles.label, { color: 'lightgrey' }]}>Feats:</Text>
+                        <Text style={{ color: 'lightgrey' }}>You have not gained any feats yet.</Text>
+                    </View>
+
+
+
+
+
+                    <View style={{
+                        flexDirection: 'row',
+                        gap: 10,
+                    }}>
+
+
+
+                        {equipmentItems
+                            .filter((item) => item.section === 2)
+                            .map((item) => (
+                                <TouchableOpacity
+                                    key={item.id}
+                                    style={styles.equipmentItem}
+                                    onPress={() => {
+                                        setArmorModalVisible(true);
+                                        setEditingEquipmentSlot(item.id);
+                                    }}
                                 >
-                                    {/* Optional: Add overlay or text */}
-                                </ImageBackground>
-                            </TouchableOpacity>
-                        ))}
+                                    <ImageBackground
+                                        source={
+                                            item.customImageUri
+                                                ? { uri: item.customImageUri }
+                                                : item.defaultImage
+                                        }
+                                        style={styles.equipmentItemImage}
+                                    />
+                                </TouchableOpacity>
+                            ))}
+
+                        {equipmentItems
+                            .filter((item) => item.section === 4)
+                            .map((item) => (
+                                <TouchableOpacity
+                                    key={item.id}
+                                    style={styles.equipmentItem}
+                                    onPress={() => {
+                                        setShieldModalVisible(true);
+                                    }}
+                                >
+                                    <ImageBackground
+                                        source={
+                                            item.customImageUri
+                                                ? { uri: item.customImageUri }
+                                                : item.defaultImage
+                                        }
+                                        style={styles.equipmentItemImage}
+                                    >
+                                        {/* Optional: Add overlay or text */}
+                                    </ImageBackground>
+                                </TouchableOpacity>
+                            ))}
+
+
+                    </View>
+
                 </View>
+
+
+
+
+
             </View>
 
             {/* Section 5: Bottom Section */}
@@ -916,7 +961,6 @@ export default function MeScreen() {
                     <TouchableOpacity
                         style={[
                             styles.weapon,
-                            !mainHandWeapon?.name ? { padding: 15 } : {},
                             mainHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
                         ]}
                         onPress={() => setMainHandModalVisible(true)}
@@ -970,7 +1014,6 @@ export default function MeScreen() {
                     <TouchableOpacity
                         style={[
                             styles.weapon,
-                            !offHandWeapon?.name ? { padding: 15 } : {},
                             offHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
                         ]}
                         onPress={() => setOffHandModalVisible(true)}
@@ -1008,66 +1051,76 @@ export default function MeScreen() {
                             />
                         )}
                     </TouchableOpacity>
-                </View>
-                {/* Ranged Hand Weapon */}
-                {equipmentItems
-                    .filter((item) => item.section === 5 && item.id === 'mainRanged')
-                    .map((item) => (
-                        <TouchableOpacity
-                            key={item.id}
-                            style={[
-                                styles.weapon,
-                                !rangedHandWeapon?.name ? { padding: 15 } : {},
-                                rangedHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
-                            ]}
-                            onPress={() => {
-                                setRangedHandModalVisible(true);
-                                setOpenRangedHandPicker(true);
-                                setRangedHandValue(rangedHandWeapon?.name?.toLowerCase() || 'none');
-                            }}
-                        >
-                            {rangedHandWeapon?.name && rangedHandWeapon?.name.toLowerCase() !== 'none' ? (
-                                (() => {
-                                    const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase() || '');
-                                    const isTwoHanded = rangedHandWeapon.properties?.includes("Two-handed");
-                                    const isProficient = weaponsProficientIn.includes(rangedHandWeapon.weaponType?.toLowerCase() || '');
-                                    const weaponImage = getWeaponImage(rangedHandWeapon.name.toLowerCase()) as ImageSourcePropType;
 
-                                    return (
-                                        <ImageBackground
-                                            source={weapon && weapon.image && weapon.image !== ''
-                                                ? { uri: weapon.image }
-                                                : weaponImage ||
-                                                equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
-                                            style={styles.equipmentItemImage}
-                                        >
-                                            {(!weapon?.image || weapon.image === '' || isTwoHanded) && !weaponImage && (
-                                                <Text style={{
-                                                    color: 'white',
-                                                    fontSize: 16,
-                                                    textAlign: 'center'
-                                                }}>
-                                                    {weapon?.label || rangedHandWeapon.name} {!isProficient && '(Inept)'}
-                                                </Text>
-                                            )}
-                                            {isTwoHanded && (
-                                                <>
-                                                    <View style={styles.twoHandedLabel}>
-                                                        <MaterialIcons name="sign-language" size={24} color="white" />
-                                                    </View>
-                                                </>
-                                            )}
-                                        </ImageBackground>
-                                    );
-                                })()
-                            ) : (
-                                <ImageBackground
-                                    source={equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
-                                    style={styles.equipmentItemImage}
-                                />
-                            )}
-                        </TouchableOpacity>
-                    ))}
+
+
+
+                    {/* Ranged Hand Weapon */}
+                    {equipmentItems
+                        .filter((item) => item.section === 5 && item.id === 'mainRanged')
+                        .map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                    styles.weapon,
+                                    rangedHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
+                                ]}
+                                onPress={() => {
+                                    setRangedHandModalVisible(true);
+                                    setOpenRangedHandPicker(true);
+                                    setRangedHandValue(rangedHandWeapon?.name?.toLowerCase() || 'none');
+                                }}
+                            >
+                                {rangedHandWeapon?.name && rangedHandWeapon?.name.toLowerCase() !== 'none' ? (
+                                    (() => {
+                                        const weapon = weapons.find((w) => w.value.toLowerCase() === rangedHandWeapon.name.toLowerCase() || '');
+                                        const isTwoHanded = rangedHandWeapon.properties?.includes("Two-handed");
+                                        const isProficient = weaponsProficientIn.includes(rangedHandWeapon.weaponType?.toLowerCase() || '');
+                                        const weaponImage = getWeaponImage(rangedHandWeapon.name.toLowerCase()) as ImageSourcePropType;
+
+                                        return (
+                                            <ImageBackground
+                                                source={weapon && weapon.image && weapon.image !== ''
+                                                    ? { uri: weapon.image }
+                                                    : weaponImage ||
+                                                    equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
+                                                style={styles.equipmentItemImage}
+                                            >
+                                                {(!weapon?.image || weapon.image === '' || isTwoHanded) && !weaponImage && (
+                                                    <Text style={{
+                                                        color: 'white',
+                                                        fontSize: 16,
+                                                        textAlign: 'center'
+                                                    }}>
+                                                        {weapon?.label || rangedHandWeapon.name} {!isProficient && '(Inept)'}
+                                                    </Text>
+                                                )}
+                                                {isTwoHanded && (
+                                                    <>
+                                                        <View style={styles.twoHandedLabel}>
+                                                            <MaterialIcons name="sign-language" size={24} color="white" />
+                                                        </View>
+                                                    </>
+                                                )}
+                                            </ImageBackground>
+                                        );
+                                    })()
+                                ) : (
+                                    <ImageBackground
+                                        source={equipmentItems.find((item) => item.id === 'mainRanged')?.defaultImage}
+                                        style={styles.equipmentItemImage}
+                                    />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+
+
+
+
+
+
+
+                </View>
             </View>
 
             {/* Character Modal */}

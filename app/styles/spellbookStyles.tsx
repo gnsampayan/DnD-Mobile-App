@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
     headerTextContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 5,
     },
     headerTextBox: {

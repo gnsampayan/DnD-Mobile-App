@@ -76,6 +76,7 @@ import glaiveImage from '@weapons/glaive.png';
 import flailImage from '@weapons/flail.png';
 import netImage from '@weapons/net.png';
 import battleaxeImage from '@weapons/battleaxe.png';
+import blowgunImage from '@weapons/blowgun.png';
 
 const weaponImages = {
   "spear": spearImage,
@@ -114,6 +115,7 @@ const weaponImages = {
   "flail": flailImage,
   "net": netImage,
   "battleaxe": battleaxeImage,
+  "blowgun": blowgunImage,
 };
 
 const addItemImageTyped: ImageSourcePropType = addItemImage as ImageSourcePropType;
@@ -268,11 +270,11 @@ export default function BagScreen() {
     const checkWeaponProficiency = () => {
       const characterClass = classData.find(c => c.value === statsData.class);
       if (characterClass && characterClass.weaponProficiency) {
-        const isProficient = characterClass.weaponProficiency.includes('martial');
+        const isProficient = characterClass?.weaponProficiency?.includes('martial');
         setIsProficientInMartialWeapons(isProficient);
 
         // Extract specific weapons
-        const specificWeapons = characterClass.weaponProficiency.filter(wp =>
+        const specificWeapons = characterClass?.weaponProficiency?.filter(wp =>
           !['simple', 'martial'].includes(wp.toLowerCase())
         );
         setClassSpecificWeapons(specificWeapons);
@@ -291,7 +293,7 @@ export default function BagScreen() {
     const proficientWeapons: string[] = [];
 
     // Get race-specific weapon proficiencies
-    const characterRace = raceData.find(r => r.race.toLowerCase() === statsData.race?.toLowerCase());
+    const characterRace = raceData.find(r => r.race?.toLowerCase() === statsData.race?.toLowerCase());
     const raceSpecificWeapons = characterRace?.proficiencies?.weaponProficiency || [];
 
     const groupedWeapons = weapons.weapons.reduce((acc, category) => {
@@ -315,8 +317,8 @@ export default function BagScreen() {
         const isProficientWithWeapon =
           !isMartialWeapon || // Simple weapons
           isProficientInMartialWeapons || // Martial weapons if class proficient
-          classSpecificWeapons.some(w => w.toLowerCase() === weaponName) || // Class specific
-          raceSpecificWeapons.some(w => w.toLowerCase() === weaponName); // Race specific
+          classSpecificWeapons.some(w => w?.toLowerCase() === weaponName) || // Class specific
+          raceSpecificWeapons.some(w => w?.toLowerCase() === weaponName); // Race specific
 
         acc.push({
           label: item.name,
@@ -477,7 +479,7 @@ export default function BagScreen() {
     if (newItem.name) {
 
       // Check if the item already exists in the items array
-      const itemExists = items.some((item) => item.name.toLowerCase() === newItem.name.toLowerCase());
+      const itemExists = items.some((item) => item?.name?.toLowerCase() === newItem?.name?.toLowerCase());
       if (itemExists) {
         Alert.alert('Item Already Exists', 'Simply update the quantity instead.');
         return;
@@ -561,14 +563,14 @@ export default function BagScreen() {
   const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns; // 20 for horizontal padding, 10 for gap between items
 
   const getWeaponImage = (weaponName: string) => {
-    const normalizedName = weaponName.toLowerCase();
+    const normalizedName = weaponName?.toLowerCase();
     return weaponImages[normalizedName as keyof typeof weaponImages] || null;
   };
 
   // Function to render each item in the grid
   const renderItem = ({ item }: { item: Item | null }) => {
     if (item) {
-      const weaponImage = getWeaponImage(item.name.toLowerCase());
+      const weaponImage = getWeaponImage(item?.name?.toLowerCase());
       return (
         <TouchableOpacity
           style={[styles.itemContainer, { width: itemWidth }]}
@@ -1317,8 +1319,8 @@ export default function BagScreen() {
                   <View style={{ marginBottom: 20 }}>
                     <Text>Properties:</Text>
                     {weapons.weapons.flatMap((category: any) => category.items).map((item: any) => {
-                      if (item.name.toLowerCase() === weaponTypeValue.toLowerCase()) {
-                        return item.properties.map((property: string, index: number) => (
+                      if (item?.name?.toLowerCase() === weaponTypeValue?.toLowerCase()) {
+                        return item?.properties?.map((property: string, index: number) => (
                           <Text key={index}>{property}</Text>
                         ));
                       }

@@ -98,8 +98,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 10,
-        paddingTop: 0,
+        paddingVertical: 0,
+        paddingHorizontal: 10,
+        marginTop: 5,
+        marginBottom: 15,
     },
     melee: {
         flex: 1,
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
     },
     weapon: {
         borderRadius: 8,
-        height: '100%',
+        flex: 1,
         aspectRatio: 1,
         borderWidth: 1,
         borderColor: 'white',
@@ -215,7 +217,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     equipmentItem: {
-        width: '100%',
+        flex: 1,
         aspectRatio: 1,
         justifyContent: 'center',
         alignItems: 'center',
@@ -239,6 +241,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         alignItems: 'center',
         gap: 10,
+        flex: 1,
     },
     headerTitle: {
         flex: 1,
