@@ -1256,8 +1256,8 @@ export default function SpellbookScreen() {
             <View style={[styles.headerTextContainer, { paddingHorizontal: 10 }]}>
                 <Text style={styles.headerText}>SpSv DC:</Text>
                 <View style={[styles.headerTextBox, { flexDirection: 'row', alignItems: 'center', gap: 5 }]}>
-                    <Text style={styles.headerText}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
-                    <MaterialCommunityIcons name="shield-star" size={20} color="lightgrey" />
+                    <Text style={[styles.headerText, { fontSize: 18 }]}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
+                    <MaterialCommunityIcons name="skull-scan" size={20} color="lightgrey" />
                 </View>
             </View>
         );

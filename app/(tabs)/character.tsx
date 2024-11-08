@@ -33,6 +33,8 @@ import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
 import { useActions } from '../context/actionsSpellsContext';
 import featuresImage from '@images/features-image.png';
+import armorTypes from '../data/armorTypes.json';
+
 
 import spearImage from '@weapons/spear.png';
 import sickleImage from '@weapons/sickle.png';
@@ -62,6 +64,14 @@ import pikeImage from '@weapons/pike.png';
 import morningstarImage from '@weapons/morningstar.png';
 import maulImage from '@weapons/maul.png';
 import longswordImage from '@weapons/longsword.png';
+import lanceImage from '@weapons/lance.png';
+import halberdImage from '@weapons/halberd.png';
+import greatswordImage from '@weapons/greatsword.png';
+import greataxeImage from '@weapons/greataxe.png';
+import glaiveImage from '@weapons/glaive.png';
+import flailImage from '@weapons/flail.png';
+import netImage from '@weapons/net.png';
+import battleaxeImage from '@weapons/battleaxe.png';
 
 const weaponImages = {
     "spear": spearImage,
@@ -92,6 +102,14 @@ const weaponImages = {
     "morningstar": morningstarImage,
     "maul": maulImage,
     "longsword": longswordImage,
+    "lance": lanceImage,
+    "halberd": halberdImage,
+    "greatsword": greatswordImage,
+    "greataxe": greataxeImage,
+    "glaive": glaiveImage,
+    "flail": flailImage,
+    "net": netImage,
+    "battleaxe": battleaxeImage,
 };
 
 // Key for AsyncStorage
@@ -168,7 +186,7 @@ export default function MeScreen() {
         rangedHandWeapon: Item | null;
         equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
     };
-    const { items, weaponsProficientIn, equippedArmor, setEquippedArmor } = useItemEquipment();
+    const { items, weaponsProficientIn, equippedArmor, setEquippedArmor, equippedShield, setEquippedShield } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
     // Local state variables for DropDownPicker values
     const [mainHandValue, setMainHandValue] = useState<string>(mainHandWeapon?.name || 'none');
@@ -184,6 +202,9 @@ export default function MeScreen() {
     const [openArmorPicker, setOpenArmorPicker] = useState(false);
     const [armorValue, setArmorValue] = useState<string | null>(null);
     const [editingEquipmentSlot, setEditingEquipmentSlot] = useState<string | null>(null);
+    const [shieldModalVisible, setShieldModalVisible] = useState(false);
+    const [openShieldPicker, setOpenShieldPicker] = useState(false);
+    const [shieldValue, setShieldValue] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -714,15 +735,64 @@ export default function MeScreen() {
 
     const handleEquipArmor = (armorName: string | null) => {
         if (armorName?.toLowerCase() === 'none' || !armorName) {
-            // Set equipped armor to null
+            // Unequip armor
             setArmorValue(null);
             setEquippedArmor(null);
             setArmorModalVisible(false);
+            setEditingEquipmentSlot(null);
             return;
         }
-        setEquippedArmor(armorName);
-        setArmorModalVisible(false);
-        setEditingEquipmentSlot(null);
+        // Initialize variables to hold the found armor information
+        let armorFound = null;
+        let armorStats = null;
+        // Convert armorName to lowercase for comparison
+        const armorNameLower = armorName.toLowerCase();
+        // Loop through armorTypes to find the matching armor (case-insensitive)
+        for (const type of armorTypes) {
+            if (type.versions) {
+                const armorKey = Object.keys(type.versions).find(
+                    (key) => key.toLowerCase() === armorNameLower
+                );
+                if (armorKey) {
+                    armorFound = type;
+                    armorStats = type.versions[armorKey as keyof typeof type.versions];
+                    break;
+                }
+            }
+        }
+        if (armorStats) {
+            // Check if the armor has a strength requirement
+            if (armorStats.strengthRequirement) {
+                // Get the user's Strength ability score
+                const strengthAbility = statsData.abilities.find(
+                    (ability) => ability.name.toLowerCase() === 'strength'
+                );
+                const userStrength = strengthAbility ? strengthAbility.value : 0;
+
+                if (userStrength < armorStats.strengthRequirement) {
+                    Alert.alert(
+                        'Strength Requirement Not Met',
+                        `You need at least ${armorStats.strengthRequirement} Strength to equip this armor. Your Strength is ${userStrength}.`
+                    );
+                    return; // Do not equip the armor
+                }
+            }
+            // Equip the armor
+            setEquippedArmor(armorName);
+            setArmorValue(armorName);
+            setArmorModalVisible(false);
+            setEditingEquipmentSlot(null);
+        } else {
+            // Armor not found
+            Alert.alert('Armor Not Found', 'The selected armor does not exist in the armor data.');
+        }
+    };
+
+    const getShieldFromBag = () => {
+        return items.filter(item => item.type?.toLowerCase() === 'shield').map(item => ({
+            label: item.name,
+            value: item.name.toLowerCase(),
+        }));
     }
 
     // Calculate half of the screen width
@@ -820,7 +890,9 @@ export default function MeScreen() {
                             <TouchableOpacity
                                 key={item.id}
                                 style={[styles.equipmentItem, !item.customImageUri ? { padding: 15 } : {}]}
-                                onPress={() => { }}
+                                onPress={() => {
+                                    setShieldModalVisible(true);
+                                }}
                             >
                                 <ImageBackground
                                     source={
@@ -1238,31 +1310,19 @@ export default function MeScreen() {
             <Modal animationType="fade" transparent={true} visible={armorModalVisible}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={styles.modalContainer}>
-                        <View style={{ flexDirection: 'row', gap: 5 }}>
-                            <Text style={{ textTransform: 'capitalize' }}>
-                                {editingEquipmentSlot && editingEquipmentSlot}: {!equippedArmor && '(None)'}
-                            </Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text>Armor:</Text>
+                                <Text style={{ textTransform: 'capitalize', fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
+                                    {equippedArmor || '(None)'}
+                                </Text>
+                            </View>
+                            {equippedArmor &&
+                                <Button title="Unequip" onPress={() => {
+                                    handleEquipArmor(null);
+                                }} />
+                            }
                         </View>
-                        {equippedArmor &&
-                            <>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <View style={{ flexDirection: 'column' }}>
-                                        <Text style={{
-                                            fontWeight: 'bold',
-                                            fontSize: 20,
-                                            marginBottom: 10,
-                                            textTransform: 'capitalize'
-                                        }}>
-                                            {equippedArmor}
-                                        </Text>
-                                    </View>
-
-                                    <Button title="Unequip" onPress={() => {
-                                        handleEquipArmor(null);
-                                    }} />
-                                </View>
-                            </>
-                        }
                         <Text style={{ marginBottom: 5 }}>Select Armor</Text>
                         <DropDownPicker
                             open={openArmorPicker}
@@ -1291,6 +1351,64 @@ export default function MeScreen() {
                             <Button title="Equip" onPress={() => {
                                 handleEquipArmor(armorValue);
                             }} />
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+
+            {/* Shield Modal */}
+            <Modal animationType="fade" transparent={true} visible={shieldModalVisible}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={styles.modalContainer}>
+
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text>
+                                    Shield:
+                                </Text>
+                                <Text style={{ textTransform: 'capitalize', fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
+                                    {equippedShield || '(None)'}
+                                </Text>
+                            </View>
+                            {equippedShield &&
+                                <Button title="Unequip" onPress={() => {
+                                    setEquippedShield(null);
+                                }} />
+                            }
+                        </View>
+
+
+
+                        <Text style={{ marginBottom: 5 }}>Select Shield</Text>
+                        <DropDownPicker
+                            open={openShieldPicker}
+                            value={shieldValue}
+                            items={getShieldFromBag()}
+                            setOpen={setOpenShieldPicker}
+                            setValue={setShieldValue}
+                            placeholder="Select a shield"
+                            containerStyle={{ height: 40, width: '100%' }}
+                            style={{ backgroundColor: '#fafafa' }}
+                            dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                        />
+                        <View style={styles.modalButtons}>
+                            <Button
+                                title="Close"
+                                color="black"
+                                onPress={() => {
+                                    setShieldValue(null);
+                                    setShieldModalVisible(false);
+                                    setOpenShieldPicker(false);
+                                }}
+                            />
+                            <Button
+                                title="Equip"
+                                onPress={() => {
+                                    setEquippedShield(shieldValue);
+                                }}
+                                disabled={!shieldValue || (shieldValue === equippedShield)}
+                            />
                         </View>
                     </View>
                 </TouchableWithoutFeedback>

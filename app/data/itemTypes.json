@@ -4,20 +4,12 @@
 		"value": "Armor"
 	},
 	{
-		"label": "Necklace",
-		"value": "Necklace"
-	},
-	{
 		"label": "Object",
 		"value": "Object"
 	},
 	{
 		"label": "Potion",
 		"value": "Potion"
-	},
-	{
-		"label": "Ring",
-		"value": "Ring"
 	},
 	{
 		"label": "Scroll",

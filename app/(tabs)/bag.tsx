@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import {
   View,
   Text,
@@ -28,14 +28,15 @@ import classData from '../data/classData.json';
 import StatsDataContext from '../context/StatsDataContext';
 import raceData from '../data/raceData.json';
 import armorTypes from '../data/armorTypes.json';
-
+import potionTypes from '../data/potionTypes.json';
+import spellsData from '../data/spells.json';
 
 
 import bedrollImage from '@items/default-item-bedroll.png';
 import campingSuppliesImage from '@items/default-item-camping-supplies.png';
 import coinPouchImage from '@items/default-item-coin-pouch.png';
 import addItemImage from '@items/add-item-image.png';
-import DropDownPicker from 'react-native-dropdown-picker';
+import DropDownPicker, { ItemType } from 'react-native-dropdown-picker';
 
 import missingImage from '@images/missing-image.png';
 
@@ -127,6 +128,7 @@ interface BaseItem {
   details?: string;
   type?: string;
   dc?: number;
+  features?: string[];
 }
 
 
@@ -248,6 +250,12 @@ export default function BagScreen() {
   const [armorTypesOptionsFiltered, setArmorTypesOptionsFiltered] = useState<
     { label: string; value: string; parent?: string; selectable?: boolean }[]
   >([]);
+  const [openPotionType, setOpenPotionType] = useState(false);
+  const [potionTypeValue, setPotionTypeValue] = useState<string | null>(null);
+  const [openScrollType, setOpenScrollType] = useState(false);
+  const [scrollTypeValue, setScrollTypeValue] = useState<string | null>(null);
+
+
 
   useEffect(() => {
     const campingSupplies = items.find(item => item.id === '1');
@@ -963,6 +971,65 @@ export default function BagScreen() {
   };
 
 
+
+  const numberedPotionItems = useMemo(() => {
+    return potionTypes.map((potion, index) => ({
+      ...potion,
+      label: `${index + 1}. ${potion.label}`,
+    }));
+  }, [potionTypes]);
+
+
+  const scrollTypes = useMemo(() => {
+    return spellsData.reduce((acc, levelGroup) => {
+      // Add level group label
+      acc.push({
+        label: `Level ${levelGroup.level}`,
+        value: `level_${levelGroup.level}`,
+        parent: null,
+        selectable: false,
+        labelStyle: {
+          fontWeight: 'bold',
+        },
+      });
+
+      // Add spells under this level
+      levelGroup.spells.forEach((spell) => {
+        acc.push({
+          label: typeof spell === 'string' ? spell : spell.name,
+          value: typeof spell === 'string' ? spell : spell.name,
+          parent: `level_${levelGroup.level}`,
+          selectable: true,
+          labelStyle: {
+            fontWeight: 'normal',
+          },
+        });
+      });
+
+      return acc;
+    }, [] as {
+      label: string;
+      value: string;
+      parent: string | null;
+      selectable: boolean;
+      labelStyle?: object;
+    }[]);
+  }, [spellsData]);
+
+
+  const findSpellByName = (spellName: string) => {
+    const lowerCaseName = spellName.toLowerCase();
+    for (const levelGroup of spellsData) {
+      for (const spell of levelGroup.spells) {
+        const name = typeof spell === 'string' ? spell : spell.name;
+        if (name.toLowerCase() === lowerCaseName) {
+          return spell;
+        }
+      }
+    }
+    return null;
+  };
+
   // Main Content
   return (
     <View style={styles.container}>
@@ -1152,9 +1219,70 @@ export default function BagScreen() {
                   </>
                 )}
 
+
+                {/* Potion Dropdown */}
+                {(itemTypeValue && itemTypeValue.toLowerCase() === 'potion') && (
+                  <>
+                    <Text>Potion Type</Text>
+                    <DropDownPicker
+                      open={openPotionType}
+                      value={potionTypeValue}
+                      items={numberedPotionItems}
+                      setOpen={setOpenPotionType}
+                      setValue={setPotionTypeValue}
+                      placeholder="Select a potion type"
+                      style={{ marginBottom: 10 }}
+                      containerStyle={{ zIndex: 1000 }}
+                      onChangeValue={(value) => {
+                        if (value) {
+                          setPotionTypeValue(value);
+                          setNewItem({
+                            ...newItem,
+                            name: value,
+                            details: potionTypes.find(p => p.value === value)?.effects || ''
+                          });
+                        }
+                      }}
+                    />
+                  </>
+                )}
+
+
+
+                {/* Scroll Dropdown */}
+                {(itemTypeValue && itemTypeValue.toLowerCase() === 'scroll') && (
+                  <>
+                    <Text>Scroll Type</Text>
+                    <DropDownPicker
+                      open={openScrollType}
+                      value={scrollTypeValue}
+                      items={scrollTypes as ItemType<string>[]}
+                      setOpen={setOpenScrollType}
+                      setValue={setScrollTypeValue}
+                      placeholder="Select a scroll type"
+                      style={{ marginBottom: 10 }}
+                      onChangeValue={(value) => {
+                        if (value) {
+                          setScrollTypeValue(value);
+                          setNewItem({
+                            ...newItem,
+                            name: value,
+                          });
+                        }
+                      }}
+                    />
+                  </>
+                )}
+
+
+
+
                 {/* Custom Item Names */}
-                {(itemTypeValue && itemTypeValue.toLowerCase() !== 'weapon')
-                  && (itemTypeValue && itemTypeValue.toLowerCase() !== 'armor') && (
+                {(
+                  (itemTypeValue && itemTypeValue.toLowerCase() === 'object')
+                  || (itemTypeValue && itemTypeValue.toLowerCase() === 'shield')
+                )
+                  && (
                     <>
                       <Text>Name</Text>
                       <TextInput
@@ -1251,127 +1379,136 @@ export default function BagScreen() {
         transparent={true}
         visible={itemModalVisible}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.itemModalContainer}>
-            <ScrollView style={{ flex: 1 }}>
+        <View style={styles.itemModalContainer}>
 
 
 
-              {/* Quantity Row */}
-              <>
-                <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 14, fontStyle: 'italic', color: 'gray' }}>Quantity</Text>
-                </View>
-                <View style={styles.quantityRow}>
-                  <TouchableOpacity
-                    onPress={() => decrementQuantity(1)}
-                    style={styles.quantityButton}
-                  >
-                    <Ionicons name="remove" size={24} color="white" />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
-                    <Text>-10</Text>
-                  </TouchableOpacity>
-                  <TextInput
-                    style={styles.quantityInput}
-                    keyboardType="number-pad"
-                    onChangeText={handleQuantityChange}
-                    onEndEditing={handleQuantityEndEditing}
-                    value={modalQuantityInput}
-                  />
-                  <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
-                    <Text>+10</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => incrementQuantity(1)}
-                    style={styles.quantityButton}
-                  >
-                    <Ionicons name="add" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </>
-
-
-
-              <TouchableOpacity onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
-                {isEditing && editingItemId === selectedItem?.id ? (
-                  <TextInput
-                    style={styles.modalInput}
-                    value={editedName}
-                    onChangeText={setEditedName}
-                    onBlur={saveItemName}
-                    onSubmitEditing={saveItemName}
-                    autoFocus={true}
-                  />
-                ) : (
-                  <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
-                )}
+          {/* Quantity Row */}
+          <>
+            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontSize: 14, fontStyle: 'italic', color: 'gray' }}>Quantity</Text>
+            </View>
+            <View style={styles.quantityRow}>
+              <TouchableOpacity
+                onPress={() => decrementQuantity(1)}
+                style={styles.quantityButton}
+              >
+                <Ionicons name="remove" size={24} color="white" />
               </TouchableOpacity>
+              <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
+                <Text>-10</Text>
+              </TouchableOpacity>
+              <TextInput
+                style={styles.quantityInput}
+                keyboardType="number-pad"
+                onChangeText={handleQuantityChange}
+                onEndEditing={handleQuantityEndEditing}
+                value={modalQuantityInput}
+              />
+              <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
+                <Text>+10</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => incrementQuantity(1)}
+                style={styles.quantityButton}
+              >
+                <Ionicons name="add" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </>
 
 
 
+          <TouchableOpacity onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
+            {isEditing && editingItemId === selectedItem?.id ? (
+              <TextInput
+                style={styles.modalInput}
+                value={editedName}
+                onChangeText={setEditedName}
+                onBlur={saveItemName}
+                onSubmitEditing={saveItemName}
+                autoFocus={true}
+              />
+            ) : (
+              <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
+            )}
+          </TouchableOpacity>
 
-              {selectedItem && (
-                <>
-                  {/* Wrap the image in a TouchableWithoutFeedback */}
-                  <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
-                    {selectedItem.image ? (
+
+
+          {selectedItem && (
+            <View style={{ flex: 1 }}>
+              {/* Wrap the image in a TouchableWithoutFeedback */}
+
+
+              {/* Image */}
+
+              {selectedItem.type?.toLowerCase() !== 'scroll' && (
+                <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
+                  {selectedItem.image ? (
+                    <View style={{ borderRadius: 8, overflow: 'hidden' }}>
+                      <ImageBackground
+                        source={
+                          typeof selectedItem.image === 'number'
+                            ? selectedItem.image
+                            : { uri: selectedItem.image }
+                        }
+                        style={styles.itemModalImage}
+                      />
+                    </View>
+                  ) : (
+                    selectedItem.type?.toLowerCase() === 'weapon' ? (
                       <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                        <ImageBackground
-                          source={
-                            typeof selectedItem.image === 'number'
-                              ? selectedItem.image
-                              : { uri: selectedItem.image }
-                          }
-                          style={styles.itemModalImage}
-                        />
+                        <ImageBackground source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
                       </View>
                     ) : (
-                      selectedItem.type?.toLowerCase() === 'weapon' ? (
-                        <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                          <ImageBackground source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
-                        </View>
-                      ) : (
-                        <View style={[styles.itemModalNoImage]}>
-                          <Text>No Image Available</Text>
-                        </View>
-                      )
-                    )}
-                  </TouchableWithoutFeedback>
-
-                  {/* Details Section */}
-                  {editingField === 'details' && !isDefaultItem(selectedItem.id) ? (
-                    <TextInput
-                      style={[styles.modalInput, styles.detailsInput]}
-                      value={editedDetails}
-                      onChangeText={setEditedDetails}
-                      keyboardType="default"
-                      onBlur={saveItemDetails}
-                      onSubmitEditing={saveItemDetails}
-                      multiline={true}
-                      textAlignVertical="top"
-                      autoFocus={true}
-                    />
-                  ) : (
-                    <TouchableWithoutFeedback onLongPress={handleDetailsLongPress}>
-                      <Text style={styles.itemModalDetails}>
-                        {selectedItem.details || 'No details available.'}
-                      </Text>
-                    </TouchableWithoutFeedback>
+                      <View style={[styles.itemModalNoImage]}>
+                        <Text>No Image Available</Text>
+                      </View>
+                    )
                   )}
-
-
-                </>
+                </TouchableWithoutFeedback>
               )}
-            </ScrollView>
-            <View style={styles.closeButtonContainer}>
-              <Button
-                title="Close"
-                onPress={() => setItemModalVisible(false)}
-              />
+
+
+
+              {/* Details Section */}
+              <View style={{ flex: 1 }}>
+                <ScrollView style={{ flex: 1, marginBottom: 60 }}>
+                  <Text style={styles.itemModalDetails}>
+                    {selectedItem.details ||
+                      (() => {
+                        // Attempt to fetch spell details
+                        const spell = findSpellByName(selectedItem.name);
+                        if (spell && typeof spell !== 'string') {
+                          let details = spell.description || '';
+                          if (spell.features) {
+                            details += '\n\nFeatures:\n';
+                            details += Object.entries(spell.features)
+                              .map(([key, value]) => `• ${key}: ${value}`)
+                              .join('\n');
+                          }
+                          return details;
+                        } else {
+                          return 'No details available.';
+                        }
+                      })()}
+                  </Text>
+                </ScrollView>
+              </View>
+
+
+
             </View>
+          )}
+          <View style={styles.closeButtonContainer}>
+            <Button
+              title="Close"
+              onPress={() => setItemModalVisible(false)}
+            />
           </View>
-        </TouchableWithoutFeedback>
+        </View>
+
       </Modal>
 
 

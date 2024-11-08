@@ -251,7 +251,7 @@ export default function ActionsScreen() {
     spentSpellSlots,
     setSpentSpellSlots
   } = useActions();
-  const { weaponsProficientIn, equippedArmor } = useItemEquipment();
+  const { weaponsProficientIn, equippedArmor, equippedShield } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
   // Define state for combined actions
   const [combinedActions, setCombinedActions] = useState<ActionBlock[]>([]);
@@ -496,7 +496,7 @@ export default function ActionsScreen() {
 
         if (!equippedArmor) {
           // No armor equipped
-          setAc(10 + dexModifier);
+          setAc(10 + dexModifier + (equippedShield ? 2 : 0));
           return;
         }
 
@@ -539,16 +539,22 @@ export default function ActionsScreen() {
                 : dexModifier;
             totalAc += dexBonus;
           }
+
+          // Add shield bonus if equipped
+          if (equippedShield) {
+            totalAc += 2;
+          }
+
           // Debug statement
           console.log('Total AC with Armor:', totalAc);
           setAc(totalAc);
         } else {
-          // Armor not found; default to base AC
-          setAc(10 + dexModifier);
+          // Armor not found; default to base AC plus shield if equipped
+          setAc(10 + dexModifier + (equippedShield ? 2 : 0));
         }
       }
     }
-  }, [statsData, equippedArmor]);
+  }, [statsData, equippedArmor, equippedShield]);
 
   const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
 
