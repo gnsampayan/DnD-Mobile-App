@@ -6,7 +6,7 @@ import StatsDataContext from '../context/StatsDataContext';
 
 export type WeaponSlot = 'mainHand' | 'offHand' | 'rangedHand';
 
-interface DraconicAncestry {
+export interface DraconicAncestry {
     dragon: string;
     damageType: string;
     breathWeapon: string;
@@ -36,6 +36,8 @@ interface CharacterContextProps {
     setInfernalLegacyEnabled: (value: boolean) => void;
     draconicAncestry: DraconicAncestry | null;
     setDraconicAncestry: (value: DraconicAncestry | null) => void;
+    breathWeaponEnabled: boolean;
+    setBreathWeaponEnabled: (value: boolean) => void;
 
 }
 
@@ -61,6 +63,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [luckyPointsEnabled, setLuckyPointsEnabled] = useState<boolean>(false);
     const [infernalLegacyEnabled, setInfernalLegacyEnabled] = useState<boolean>(false);
     const [draconicAncestry, setDraconicAncestry] = useState<DraconicAncestry | null>(null);
+    const [breathWeaponEnabled, setBreathWeaponEnabled] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -70,6 +73,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const LUCKY_POINTS_ENABLED_STORAGE_KEY = '@lucky_points_enabled';
     const INFERNAL_LEGACY_ENABLED_STORAGE_KEY = '@infernal_legacy_enabled';
     const DRACONIC_ANCESTRY_ENABLED_STORAGE_KEY = '@draconic_ancestry_enabled';
+    const BREATH_WEAPON_ENABLED_STORAGE_KEY = '@breath_weapon_enabled';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -107,6 +111,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 if (storedDraconicAncestryEnabled) {
                     setDraconicAncestry(JSON.parse(storedDraconicAncestryEnabled));
                 }
+                const storedBreathWeaponEnabled = await AsyncStorage.getItem(BREATH_WEAPON_ENABLED_STORAGE_KEY);
+                if (storedBreathWeaponEnabled) {
+                    setBreathWeaponEnabled(storedBreathWeaponEnabled === 'true');
+                }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
             } finally {
@@ -125,7 +133,23 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setLuckyPointsEnabled(false);
         setInfernalLegacyEnabled(false);
         setDraconicAncestry(null);
+        setBreathWeaponEnabled(false);
     }, [statsData.class]);
+
+
+    // set breath weapon boolean to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveBreathWeaponEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(BREATH_WEAPON_ENABLED_STORAGE_KEY, breathWeaponEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving breath weapon enabled to AsyncStorage:', error);
+                }
+            }
+            saveBreathWeaponEnabledToStorage();
+        }
+    }, [breathWeaponEnabled, isLoading]);
 
     // set draconic ancestry boolean to AsyncStorage whenever it changes
     useEffect(() => {
@@ -361,6 +385,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setInfernalLegacyEnabled,
                 draconicAncestry,
                 setDraconicAncestry,
+                breathWeaponEnabled,
+                setBreathWeaponEnabled,
             }}
         >
             {children}

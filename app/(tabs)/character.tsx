@@ -12,6 +12,7 @@ import {
     ImageBackground,
     ImageSourcePropType,
     Button,
+    ScrollView,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
@@ -208,6 +209,8 @@ export default function MeScreen() {
         setInfernalLegacyEnabled,
         draconicAncestry,
         setDraconicAncestry,
+        breathWeaponEnabled,
+        setBreathWeaponEnabled,
     } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
@@ -226,6 +229,8 @@ export default function MeScreen() {
         setInfernalLegacyEnabled: (value: boolean) => void;
         draconicAncestry: DraconicAncestry | null;
         setDraconicAncestry: (value: DraconicAncestry | null) => void;
+        breathWeaponEnabled: boolean;
+        setBreathWeaponEnabled: (value: boolean) => void;
     };
     const {
         items,
@@ -741,37 +746,52 @@ export default function MeScreen() {
 
         return offhandWeapons;
     }
+
+
+
+
     const renderRaceFeatures = (featureKey?: string) => {
         return (
             <View style={{ marginBottom: 20, gap: 10 }}>
-                {raceBonuses.map((race) => (
-                    race.race === statsData.race && Object.entries(race.features).map(([key, value]) => {
-                        if (featureKey) {
-                            if (featureKey === key) {
-                                return <Text key={`value-${key}`} style={{ fontSize: 16, lineHeight: 20 }}>{value}</Text>
+                {raceBonuses
+                    .filter((race) => race.race === statsData.race)
+                    .map((race) =>
+                        Object.entries(race.features).map(([key, value]) => {
+                            if (featureKey) {
+                                if (featureKey === key) {
+                                    return (
+                                        <Text key={`value-${key}`} style={{ fontSize: 16, lineHeight: 20 }}>
+                                            {value}
+                                        </Text>
+                                    );
+                                }
+                                return null;
                             }
-                            return null;
-                        }
-                        return (
-                            <View
-                                key={`feature-${key}`}
-                                style={{ flexDirection: 'column', gap: 5, backgroundColor: 'rgba(0,0,0,0.1)', padding: 10, borderRadius: 8 }}
-                            >
-                                <Text
-                                    key={`label-${key}`}
-                                    style={styles.featLabel}
+                            return (
+                                <View
+                                    key={`feature-${key}`}
+                                    style={{
+                                        flexDirection: 'column',
+                                        gap: 5,
+                                        backgroundColor: 'rgba(0,0,0,0.1)',
+                                        padding: 10,
+                                        borderRadius: 8,
+                                    }}
                                 >
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                                </Text>
-                                <Text
-                                    key={`value-${key}`}>{value}</Text>
-                            </View>
-                        )
-                    })
-                ))}
+                                    <Text key={`label-${key}`} style={styles.featLabel}>
+                                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    </Text>
+                                    <Text key={`value-${key}`}>{value}</Text>
+                                </View>
+                            );
+                        })
+                    )}
             </View>
-        )
-    }
+        );
+    };
+
+
+
     const renderClassFeatures = (featureKey?: string) => {
         return (
             <View>
@@ -985,6 +1005,25 @@ export default function MeScreen() {
                     </>
                 )
             }
+            if (selectedFeat.toLowerCase() === "breath weapon" && !breathWeaponEnabled) {
+                return (
+                    <View style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: 'rgba(0,0,0,1)',
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <MaterialCommunityIcons name="weather-windy" size={20} color="gold" />
+                        <Button
+                            title="Activate"
+                            color="gold"
+                            onPress={() => activateFeat(selectedFeat as string)}
+                        />
+                    </View>
+                )
+            }
         }
         return null;
     }
@@ -1022,6 +1061,9 @@ export default function MeScreen() {
                     setDraconicAncestry(draconicAncestry);
                 }
             }
+        }
+        if (feat.toLowerCase() === "breath weapon") {
+            setBreathWeaponEnabled(true);
         }
     }
 
@@ -1078,8 +1120,8 @@ export default function MeScreen() {
                             <View style={styles.emptyImageContainer}>
                                 {!statsData.race && !statsData.class ?
                                     <>
-                                        <Ionicons name="body" size={24} color="white" />
-                                        <Text style={{ color: 'white', marginBottom: 40, marginTop: 10, fontSize: 16, textAlign: 'center' }}>
+                                        <Ionicons name="body" size={24} color="gold" />
+                                        <Text style={{ color: 'gold', marginBottom: 40, marginTop: 10, fontSize: 16, textAlign: 'center' }}>
                                             Tap to create your{'\n'}character
                                         </Text>
                                     </>
@@ -1099,9 +1141,8 @@ export default function MeScreen() {
 
 
                     {/* Feats */}
-                    <View style={{
+                    <ScrollView style={{
                         flexDirection: 'column',
-                        gap: 10,
                         flex: 1,
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -1112,43 +1153,69 @@ export default function MeScreen() {
                         paddingHorizontal: 10,
                     }}>
                         {/* race features */}
-                        <View style={{ gap: 5 }}>
+                        <View style={{ gap: 5, marginBottom: 20 }}>
                             <Text style={[styles.label, { color: 'lightgrey' }]}>{statsData.race || 'Race'} Feats:</Text>
                             {(!statsData.race || raceBonuses.length === 0) && <Text style={{ color: 'lightgrey' }}>—</Text>}
                             {raceBonuses.map((race) => (
                                 race.race === statsData.race && Object.entries(race.features).map(([key]) => (
-                                    <TouchableOpacity
-                                        key={`feature-${key}`}
-                                        style={{ flexDirection: 'column', gap: 5, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 8 }}
-                                        onPress={() => {
-                                            setFeatDescriptionModalVisible(true);
-                                            setSelectedFeat(key);
-                                        }}
-                                    >
-                                        <Text
-                                            key={`label-${key}`}
-                                            style={[
-                                                styles.featLabel,
-                                                // highlight so user can activate lucky feat
-                                                key.toLowerCase() === 'lucky'
-                                                && (!luckyPointsEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                // highlight if skill proficiency not gained yet
-                                                key.toLowerCase() === 'skill versatility'
-                                                && (!raceSkillProfGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                // highlight if relentless endurance not gained yet
-                                                key.toLowerCase() === 'relentless endurance'
-                                                && (!relentlessEnduranceGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                // highlight if infernal legacy not enabled yet
-                                                key.toLowerCase() === 'infernal legacy'
-                                                && (!infernalLegacyEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                // highlight if draconic ancestry not enabled yet
-                                                key.toLowerCase() === 'draconic ancestry'
-                                                && (!draconicAncestry ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                            ]}
+                                    <View
+                                        key={`race-feature-${key}`}
+                                        style={{ flexDirection: 'row', alignItems: 'center', gap: 5, }}>
+                                        {((key.toLowerCase() === 'lucky' && !luckyPointsEnabled) ||
+                                            (key.toLowerCase() === 'skill versatility' && !raceSkillProfGained) ||
+                                            (key.toLowerCase() === 'relentless endurance' && !relentlessEnduranceGained) ||
+                                            (key.toLowerCase() === 'infernal legacy' && !infernalLegacyEnabled) ||
+                                            (key.toLowerCase() === 'draconic ancestry' && !draconicAncestry) ||
+                                            (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled)) && (
+                                                <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
+                                            )}
+                                        <TouchableOpacity
+                                            key={`feature-${key}`}
+                                            style={{
+                                                flexDirection: 'column',
+                                                gap: 5,
+                                                padding: 5,
+                                                flexShrink: 1,
+                                            }}
+                                            onPress={() => {
+                                                setFeatDescriptionModalVisible(true);
+                                                setSelectedFeat(key);
+                                            }}
                                         >
-                                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                                        </Text>
-                                    </TouchableOpacity>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                                                <Text
+                                                    key={`label-${key}`}
+                                                    style={[
+                                                        styles.featLabel,
+                                                        // highlight so user can activate lucky feat
+                                                        key.toLowerCase() === 'lucky'
+                                                        && (!luckyPointsEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        // highlight if skill proficiency not gained yet
+                                                        key.toLowerCase() === 'skill versatility'
+                                                        && (!raceSkillProfGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        // highlight if relentless endurance not gained yet
+                                                        key.toLowerCase() === 'relentless endurance'
+                                                        && (!relentlessEnduranceGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        // highlight if infernal legacy not enabled yet
+                                                        key.toLowerCase() === 'infernal legacy'
+                                                        && (!infernalLegacyEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        // highlight if draconic ancestry not enabled yet
+                                                        key.toLowerCase() === 'draconic ancestry'
+                                                        && (!draconicAncestry ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        // highlight if breath weapon not enabled yet
+                                                        key.toLowerCase() === 'breath weapon'
+                                                        && (!breathWeaponEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        {
+                                                            flexShrink: 1,
+                                                            flexWrap: 'wrap'
+                                                        }
+                                                    ]}
+                                                >
+                                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
                                 ))
                             ))}
                         </View>
@@ -1157,7 +1224,7 @@ export default function MeScreen() {
                             <Text style={[styles.label, { color: 'lightgrey', textTransform: 'capitalize' }]}>{statsData.class || 'Class'} Feats:</Text>
                             <Text style={{ color: 'lightgrey' }}>—⁠</Text>
                         </View>
-                    </View>
+                    </ScrollView>
 
 
 

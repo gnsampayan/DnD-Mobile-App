@@ -1040,7 +1040,7 @@ export default function BagScreen() {
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{carryingCapacity}</Text>
-            <MaterialCommunityIcons name="weight-pound" size={20} color="lightgrey" />
+            <MaterialCommunityIcons name="anvil" size={20} color="lightgrey" />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{foodUnits}</Text>

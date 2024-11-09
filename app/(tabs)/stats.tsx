@@ -443,7 +443,13 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
         return (
             <TouchableOpacity
-                style={[styles.skillContainer, isProficient ? { backgroundColor: 'white' } : {}]}
+                style={[
+                    styles.skillContainer,
+                    { borderColor: 'gold' },
+                    isProficient ? { backgroundColor: 'white' } : {},
+                    // set border color to gold if unused skill points are greater than 0
+                    unusedSkillPoints > 0 ? { borderWidth: 1 } : {}
+                ]}
                 onPress={() => {
                     // Handle adding proficiency if there are unused skill points
                     if (unusedSkillPoints > 0 && !gainedProficiency) {

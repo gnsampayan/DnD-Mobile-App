@@ -551,14 +551,17 @@ export default function SpellbookScreen() {
                     </View>
                     <FlatList
                         style={{ marginLeft: 10 }}
+                        contentContainerStyle={{ gap: 10 }}
                         data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => ({
                             slotIndex: i,
                             spellName: null
                         }))}
                         renderItem={({ item }) => renderSpellBlock({ item }, "prepared-spells")}
                         keyExtractor={(item) => item.slotIndex.toString()}
-                        horizontal={true}
+                        horizontal={statsData.class === 'wizard'}
                         showsHorizontalScrollIndicator={false}
+                        numColumns={statsData.class === 'wizard' ? 1 : 3}
+                        key={statsData.class === 'wizard' ? 'wizard' : 'other'}
                     />
                 </View>
             )

@@ -13,13 +13,14 @@ import {
   ImageBackground,
   ImageSourcePropType,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
-import { CharacterContext } from '../context/equipmentActionsContext';
+import { CharacterContext, DraconicAncestry } from '../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
 import StatsDataContext from '../context/StatsDataContext';
 import cantripsData from '../data/cantrips.json';
@@ -43,6 +44,9 @@ import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 import armorTypes from '../data/armorTypes.json';
+
+// Draconic Ancestry images
+import draconicAncestryImage from '@actions/draconic-ancestry-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -222,6 +226,7 @@ interface DefaultActionBlock extends BaseAction {
 
 interface CustomActionBlock extends BaseAction {
   // Additional properties specific to custom actions
+  source?: 'race' | 'class' | 'spell' | 'cantrip' | 'custom';
 }
 
 // Create a union type for Action
@@ -292,6 +297,8 @@ export default function ActionsScreen() {
     setRelentlessEnduranceUsable,
     luckyPointsEnabled,
     infernalLegacyEnabled,
+    draconicAncestry,
+    breathWeaponEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -301,6 +308,8 @@ export default function ActionsScreen() {
     setRelentlessEnduranceUsable: (value: boolean) => void;
     luckyPointsEnabled: boolean;
     infernalLegacyEnabled: boolean;
+    draconicAncestry: DraconicAncestry | null;
+    breathWeaponEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -311,23 +320,23 @@ export default function ActionsScreen() {
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
-    { id: '0', name: 'Long Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1 }, image: defaultLongRestImage },
-    { id: '1', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
-    { id: '2', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
-    { id: '3', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
-    { id: '4', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 1 }, image: defaultJumpImage },
+    { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1 }, image: defaultLongRestImage },
+    { id: '1', name: 'Reaction', details: 'Instantly respond to a trigger', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
+    { id: '2', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
+    { id: '3', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
+    { id: '4', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '5', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 1 }, image: defaultJumpImage },
     {
-      id: '5',
+      id: '6',
       name: 'Shove',
       details: 'Push a creature forward 5m or knock it prone. You can only shove creatures up to one size larger than you. Your roll must be greater than the target\'s roll.',
       cost: { actions: 0, bonus: 1 },
       image: defaultPushImage
     },
-    { id: '6', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
-    { id: '7', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
-    { id: '8', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
-    { id: '9', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
-    { id: '10', name: 'Reaction', details: 'Instantly respond to a trigger', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
+    { id: '7', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
+    { id: '8', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+    { id: '9', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
+    { id: '10', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
   ];
 
   const [armorStealthDisadvantage, setArmorStealthDisadvantage] = useState<boolean>(false);
@@ -391,6 +400,7 @@ export default function ActionsScreen() {
           details: '',
           image: cantripImageSource,
           type: 'cantrip',
+          source: 'cantrip',
         } as ActionBlock;
       }
 
@@ -401,6 +411,7 @@ export default function ActionsScreen() {
         details: cantrip.description || '',
         image: cantripImageSource,
         type: 'cantrip',
+        source: 'cantrip',
       } as ActionBlock;
     });
   };
@@ -438,7 +449,7 @@ export default function ActionsScreen() {
     });
     const uniqueActions = Array.from(uniqueActionsMap.values());
     setCombinedActions(uniqueActions);
-  }, [actions, cantripSlotsData, statsData.race, statsData.level, infernalLegacyEnabled]);
+  }, [actions, cantripSlotsData, statsData.race, statsData.level, infernalLegacyEnabled, draconicAncestry, breathWeaponEnabled]);
 
 
   // Extract Ability Modifiers from statsData
@@ -1221,6 +1232,15 @@ export default function ActionsScreen() {
     return typeof s === 'object' && s !== null && 'name' in s;
   }
 
+  function renderDraconicAncestryDetails(draconicAncestry: DraconicAncestry): string {
+    return [
+      `Dragon: ${draconicAncestry.dragon}`,
+      `Damage Type: ${draconicAncestry.damageType}`,
+      `Breath Weapon: ${draconicAncestry.breathWeapon}`,
+      `Typical Alignment: ${draconicAncestry.typicalAlignment}`,
+    ].join('\n');
+  }
+
   const generateRaceBasedActions = (): ActionBlock[] => {
     const raceActions: ActionBlock[] = [];
 
@@ -1237,6 +1257,7 @@ export default function ActionsScreen() {
             image: cantripImageSource,
             details: cantrip.description || '',
             type: 'cantrip',
+            source: 'race',
           } as ActionBlock);
         }
       }
@@ -1265,6 +1286,7 @@ export default function ActionsScreen() {
             cost: parseCastingTime(spell.castingTime),
             details: spell.description || '',
             type: 'spell',
+            source: 'race',
           } as ActionBlock);
         }
       }
@@ -1293,10 +1315,28 @@ export default function ActionsScreen() {
             cost: parseCastingTime(spell.castingTime),
             details: spell.description || '',
             type: 'spell',
+            source: 'race',
           } as ActionBlock);
         }
       }
     }
+
+
+    // Draconic Ancestry
+    // For Dragonborn's Breath Weapon
+    if (statsData.race?.toLowerCase() === 'dragonborn' && (draconicAncestry !== null) && breathWeaponEnabled) {
+      // Add 'Breath Weapon' action
+      raceActions.push({
+        id: 'race-breath-weapon',
+        name: 'Breath Weapon',
+        cost: { actions: 1, bonus: 0 },
+        details: renderDraconicAncestryDetails(draconicAncestry),
+        image: draconicAncestryImage as ImageSourcePropType,
+        type: 'feature',
+        source: 'race',
+      } as ActionBlock);
+    }
+
 
     return raceActions;
   };
@@ -1674,7 +1714,7 @@ export default function ActionsScreen() {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
                 {selectedAction && (
-                  <>
+                  <View>
                     {/* Image, Title and Cost Section */}
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                       {/* Image Section */}
@@ -1789,16 +1829,17 @@ export default function ActionsScreen() {
 
                         {/* If infernal legacy is enabled, and Hellish Rebuke is selected, show this text */}
                         {infernalLegacyEnabled &&
-                          (selectedAction.name.toLowerCase() === 'hellish rebuke' ||
+                          ('source' in selectedAction && selectedAction.source === 'race') &&
+                          (
+                            selectedAction.name.toLowerCase() === 'hellish rebuke' ||
                             selectedAction.name.toLowerCase() === 'darkness' ||
-                            selectedAction.name.toLowerCase() === 'thaumaturgy') && (
+                            selectedAction.name.toLowerCase() === 'thaumaturgy'
+                          ) && (
                             <View style={{ flexDirection: 'row', gap: 5 }}>
-                              <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
-                                (Infernal Legacy)
-                              </Text>
+                              <MaterialCommunityIcons name="emoticon-devil" size={16} color="black" />
                               {selectedAction.name.toLowerCase() === 'hellish rebuke' && (
                                 <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
-                                  SpLv2
+                                  SpLv2 (3d10)
                                 </Text>
                               )}
                             </View>
@@ -2113,8 +2154,115 @@ export default function ActionsScreen() {
                       </View>
                     )}
 
+                    {/* Cantrip Features */}
+                    {cantripsData.find(c => c.name.toLowerCase() === selectedAction.name.toLowerCase()) && (
+                      <View style={styles.modalWeaponProperty}>
+                        <View style={{ gap: 5 }}>
+                          {(() => {
+                            const features = cantripsData.find(c => c.name === selectedAction.name)?.features;
+                            if (!features) return null;
+
+                            // Handle array of strings or objects
+                            if (Array.isArray(features)) {
+                              return features.map((feature, index) => {
+                                if (typeof feature === 'object') {
+                                  return (
+                                    <View key={index} style={{ marginBottom: 5 }}>
+                                      <Text style={{ fontWeight: 'bold' }}>{feature.effect}</Text>
+                                      <Text style={{ marginLeft: 10 }}>{feature.details}</Text>
+                                    </View>
+                                  );
+                                }
+                                return (
+                                  <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text>{`${index + 1}). ${feature}`}</Text>
+                                  </View>
+                                );
+                              });
+                            }
+
+                            // Handle string
+                            if (typeof features === 'string') {
+                              return <Text>• {features}</Text>;
+                            }
+
+                            // Handle object
+                            return Object.entries(features).map(([key, value]) => {
+                              if (typeof value === 'object' && value !== null) {
+                                return (
+                                  <View key={key} style={{ marginBottom: 5 }}>
+                                    <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                    {Object.entries(value).map(([subKey, subValue]) => (
+                                      <Text key={subKey} style={{ marginLeft: 10 }}>
+                                        Level {subKey}: {String(subValue)}
+                                      </Text>
+                                    ))}
+                                  </View>
+                                );
+                              }
+                              return (
+                                <Text key={key}>
+                                  <Text style={{ fontWeight: 'bold' }}>{key}:</Text> {value}
+                                </Text>
+                              );
+                            });
+                          })()}
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Draconic Damage Details */}
+                    {('source' in selectedAction) && (selectedAction.source === 'race') &&
+                      (statsData?.race?.toLowerCase() === 'dragonborn') && (
+                        <>
+                          <View style={styles.modalWeaponProperty}>
+                            <MaterialCommunityIcons name="skull-scan" size={20} color="black" />
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text>8 + ({calculateModifier(statsData.abilities.find(a => a.name === 'Constitution')?.value || 10)} Con)</Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                <Text>+{proficiencyBonus}</Text>
+                                <Ionicons name="ribbon" size={16} color="black" />
+                              </View>
+                            </View>
+                          </View>
+                          <View style={styles.modalWeaponProperty}>
+                            <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text>
+                                {statsData.level <= 5 ? '2d6' :
+                                  statsData.level <= 10 ? '3d6' :
+                                    statsData.level <= 15 ? '4d6' : '5d6'}
+                              </Text>
+                              <MaterialCommunityIcons name="shield-check" size={16} color="black" />
+                              <Text>or {statsData.level <= 5 ? '2d6' :
+                                statsData.level <= 10 ? '3d6' :
+                                  statsData.level <= 15 ? '4d6' : '5d6'}/2</Text>
+                              <MaterialCommunityIcons name="shield-off" size={16} color="black" />
+                            </View>
+                          </View>
+
+                        </>
+                      )}
+
+
+
                     {/* Modal Buttons */}
-                    <View style={styles.modalButtons}>
+                    <View style={[styles.modalButtons, { flexDirection: 'column', gap: 10 }]}>
+                      {/* short rest button -- only show if action is rest */}
+                      {selectedAction.name.toLowerCase() === 'rest' && (
+                        <TouchableOpacity
+                          style={[styles.modalButtonCommit, { flexDirection: 'row', gap: 5, justifyContent: 'center', alignItems: 'center' }]}
+                          onPress={() => {
+                            Alert.alert('Short Rest', `Roll 1d${hitDice} + (${calculateModifier(statsData.abilities.find(a => a.name === 'Constitution')?.value || 10)} Con) and add the result to your hit points.`);
+                            setActionModalVisible(false);
+                            setCurrentActionsAvailable(1);
+                            setCurrentBonusActionsAvailable(1);
+                            setCurrentReactionsAvailable(1);
+                          }}>
+                          <MaterialCommunityIcons name="sleep" size={16} color="black" />
+                          <Text>Short Rest</Text>
+                        </TouchableOpacity>
+                      )}
 
                       {/* Commit Button */}
                       <TouchableOpacity
@@ -2128,7 +2276,7 @@ export default function ActionsScreen() {
                             (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)) && { opacity: 0.2 }
                         ]}
                         onPress={() => {
-                          if (selectedAction.name.toLowerCase() === 'long rest') {
+                          if (selectedAction.name.toLowerCase() === 'rest') {
                             handleHpChange('replenish');
                             setSpentSpellSlots({
                               ...spentSpellSlots,
@@ -2174,8 +2322,7 @@ export default function ActionsScreen() {
                       >
                         <View style={styles.modalButtonTextContainer}>
 
-                          <Text>Commit: </Text>
-                          {selectedAction.name.toLowerCase() !== 'long rest' ? (
+                          {selectedAction.name.toLowerCase() !== 'rest' ? (
                             <>
                               {
                                 selectedAction.cost.actions === 0 ? null : (
@@ -2203,7 +2350,8 @@ export default function ActionsScreen() {
                             </>
                           ) :
                             <View style={styles.costTextContainer}>
-                              <Text style={styles.modalButtonTextBlack}>8 hours</Text>
+                              <MaterialCommunityIcons name="campfire" size={16} color="black" />
+                              <Text style={styles.modalButtonTextBlack}>Camp</Text>
                             </View>
                           }
 
@@ -2211,7 +2359,7 @@ export default function ActionsScreen() {
                       </TouchableOpacity>
                     </View>
 
-                  </>
+                  </View>
                 )}
 
               </View>
