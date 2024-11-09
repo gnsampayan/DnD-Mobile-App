@@ -396,7 +396,14 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     imageStyle={{ borderRadius: 8 }}
                 >
                     <View style={styles.abilityOverlay}>
-                        <Text style={[styles.abilityName, isPrimaryAbility ? { textDecorationLine: 'underline', textDecorationColor: 'magenta' } : {}]}>{item.name}</Text>
+                        <Text style={[
+                            styles.abilityName,
+                            isPrimaryAbility
+                                ? { color: 'black', backgroundColor: 'rgba(255, 255, 255, 1)' }
+                                : {}
+                        ]}>
+                            {item.name}
+                        </Text>
                         <View style={styles.abilityValueContainer}>
                             <Text style={styles.abilityValue}>{item.value}</Text>
                         </View>

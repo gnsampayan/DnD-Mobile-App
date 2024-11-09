@@ -270,7 +270,9 @@ export default function ActionsScreen() {
     hellishRebukeSpent,
     setHellishRebukeSpent,
     darknessSpent,
-    setDarknessSpent
+    setDarknessSpent,
+    breathWeaponSpent,
+    setBreathWeaponSpent,
   } = useActions();
   const { weaponsProficientIn, equippedArmor, equippedShield } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
@@ -1000,6 +1002,11 @@ export default function ActionsScreen() {
         }
       }
 
+      // Check for breath weapon
+      if (breathWeaponEnabled && item.name.toLowerCase() === 'breath weapon') {
+        affordable = affordable && !breathWeaponSpent;
+      }
+
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
@@ -1234,10 +1241,9 @@ export default function ActionsScreen() {
 
   function renderDraconicAncestryDetails(draconicAncestry: DraconicAncestry): string {
     return [
-      `Dragon: ${draconicAncestry.dragon}`,
       `Damage Type: ${draconicAncestry.damageType}`,
       `Breath Weapon: ${draconicAncestry.breathWeapon}`,
-      `Typical Alignment: ${draconicAncestry.typicalAlignment}`,
+      'Replenishes on a long rest.',
     ].join('\n');
   }
 
@@ -2300,6 +2306,9 @@ export default function ActionsScreen() {
                               setDarknessSpent(false);
                               setHellishRebukeSpent(false);
                             }
+                            if (breathWeaponEnabled) {
+                              setBreathWeaponSpent(false);
+                            }
                           }
                           // if action is hellish rebuke, set hellish rebuke spent to true
                           if (selectedAction.name.toLowerCase() === 'hellish rebuke') {
@@ -2308,6 +2317,9 @@ export default function ActionsScreen() {
                           // if action is darkness, set darkness spent to true
                           if (selectedAction.name.toLowerCase() === 'darkness') {
                             setDarknessSpent(true);
+                          }
+                          if (selectedAction.name.toLowerCase() === 'breath weapon') {
+                            setBreathWeaponSpent(true);
                           }
                           commitAction();
                         }}

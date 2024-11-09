@@ -750,7 +750,7 @@ export default function SpellbookScreen() {
                                 <MaterialCommunityIcons name="book-education" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                        <ScrollView style={{ paddingHorizontal: 10, flex: 1, marginBottom: 40 }}>
+                        <ScrollView style={[{ paddingHorizontal: 10, flex: 1, marginBottom: 40 }, statsData.class === 'wizard' ? { marginBottom: 0 } : {}]}>
                             {data.map((item, index) => (
                                 <View key={item.slotIndex.toString()}>
                                     {renderSpellBlock({ item }, "known-spells")}

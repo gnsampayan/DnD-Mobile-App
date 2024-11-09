@@ -1109,7 +1109,7 @@ export default function MeScreen() {
                     style={{ borderWidth: 1, borderColor: 'white', borderStyle: 'solid', borderRadius: 8 }}
                     onLongPress={handleImageLongPress}
                     onPress={() => setCharacterModalVisible(true)}>
-                    <View style={[styles.imageContainer, { width: section3Width }]}>
+                    <View style={[styles.imageContainer, { width: section3Width, overflow: 'hidden' }]}>
                         {imageUri ? (
                             <Image
                                 source={{ uri: imageUri }}
