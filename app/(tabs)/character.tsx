@@ -946,6 +946,21 @@ export default function MeScreen() {
                             setOpen={setDraconicAncestryModalVisible}
                             placeholder="Select a draconic ancestry"
                         />
+
+
+                        {/* render key value pairs of draconic ancestry based on draconic ancestry value */}
+                        {draconicAncestryValue && draconicAncestryData
+                            .filter(ancestry => ancestry.dragon === draconicAncestryValue)
+                            .map(ancestry => (
+                                <View key={ancestry.dragon} style={{ padding: 10 }}>
+                                    <Text><Text style={{ fontWeight: 'bold' }}>Dragon: </Text>{ancestry.dragon}</Text>
+                                    <Text><Text style={{ fontWeight: 'bold' }}>Damage Type: </Text>{ancestry.damageType}</Text>
+                                    <Text><Text style={{ fontWeight: 'bold' }}>Breath Weapon: </Text>{ancestry.breathWeapon}</Text>
+                                    <Text><Text style={{ fontWeight: 'bold' }}>Typical Alignment: </Text>{ancestry.typicalAlignment}</Text>
+                                </View>
+                            ))}
+
+
                         <View style={{
                             paddingHorizontal: 10,
                             backgroundColor: 'rgba(0,0,0,1)',
@@ -959,7 +974,11 @@ export default function MeScreen() {
                             <Button
                                 title="Activate"
                                 color="gold"
-                                onPress={() => activateFeat(selectedFeat as string)}
+                                onPress={() => {
+                                    activateFeat(selectedFeat as string)
+                                    setDraconicAncestryModalVisible(false);
+                                    setDraconicAncestryValue(null);
+                                }}
                                 disabled={!draconicAncestryValue}
                             />
                         </View>
@@ -969,6 +988,11 @@ export default function MeScreen() {
         }
         return null;
     }
+
+
+
+
+
     const activateFeat = (feat: string) => {
         // if feat is "lucky", then activate lucky
         if (feat.toLowerCase() === "lucky") {
@@ -1716,7 +1740,11 @@ export default function MeScreen() {
 
             {/* Race Feat Description Modal */}
             <Modal animationType="fade" transparent={true} visible={featDescriptionModalVisible}>
-                <TouchableWithoutFeedback onPress={() => setFeatDescriptionModalVisible(false)}>
+                <TouchableWithoutFeedback onPress={() => {
+                    setFeatDescriptionModalVisible(false);
+                    setDraconicAncestryValue(null);
+                    setDraconicAncestryModalVisible(false);
+                }}>
                     <View style={styles.modalOverlay}>
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <View style={{
