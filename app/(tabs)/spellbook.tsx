@@ -1631,8 +1631,6 @@ export default function SpellbookScreen() {
                 break;
 
             default:
-                // Default to wizard -- change this later
-                spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
                 return {};
         }
 

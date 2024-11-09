@@ -68,7 +68,7 @@
 		"race": "Halfling",
 		"speed": 25,
 		"features": {
-			"lucky": "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll one dice of your choice.",
+			"lucky": "You gain 1 lucky point. When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can choose to spend your lucky point and reroll. You regain your lucky points after a long rest.",
 			"brave": "You have advantage on saving throws against being frightened.",
 			"halfling nimbleness": "Your small size makes you nimble, and you have advantage on Dexterity (Acrobatics) checks made to avoid being grappled, pinned, or otherwise restrained. You can move through the space of any creature that is of a size larger than yours.",
 			"language": "You can speak, read, and write Common and Halfling."
@@ -104,10 +104,11 @@
 	{
 		"race": "Half-Elf",
 		"proficiencies": {
-			"skillProficiency": ["perception", "acrobatics"]
+			"skillProficiency": ["perception"]
 		},
 		"speed": 30,
 		"features": {
+			"+1 skill proficiency": "You gain proficiency in one skill of your choice.",
 			"darkvision": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
 			"fey ancestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
 			"language": "You can speak, read, and write Common, Elvish, and one other language of your choice."

@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
@@ -182,11 +182,24 @@ export default function MeScreen() {
     const [openOffHandPicker, setOpenOffHandPicker] = useState(false);
     const [openRangedHandPicker, setOpenRangedHandPicker] = useState(false);
     // Items and weapons
-    const { mainHandWeapon, offHandWeapon, rangedHandWeapon, equipWeapon } = useContext(CharacterContext) as {
+    const {
+        mainHandWeapon,
+        offHandWeapon,
+        rangedHandWeapon,
+        equipWeapon,
+        luckyPoints,
+        setLuckyPoints,
+        luckyPointsMax,
+        setLuckyPointsMax
+    } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
         rangedHandWeapon: Item | null;
         equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
+        luckyPoints: number | null;
+        setLuckyPoints: (points: number) => void;
+        luckyPointsMax: number;
+        setLuckyPointsMax: (points: number) => void;
     };
     const { items, weaponsProficientIn, equippedArmor, setEquippedArmor, equippedShield, setEquippedShield } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
@@ -203,10 +216,12 @@ export default function MeScreen() {
     const [armorModalVisible, setArmorModalVisible] = useState(false);
     const [openArmorPicker, setOpenArmorPicker] = useState(false);
     const [armorValue, setArmorValue] = useState<string | null>(null);
-    const [editingEquipmentSlot, setEditingEquipmentSlot] = useState<string | null>(null);
     const [shieldModalVisible, setShieldModalVisible] = useState(false);
     const [openShieldPicker, setOpenShieldPicker] = useState(false);
     const [shieldValue, setShieldValue] = useState<string | null>(null);
+    const [featDescriptionModalVisible, setFeatDescriptionModalVisible] = useState(false);
+    const [selectedFeat, setSelectedFeat] = useState<string | null>(null);
+    const [settingsModalVisible, setSettingsModalVisible] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -374,19 +389,6 @@ export default function MeScreen() {
         }
     };
 
-    const deleteEquipmentImage = async (equipmentId: string) => {
-        try {
-            await AsyncStorage.removeItem(`equipmentImage-${equipmentId}`);
-            setEquipmentItems((prevItems) =>
-                prevItems.map((item) =>
-                    item.id === equipmentId ? { ...item, customImageUri: undefined } : item
-                )
-            );
-        } catch (error) {
-            console.error('Failed to delete equipment image:', error);
-        }
-    };
-
     const handleSaveRaceAndClass = () => {
         Alert.alert(
             'Confirm Selections',
@@ -467,6 +469,8 @@ export default function MeScreen() {
         // Clear AsyncStorage
         clearAsyncStorage();
         clearCantripSlots();
+        setSettingsModalVisible(false);
+        setLuckyPoints(-1);
     };
 
     const clearCantripSlots = async () => {
@@ -691,33 +695,40 @@ export default function MeScreen() {
 
         return offhandWeapons;
     }
-    const renderRaceFeatures = () => {
+    const renderRaceFeatures = (featureKey?: string) => {
         return (
             <View style={{ marginBottom: 20, gap: 10 }}>
-                <Text style={styles.label}>Race Features:</Text>
                 {raceBonuses.map((race) => (
-                    race.race === statsData.race && Object.entries(race.features).map(([key, value]) => (
-                        <View
-                            key={`feature-${key}`}
-                            style={{ flexDirection: 'column', gap: 5, backgroundColor: 'rgba(0,0,0,0.1)', padding: 10, borderRadius: 8 }}
-                        >
-                            <Text
-                                key={`label-${key}`}
-                                style={styles.featLabel}
+                    race.race === statsData.race && Object.entries(race.features).map(([key, value]) => {
+                        if (featureKey) {
+                            if (featureKey === key) {
+                                return <Text key={`value-${key}`} style={{ fontSize: 16, lineHeight: 20 }}>{value}</Text>
+                            }
+                            return null;
+                        }
+                        return (
+                            <View
+                                key={`feature-${key}`}
+                                style={{ flexDirection: 'column', gap: 5, backgroundColor: 'rgba(0,0,0,0.1)', padding: 10, borderRadius: 8 }}
                             >
-                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                            </Text>
-                            <Text key={`value-${key}`}>{value}</Text>
-                        </View>
-                    ))
+                                <Text
+                                    key={`label-${key}`}
+                                    style={styles.featLabel}
+                                >
+                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                </Text>
+                                <Text
+                                    key={`value-${key}`}>{value}</Text>
+                            </View>
+                        )
+                    })
                 ))}
             </View>
         )
     }
-    const renderClassFeatures = () => {
+    const renderClassFeatures = (featureKey?: string) => {
         return (
             <View>
-                <Text>Class Features</Text>
                 <Text>You have not gained any {statsData.class} features yet.</Text>
             </View>
         )
@@ -741,7 +752,6 @@ export default function MeScreen() {
             setArmorValue(null);
             setEquippedArmor(null);
             setArmorModalVisible(false);
-            setEditingEquipmentSlot(null);
             return;
         }
         // Initialize variables to hold the found armor information
@@ -783,7 +793,6 @@ export default function MeScreen() {
             setEquippedArmor(armorName);
             setArmorValue(armorName);
             setArmorModalVisible(false);
-            setEditingEquipmentSlot(null);
         } else {
             // Armor not found
             Alert.alert('Armor Not Found', 'The selected armor does not exist in the armor data.');
@@ -795,6 +804,41 @@ export default function MeScreen() {
             label: item.name,
             value: item.name.toLowerCase(),
         }));
+    }
+
+    const renderCustomFeatButton = () => {
+        if (selectedFeat) {
+            // if feat is "lucky", then show activate button
+            if (selectedFeat.toLowerCase() === "lucky" && (!luckyPointsMax || !luckyPoints)) {
+                return (
+                    <View style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: 'rgba(0,0,0,1)',
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <MaterialCommunityIcons name="clover" size={20} color="gold" />
+                        <Button
+                            title="Activate"
+                            color="gold"
+                            onPress={() => activateFeat(selectedFeat as string)}
+                        />
+                    </View>
+                )
+            }
+        }
+        return null;
+    }
+    const activateFeat = (feat: string) => {
+        // if feat is "lucky", then activate lucky
+        if (feat.toLowerCase() === "lucky") {
+            if (!luckyPointsMax || !luckyPoints) {
+                setLuckyPointsMax(1);
+                setLuckyPoints(1);
+            }
+        }
     }
 
 
@@ -823,7 +867,7 @@ export default function MeScreen() {
                     </ImageBackground>
                 </View>
                 <View style={styles.headerButtons}>
-                    <TouchableOpacity style={styles.userAccountButton}>
+                    <TouchableOpacity style={styles.userAccountButton} onPress={() => setSettingsModalVisible(true)}>
                         <Ionicons name="settings" size={24} color="white" />
                     </TouchableOpacity>
                 </View>
@@ -883,8 +927,39 @@ export default function MeScreen() {
                         paddingVertical: 5,
                         paddingHorizontal: 10,
                     }}>
-                        <Text style={[styles.label, { color: 'lightgrey' }]}>Feats:</Text>
-                        <Text style={{ color: 'lightgrey' }}>You have not gained any feats yet.</Text>
+                        {/* race features */}
+                        <View style={{ gap: 5 }}>
+                            <Text style={[styles.label, { color: 'lightgrey' }]}>{statsData.race || 'Race'} Feats:</Text>
+                            {(!statsData.race || raceBonuses.length === 0) && <Text style={{ color: 'lightgrey' }}>—</Text>}
+                            {raceBonuses.map((race) => (
+                                race.race === statsData.race && Object.entries(race.features).map(([key]) => (
+                                    <TouchableOpacity
+                                        key={`feature-${key}`}
+                                        style={{ flexDirection: 'column', gap: 5, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 8 }}
+                                        onPress={() => {
+                                            setFeatDescriptionModalVisible(true);
+                                            setSelectedFeat(key);
+                                        }}
+                                    >
+                                        <Text
+                                            key={`label-${key}`}
+                                            style={[
+                                                styles.featLabel,
+                                                // highlight so user can activate lucky feat
+                                                key.toLowerCase() === 'lucky' && (luckyPoints === null || luckyPoints === -1) && { color: 'gold' }
+                                            ]}
+                                        >
+                                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))
+                            ))}
+                        </View>
+                        {/* class features */}
+                        <View style={{ gap: 5 }}>
+                            <Text style={[styles.label, { color: 'lightgrey', textTransform: 'capitalize' }]}>{statsData.class || 'Class'} Feats:</Text>
+                            <Text style={{ color: 'lightgrey' }}>—⁠</Text>
+                        </View>
                     </View>
 
 
@@ -906,7 +981,6 @@ export default function MeScreen() {
                                     style={styles.equipmentItem}
                                     onPress={() => {
                                         setArmorModalVisible(true);
-                                        setEditingEquipmentSlot(item.id);
                                     }}
                                 >
                                     <ImageBackground
@@ -1136,12 +1210,6 @@ export default function MeScreen() {
                                             {isRaceConfirmed && isClassConfirmed && <Text style={styles.modalLabel}>,</Text>}
                                             {isClassConfirmed && <Text style={[styles.modalLabel, { textTransform: 'capitalize', marginLeft: 5 }]}>{statsData.class}</Text>}
                                         </View>
-                                        <Ionicons name="trash-bin" size={24} color="red" onPress={() => {
-                                            Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
-                                                { text: 'Cancel', style: 'cancel' },
-                                                { text: 'Delete', style: 'destructive', onPress: async () => handleDeleteCharacter() }
-                                            ]);
-                                        }} />
                                     </View>
                                 )}
                                 <View style={styles.formContainer}>
@@ -1183,16 +1251,19 @@ export default function MeScreen() {
                                             </>
                                         )}
                                     </View>
-                                    {(!isRaceConfirmed || !isClassConfirmed) && (
-                                        <TouchableOpacity
-                                            style={styles.submitButton}
-                                            onPress={() => {
-                                                handleSaveRaceAndClass();
-                                            }}
-                                        >
-                                            <Text style={styles.submitButtonText}>Save Changes</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                    {(!isRaceConfirmed && !isClassConfirmed)
+                                        && (raceValue && classValue)
+                                        && (
+                                            <TouchableOpacity
+                                                style={styles.submitButton}
+                                                onPress={() => {
+                                                    handleSaveRaceAndClass();
+                                                    setCharacterModalVisible(false);
+                                                }}
+                                            >
+                                                <Text style={styles.submitButtonText}>Save Changes</Text>
+                                            </TouchableOpacity>
+                                        )}
                                     <Button title="Close" onPress={() => setCharacterModalVisible(false)} />
                                 </View>
                             </View>
@@ -1341,10 +1412,12 @@ export default function MeScreen() {
                 <View style={styles.modalContainer}>
                     <View style={{ flexDirection: 'column', gap: 10 }}>
                         <Text style={styles.modalTitle}>Features</Text>
-                        <View>
+                        <View style={{ flexDirection: 'column', gap: 5 }}>
+                            <Text style={styles.label}>Race Features:</Text>
                             {statsData.race && renderRaceFeatures()}
                         </View>
-                        <View>
+                        <View style={{ flexDirection: 'column', gap: 5 }}>
+                            <Text style={styles.label}>Class Features:</Text>
                             {statsData.class && renderClassFeatures()}
                         </View>
                     </View>
@@ -1399,7 +1472,6 @@ export default function MeScreen() {
                                     setArmorValue(null);
                                     setArmorModalVisible(false);
                                     setOpenArmorPicker(false);
-                                    setEditingEquipmentSlot(null);
                                 }} />
                             <Button title="Equip" onPress={() => {
                                 handleEquipArmor(armorValue);
@@ -1469,8 +1541,64 @@ export default function MeScreen() {
 
 
 
+            {/* Race Feat Description Modal */}
+            <Modal animationType="fade" transparent={true} visible={featDescriptionModalVisible}>
+                <TouchableWithoutFeedback onPress={() => setFeatDescriptionModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <View style={{
+                                flexDirection: 'column',
+                                gap: 10,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: 'white',
+                                padding: 20,
+                                borderRadius: 10,
+                                minWidth: '80%',
+                                marginHorizontal: 20,
+                            }}>
+                                <Text style={{
+                                    fontSize: 20,
+                                    fontWeight: 'bold',
+                                    marginBottom: 10,
+                                    textTransform: 'capitalize',
+                                }}>{selectedFeat}</Text>
+                                <View>
+                                    {statsData.race && renderRaceFeatures(selectedFeat as string)}
+                                </View>
+                                {renderCustomFeatButton()}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
+
+
+            {/* Settings Modal */}
+            <Modal animationType="fade" transparent={true} visible={settingsModalVisible}>
+                <View style={styles.modalContainer}>
+                    <Text>Settings</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text>Delete Character</Text>
+                        <Ionicons name="trash-bin" size={24} color="red" onPress={() => {
+                            Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
+                                { text: 'Cancel', style: 'cancel' },
+                                { text: 'Delete', style: 'destructive', onPress: async () => handleDeleteCharacter() }
+                            ]);
+                        }} />
+                        <Button
+                            title="Close"
+                            onPress={() => setSettingsModalVisible(false)} />
+                    </View>
+                </View>
+            </Modal>
+
+
 
 
         </View>
     );
 }
+
+

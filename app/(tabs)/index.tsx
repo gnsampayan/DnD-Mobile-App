@@ -260,7 +260,6 @@ export default function ActionsScreen() {
   // Use context for statsData
   const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
 
-  // Change later to check if character main weapon state is equipped
   const {
     mainHandWeapon,
     rangedHandWeapon,
@@ -269,7 +268,14 @@ export default function ActionsScreen() {
     getWeaponAttackBonus,
     getWeaponSkillModifiers,
     getWeaponProperties,
-  } = useContext(CharacterContext) as unknown as CharacterContextType;
+    luckyPoints,
+    setLuckyPoints,
+    luckyPointsMax
+  } = useContext(CharacterContext) as unknown as CharacterContextType & {
+    luckyPoints: number | null;
+    setLuckyPoints: (points: number) => void;
+    luckyPointsMax: number;
+  };
   const [isArmed, setIsArmed] = useState(false);
 
   // Update `isArmed` when mainHandWeapon changes
@@ -1215,6 +1221,48 @@ export default function ActionsScreen() {
               </Text>
             </View>
           </View>
+
+          {/* Show if lucky points */}
+          {luckyPoints !== null && luckyPoints !== -1 && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                disabled={luckyPoints === 0}
+                style={[styles.headerTextContainer, {
+                  paddingVertical: 3,
+                  paddingHorizontal: 5,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: 8,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  opacity: luckyPoints === 0 ? 0.1 : 1
+                }]}
+                onPress={() => {
+                  Alert.alert(
+                    'Lucky Points',
+                    `You have ${luckyPoints} lucky point(s). Use it wisely!`,
+                    [
+                      {
+                        text: 'OK',
+                        style: 'cancel'
+                      },
+                      {
+                        text: 'Use',
+                        onPress: () => {
+                          if (luckyPoints && luckyPoints > 0) {
+                            setLuckyPoints(luckyPoints - 1);
+                          }
+                        }
+                      }
+                    ],
+                  );
+                }}
+              >
+                <Text style={[styles.headerText, { marginRight: 4 }]}>{luckyPoints}</Text>
+                <MaterialCommunityIcons name="clover" size={18} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Show if stealth disadvantage from equipped armor */}
           {armorStealthDisadvantage && (
             <View style={styles.headerTextContainer}>
@@ -1281,7 +1329,12 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>+{proficiencyBonus}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="ribbon" size={24} color="lightgrey" />
+                        <TouchableOpacity
+                          onPress={() => Alert.alert('Proficiency Bonus', 'Your proficiency bonus is determined by your proficiency rank, which is based on your class and level. It is used to calculate the effectiveness of your skills and abilities.')}
+                        >
+                          <Ionicons name="ribbon" size={24} color="lightgrey"
+                          />
+                        </TouchableOpacity>
                       </View>
                     </View>
 
@@ -1289,7 +1342,12 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{ac}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey" />
+                        <TouchableOpacity
+                          onPress={() => Alert.alert('Armor Class', 'Your Armor Class is determined by your Dexterity modifier, armor, and shield. It is used to calculate the effectiveness of your armor and shield against attacks.')}
+                        >
+                          <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey"
+                          />
+                        </TouchableOpacity>
                       </View>
                     </View>
                   </View>
@@ -1300,14 +1358,22 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>+{currentWisdomModifier + proficiencyBonus}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="eye" size={24} color="lightgrey" />
+                        <TouchableOpacity
+                          onPress={() => Alert.alert('Perception', 'Your Perception is determined by your Wisdom modifier and your proficiency bonus. It is used to calculate your ability to detect and respond to hidden or subtle details.')}
+                        >
+                          <Ionicons name="eye" size={24} color="lightgrey" />
+                        </TouchableOpacity>
                       </View>
                     </View>
                     {/* Movement Speed */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{movementSpeed}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="footsteps" size={24} color="lightgrey" />
+                        <TouchableOpacity
+                          onPress={() => Alert.alert('Movement Speed', 'Your Movement Speed is determined by your base speed and any bonuses or penalties from your equipment or abilities. It is used to calculate how far you can move in a single turn.')}
+                        >
+                          <Ionicons name="footsteps" size={24} color="lightgrey" />
+                        </TouchableOpacity>
                       </View>
                     </View>
                   </View>
@@ -1319,11 +1385,15 @@ export default function ActionsScreen() {
 
                   {/* Third Box Quick Stats */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
-                    {/* AC */}
+                    {/* Initiative */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{currentDexModifier < 0 ? '' : '+'}{currentDexModifier}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="alert" size={24} color="lightgrey" />
+                        <TouchableOpacity
+                          onPress={() => Alert.alert('Initiative', 'Your Initiative is determined by your Dexterity modifier. It is used to calculate your order of turn in combat.')}
+                        >
+                          <Ionicons name="alert" size={24} color="lightgrey" />
+                        </TouchableOpacity>
                       </View>
                     </View>
 
@@ -1331,7 +1401,11 @@ export default function ActionsScreen() {
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>{hitDice}</Text>
                       <View style={styles.subheaderSideBySide}>
-                        <Ionicons name="fitness" size={24} color="lightgrey" />
+                        <TouchableOpacity
+                          onPress={() => Alert.alert('Hit Dice', 'Your Hit Dice is determined by your class. It is used to calculate your maximum hit points and is the dice you roll to regain hit points in short rest.')}
+                        >
+                          <Ionicons name="fitness" size={24} color="lightgrey" />
+                        </TouchableOpacity>
                       </View>
                     </View>
 
@@ -1881,6 +1955,9 @@ export default function ActionsScreen() {
                               SpLv8: 0,
                               SpLv9: 0
                             });
+                            if (!luckyPoints) {
+                              setLuckyPoints(luckyPointsMax);
+                            }
                           }
                           commitAction();
                         }}

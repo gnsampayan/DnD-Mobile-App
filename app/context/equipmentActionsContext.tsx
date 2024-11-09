@@ -14,6 +14,10 @@ interface CharacterContextProps {
     getWeaponSkillModifiers: (weapon: Item) => string[];
     getWeaponProperties: (weapon: Item) => string[];
     getWeaponAttackBonus: (weapon: Item) => string;
+    luckyPoints: number | null;
+    setLuckyPoints: (points: number) => void;
+    luckyPointsMax: number;
+    setLuckyPointsMax: (points: number) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -28,19 +32,30 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         offHandWeapon: null,
         rangedHandWeapon: null,
     });
-
     const { items } = useItemEquipment();
     const [isLoading, setIsLoading] = useState(true);
+    const [luckyPoints, setLuckyPoints] = useState<number | null>(null);
+    const [luckyPointsMax, setLuckyPointsMax] = useState<number>(1);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
+    const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
+    const LUCKY_POINTS_MAX_STORAGE_KEY = '@lucky_points_max';
 
-    // Load weapons from AsyncStorage on component mount
+    // Load weapons and lucky points from AsyncStorage on component mount
     useEffect(() => {
         const loadWeaponsFromStorage = async () => {
             try {
                 const storedWeapons = await AsyncStorage.getItem(WEAPONS_STORAGE_KEY);
                 if (storedWeapons) {
                     setWeapons(JSON.parse(storedWeapons));
+                }
+                const storedLuckyPoints = await AsyncStorage.getItem(LUCKY_POINTS_STORAGE_KEY);
+                if (storedLuckyPoints) {
+                    setLuckyPoints(parseInt(storedLuckyPoints));
+                }
+                const storedLuckyPointsMax = await AsyncStorage.getItem(LUCKY_POINTS_MAX_STORAGE_KEY);
+                if (storedLuckyPointsMax) {
+                    setLuckyPointsMax(parseInt(storedLuckyPointsMax));
                 }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
@@ -52,7 +67,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         loadWeaponsFromStorage();
     }, []);
 
-    // Save weapons to AsyncStorage whenever they change
+    // Save weapons and lucky points to AsyncStorage whenever they change
     useEffect(() => {
         if (!isLoading) {
             const saveWeaponsToStorage = async () => {
@@ -66,6 +81,29 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
             saveWeaponsToStorage();
         }
     }, [weapons, isLoading]);
+
+    // Save lucky points and max to AsyncStorage whenever they change
+    useEffect(() => {
+        if (!isLoading) {
+            const saveLuckyPointsToStorage = async () => {
+                try {
+                    if (luckyPoints === null || luckyPoints === -1) {
+                        await AsyncStorage.removeItem(LUCKY_POINTS_STORAGE_KEY);
+                        console.log("luckyPoints removed from AsyncStorage");
+                    } else {
+                        await AsyncStorage.setItem(LUCKY_POINTS_STORAGE_KEY, luckyPoints.toString());
+                        console.log("luckyPoints saved to AsyncStorage");
+                    }
+                    await AsyncStorage.setItem(LUCKY_POINTS_MAX_STORAGE_KEY, luckyPointsMax.toString());
+                    console.log("luckyPointsMax saved to AsyncStorage");
+                } catch (error) {
+                    console.error('Error saving lucky points to AsyncStorage:', error);
+                }
+            };
+
+            saveLuckyPointsToStorage();
+        }
+    }, [luckyPoints, luckyPointsMax, isLoading]);
 
 
 
@@ -99,7 +137,6 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
             return updatedWeapons;
         });
     }, [items]);
-
 
 
 
@@ -179,6 +216,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 getWeaponSkillModifiers,
                 getWeaponProperties,
                 getWeaponAttackBonus,
+                luckyPoints,
+                setLuckyPoints,
+                luckyPointsMax,
+                setLuckyPointsMax
             }}
         >
             {children}
