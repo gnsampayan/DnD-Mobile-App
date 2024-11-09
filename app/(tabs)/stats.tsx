@@ -782,8 +782,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         </View>
                         <View
                             style={{
-                                flexDirection: 'row',
-                                flexWrap: 'wrap',
+                                flexDirection: 'column',
                                 justifyContent: 'flex-start',
                             }}
                         >
@@ -793,12 +792,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 return (
                                     <View
                                         key={lvl}
-                                        style={{
-                                            flexDirection: 'column',
-                                            alignItems: 'flex-start',
-                                            margin: 5,
-                                            gap: 5,
-                                        }}
+                                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}
                                     >
                                         <Text style={styles.modalInputLabel}>Level {lvl} Increase:</Text>
                                         {!hasIncrease ? (
@@ -864,7 +858,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                                 </TouchableOpacity>
                                             </>
                                         ) : (
-                                            <Text style={styles.modalText}>
+                                            <Text style={[styles.modalText, { color: 'black' }]}>
                                                 {hpIncreases[lvl]} (including +{constitutionModifier} Con)
                                             </Text>
                                         )}

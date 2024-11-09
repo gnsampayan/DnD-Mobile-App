@@ -558,10 +558,8 @@ export default function SpellbookScreen() {
                         }))}
                         renderItem={({ item }) => renderSpellBlock({ item }, "prepared-spells")}
                         keyExtractor={(item) => item.slotIndex.toString()}
-                        horizontal={statsData.class === 'wizard'}
+                        horizontal={true}
                         showsHorizontalScrollIndicator={false}
-                        numColumns={statsData.class === 'wizard' ? 1 : 3}
-                        key={statsData.class === 'wizard' ? 'wizard' : 'other'}
                     />
                 </View>
             )
@@ -718,7 +716,7 @@ export default function SpellbookScreen() {
                 // Prepare the data for the FlatList
                 let data = knownSpellSlotsData;
                 return (
-                    <View style={[styles.section, { flex: 1 }]}>
+                    <View style={{ flex: 1 }}>
                         <View style={{
                             flexDirection: 'row',
                             justifyContent: 'space-between',
@@ -750,7 +748,7 @@ export default function SpellbookScreen() {
                                 <MaterialCommunityIcons name="book-education" size={20} color="white" />
                             </TouchableOpacity>
                         </View>
-                        <ScrollView style={[{ paddingHorizontal: 10, flex: 1, marginBottom: 40 }, statsData.class === 'wizard' ? { marginBottom: 0 } : {}]}>
+                        <ScrollView style={{ paddingHorizontal: 10, flex: 1 }}>
                             {data.map((item, index) => (
                                 <View key={item.slotIndex.toString()}>
                                     {renderSpellBlock({ item }, "known-spells")}
@@ -785,7 +783,7 @@ export default function SpellbookScreen() {
                 return null;
             } else {
                 return (
-                    <View style={[styles.section, { flex: 1, marginBottom: 50 }]}>
+                    <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
                             <MaterialCommunityIcons name="auto-fix" size={24} color="lightgrey" />
                             <Text style={styles.label}>
