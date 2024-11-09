@@ -5,6 +5,8 @@ const ACTIONS_STORAGE_KEY = 'actions_available';
 const BONUS_ACTIONS_STORAGE_KEY = 'bonus_actions_available';
 const REACTIONS_STORAGE_KEY = 'reactions_available';
 const SPENT_SPELL_SLOTS_STORAGE_KEY = 'spent_spell_slots';
+const HELLISH_REBUKE_SPENT_STORAGE_KEY = 'hellish_rebuke_spent';
+const DARKNESS_SPENT_STORAGE_KEY = 'darkness_spent';
 
 interface ActionsContextType {
     currentActionsAvailable: number;
@@ -15,6 +17,10 @@ interface ActionsContextType {
     setCurrentReactionsAvailable: React.Dispatch<React.SetStateAction<number>>;
     spentSpellSlots: { [key: string]: number };
     setSpentSpellSlots: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
+    hellishRebukeSpent: boolean;
+    setHellishRebukeSpent: React.Dispatch<React.SetStateAction<boolean>>;
+    darknessSpent: boolean;
+    setDarknessSpent: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ActionsContext = createContext<ActionsContextType | undefined>(undefined);
@@ -34,6 +40,8 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
         SpLv8: 0,
         SpLv9: 0
     });
+    const [hellishRebukeSpent, setHellishRebukeSpent] = useState<boolean>(false);
+    const [darknessSpent, setDarknessSpent] = useState<boolean>(false);
 
     // Load saved values on mount
     useEffect(() => {
@@ -43,6 +51,8 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 const savedBonusActions = await AsyncStorage.getItem(BONUS_ACTIONS_STORAGE_KEY);
                 const savedReactions = await AsyncStorage.getItem(REACTIONS_STORAGE_KEY);
                 const savedSpentSpellSlots = await AsyncStorage.getItem(SPENT_SPELL_SLOTS_STORAGE_KEY);
+                const savedHellishRebukeSpent = await AsyncStorage.getItem(HELLISH_REBUKE_SPENT_STORAGE_KEY);
+                const savedDarknessSpent = await AsyncStorage.getItem(DARKNESS_SPENT_STORAGE_KEY);
 
                 if (savedActions) {
                     setCurrentActionsAvailable(Number(savedActions));
@@ -55,6 +65,12 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 }
                 if (savedSpentSpellSlots) {
                     setSpentSpellSlots(JSON.parse(savedSpentSpellSlots));
+                }
+                if (savedHellishRebukeSpent) {
+                    setHellishRebukeSpent(savedHellishRebukeSpent === 'true');
+                }
+                if (savedDarknessSpent) {
+                    setDarknessSpent(savedDarknessSpent === 'true');
                 }
             } catch (error) {
                 console.error('Error loading actions from storage:', error);
@@ -72,13 +88,15 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 await AsyncStorage.setItem(BONUS_ACTIONS_STORAGE_KEY, currentBonusActionsAvailable.toString());
                 await AsyncStorage.setItem(REACTIONS_STORAGE_KEY, currentReactionsAvailable.toString());
                 await AsyncStorage.setItem(SPENT_SPELL_SLOTS_STORAGE_KEY, JSON.stringify(spentSpellSlots));
+                await AsyncStorage.setItem(HELLISH_REBUKE_SPENT_STORAGE_KEY, hellishRebukeSpent.toString());
+                await AsyncStorage.setItem(DARKNESS_SPENT_STORAGE_KEY, darknessSpent.toString());
             } catch (error) {
                 console.error('Error saving actions to storage:', error);
             }
         };
 
         saveValues();
-    }, [currentActionsAvailable, currentBonusActionsAvailable, currentReactionsAvailable, spentSpellSlots]);
+    }, [currentActionsAvailable, currentBonusActionsAvailable, currentReactionsAvailable, spentSpellSlots, hellishRebukeSpent, darknessSpent]);
 
     return (
         <ActionsContext.Provider
@@ -90,7 +108,11 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 currentReactionsAvailable,
                 setCurrentReactionsAvailable,
                 spentSpellSlots,
-                setSpentSpellSlots
+                setSpentSpellSlots,
+                hellishRebukeSpent,
+                setHellishRebukeSpent,
+                darknessSpent,
+                setDarknessSpent
             }}
         >
             {children}

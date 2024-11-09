@@ -188,20 +188,41 @@ export default function MeScreen() {
         rangedHandWeapon,
         equipWeapon,
         luckyPoints,
+        luckyPointsEnabled,
         setLuckyPoints,
         luckyPointsMax,
-        setLuckyPointsMax
+        setLuckyPointsMax,
+        relentlessEnduranceGained,
+        setRelentlessEnduranceGained,
+        setRelentlessEnduranceUsable,
+        setLuckyPointsEnabled,
+        infernalLegacyEnabled,
+        setInfernalLegacyEnabled
     } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
         rangedHandWeapon: Item | null;
         equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
         luckyPoints: number | null;
+        luckyPointsEnabled: boolean;
         setLuckyPoints: (points: number) => void;
         luckyPointsMax: number;
         setLuckyPointsMax: (points: number) => void;
+        relentlessEnduranceGained: boolean;
+        setRelentlessEnduranceGained: (value: boolean) => void;
+        setRelentlessEnduranceUsable: (value: boolean) => void;
+        setLuckyPointsEnabled: (value: boolean) => void;
+        infernalLegacyEnabled: boolean;
+        setInfernalLegacyEnabled: (value: boolean) => void;
     };
-    const { items, weaponsProficientIn, equippedArmor, setEquippedArmor, equippedShield, setEquippedShield } = useItemEquipment();
+    const {
+        items,
+        weaponsProficientIn,
+        equippedArmor,
+        setEquippedArmor,
+        equippedShield,
+        setEquippedShield,
+    } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
     // Local state variables for DropDownPicker values
     const [mainHandValue, setMainHandValue] = useState<string>(mainHandWeapon?.name || 'none');
@@ -269,9 +290,20 @@ export default function MeScreen() {
     }, [items, mainHandWeapon, offHandWeapon, equipWeapon]);
 
     // Use context for statsData
-    const { statsData, updateStatsData } = useContext(StatsDataContext) as {
+    const {
+        statsData,
+        updateStatsData,
+        unusedSkillPoints,
+        setUnusedSkillPoints,
+        raceSkillProfGained,
+        setRaceSkillProfGained
+    } = useContext(StatsDataContext) as {
         statsData: StatsData;
         updateStatsData: (data: StatsData) => void;
+        unusedSkillPoints: number;
+        setUnusedSkillPoints: (points: number) => void;
+        raceSkillProfGained: boolean;
+        setRaceSkillProfGained: (value: boolean) => void;
     };
 
     if (!statsData) {
@@ -809,7 +841,7 @@ export default function MeScreen() {
     const renderCustomFeatButton = () => {
         if (selectedFeat) {
             // if feat is "lucky", then show activate button
-            if (selectedFeat.toLowerCase() === "lucky" && (!luckyPointsMax || !luckyPoints)) {
+            if (selectedFeat.toLowerCase() === "lucky" && (!luckyPointsEnabled)) {
                 return (
                     <View style={{
                         paddingHorizontal: 10,
@@ -828,16 +860,87 @@ export default function MeScreen() {
                     </View>
                 )
             }
+            if (selectedFeat.toLowerCase() === "skill versatility" && !raceSkillProfGained) {
+                return (
+                    <View style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: 'rgba(0,0,0,1)',
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <Text style={{ color: 'lightgrey' }}>+2 </Text>
+                        <MaterialCommunityIcons name="bullseye-arrow" size={20} color="gold" />
+                        <Button
+                            title="Activate"
+                            color="gold"
+                            onPress={() => activateFeat(selectedFeat as string)}
+                        />
+                    </View>
+                )
+            }
+            if (selectedFeat.toLowerCase() === "relentless endurance" && !relentlessEnduranceGained) {
+                return (
+                    <View style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: 'rgba(0,0,0,1)',
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <Ionicons name="fitness" size={20} color="gold" />
+                        <Button
+                            title="Activate"
+                            color="gold"
+                            onPress={() => activateFeat(selectedFeat as string)}
+                        />
+                    </View>
+                )
+            }
+            if (selectedFeat.toLowerCase() === "infernal legacy" && !infernalLegacyEnabled) {
+                return (
+                    <View style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: 'rgba(0,0,0,1)',
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <MaterialCommunityIcons name="emoticon-devil" size={20} color="gold" />
+                        <Button
+                            title="Activate"
+                            color="gold"
+                            onPress={() => activateFeat(selectedFeat as string)}
+                        />
+                    </View>
+                )
+            }
         }
         return null;
     }
     const activateFeat = (feat: string) => {
         // if feat is "lucky", then activate lucky
         if (feat.toLowerCase() === "lucky") {
-            if (!luckyPointsMax || !luckyPoints) {
+            if (!luckyPointsMax || !luckyPoints || !luckyPointsEnabled) {
                 setLuckyPointsMax(1);
                 setLuckyPoints(1);
+                setLuckyPointsEnabled(true);
             }
+        }
+        // if feat is "+1 skill proficiency", then activate +1 skill proficiency
+        if (feat.toLowerCase() === "skill versatility") {
+            setUnusedSkillPoints(unusedSkillPoints + 2);
+            setRaceSkillProfGained(true);
+        }
+        if (feat.toLowerCase() === "relentless endurance") {
+            setRelentlessEnduranceGained(true);
+            setRelentlessEnduranceUsable(true);
+        }
+        if (feat.toLowerCase() === "infernal legacy") {
+            setInfernalLegacyEnabled(true);
         }
     }
 
@@ -946,7 +1049,17 @@ export default function MeScreen() {
                                             style={[
                                                 styles.featLabel,
                                                 // highlight so user can activate lucky feat
-                                                key.toLowerCase() === 'lucky' && (luckyPoints === null || luckyPoints === -1) && { color: 'gold' }
+                                                key.toLowerCase() === 'lucky'
+                                                && (!luckyPointsEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                // highlight if skill proficiency not gained yet
+                                                key.toLowerCase() === 'skill versatility'
+                                                && (!raceSkillProfGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                // highlight if relentless endurance not gained yet
+                                                key.toLowerCase() === 'relentless endurance'
+                                                && (!relentlessEnduranceGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                // highlight if infernal legacy not enabled yet
+                                                key.toLowerCase() === 'infernal legacy'
+                                                && (!infernalLegacyEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
                                             ]}
                                         >
                                             {key.charAt(0).toUpperCase() + key.slice(1)}

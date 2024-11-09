@@ -1,7 +1,8 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { Item, useItemEquipment } from './ItemEquipmentContext'; // Assuming you have an Item interface defined here.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import weaponsData from '../data/weapons.json';
+import StatsDataContext from '../context/StatsDataContext';
 
 export type WeaponSlot = 'mainHand' | 'offHand' | 'rangedHand';
 
@@ -14,10 +15,19 @@ interface CharacterContextProps {
     getWeaponSkillModifiers: (weapon: Item) => string[];
     getWeaponProperties: (weapon: Item) => string[];
     getWeaponAttackBonus: (weapon: Item) => string;
+    luckyPointsEnabled: boolean;
+    setLuckyPointsEnabled: (value: boolean) => void;
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
     luckyPointsMax: number;
     setLuckyPointsMax: (points: number) => void;
+    relentlessEnduranceGained: boolean;
+    setRelentlessEnduranceGained: (value: boolean) => void;
+    relentlessEnduranceUsable: boolean;
+    setRelentlessEnduranceUsable: (value: boolean) => void;
+    infernalLegacyEnabled: boolean;
+    setInfernalLegacyEnabled: (value: boolean) => void;
+
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -32,18 +42,27 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         offHandWeapon: null,
         rangedHandWeapon: null,
     });
+    const { statsData } = useContext(StatsDataContext);
     const { items } = useItemEquipment();
     const [isLoading, setIsLoading] = useState(true);
     const [luckyPoints, setLuckyPoints] = useState<number | null>(null);
     const [luckyPointsMax, setLuckyPointsMax] = useState<number>(1);
+    const [relentlessEnduranceGained, setRelentlessEnduranceGained] = useState<boolean>(false);
+    const [relentlessEnduranceUsable, setRelentlessEnduranceUsable] = useState<boolean>(false);
+    const [luckyPointsEnabled, setLuckyPointsEnabled] = useState<boolean>(false);
+    const [infernalLegacyEnabled, setInfernalLegacyEnabled] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
     const LUCKY_POINTS_MAX_STORAGE_KEY = '@lucky_points_max';
+    const RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY = '@relentless_endurance_gained';
+    const RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY = '@relentless_endurance_usable';
+    const LUCKY_POINTS_ENABLED_STORAGE_KEY = '@lucky_points_enabled';
+    const INFERNAL_LEGACY_ENABLED_STORAGE_KEY = '@infernal_legacy_enabled';
 
-    // Load weapons and lucky points from AsyncStorage on component mount
+    // Load data from AsyncStorage on component mount
     useEffect(() => {
-        const loadWeaponsFromStorage = async () => {
+        const loadDataFromStorage = async () => {
             try {
                 const storedWeapons = await AsyncStorage.getItem(WEAPONS_STORAGE_KEY);
                 if (storedWeapons) {
@@ -57,6 +76,22 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 if (storedLuckyPointsMax) {
                     setLuckyPointsMax(parseInt(storedLuckyPointsMax));
                 }
+                const storedRelentlessEnduranceGained = await AsyncStorage.getItem(RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY);
+                if (storedRelentlessEnduranceGained) {
+                    setRelentlessEnduranceGained(storedRelentlessEnduranceGained === 'true');
+                }
+                const storedRelentlessEnduranceUsable = await AsyncStorage.getItem(RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY);
+                if (storedRelentlessEnduranceUsable) {
+                    setRelentlessEnduranceUsable(storedRelentlessEnduranceUsable === 'true');
+                }
+                const storedLuckyPointsEnabled = await AsyncStorage.getItem(LUCKY_POINTS_ENABLED_STORAGE_KEY);
+                if (storedLuckyPointsEnabled) {
+                    setLuckyPointsEnabled(storedLuckyPointsEnabled === 'true');
+                }
+                const storedInfernalLegacyEnabled = await AsyncStorage.getItem(INFERNAL_LEGACY_ENABLED_STORAGE_KEY);
+                if (storedInfernalLegacyEnabled) {
+                    setInfernalLegacyEnabled(storedInfernalLegacyEnabled === 'true');
+                }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
             } finally {
@@ -64,10 +99,48 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
             }
         };
 
-        loadWeaponsFromStorage();
+        loadDataFromStorage();
     }, []);
 
-    // Save weapons and lucky points to AsyncStorage whenever they change
+
+    // set relentless endurance boolean to false when class is changed
+    useEffect(() => {
+        setRelentlessEnduranceGained(false);
+        setRelentlessEnduranceUsable(false);
+        setLuckyPointsEnabled(false);
+        setInfernalLegacyEnabled(false);
+    }, [statsData.class]);
+
+
+    // save infernal legacy enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveInfernalLegacyEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(INFERNAL_LEGACY_ENABLED_STORAGE_KEY, infernalLegacyEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving infernal legacy enabled to AsyncStorage:', error);
+                }
+            };
+            saveInfernalLegacyEnabledToStorage();
+        }
+    }, [infernalLegacyEnabled, isLoading]);
+
+    // save relentless endurance usable to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveRelentlessEnduranceUsableToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY, relentlessEnduranceUsable.toString());
+                } catch (error) {
+                    console.error('Error saving relentless endurance usable to AsyncStorage:', error);
+                }
+            };
+            saveRelentlessEnduranceUsableToStorage();
+        }
+    }, [relentlessEnduranceUsable, isLoading]);
+
+    // Save weapons points to AsyncStorage whenever they change
     useEffect(() => {
         if (!isLoading) {
             const saveWeaponsToStorage = async () => {
@@ -82,7 +155,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [weapons, isLoading]);
 
-    // Save lucky points and max to AsyncStorage whenever they change
+    // Save lucky points to AsyncStorage whenever they change
     useEffect(() => {
         if (!isLoading) {
             const saveLuckyPointsToStorage = async () => {
@@ -105,6 +178,34 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [luckyPoints, luckyPointsMax, isLoading]);
 
+
+    // save lucky points enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveLuckyPointsEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(LUCKY_POINTS_ENABLED_STORAGE_KEY, luckyPointsEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving lucky points enabled to AsyncStorage:', error);
+                }
+            };
+            saveLuckyPointsEnabledToStorage();
+        }
+    }, [luckyPointsEnabled, isLoading]);
+
+    // save relentless endurance boolean to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveRelentlessEnduranceToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY, relentlessEnduranceGained.toString());
+                } catch (error) {
+                    console.error('Error saving relentless endurance to AsyncStorage:', error);
+                }
+            };
+            saveRelentlessEnduranceToStorage();
+        }
+    }, [relentlessEnduranceGained, isLoading]);
 
 
     // Update weapon slots when items change
@@ -219,7 +320,15 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 luckyPoints,
                 setLuckyPoints,
                 luckyPointsMax,
-                setLuckyPointsMax
+                setLuckyPointsMax,
+                relentlessEnduranceGained,
+                setRelentlessEnduranceGained,
+                relentlessEnduranceUsable,
+                setRelentlessEnduranceUsable,
+                luckyPointsEnabled,
+                setLuckyPointsEnabled,
+                infernalLegacyEnabled,
+                setInfernalLegacyEnabled,
             }}
         >
             {children}

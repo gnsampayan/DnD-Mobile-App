@@ -87,7 +87,21 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [levelModalVisible, setLevelModalVisible] = useState<boolean>(false);
 
     // Use context for statsData
-    const { statsData, updateStatsData } = useContext(StatsDataContext) as { statsData: StatsData, updateStatsData: (data: StatsData) => void };
+    const {
+        statsData,
+        updateStatsData,
+        unusedSkillPoints,
+        setUnusedSkillPoints,
+        skillProficiency,
+        setSkillProficiency,
+    } = useContext(StatsDataContext) as {
+        statsData: StatsData,
+        updateStatsData: (data: StatsData) => void,
+        unusedSkillPoints: number,
+        setUnusedSkillPoints: (value: number) => void,
+        skillProficiency: string[],
+        setSkillProficiency: (value: string[]) => void,
+    };
 
     if (!statsData) {
         // Render a loading indicator or return null
@@ -411,17 +425,56 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             ? Math.floor((relatedAbility.value - 10) / 2)
             : 0;
 
-        const skillValue = abilityModifier;
+        // Get race data
+        const raceData = raceBonuses.find((race) => race.race === statsData.race);
 
-        const isProficient = raceBonuses.find(bonus => bonus.race === statsData.race)?.proficiencies?.skillProficiency?.includes(item.name.toLowerCase());
-        const skillModifier = isProficient ? skillValue + proficiencyBonus : skillValue;
+        // Determine if the skill proficiency is gained from race
+        const raceProficiency = raceData?.skillProficiency?.includes(item.name.toLowerCase());
+
+        // Determine if the skill proficiency is gained from skills learned (skillProficienciesGained)
+        const gainedProficiency = skillProficiency?.includes(item.name.toLowerCase());
+
+        // Calculate the total skill modifier
+        const skillModifier =
+            abilityModifier + (raceProficiency || gainedProficiency ? statsData.proficiencyBonus : 0);
+
+        // Determine if the skill is proficient (either from race or gained)
+        const isProficient = raceProficiency || gainedProficiency;
+
         return (
-            <View style={[styles.skillContainer, isProficient ? { backgroundColor: 'white' } : {},]}>
+            <TouchableOpacity
+                style={[styles.skillContainer, isProficient ? { backgroundColor: 'white' } : {}]}
+                onPress={() => {
+                    // Handle adding proficiency if there are unused skill points
+                    if (unusedSkillPoints > 0 && !gainedProficiency) {
+                        Alert.alert(
+                            "Confirm Skill Proficiency",
+                            `Do you want to gain proficiency in ${item.name}?`,
+                            [
+                                {
+                                    text: "Cancel",
+                                    style: "cancel"
+                                },
+                                {
+                                    text: "Confirm",
+                                    onPress: () => {
+                                        setSkillProficiency([...skillProficiency, item.name.toLowerCase()]);
+                                        setUnusedSkillPoints(unusedSkillPoints - 1);
+                                        console.log('Skill Proficiency Gained:', skillProficiency);
+                                    }
+                                }
+                            ]
+                        );
+                    }
+                }}
+            >
                 <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>
                     {skillModifier >= 0 ? `+${skillModifier}` : `${skillModifier}`}
                 </Text>
-                <Text style={[styles.skillName, isProficient ? { color: 'black' } : {}]}>{item.name.substring(0, 5)}</Text>
-            </View>
+                <Text style={[styles.skillName, isProficient ? { color: 'black' } : {}]}>
+                    {item.name.substring(0, 5)}
+                </Text>
+            </TouchableOpacity>
         );
     };
 
@@ -637,9 +690,20 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
             {/* Skills */}
             <View style={styles.skillsContainer}>
-                <View style={styles.rowIconTitle}>
-                    <MaterialCommunityIcons name="bullseye-arrow" size={24} color="lightgrey" />
-                    <Text style={styles.skillsTitle}>Skills</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View style={styles.rowIconTitle}>
+                        <MaterialCommunityIcons name="bullseye-arrow" size={24} color="lightgrey" />
+                        <Text style={styles.skillsTitle}>Skills</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10 }}>
+                        {unusedSkillPoints > 0 && (
+                            <>
+                                <Text style={{ color: 'white' }}>+</Text>
+                                <Text style={[styles.skillsTitle, { color: 'white', marginRight: 5 }]}>{unusedSkillPoints}</Text>
+                                <Ionicons name="ribbon" size={20} color={unusedSkillPoints > 0 ? 'gold' : 'lightgrey'} />
+                            </>
+                        )}
+                    </View>
                 </View>
                 <FlatList
                     data={skills}

@@ -18,9 +18,7 @@
 	{
 		"race": "Elf",
 		"speed": 30,
-		"proficiencies": {
-			"skillProficiency": ["perception"]
-		},
+		"skillProficiency": ["perception"],
 		"features": {
 			"fey ancestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
 			"trance": "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. A short rest counts as 8 hours of sleep.",
@@ -40,15 +38,8 @@
 	{
 		"race": "Dwarf",
 		"speed": 25,
-		"proficiencies": {
-			"weaponProficiency": [
-				"battleaxe",
-				"handaxe",
-				"hammer, light",
-				"warhammer"
-			],
-			"toolProficiency": ["smith's tools", "brewer's supplies", "mason's tools"]
-		},
+		"weaponProficiency": ["battleaxe", "handaxe", "hammer, light", "warhammer"],
+		"toolProficiency": ["smith's tools", "brewer's supplies", "mason's tools"],
 		"features": {
 			"stone cunning": "Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus.",
 			"darkvision": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
@@ -103,12 +94,9 @@
 	},
 	{
 		"race": "Half-Elf",
-		"proficiencies": {
-			"skillProficiency": ["perception"]
-		},
 		"speed": 30,
 		"features": {
-			"+1 skill proficiency": "You gain proficiency in one skill of your choice.",
+			"skill versatility": "You gain proficiency in two skills of your choice.",
 			"darkvision": "Thanks to your elf blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
 			"fey ancestry": "You have advantage on saving throws against being charmed, and magic can't put you to sleep.",
 			"language": "You can speak, read, and write Common, Elvish, and one other language of your choice."
@@ -126,9 +114,7 @@
 	{
 		"race": "Half-Orc",
 		"speed": 30,
-		"proficiencies": {
-			"skillProficiency": ["intimidation"]
-		},
+		"skillProficiency": ["intimidation"],
 		"features": {
 			"darkVision": "Thanks to your orc blood, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
 			"relentless endurance": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest.",

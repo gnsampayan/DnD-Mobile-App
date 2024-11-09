@@ -294,7 +294,7 @@ export default function BagScreen() {
 
     // Get race-specific weapon proficiencies
     const characterRace = raceData.find(r => r.race?.toLowerCase() === statsData.race?.toLowerCase());
-    const raceSpecificWeapons = characterRace?.proficiencies?.weaponProficiency || [];
+    const raceSpecificWeapons = characterRace?.weaponProficiency || [];
 
     const groupedWeapons = weapons.weapons.reduce((acc, category) => {
       // Add group label with bold font

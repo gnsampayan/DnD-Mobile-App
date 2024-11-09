@@ -23,6 +23,7 @@ import { CharacterContext } from '../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
 import StatsDataContext from '../context/StatsDataContext';
 import cantripsData from '../data/cantrips.json';
+import spellsData from '../data/spells.json';
 import reactionImage from '@actions/reaction-image.png';
 import defaultLongRestImage from '@actions/long-rest-image-v2.png';
 import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
@@ -147,7 +148,12 @@ const cantripImages = {
 interface BaseAction {
   id: string;
   name: string;
-  cost: { actions: number; bonus: number; reaction?: number; castingTimeText?: string };
+  cost: {
+    actions: number;
+    bonus: number;
+    reaction?: number;
+    castingTimeText?: string
+  };
   details?: string;
   image?: string | ImageSourcePropType;
 }
@@ -170,6 +176,12 @@ interface Ability {
   id: number;
   name: string;
   value: number;
+}
+
+interface Spell {
+  name: string;
+  castingTime: string;
+  description: string;
 }
 
 // Define Allocation History Interface
@@ -249,7 +261,11 @@ export default function ActionsScreen() {
     setCurrentBonusActionsAvailable,
     setCurrentReactionsAvailable,
     spentSpellSlots,
-    setSpentSpellSlots
+    setSpentSpellSlots,
+    hellishRebukeSpent,
+    setHellishRebukeSpent,
+    darknessSpent,
+    setDarknessSpent
   } = useActions();
   const { weaponsProficientIn, equippedArmor, equippedShield } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
@@ -270,11 +286,21 @@ export default function ActionsScreen() {
     getWeaponProperties,
     luckyPoints,
     setLuckyPoints,
-    luckyPointsMax
+    luckyPointsMax,
+    relentlessEnduranceGained,
+    relentlessEnduranceUsable,
+    setRelentlessEnduranceUsable,
+    luckyPointsEnabled,
+    infernalLegacyEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
     luckyPointsMax: number;
+    relentlessEnduranceGained: boolean;
+    relentlessEnduranceUsable: boolean;
+    setRelentlessEnduranceUsable: (value: boolean) => void;
+    luckyPointsEnabled: boolean;
+    infernalLegacyEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -339,6 +365,7 @@ export default function ActionsScreen() {
   const calculateModifier = (score: number): number => {
     return Math.floor((score - 10) / 2);
   };
+
   const getCantripImage = (cantripName: string): ImageSourcePropType => {
     const image = cantripImages[cantripName as keyof typeof cantripImages];
     if (typeof image === 'number') {
@@ -398,11 +425,20 @@ export default function ActionsScreen() {
     }
   };
 
-  // Update combinedActions whenever actions or cantripSlotsData change
+  // Update combinedActions whenever actions, cantripSlotsData, statsData.race, or statsData.level change
   useEffect(() => {
     const cantripActions = generateCantripActions(cantripSlotsData);
-    setCombinedActions([...actions, ...cantripActions]);
-  }, [actions, cantripSlotsData]);
+    const raceActions = generateRaceBasedActions();
+    // Combine all actions into one array
+    const allActions = [...actions, ...cantripActions, ...raceActions];
+    // Remove duplicates based on 'id'
+    const uniqueActionsMap = new Map<string, ActionBlock>();
+    allActions.forEach(action => {
+      uniqueActionsMap.set(action.id, action); // 'id' should be unique for each action
+    });
+    const uniqueActions = Array.from(uniqueActionsMap.values());
+    setCombinedActions(uniqueActions);
+  }, [actions, cantripSlotsData, statsData.race, statsData.level, infernalLegacyEnabled]);
 
 
   // Extract Ability Modifiers from statsData
@@ -940,15 +976,25 @@ export default function ActionsScreen() {
   // Render Action Blocks
   const renderActionBlocks = ({ item }: { item: ActionBlock | null }) => {
     if (item) {
-      const affordable =
-        currentActionsAvailable >= item.cost.actions &&
+      let affordable = currentActionsAvailable >= item.cost.actions &&
         currentBonusActionsAvailable >= item.cost.bonus &&
         (item.cost.reaction !== undefined ? currentReactionsAvailable >= item.cost.reaction : true);
+
+      // Check for infernal legacy spells
+      if (infernalLegacyEnabled) {
+        if (item.name.toLowerCase() === 'darkness') {
+          affordable = affordable && !darknessSpent;
+        } else if (item.name.toLowerCase() === 'hellish rebuke') {
+          affordable = affordable && !hellishRebukeSpent;
+        }
+      }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
       const offHandWeaponEquipped = offHandWeapon && offHandWeapon.name.toLowerCase() !== 'none';
+
+      const isInfernalSpell = item.name.toLowerCase() === 'darkness' || item.name.toLowerCase() === 'hellish rebuke';
 
       return (
         <ImageBackground
@@ -979,7 +1025,7 @@ export default function ActionsScreen() {
               setActionModalVisible(true);
             }}
             onLongPress={() => handleLongPress(item.id)}
-            disabled={!affordable || (isRangedAttack && !rangedHandWeaponEquipped) || (isOffhandAttack && !offHandWeaponEquipped)}
+            disabled={!isInfernalSpell && (!affordable || (isRangedAttack && !rangedHandWeaponEquipped) || (isOffhandAttack && !offHandWeaponEquipped))}
           >
             {!item.image && (
               <View style={styles.itemTextContainer}>
@@ -1171,6 +1217,94 @@ export default function ActionsScreen() {
   }, [statsData.abilities, getStrengthModifier, getDexModifier]);
 
 
+  function isSpell(s: any): s is Spell {
+    return typeof s === 'object' && s !== null && 'name' in s;
+  }
+
+  const generateRaceBasedActions = (): ActionBlock[] => {
+    const raceActions: ActionBlock[] = [];
+
+    if (statsData.race?.toLowerCase() === 'tiefling' && infernalLegacyEnabled) {
+      // Level 1: Thaumaturgy
+      if (statsData.level >= 1) {
+        const cantrip = cantripsData.find(c => c.name === 'Thaumaturgy');
+        if (cantrip) {
+          const cantripImageSource = getCantripImage(cantrip.name);
+          raceActions.push({
+            id: 'race-cantrip-thaumaturgy',
+            name: 'Thaumaturgy',
+            cost: parseCastingTime(cantrip.castingTime),
+            image: cantripImageSource,
+            details: cantrip.description || '',
+            type: 'cantrip',
+          } as ActionBlock);
+        }
+      }
+
+      // Level 3: Hellish Rebuke
+      if (statsData.level >= 3) {
+        // Search through all spell levels 1-9
+        const spell = spellsData
+          .filter(levelData => levelData.level >= 1 && levelData.level <= 9)
+          .flatMap(levelData => {
+            // Handle both spell objects and strings in the spells array
+            return levelData.spells.map(spell => {
+              if (typeof spell === 'string') {
+                return { name: spell };
+              }
+              return spell;
+            });
+          })
+          .filter(isSpell)
+          .find(s => s.name === 'Hellish Rebuke');
+
+        if (spell) {
+          raceActions.push({
+            id: 'race-spell-hellish-rebuke',
+            name: 'Hellish Rebuke',
+            cost: parseCastingTime(spell.castingTime),
+            details: spell.description || '',
+            type: 'spell',
+          } as ActionBlock);
+        }
+      }
+
+      // Level 5: Darkness
+      if (statsData.level >= 5) {
+        // Search through all spell levels 1-9
+        const spell = spellsData
+          .filter(levelData => levelData.level >= 1 && levelData.level <= 9)
+          .flatMap(levelData => {
+            // Handle both spell objects and strings in the spells array
+            return levelData.spells.map(spell => {
+              if (typeof spell === 'string') {
+                return { name: spell };
+              }
+              return spell;
+            });
+          })
+          .filter(isSpell)
+          .find(s => s.name === 'Darkness');
+
+        if (spell) {
+          raceActions.push({
+            id: 'race-spell-darkness',
+            name: 'Darkness',
+            cost: parseCastingTime(spell.castingTime),
+            details: spell.description || '',
+            type: 'spell',
+          } as ActionBlock);
+        }
+      }
+    }
+
+    return raceActions;
+  };
+
+
+
+
+  // Main Contents
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -1238,8 +1372,8 @@ export default function ActionsScreen() {
                 }]}
                 onPress={() => {
                   Alert.alert(
-                    'Lucky Points',
-                    `You have ${luckyPoints} lucky point(s). Use it wisely!`,
+                    `${luckyPoints} lucky point(s)`,
+                    `When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can choose to spend your lucky point and reroll. You regain your lucky points after a long rest.`,
                     [
                       {
                         text: 'OK',
@@ -1262,6 +1396,37 @@ export default function ActionsScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+
+          {/* Show if relentless endurance is gained */}
+          {relentlessEnduranceGained && (
+            <View style={[styles.headerTextContainer, { opacity: relentlessEnduranceUsable ? 1 : 0.1 }]}>
+              <TouchableOpacity
+                disabled={!relentlessEnduranceUsable}
+                onPress={() => {
+                  Alert.alert(
+                    'Relentless Endurance',
+                    'If you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can use this once per long rest.',
+                    [
+                      {
+                        text: 'OK',
+                        style: 'cancel'
+                      },
+                      {
+                        text: 'Use',
+                        onPress: () => {
+                          // Add logic here to use Relentless Endurance
+                          setRelentlessEnduranceUsable(false);
+                        }
+                      }
+                    ]
+                  );
+                }}>
+                <Ionicons name="fitness" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
+
 
           {/* Show if stealth disadvantage from equipped armor */}
           {armorStealthDisadvantage && (
@@ -1404,7 +1569,7 @@ export default function ActionsScreen() {
                         <TouchableOpacity
                           onPress={() => Alert.alert('Hit Dice', 'Your Hit Dice is determined by your class. It is used to calculate your maximum hit points and is the dice you roll to regain hit points in short rest.')}
                         >
-                          <Ionicons name="fitness" size={24} color="lightgrey" />
+                          <Ionicons name="dice" size={24} color="lightgrey" />
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -1613,12 +1778,32 @@ export default function ActionsScreen() {
                           )}
 
                         </View>
+
+
                         {/* If Cantrip, show this text */}
                         {('type' in selectedAction && selectedAction.type === 'cantrip') &&
                           <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
                             (Detailed in Spellbook)
                           </Text>
                         }
+
+                        {/* If infernal legacy is enabled, and Hellish Rebuke is selected, show this text */}
+                        {infernalLegacyEnabled &&
+                          (selectedAction.name.toLowerCase() === 'hellish rebuke' ||
+                            selectedAction.name.toLowerCase() === 'darkness' ||
+                            selectedAction.name.toLowerCase() === 'thaumaturgy') && (
+                            <View style={{ flexDirection: 'row', gap: 5 }}>
+                              <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
+                                (Infernal Legacy)
+                              </Text>
+                              {selectedAction.name.toLowerCase() === 'hellish rebuke' && (
+                                <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
+                                  SpLv2
+                                </Text>
+                              )}
+                            </View>
+                          )}
+
                       </View>
                     </View>
 
@@ -1938,7 +2123,9 @@ export default function ActionsScreen() {
                           selectedAction &&
                           (currentActionsAvailable < selectedAction.cost.actions ||
                             currentBonusActionsAvailable < selectedAction.cost.bonus ||
-                            selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) && { opacity: 0.5 }
+                            selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction ||
+                            (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
+                            (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)) && { opacity: 0.2 }
                         ]}
                         onPress={() => {
                           if (selectedAction.name.toLowerCase() === 'long rest') {
@@ -1955,9 +2142,24 @@ export default function ActionsScreen() {
                               SpLv8: 0,
                               SpLv9: 0
                             });
-                            if (!luckyPoints) {
+                            if (!luckyPoints && luckyPointsEnabled) {
                               setLuckyPoints(luckyPointsMax);
                             }
+                            if (relentlessEnduranceGained && !relentlessEnduranceUsable) {
+                              setRelentlessEnduranceUsable(true);
+                            }
+                            if (infernalLegacyEnabled) {
+                              setDarknessSpent(false);
+                              setHellishRebukeSpent(false);
+                            }
+                          }
+                          // if action is hellish rebuke, set hellish rebuke spent to true
+                          if (selectedAction.name.toLowerCase() === 'hellish rebuke') {
+                            setHellishRebukeSpent(true);
+                          }
+                          // if action is darkness, set darkness spent to true
+                          if (selectedAction.name.toLowerCase() === 'darkness') {
+                            setDarknessSpent(true);
                           }
                           commitAction();
                         }}
@@ -1965,7 +2167,9 @@ export default function ActionsScreen() {
                           !selectedAction ||
                           currentActionsAvailable < selectedAction.cost.actions ||
                           currentBonusActionsAvailable < selectedAction.cost.bonus ||
-                          selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction
+                          (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
+                          (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
+                          (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>
