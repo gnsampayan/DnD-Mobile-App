@@ -20,6 +20,7 @@ import StatsDataContext from '../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
 import weaponData from '../data/weapons.json';
+import draconicAncestryData from '../data/draconicAncestry.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -148,6 +149,13 @@ interface StatsData {
     hitDice: number;
 }
 
+interface DraconicAncestry {
+    dragon: string;
+    damageType: string;
+    breathWeapon: string;
+    typicalAlignment: string;
+}
+
 // Define a function to clear AsyncStorage
 const clearAsyncStorage = async () => {
     try {
@@ -197,7 +205,9 @@ export default function MeScreen() {
         setRelentlessEnduranceUsable,
         setLuckyPointsEnabled,
         infernalLegacyEnabled,
-        setInfernalLegacyEnabled
+        setInfernalLegacyEnabled,
+        draconicAncestry,
+        setDraconicAncestry,
     } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
@@ -214,6 +224,8 @@ export default function MeScreen() {
         setLuckyPointsEnabled: (value: boolean) => void;
         infernalLegacyEnabled: boolean;
         setInfernalLegacyEnabled: (value: boolean) => void;
+        draconicAncestry: DraconicAncestry | null;
+        setDraconicAncestry: (value: DraconicAncestry | null) => void;
     };
     const {
         items,
@@ -243,6 +255,8 @@ export default function MeScreen() {
     const [featDescriptionModalVisible, setFeatDescriptionModalVisible] = useState(false);
     const [selectedFeat, setSelectedFeat] = useState<string | null>(null);
     const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+    const [draconicAncestryValue, setDraconicAncestryValue] = useState<string | null>(null);
+    const [draconicAncestryModalVisible, setDraconicAncestryModalVisible] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -918,6 +932,40 @@ export default function MeScreen() {
                     </View>
                 )
             }
+            if (selectedFeat.toLowerCase() === "draconic ancestry" && !draconicAncestry) {
+                return (
+                    <>
+                        <DropDownPicker
+                            items={draconicAncestryData.map(item => ({
+                                label: item.dragon,
+                                value: item.dragon
+                            }))}
+                            open={draconicAncestryModalVisible}
+                            value={draconicAncestryValue}
+                            setValue={setDraconicAncestryValue}
+                            setOpen={setDraconicAncestryModalVisible}
+                            placeholder="Select a draconic ancestry"
+                        />
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: !draconicAncestryValue ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="dna" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={!draconicAncestryValue}
+                            />
+                        </View>
+                    </>
+                )
+            }
         }
         return null;
     }
@@ -941,6 +989,15 @@ export default function MeScreen() {
         }
         if (feat.toLowerCase() === "infernal legacy") {
             setInfernalLegacyEnabled(true);
+        }
+        if (feat.toLowerCase() === "draconic ancestry") {
+            if (draconicAncestryValue) {
+                // match draconic ancestry value to draconic ancestry data
+                const draconicAncestry = draconicAncestryData.find(item => item.dragon === draconicAncestryValue);
+                if (draconicAncestry) {
+                    setDraconicAncestry(draconicAncestry);
+                }
+            }
         }
     }
 
@@ -1060,6 +1117,9 @@ export default function MeScreen() {
                                                 // highlight if infernal legacy not enabled yet
                                                 key.toLowerCase() === 'infernal legacy'
                                                 && (!infernalLegacyEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                // highlight if draconic ancestry not enabled yet
+                                                key.toLowerCase() === 'draconic ancestry'
+                                                && (!draconicAncestry ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
                                             ]}
                                         >
                                             {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -1678,6 +1738,17 @@ export default function MeScreen() {
                                 }}>{selectedFeat}</Text>
                                 <View>
                                     {statsData.race && renderRaceFeatures(selectedFeat as string)}
+                                    {/* Draconic Ancestry Description */}
+                                    {selectedFeat?.toLowerCase() === "draconic ancestry" && draconicAncestry && (
+                                        <View style={{ padding: 10 }}>
+                                            {Object.entries(draconicAncestry).map(([key, value]) => (
+                                                <Text key={key} style={{ marginBottom: 5 }}>
+                                                    <Text style={{ fontWeight: 'bold' }}>{key}: </Text>
+                                                    {value}
+                                                </Text>
+                                            ))}
+                                        </View>
+                                    )}
                                 </View>
                                 {renderCustomFeatButton()}
                             </View>
