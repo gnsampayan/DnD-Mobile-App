@@ -22,6 +22,8 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
 import weaponData from '../data/weapons.json';
 import draconicAncestryData from '../data/draconicAncestry.json';
+import artificerFeatures from '../data/class-tables/artificerFeatures.json';
+import artificerInfusions from '../data/class-tables/artificerInfusions.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -749,7 +751,6 @@ export default function MeScreen() {
 
 
 
-
     const renderRaceFeatures = (featureKey?: string) => {
         return (
             <View style={{ marginBottom: 20, gap: 10 }}>
@@ -790,15 +791,96 @@ export default function MeScreen() {
         );
     };
 
+    const renderClassFeatures = (isList?: boolean, textStyle?: string) => {
+        if (!statsData.class) {
+            return <Text style={{ color: 'lightgrey' }}>—⁠</Text>
+        }
 
-
-    const renderClassFeatures = (featureKey?: string) => {
         return (
-            <View>
-                <Text>You have not gained any {statsData.class} features yet.</Text>
+            <View style={{ marginBottom: 20, gap: 10 }}>
+                {artificerFeatures
+                    .filter(feature => feature.level <= statsData.level)
+                    .map((feature) => {
+                        if (isList) {
+                            return (
+                                <View
+                                    key={feature.name}
+                                    style={{
+                                        flexDirection: 'column',
+                                        gap: 5,
+                                        padding: 5,
+                                        borderRadius: 8,
+                                    }}
+                                >
+                                    <Text style={styles.featLabel}>{feature.name}</Text>
+                                </View>
+                            );
+                        }
+
+                        const renderObject = (obj: any) => {
+                            return Object.entries(obj).map(([key, value], index) => {
+                                if (key === 'id') return null;
+
+                                // Check if key is a number or numeric string
+                                const displayKey = !isNaN(Number(key)) ? String(Number(key) + 1) : key;
+                                const isNumericKey = !isNaN(Number(key));
+
+                                if (typeof value === 'object' && value !== null) {
+                                    return (
+                                        <View
+                                            key={key}
+                                            style={{
+                                                flexDirection: isNumericKey ? 'row' : 'column',
+                                                gap: 5,
+                                                borderRadius: 8,
+                                            }}
+                                        >
+                                            <Text style={styles.featLabel}>{displayKey}</Text>
+                                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', flex: 1 }}>
+                                                {renderObject(value)}
+                                            </View>
+                                        </View>
+                                    );
+                                }
+
+                                return (
+                                    <View
+                                        key={key}
+                                        style={{
+                                            flexDirection: isNumericKey ? 'row' : 'column',
+                                            gap: 5,
+                                            borderRadius: 8,
+                                        }}
+                                    >
+                                        <Text style={styles.featLabel}>{displayKey}</Text>
+                                        <Text style={{ flexWrap: 'wrap', flex: 1 }}>{String(value)}</Text>
+                                    </View>
+                                );
+                            });
+                        };
+
+                        return (
+                            <View
+                                key={feature.name}
+                                style={{
+                                    flexDirection: 'column',
+                                    gap: 5,
+                                    backgroundColor: 'rgba(0,0,0,0.1)',
+                                    padding: 10,
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <Text style={styles.featLabel}>{feature.name}</Text>
+                                {renderObject(feature)}
+                            </View>
+                        );
+                    })}
             </View>
-        )
+        );
     }
+
+
+
 
     const getWeaponImage = (weaponName: string) => {
         const normalizedName = weaponName.toLowerCase();
@@ -1222,7 +1304,7 @@ export default function MeScreen() {
                         {/* class features */}
                         <View style={{ gap: 5 }}>
                             <Text style={[styles.label, { color: 'lightgrey', textTransform: 'capitalize' }]}>{statsData.class || 'Class'} Feats:</Text>
-                            <Text style={{ color: 'lightgrey' }}>—⁠</Text>
+                            {renderClassFeatures(true)}
                         </View>
                     </ScrollView>
 
@@ -1492,6 +1574,7 @@ export default function MeScreen() {
                                                     style={{ backgroundColor: '#fafafa' }}
                                                     dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
                                                     zIndex={3000}
+                                                    dropDownDirection="BOTTOM"
                                                 />
                                             </>
                                         )}
@@ -1674,7 +1757,7 @@ export default function MeScreen() {
             {/* Features Modal */}
             <Modal animationType="fade" transparent={true} visible={featuresModalVisible}>
                 <View style={styles.modalContainer}>
-                    <View style={{ flexDirection: 'column', gap: 10 }}>
+                    <ScrollView style={{ flexDirection: 'column', gap: 10, flex: 1, marginBottom: 60 }}>
                         <Text style={styles.modalTitle}>Features</Text>
                         <View style={{ flexDirection: 'column', gap: 5 }}>
                             <Text style={styles.label}>Race Features:</Text>
@@ -1684,7 +1767,7 @@ export default function MeScreen() {
                             <Text style={styles.label}>Class Features:</Text>
                             {statsData.class && renderClassFeatures()}
                         </View>
-                    </View>
+                    </ScrollView>
                     <View style={styles.modalButtons}>
                         <Button
                             title="Close"

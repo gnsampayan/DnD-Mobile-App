@@ -216,13 +216,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 try {
                     if (luckyPoints === null || luckyPoints === -1) {
                         await AsyncStorage.removeItem(LUCKY_POINTS_STORAGE_KEY);
-                        console.log("luckyPoints removed from AsyncStorage");
                     } else {
                         await AsyncStorage.setItem(LUCKY_POINTS_STORAGE_KEY, luckyPoints.toString());
-                        console.log("luckyPoints saved to AsyncStorage");
                     }
                     await AsyncStorage.setItem(LUCKY_POINTS_MAX_STORAGE_KEY, luckyPointsMax.toString());
-                    console.log("luckyPointsMax saved to AsyncStorage");
                 } catch (error) {
                     console.error('Error saving lucky points to AsyncStorage:', error);
                 }

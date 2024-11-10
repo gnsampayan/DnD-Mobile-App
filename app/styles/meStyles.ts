@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 40,
         width: '100%',
-        left: 20
+        left: 0
     },
     modalButtonsColumn: {
         flexDirection: 'column',

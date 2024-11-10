@@ -575,10 +575,6 @@ export default function ActionsScreen() {
           }
         }
 
-        // Debug statements
-        console.log('Equipped Armor:', equippedArmor);
-        console.log('Armor Found:', armorFound);
-
         if (armorFound) {
           const armorStats = armorFound;
 
@@ -600,8 +596,6 @@ export default function ActionsScreen() {
             totalAc += 2;
           }
 
-          // Debug statement
-          console.log('Total AC with Armor:', totalAc);
           setAc(totalAc);
         } else {
           // Armor not found; default to base AC plus shield if equipped

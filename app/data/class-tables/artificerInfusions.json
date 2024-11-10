@@ -1,0 +1,273 @@
+[
+	{
+		"id": "Arcane Propulsion Armor",
+		"name": "Arcane Propulsion Armor",
+		"prerequisite": "14th-level artificer",
+		"item": "A suit of armor (requires attunement)",
+		"description": "The wearer of this armor gains these benefits:",
+		"benefits": [
+			"The wearer's walking speed increases by 5 feet.",
+			"The armor includes gauntlets, each of which is a magic melee weapon that can be wielded only when the hand is holding nothing. The wearer is proficient with the gauntlets, and each one deals 1d8 force damage on a hit and has the thrown property, with a normal range of 20 feet and a long range of 60 feet. When thrown, the gauntlet detaches and flies at the attack's target, then immediately returns to the wearer and reattaches.",
+			"The armor can't be removed against the wearer's will.",
+			"If the wearer is missing any limbs, the armor replaces those limbs - hands, arms, feet, legs, or similar appendages. The replacements function identically to the body parts they replace."
+		]
+	},
+	{
+		"id": "Armor of Magical Strength",
+		"name": "Armor of Magical Strength",
+		"item": "A suit of armor (requires attunement)",
+		"description": "This armor has 6 charges. The wearer can expend the armor's charges in the following ways:",
+		"uses": [
+			"When the wearer makes a Strength check or a Strength saving throw, it can expend 1 charge to add a bonus to the roll equal to its Intelligence modifier.",
+			"If the creature would be knocked prone, it can use its reaction to expend 1 charge to avoid being knocked prone."
+		],
+		"recharge": "The armor regains 1d6 expended charges daily at dawn."
+	},
+	{
+		"id": "Armor of Tools",
+		"name": "Armor of Tools",
+		"item": "A suit of armor",
+		"description": "As an action, a creature wearing this infused armor can integrate into it artisan's tools or thieves' tools. The tools remain integrated in the armor for 8 hours or until the wearer removes the tools as an action. The armor can have only one tool integrated at a time. The wearer can add its Intelligence modifier to any ability checks it makes with the integrated tool. The wearer must have a hand free to use the tool.",
+		"source": "UA"
+	},
+	{
+		"id": "Boots of the Winding Path",
+		"name": "Boots of the Winding Path",
+		"prerequisite": "6th-level artificer",
+		"item": "A pair of boots (requires attunement)",
+		"description": "While wearing these boots, a creature can teleport up to 15 feet as a bonus action to an unoccupied space the creature can see. The creature must have occupied that space at some point during the current turn."
+	},
+	{
+		"id": "Enhanced Arcane Focus",
+		"name": "Enhanced Arcane Focus",
+		"item": "A rod, staff or wand (requires attunement)",
+		"description": "While holding this item, a creature gains +1 bonus to spell attack rolls. In addition, the creature ignores half cover when making a spell attack.",
+		"scaling": "The bonus increases to +2 when you reach 10th level in this class."
+	},
+	{
+		"id": "Enhanced Defense",
+		"name": "Enhanced Defense",
+		"item": "A suit of armor or a shield",
+		"description": "A creature gains a +1 bonus to Armor Class while wearing (armor) or wielding (shield) the infused item.",
+		"scaling": "The bonus increases to +2 when you reach 10th level in this class."
+	},
+	{
+		"id": "Enhanced Weapon",
+		"name": "Enhanced Weapon",
+		"item": "A simple or martial weapon",
+		"description": "This magic weapon grants a +1 bonus to attack and damage rolls made with it.",
+		"scaling": "The bonus increases to +2 when you reach 10th level in this class."
+	},
+	{
+		"id": "Helm of Awareness",
+		"name": "Helm of Awareness",
+		"prerequisite": "10th-level artificer",
+		"item": "A helmet (requires attunement)",
+		"description": "While wearing this helmet, a creature has advantage on initiative rolls. In addition, the wearer can't be surprised, provided it isn't incapacitated."
+	},
+	{
+		"id": "Homunculus Servant",
+		"name": "Homunculus Servant",
+		"item": "A gem or crystal worth at least 100 gp",
+		"description": "You learn intricate methods for magically creating a special homunculus that serves you. The item you infuse serves as the creature's heart, around which the creature's body instantly forms.",
+		"features": {
+			"appearance": "You determine the homunculus's appearance. Some artificers prefer mechanical-looking birds, whereas some like winged vials or miniature, animate cauldrons.",
+			"behavior": "The homunculus is friendly to you and your companions, and it obeys your commands.",
+			"combat": "In combat, the homunculus shares your initiative count, but it takes its turn immediately after yours. It can move and use its reaction on its own, but the only action it takes on its turn is the Dodge action, unless you take a bonus action on your turn to command it to take another action.",
+			"healing": "The homunculus regains 2d6 hit points if the mending spell is cast on it.",
+			"death": "If you or the homunculus dies, it vanishes, leaving its heart in its space."
+		},
+		"stats": {
+			"type": "Tiny construct",
+			"ac": "13 (natural armor)",
+			"hp": "1 + your Intelligence modifier + your artificer level",
+			"speed": {
+				"walk": "20 ft.",
+				"fly": "30 ft."
+			},
+			"abilities": {
+				"str": "4 (-3)",
+				"dex": "15 (+2)",
+				"con": "12 (+1)",
+				"int": "10 (+0)",
+				"wis": "10 (+0)",
+				"cha": "7 (-2)"
+			},
+			"savingThrows": ["Dex +2 plus PB"],
+			"skills": {
+				"perception": "+0 plus PB x 2",
+				"stealth": "+2 plus PB"
+			},
+			"immunities": {
+				"damage": ["poison"],
+				"conditions": ["exhaustion", "poisoned"]
+			},
+			"senses": {
+				"darkvision": "60 ft.",
+				"passivePerception": "10 + (PB x 2)"
+			},
+			"languages": "understands the languages you speak",
+			"actions": {
+				"Force Strike": {
+					"type": "Ranged Weapon Attack",
+					"toHit": "your spell attack modifier",
+					"range": "30 ft.",
+					"target": "one target you can see",
+					"damage": "1d4 + PB force"
+				}
+			},
+			"reactions": {
+				"Channel Magic": "The homunculus delivers a spell you cast that has a range of touch. The homunculus must be within 120 feet of you."
+			},
+			"special": {
+				"Evasion": "If the homunculus is subjected to an effect that allows it to make a Dexterity saving throw to take only half damage, it instead takes no damage if it succeeds on the saving throw, and only half damage if it fails. It can't use this trait if it's incapacitated."
+			}
+		}
+	},
+	{
+		"id": "Mind Sharpener",
+		"name": "Mind Sharpener",
+		"item": "A suit of armor or robes",
+		"description": "The infused item can send a jolt to the wearer to refocus their mind.",
+		"mechanics": {
+			"charges": 4,
+			"use": "When the wearer fails a Constitution saving throw to maintain concentration on a spell, the wearer can use its reaction to expend 1 of the item's charges to succeed instead.",
+			"recharge": "The item regains 1d4 expended charges daily at dawn."
+		}
+	},
+	{
+		"id": "Radiant Weapon",
+		"name": "Radiant Weapon",
+		"prerequisite": "6th-level artificer",
+		"item": "A simple or martial weapon (requires attunement)",
+		"description": "This magic weapon grants a +1 bonus to attack and damage rolls made with it.",
+		"features": {
+			"light": {
+				"action": "bonus action",
+				"bright": "30-foot radius",
+				"dim": "additional 30 feet",
+				"control": "can extinguish as bonus action"
+			},
+			"blinding": {
+				"charges": 4,
+				"trigger": "reaction to being hit by attack",
+				"effect": "attacker blinded until end of their next turn",
+				"save": "Constitution vs spell save DC",
+				"cost": "1 charge",
+				"recharge": "1d4 charges daily at dawn"
+			}
+		}
+	},
+	{
+		"id": "Repeating Shot",
+		"name": "Repeating Shot",
+		"item": "A simple or martial weapon with the ammunition property (requires attunement)",
+		"description": "This magic weapon grants a +1 bonus to attack and damage rolls made with it when it's used to make a ranged attack, and it ignores the loading property if it has it.",
+		"features": {
+			"ammunition": "If the weapon lacks ammunition, it produces its own, automatically creating one piece of magic ammunition when the wielder makes a ranged attack with it.",
+			"duration": "The ammunition created by the weapon vanishes the instant after it hits or misses a target."
+		}
+	},
+	{
+		"id": "Replicate Magic Item",
+		"name": "Replicate Magic Item",
+		"description": "Using this infusion, you replicate a particular magic item. You can learn this infusion multiple times; each time you do so, choose a magic item that you can make with it, picking from the Replicable Items tables.",
+		"tables": {
+			"2nd-Level": [
+				{ "item": "Alchemy Jug", "attunement": false },
+				{ "item": "Bag of Holding", "attunement": false },
+				{ "item": "Cap of Water Breathing", "attunement": false },
+				{ "item": "Goggles of Night", "attunement": false },
+				{ "item": "Rope of Climbing", "attunement": false },
+				{ "item": "Sending Stones", "attunement": false },
+				{ "item": "Wand of Magic Detection", "attunement": false },
+				{ "item": "Wand of Secrets", "attunement": false }
+			],
+			"6th-Level": [
+				{ "item": "Boots of Elvenkind", "attunement": false },
+				{ "item": "Cloak of Elvenkind", "attunement": true },
+				{ "item": "Cloak of the Manta Ray", "attunement": false },
+				{ "item": "Eyes of Charming", "attunement": true },
+				{ "item": "Gloves of Thievery", "attunement": false },
+				{ "item": "Lantern of Revealing", "attunement": false },
+				{ "item": "Pipes of Haunting", "attunement": false },
+				{ "item": "Ring of Water Walking", "attunement": false }
+			],
+			"10th-Level": [
+				{ "item": "Boots of Striding and Springing", "attunement": true },
+				{ "item": "Boots of the Winterlands", "attunement": true },
+				{ "item": "Bracers of Archery", "attunement": true },
+				{ "item": "Brooch of Shielding", "attunement": true },
+				{ "item": "Cloak of Protection", "attunement": true },
+				{ "item": "Eyes of the Eagle", "attunement": true },
+				{ "item": "Gauntlets of Ogre Power", "attunement": true },
+				{ "item": "Gloves of Missile Snaring", "attunement": true },
+				{ "item": "Gloves of Swimming and Climbing", "attunement": true },
+				{ "item": "Hat of Disguise", "attunement": true },
+				{ "item": "Headband of Intellect", "attunement": true },
+				{ "item": "Helm of Telepathy", "attunement": true },
+				{ "item": "Medallion of Thoughts", "attunement": true },
+				{ "item": "Necklace of Adaptation", "attunement": true },
+				{ "item": "Periapt of Wound Closure", "attunement": true },
+				{ "item": "Pipes of the Sewers", "attunement": true },
+				{ "item": "Quiver of Ehlonna", "attunement": false },
+				{ "item": "Ring of Jumping", "attunement": true },
+				{ "item": "Ring of Mind Shielding", "attunement": true },
+				{ "item": "Slippers of Spider Climbing", "attunement": true },
+				{ "item": "Ventilating Lungs", "attunement": true },
+				{ "item": "Winged Boots", "attunement": true }
+			],
+			"14th-Level": [
+				{ "item": "Amulet of Health", "attunement": true },
+				{ "item": "Arcane Propulsion Arm", "attunement": true },
+				{ "item": "Belt of Hill Giant Strength", "attunement": true },
+				{ "item": "Boots of Levitation", "attunement": true },
+				{ "item": "Boots of Speed", "attunement": true },
+				{ "item": "Bracers of Defense", "attunement": true },
+				{ "item": "Cloak of the Bat", "attunement": true },
+				{ "item": "Dimensional Shackles", "attunement": false },
+				{ "item": "Gem of Seeing", "attunement": true },
+				{ "item": "Horn of Blasting", "attunement": false },
+				{ "item": "Ring of Free Action", "attunement": true },
+				{ "item": "Ring of Protection", "attunement": true },
+				{ "item": "Ring of the Ram", "attunement": true }
+			]
+		}
+	},
+	{
+		"id": "Repulsion Shield",
+		"name": "Repulsion Shield",
+		"prerequisite": "6th-level artificer",
+		"item": "A shield (requires attunement)",
+		"description": "A creature gains a +1 bonus to Armor Class while wielding this shield.",
+		"mechanics": {
+			"charges": 4,
+			"use": {
+				"trigger": "reaction to being hit by melee attack",
+				"effect": "push attacker up to 15 feet away",
+				"cost": "1 charge"
+			},
+			"recharge": "1d4 expended charges daily at dawn"
+		}
+	},
+	{
+		"id": "Resistant Armor",
+		"name": "Resistant Armor",
+		"prerequisite": "6th-level artificer",
+		"item": "A suit of armor (requires attunement)",
+		"description": "While wearing this armor, a creature has resistance to one of the following damage types, which you choose when you infuse the item: acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, or thunder."
+	},
+	{
+		"id": "Returning Weapon",
+		"name": "Returning Weapon",
+		"item": "A simple or martial weapon with the thrown property",
+		"description": "This magic weapon grants a +1 bonus to attack and damage rolls made with it, and it returns to the wielder's hand immediately after it is used to make a ranged attack."
+	},
+	{
+		"id": "Spell-Refueling Ring",
+		"name": "Spell-Refueling Ring",
+		"prerequisite": "6th-level artificer",
+		"item": "A ring (requires attunement)",
+		"description": "While wearing this ring, the creature can recover one expended spell slot as an action. The recovered slot can be of 3rd level or lower. Once used, the ring can't be used again until the next dawn."
+	}
+]

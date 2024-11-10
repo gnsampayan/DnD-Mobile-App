@@ -138,6 +138,9 @@ const cantripImages = {
 const learnedSpellsFromOtherWizards = 0;
 const learnedSpellsFromScrolls = 0;
 
+// TODO: make this dynamic
+const spellLevelAccess = 1;
+
 
 // Key for AsyncStorage
 const CANTRIP_SLOTS_KEY = '@cantrip_slots';
@@ -177,6 +180,7 @@ interface Spell {
     name: string;
     castingTime: string;
 }
+
 
 
 export default function SpellbookScreen() {
@@ -229,8 +233,6 @@ export default function SpellbookScreen() {
     const { statsData, isSpellCaster } = useContext(StatsDataContext);
     const { cantripSlotsData, setCantripSlotsData, saveCantripSlots } = useContext(CantripSlotsContext);
 
-    // TODO: make this dynamic
-    const spellLevelAccess = 1;
 
     const characterClass = classData.find(cls => cls.value.toLowerCase() === statsData?.class?.toLowerCase());
 
