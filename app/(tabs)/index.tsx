@@ -1433,6 +1433,7 @@ export default function ActionsScreen() {
           }}
           onPress={() => {
             console.log('open', knownInfusionValue);
+
           }}
         >
           <Text style={{ color: 'white' }}>open</Text>
@@ -1778,7 +1779,7 @@ export default function ActionsScreen() {
                       keyboardType="number-pad"
                       placeholderTextColor="gray"
                       style={[styles.modalInputTempHp, { fontSize: 20 }]}
-                      onChangeText={(value) => {
+                      onChangeText={(value: string) => {
                         if (value === '') {
                           setTempHp(0);
                         } else {
@@ -1839,7 +1840,7 @@ export default function ActionsScreen() {
         // data={dataWithAddButton}
         data={[...combinedActions, null]}
         renderItem={renderActionBlocks}
-        keyExtractor={(item) => (item ? item.id : 'add-button')}
+        keyExtractor={(item: ActionBlock | null) => (item ? item.id : 'add-button')}
         key={numColumns} // Important for resetting the layout
         numColumns={numColumns}
         contentContainerStyle={styles.grid}
@@ -2538,14 +2539,14 @@ export default function ActionsScreen() {
                   style={styles.modalInput}
                   placeholder="Action Name"
                   placeholderTextColor="gray"
-                  onChangeText={(text) => setNewActionName(text)}
+                  onChangeText={(text: string) => setNewActionName(text)}
                   value={newActionName}
                 />
                 <TextInput
                   style={[styles.modalInput, styles.detailsInput]}
                   placeholder="Action Details"
                   placeholderTextColor="gray"
-                  onChangeText={(text) => setNewActionDetails(text)}
+                  onChangeText={(text: string) => setNewActionDetails(text)}
                   value={newActionDetails}
                   multiline={true}
                   numberOfLines={4}
@@ -2560,7 +2561,7 @@ export default function ActionsScreen() {
                   placeholderTextColor="gray"
                   keyboardType="number-pad"
                   value={newActionCost.actions.toString()}
-                  onChangeText={(text) => setNewActionCost({ ...newActionCost, actions: Number(text) || 0 })}
+                  onChangeText={(text: string) => setNewActionCost({ ...newActionCost, actions: Number(text) || 0 })}
                 />
                 <TextInput
                   style={styles.modalInput}
@@ -2568,7 +2569,7 @@ export default function ActionsScreen() {
                   placeholderTextColor="gray"
                   keyboardType="number-pad"
                   value={newActionCost.bonus.toString()}
-                  onChangeText={(text) => setNewActionCost({ ...newActionCost, bonus: Number(text) || 0 })}
+                  onChangeText={(text: string) => setNewActionCost({ ...newActionCost, bonus: Number(text) || 0 })}
                 />
 
                 <TouchableOpacity style={styles.imagePickerButton} onPress={() => pickImage(true)}>
