@@ -38,6 +38,14 @@ interface CharacterContextProps {
     setDraconicAncestry: (value: DraconicAncestry | null) => void;
     breathWeaponEnabled: boolean;
     setBreathWeaponEnabled: (value: boolean) => void;
+    magicalTinkeringEnabled: boolean;
+    setMagicalTinkeringEnabled: (value: boolean) => void;
+    infuseItemEnabled: boolean;
+    setInfuseItemEnabled: (value: boolean) => void;
+    infuseItemSpent: boolean;
+    setInfuseItemSpent: (value: boolean) => void;
+    infusionsLearned: string[];
+    setInfusionsLearned: (value: string[]) => void;
 
 }
 
@@ -64,6 +72,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [infernalLegacyEnabled, setInfernalLegacyEnabled] = useState<boolean>(false);
     const [draconicAncestry, setDraconicAncestry] = useState<DraconicAncestry | null>(null);
     const [breathWeaponEnabled, setBreathWeaponEnabled] = useState<boolean>(false);
+    const [magicalTinkeringEnabled, setMagicalTinkeringEnabled] = useState<boolean>(false);
+    const [infuseItemEnabled, setInfuseItemEnabled] = useState<boolean>(false);
+    const [infuseItemSpent, setInfuseItemSpent] = useState<boolean>(false);
+    const [infusionsLearned, setInfusionsLearned] = useState<string[]>([]);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -74,6 +86,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const INFERNAL_LEGACY_ENABLED_STORAGE_KEY = '@infernal_legacy_enabled';
     const DRACONIC_ANCESTRY_ENABLED_STORAGE_KEY = '@draconic_ancestry_enabled';
     const BREATH_WEAPON_ENABLED_STORAGE_KEY = '@breath_weapon_enabled';
+    const MAGICAL_TINKERING_ENABLED_STORAGE_KEY = '@magical_tinkering_enabled';
+    const INFUSE_ITEM_ENABLED_STORAGE_KEY = '@infuse_item_enabled';
+    const INFUSE_ITEM_SPENT_STORAGE_KEY = '@infuse_item_spent';
+    const INFUSIONS_LEARNED_STORAGE_KEY = '@infusions_learned';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -115,6 +131,22 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 if (storedBreathWeaponEnabled) {
                     setBreathWeaponEnabled(storedBreathWeaponEnabled === 'true');
                 }
+                const storedMagicalTinkeringEnabled = await AsyncStorage.getItem(MAGICAL_TINKERING_ENABLED_STORAGE_KEY);
+                if (storedMagicalTinkeringEnabled) {
+                    setMagicalTinkeringEnabled(storedMagicalTinkeringEnabled === 'true');
+                }
+                const storedInfuseItemEnabled = await AsyncStorage.getItem(INFUSE_ITEM_ENABLED_STORAGE_KEY);
+                if (storedInfuseItemEnabled) {
+                    setInfuseItemEnabled(storedInfuseItemEnabled === 'true');
+                }
+                const storedInfuseItemSpent = await AsyncStorage.getItem(INFUSE_ITEM_SPENT_STORAGE_KEY);
+                if (storedInfuseItemSpent) {
+                    setInfuseItemSpent(storedInfuseItemSpent === 'true');
+                }
+                const storedInfusionsLearned = await AsyncStorage.getItem(INFUSIONS_LEARNED_STORAGE_KEY);
+                if (storedInfusionsLearned) {
+                    setInfusionsLearned(JSON.parse(storedInfusionsLearned));
+                }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
             } finally {
@@ -134,8 +166,70 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setInfernalLegacyEnabled(false);
         setDraconicAncestry(null);
         setBreathWeaponEnabled(false);
+        setMagicalTinkeringEnabled(false);
+        setInfuseItemEnabled(false);
+        setInfuseItemSpent(false);
+        setInfusionsLearned([]);
     }, [statsData.class]);
 
+
+    // save infusions learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveInfusionsLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(INFUSIONS_LEARNED_STORAGE_KEY, JSON.stringify(infusionsLearned));
+                } catch (error) {
+                    console.error('Error saving infusions learned to AsyncStorage:', error);
+                }
+            }
+            saveInfusionsLearnedToStorage();
+        }
+    }, [infusionsLearned, isLoading]);
+
+
+    // set infuse item spent boolean to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveInfuseItemSpentToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(INFUSE_ITEM_SPENT_STORAGE_KEY, infuseItemSpent.toString());
+                } catch (error) {
+                    console.error('Error saving infuse item spent to AsyncStorage:', error);
+                }
+            }
+            saveInfuseItemSpentToStorage();
+        }
+    }, [infuseItemSpent, isLoading]);
+
+    // set infuse item boolean to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveInfuseItemEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(INFUSE_ITEM_ENABLED_STORAGE_KEY, infuseItemEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving infuse item enabled to AsyncStorage:', error);
+                }
+            };
+            saveInfuseItemEnabledToStorage();
+        }
+    }, [infuseItemEnabled, isLoading]);
+
+
+    // set magical tinkering boolean to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveMagicalTinkeringEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(MAGICAL_TINKERING_ENABLED_STORAGE_KEY, magicalTinkeringEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving magical tinkering enabled to AsyncStorage:', error);
+                }
+            };
+            saveMagicalTinkeringEnabledToStorage();
+        }
+    }, [magicalTinkeringEnabled, isLoading]);
 
     // set breath weapon boolean to AsyncStorage whenever it changes
     useEffect(() => {
@@ -384,6 +478,14 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setDraconicAncestry,
                 breathWeaponEnabled,
                 setBreathWeaponEnabled,
+                magicalTinkeringEnabled,
+                setMagicalTinkeringEnabled,
+                infuseItemEnabled,
+                setInfuseItemEnabled,
+                infuseItemSpent,
+                setInfuseItemSpent,
+                infusionsLearned,
+                setInfusionsLearned,
             }}
         >
             {children}

@@ -23,7 +23,7 @@ import classItems from '../data/classData.json';
 import weaponData from '../data/weapons.json';
 import draconicAncestryData from '../data/draconicAncestry.json';
 import artificerFeatures from '../data/class-tables/artificerFeatures.json';
-import artificerInfusions from '../data/class-tables/artificerInfusions.json';
+import artificerInfusionsData from '../data/class-tables/artificerInfusions.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -168,6 +168,13 @@ const clearAsyncStorage = async () => {
     }
 };
 
+const classFeaturesMap: { [key: string]: any } = {
+    artificer: artificerFeatures,
+}
+
+// TODO: make max infusions learned a variable
+const INFUSIONS_CREDITS = 4;
+
 export default function MeScreen() {
     // Define equipment items
     const initialEquipmentItems: EquipmentItem[] = [
@@ -213,6 +220,12 @@ export default function MeScreen() {
         setDraconicAncestry,
         breathWeaponEnabled,
         setBreathWeaponEnabled,
+        magicalTinkeringEnabled,
+        setMagicalTinkeringEnabled,
+        infuseItemEnabled,
+        setInfuseItemEnabled,
+        infusionsLearned,
+        setInfusionsLearned,
     } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
@@ -233,6 +246,12 @@ export default function MeScreen() {
         setDraconicAncestry: (value: DraconicAncestry | null) => void;
         breathWeaponEnabled: boolean;
         setBreathWeaponEnabled: (value: boolean) => void;
+        magicalTinkeringEnabled: boolean;
+        setMagicalTinkeringEnabled: (value: boolean) => void;
+        infuseItemEnabled: boolean;
+        setInfuseItemEnabled: (value: boolean) => void;
+        infusionsLearned: string[];
+        setInfusionsLearned: (value: string[]) => void;
     };
     const {
         items,
@@ -264,6 +283,9 @@ export default function MeScreen() {
     const [settingsModalVisible, setSettingsModalVisible] = useState(false);
     const [draconicAncestryValue, setDraconicAncestryValue] = useState<string | null>(null);
     const [draconicAncestryModalVisible, setDraconicAncestryModalVisible] = useState(false);
+    const [classFeatDescriptionModalVisible, setClassFeatDescriptionModalVisible] = useState(false);
+    const [infusionModalVisible, setInfusionModalVisible] = useState(false);
+    const [infusionValue, setInfusionValue] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -791,93 +813,162 @@ export default function MeScreen() {
         );
     };
 
-    const renderClassFeatures = (isList?: boolean, textStyle?: string) => {
+    const renderClassFeatures = (isList?: boolean, specificFeature?: string) => {
         if (!statsData.class) {
-            return <Text style={{ color: 'lightgrey' }}>—⁠</Text>
+            return <Text style={{ color: 'lightgrey' }}>—⁠</Text>;
+        }
+
+        const currentClass = statsData.class.toLowerCase();
+        const classFeatures = classFeaturesMap[currentClass];
+
+        if (!classFeatures) {
+            return <Text style={{ color: 'lightgrey' }}>No features available for this class.</Text>;
+        }
+
+        const renderObject = (obj: any) => {
+            return Object.entries(obj).map(([key, value], index) => {
+                if (key && key.toLowerCase() === 'id') return null;
+
+                // Check if key is a number (for lists)
+                const displayKey = !isNaN(Number(key)) ? String(Number(key) + 1) : key;
+                const isNumericKey = !isNaN(Number(key));
+
+                if (typeof value === 'object' && value !== null) {
+                    return (
+                        <View
+                            key={key}
+                            style={{
+                                flexDirection: isNumericKey ? 'row' : 'column',
+                                gap: 5,
+                                borderRadius: 8,
+                                marginBottom: 5,
+                            }}
+                        >
+                            <Text style={styles.featLabel}>{displayKey}</Text>
+                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', flex: 1 }}>
+                                {renderObject(value)}
+                            </View>
+                        </View>
+                    );
+                }
+
+                return (
+                    <View
+                        key={key}
+                        style={{
+                            flexDirection: isNumericKey ? 'row' : 'column',
+                            gap: 5,
+                            borderRadius: 8,
+                            marginBottom: 5,
+                        }}
+                    >
+                        <Text style={styles.featLabel}>{displayKey}</Text>
+                        <Text style={{ flexWrap: 'wrap', flex: 1 }}>{String(value)}</Text>
+                    </View>
+                );
+            });
+        };
+
+        const renderFeature = (feature: any) => {
+            const { name, level, ...featureData } = feature;
+            return (
+                <View
+                    key={name && name.toLowerCase()}
+                    style={{
+                        flexDirection: 'column',
+                        gap: 5,
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        padding: 10,
+                        borderRadius: 8,
+                        marginBottom: 5,
+                    }}
+                >
+                    {/* Show feature name only if not rendering a specific feature */}
+                    {!specificFeature && <Text style={styles.featLabel}>{name}</Text>}
+                    {renderObject(featureData)}
+                </View>
+            );
+        };
+
+        // Function to find a specific feature by name, including subfeatures
+        const findFeatureByName = (features: any[], name: string): any | null => {
+            for (const feature of features) {
+                if (feature.name && feature.name.toLowerCase() === name.toLowerCase()) {
+                    return feature;
+                }
+                if (feature.features) {
+                    const subFeature = findFeatureByName(feature.features, name);
+                    if (subFeature) {
+                        return subFeature;
+                    }
+                }
+            }
+            return null;
+        };
+
+        let featuresToRender: any[] = [];
+
+        if (specificFeature) {
+            const feature = findFeatureByName(classFeatures, specificFeature);
+            if (feature) {
+                featuresToRender = [feature];
+            } else {
+                return <Text style={{ color: 'lightgrey' }}>Feature not found.</Text>;
+            }
+        } else {
+            featuresToRender = classFeatures.filter((feature: any) => feature.level <= statsData.level);
         }
 
         return (
             <View style={{ marginBottom: 20, gap: 10 }}>
-                {artificerFeatures
-                    .filter(feature => feature.level <= statsData.level)
-                    .map((feature) => {
-                        if (isList) {
-                            return (
-                                <View
-                                    key={feature.name}
-                                    style={{
-                                        flexDirection: 'column',
-                                        gap: 5,
-                                        padding: 5,
-                                        borderRadius: 8,
-                                    }}
-                                >
-                                    <Text style={styles.featLabel}>{feature.name}</Text>
-                                </View>
-                            );
-                        }
-
-                        const renderObject = (obj: any) => {
-                            return Object.entries(obj).map(([key, value], index) => {
-                                if (key === 'id') return null;
-
-                                // Check if key is a number or numeric string
-                                const displayKey = !isNaN(Number(key)) ? String(Number(key) + 1) : key;
-                                const isNumericKey = !isNaN(Number(key));
-
-                                if (typeof value === 'object' && value !== null) {
-                                    return (
-                                        <View
-                                            key={key}
-                                            style={{
-                                                flexDirection: isNumericKey ? 'row' : 'column',
-                                                gap: 5,
-                                                borderRadius: 8,
-                                            }}
-                                        >
-                                            <Text style={styles.featLabel}>{displayKey}</Text>
-                                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', flex: 1 }}>
-                                                {renderObject(value)}
-                                            </View>
-                                        </View>
-                                    );
-                                }
-
-                                return (
-                                    <View
-                                        key={key}
-                                        style={{
-                                            flexDirection: isNumericKey ? 'row' : 'column',
-                                            gap: 5,
-                                            borderRadius: 8,
-                                        }}
-                                    >
-                                        <Text style={styles.featLabel}>{displayKey}</Text>
-                                        <Text style={{ flexWrap: 'wrap', flex: 1 }}>{String(value)}</Text>
-                                    </View>
-                                );
-                            });
-                        };
-
+                {featuresToRender.map((feature: any) => {
+                    if (isList) {
                         return (
-                            <View
-                                key={feature.name}
+                            <TouchableOpacity
+                                key={feature.name && feature.name.toLowerCase()}
                                 style={{
-                                    flexDirection: 'column',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
                                     gap: 5,
-                                    backgroundColor: 'rgba(0,0,0,0.1)',
-                                    padding: 10,
+                                    padding: 5,
                                     borderRadius: 8,
                                 }}
+                                onPress={() => {
+                                    setClassFeatDescriptionModalVisible(true);
+                                    setSelectedFeat(feature.name);
+                                }}
                             >
-                                <Text style={styles.featLabel}>{feature.name}</Text>
-                                {renderObject(feature)}
-                            </View>
+                                {/* Show Icon for specific class features */}
+                                {((feature.name.toLowerCase() === 'magical tinkering' && !magicalTinkeringEnabled) ||
+                                    (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled)) && (
+                                        <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
+                                    )}
+                                <Text
+                                    style={[
+                                        styles.featLabel,
+                                        // highlight text for specific class features
+                                        feature.name.toLowerCase() === 'magical tinkering'
+                                            ? (!magicalTinkeringEnabled
+                                                ? { color: 'gold' }
+                                                : { textDecorationLine: 'line-through' })
+                                            : feature.name.toLowerCase() === 'infuse item'
+                                                ? (!infuseItemEnabled
+                                                    ? { color: 'gold' }
+                                                    : { textDecorationLine: 'line-through' })
+                                                : {}
+                                    ]}
+                                >
+                                    {feature.name}
+                                </Text>
+                            </TouchableOpacity>
                         );
-                    })}
+                    }
+
+                    return renderFeature(feature);
+                })}
             </View>
         );
-    }
+    };
 
 
 
@@ -955,114 +1046,14 @@ export default function MeScreen() {
     }
 
     const renderCustomFeatButton = () => {
-        if (selectedFeat) {
-            // if feat is "lucky", then show activate button
-            if (selectedFeat.toLowerCase() === "lucky" && (!luckyPointsEnabled)) {
-                return (
-                    <View style={{
-                        paddingHorizontal: 10,
-                        backgroundColor: 'rgba(0,0,0,1)',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                        <MaterialCommunityIcons name="clover" size={20} color="gold" />
-                        <Button
-                            title="Activate"
-                            color="gold"
-                            onPress={() => activateFeat(selectedFeat as string)}
-                        />
-                    </View>
-                )
-            }
-            if (selectedFeat.toLowerCase() === "skill versatility" && !raceSkillProfGained) {
-                return (
-                    <View style={{
-                        paddingHorizontal: 10,
-                        backgroundColor: 'rgba(0,0,0,1)',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                        <Text style={{ color: 'lightgrey' }}>+2 </Text>
-                        <MaterialCommunityIcons name="bullseye-arrow" size={20} color="gold" />
-                        <Button
-                            title="Activate"
-                            color="gold"
-                            onPress={() => activateFeat(selectedFeat as string)}
-                        />
-                    </View>
-                )
-            }
-            if (selectedFeat.toLowerCase() === "relentless endurance" && !relentlessEnduranceGained) {
-                return (
-                    <View style={{
-                        paddingHorizontal: 10,
-                        backgroundColor: 'rgba(0,0,0,1)',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                        <Ionicons name="fitness" size={20} color="gold" />
-                        <Button
-                            title="Activate"
-                            color="gold"
-                            onPress={() => activateFeat(selectedFeat as string)}
-                        />
-                    </View>
-                )
-            }
-            if (selectedFeat.toLowerCase() === "infernal legacy" && !infernalLegacyEnabled) {
-                return (
-                    <View style={{
-                        paddingHorizontal: 10,
-                        backgroundColor: 'rgba(0,0,0,1)',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                        <MaterialCommunityIcons name="emoticon-devil" size={20} color="gold" />
-                        <Button
-                            title="Activate"
-                            color="gold"
-                            onPress={() => activateFeat(selectedFeat as string)}
-                        />
-                    </View>
-                )
-            }
-            if (selectedFeat.toLowerCase() === "draconic ancestry" && !draconicAncestry) {
-                return (
-                    <>
-                        <DropDownPicker
-                            items={draconicAncestryData.map(item => ({
-                                label: item.dragon,
-                                value: item.dragon
-                            }))}
-                            open={draconicAncestryModalVisible}
-                            value={draconicAncestryValue}
-                            setValue={setDraconicAncestryValue}
-                            setOpen={setDraconicAncestryModalVisible}
-                            placeholder="Select a draconic ancestry"
-                        />
+        if (!selectedFeat) return null;
 
+        const featName = selectedFeat.toLowerCase();
 
-                        {/* render key value pairs of draconic ancestry based on draconic ancestry value */}
-                        {draconicAncestryValue && draconicAncestryData
-                            .filter(ancestry => ancestry.dragon === draconicAncestryValue)
-                            .map(ancestry => (
-                                <View key={ancestry.dragon} style={{ padding: 10 }}>
-                                    <Text><Text style={{ fontWeight: 'bold' }}>Dragon: </Text>{ancestry.dragon}</Text>
-                                    <Text><Text style={{ fontWeight: 'bold' }}>Damage Type: </Text>{ancestry.damageType}</Text>
-                                    <Text><Text style={{ fontWeight: 'bold' }}>Breath Weapon: </Text>{ancestry.breathWeapon}</Text>
-                                    <Text><Text style={{ fontWeight: 'bold' }}>Typical Alignment: </Text>{ancestry.typicalAlignment}</Text>
-                                </View>
-                            ))}
-
-
+        switch (featName) {
+            case "lucky":
+                if (!luckyPointsEnabled) {
+                    return (
                         <View style={{
                             paddingHorizontal: 10,
                             backgroundColor: 'rgba(0,0,0,1)',
@@ -1070,42 +1061,209 @@ export default function MeScreen() {
                             borderWidth: 1,
                             flexDirection: 'row',
                             alignItems: 'center',
-                            opacity: !draconicAncestryValue ? 0.2 : 1
                         }}>
-                            <MaterialCommunityIcons name="dna" size={20} color="gold" />
+                            <MaterialCommunityIcons name="clover" size={20} color="gold" />
                             <Button
                                 title="Activate"
                                 color="gold"
-                                onPress={() => {
-                                    activateFeat(selectedFeat as string)
-                                    setDraconicAncestryModalVisible(false);
-                                    setDraconicAncestryValue(null);
-                                }}
-                                disabled={!draconicAncestryValue}
+                                onPress={() => activateFeat(selectedFeat as string)}
                             />
                         </View>
-                    </>
-                )
-            }
-            if (selectedFeat.toLowerCase() === "breath weapon" && !breathWeaponEnabled) {
-                return (
-                    <View style={{
-                        paddingHorizontal: 10,
-                        backgroundColor: 'rgba(0,0,0,1)',
-                        borderRadius: 8,
-                        borderWidth: 1,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                        <MaterialCommunityIcons name="weather-windy" size={20} color="gold" />
-                        <Button
-                            title="Activate"
-                            color="gold"
-                            onPress={() => activateFeat(selectedFeat as string)}
-                        />
-                    </View>
-                )
-            }
+                    );
+                }
+                break;
+
+            case "skill versatility":
+                if (!raceSkillProfGained) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                            <Text style={{ color: 'lightgrey' }}>+2 </Text>
+                            <MaterialCommunityIcons name="bullseye-arrow" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                            />
+                        </View>
+                    );
+                }
+                break;
+
+            case "relentless endurance":
+                if (!relentlessEnduranceGained) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                            <Ionicons name="fitness" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                            />
+                        </View>
+                    );
+                }
+                break;
+
+            case "infernal legacy":
+                if (!infernalLegacyEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                            <MaterialCommunityIcons name="emoticon-devil" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                            />
+                        </View>
+                    );
+                }
+                break;
+
+            case "draconic ancestry":
+                if (!draconicAncestry) {
+                    return (
+                        <>
+                            <DropDownPicker
+                                items={draconicAncestryData.map(item => ({
+                                    label: item.dragon,
+                                    value: item.dragon
+                                }))}
+                                open={draconicAncestryModalVisible}
+                                value={draconicAncestryValue}
+                                setValue={setDraconicAncestryValue}
+                                setOpen={setDraconicAncestryModalVisible}
+                                placeholder="Select a draconic ancestry"
+                            />
+
+                            {/* render key value pairs of draconic ancestry based on draconic ancestry value */}
+                            {draconicAncestryValue && draconicAncestryData
+                                .filter(ancestry => ancestry.dragon === draconicAncestryValue)
+                                .map(ancestry => (
+                                    <View key={ancestry.dragon} style={{ padding: 10 }}>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>Dragon: </Text>{ancestry.dragon}</Text>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>Damage Type: </Text>{ancestry.damageType}</Text>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>Breath Weapon: </Text>{ancestry.breathWeapon}</Text>
+                                        <Text><Text style={{ fontWeight: 'bold' }}>Typical Alignment: </Text>{ancestry.typicalAlignment}</Text>
+                                    </View>
+                                ))}
+
+                            <View style={{
+                                paddingHorizontal: 10,
+                                backgroundColor: 'rgba(0,0,0,1)',
+                                borderRadius: 8,
+                                borderWidth: 1,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                opacity: !draconicAncestryValue ? 0.2 : 1
+                            }}>
+                                <MaterialCommunityIcons name="dna" size={20} color="gold" />
+                                <Button
+                                    title="Activate"
+                                    color="gold"
+                                    onPress={() => {
+                                        activateFeat(selectedFeat as string)
+                                        setDraconicAncestryModalVisible(false);
+                                        setDraconicAncestryValue(null);
+                                    }}
+                                    disabled={!draconicAncestryValue}
+                                />
+                            </View>
+                        </>
+                    );
+                }
+                break;
+
+            case "breath weapon":
+                if (!breathWeaponEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                            <MaterialCommunityIcons name="weather-windy" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                            />
+                        </View>
+                    );
+                }
+                break;
+
+
+            // Class Features
+            case "magical tinkering":
+                if (!magicalTinkeringEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                            <MaterialCommunityIcons name="tools" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                            />
+                        </View>
+                    )
+                }
+                break;
+            case "infuse item":
+                if (!infuseItemEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: infusionsLearned.length !== INFUSIONS_CREDITS ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="beaker" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={infusionsLearned.length !== INFUSIONS_CREDITS}
+                            />
+                        </View>
+                    )
+                }
+                break;
+
+
         }
         return null;
     }
@@ -1147,6 +1305,136 @@ export default function MeScreen() {
         if (feat.toLowerCase() === "breath weapon") {
             setBreathWeaponEnabled(true);
         }
+
+        // Class Features
+
+        // Magical Tinkering
+        if (feat.toLowerCase() === "magical tinkering") {
+            setMagicalTinkeringEnabled(true);
+            setClassFeatDescriptionModalVisible(false);
+            setSelectedFeat(null);
+        }
+        // Infuse Item
+        if (feat.toLowerCase() === "infuse item") {
+            setInfuseItemEnabled(true);
+            setClassFeatDescriptionModalVisible(false);
+            setSelectedFeat(null);
+
+        }
+    }
+
+    const renderArtificerInfusionDropdown = () => {
+        // Recursive function to render nested JSON content
+        const renderNestedContent = (content: any, depth: number = 0) => {
+            if (!content) return null;
+            if (Array.isArray(content)) {
+                return content.map((item, index) => (
+                    <View key={index} style={{ marginLeft: depth * 10 }}>
+                        {typeof item === 'object'
+                            ? renderNestedContent(item, depth + 1)
+                            : <Text>• {item}</Text>
+                        }
+                    </View>
+                ));
+            }
+            if (typeof content === 'object') {
+                return Object.entries(content).map(([key, value]) => (
+                    <View key={key} style={{ marginBottom: 5, marginLeft: depth * 10 }}>
+                        <Text style={{ fontWeight: depth === 0 ? 'bold' : '500', textTransform: 'capitalize' }}>
+                            {depth > 0 && '• '}{key}:
+                        </Text>
+                        {typeof value === 'object'
+                            ? renderNestedContent(value, depth + 1)
+                            : <Text>{String(value)}</Text>
+                        }
+                    </View>
+                ));
+            }
+            return <Text>{String(content)}</Text>;
+        };
+        return (
+            <View style={{
+                paddingVertical: 10,
+                zIndex: 2000,
+            }}>
+                <View style={{ flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center', zIndex: 2000 }}>
+                    <Text style={{ color: 'black', fontWeight: 'bold' }}>{infusionsLearned.length}/{INFUSIONS_CREDITS}</Text>
+                    <DropDownPicker
+                        items={artificerInfusionsData
+                            .filter(item => !infusionsLearned.includes(item.name.toLowerCase()))
+                            .map(item => ({
+                                label: item.name,
+                                value: item.name.toLowerCase()
+                            }))}
+                        value={infusionValue}
+                        setValue={setInfusionValue}
+                        open={infusionModalVisible}
+                        setOpen={setInfusionModalVisible}
+                        placeholder="Select an infusion"
+                        dropDownContainerStyle={{ backgroundColor: 'white', zIndex: 2000 }}
+                        containerStyle={{ flex: 1 }}
+                        disabled={infusionsLearned.length === INFUSIONS_CREDITS}
+                        style={{ opacity: infusionsLearned.length === INFUSIONS_CREDITS ? 0.2 : 1 }}
+                    />
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: 'black',
+                            paddingHorizontal: 10,
+                            paddingVertical: 5,
+                            borderRadius: 8,
+                            opacity: infusionsLearned.length === INFUSIONS_CREDITS ? 0.2 : 1
+                        }}
+                        onPress={() => {
+                            // add item to array of infusions learned
+                            if (infusionValue) {
+                                setInfusionsLearned([...infusionsLearned, infusionValue]);
+                                setInfusionValue(null); // Reset the selected value
+                            }
+                        }}
+                        disabled={!infusionValue || infusionsLearned.length === INFUSIONS_CREDITS}
+                    >
+                        <Text style={{ color: 'white' }}>Select</Text>
+                    </TouchableOpacity>
+                </View>
+
+
+                {/* Render the selected infusions */}
+                {infusionsLearned.length > 0 && (
+                    <View style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                        {infusionsLearned.map(infusion => (
+                            <View key={infusion} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{infusion.charAt(0).toUpperCase() + infusion.slice(1)}</Text>
+                                <TouchableOpacity onPress={() => setInfusionsLearned(infusionsLearned.filter(i => i !== infusion))}>
+                                    <Ionicons name="remove-circle" size={24} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+
+
+                <ScrollView style={{
+                    height: infusionValue ? '40%' : 0,
+                    borderBottomWidth: 1,
+                    borderTopWidth: 1,
+                    borderColor: infusionValue ? 'black' : 'transparent'
+                }}>
+                    {infusionValue && artificerInfusionsData
+                        .filter(infusion => infusion.name.toLowerCase() === infusionValue)
+                        .map(infusion => (
+                            <View key={infusion.name} style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                                {renderNestedContent(
+                                    Object.fromEntries(
+                                        Object.entries(infusion).filter(([key]) => key !== 'id')
+                                    )
+                                )}
+                            </View>
+                        ))
+                    }
+                </ScrollView>
+            </View>
+        );
     }
 
 
@@ -1248,7 +1536,7 @@ export default function MeScreen() {
                                             (key.toLowerCase() === 'relentless endurance' && !relentlessEnduranceGained) ||
                                             (key.toLowerCase() === 'infernal legacy' && !infernalLegacyEnabled) ||
                                             (key.toLowerCase() === 'draconic ancestry' && !draconicAncestry) ||
-                                            (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled)) && (
+                                            (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled && draconicAncestry)) && (
                                                 <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                             )}
                                         <TouchableOpacity
@@ -1263,8 +1551,11 @@ export default function MeScreen() {
                                                 setFeatDescriptionModalVisible(true);
                                                 setSelectedFeat(key);
                                             }}
+                                            disabled={key.toLowerCase() === 'breath weapon' && !draconicAncestry}
                                         >
                                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+
+                                                {/* Race Feats Highlighting */}
                                                 <Text
                                                     key={`label-${key}`}
                                                     style={[
@@ -1286,7 +1577,7 @@ export default function MeScreen() {
                                                         && (!draconicAncestry ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
                                                         // highlight if breath weapon not enabled yet
                                                         key.toLowerCase() === 'breath weapon'
-                                                        && (!breathWeaponEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
+                                                        && (!breathWeaponEnabled ? { color: draconicAncestry ? 'gold' : '#586a9f' } : { textDecorationLine: 'line-through' }),
                                                         {
                                                             flexShrink: 1,
                                                             flexWrap: 'wrap'
@@ -1933,6 +2224,32 @@ export default function MeScreen() {
                         </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
+            </Modal>
+
+
+            {/* Class Feat Description Modal */}
+            <Modal animationType="fade" transparent={true} visible={classFeatDescriptionModalVisible}>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        {/* Modal Title */}
+                        <Text style={styles.modalTitle}>{selectedFeat}</Text>
+                        {/* Artificer Infusion Dropdown */}
+                        {statsData.class === 'artificer' && selectedFeat?.toLowerCase() === 'infuse item' && !infuseItemEnabled && (
+                            renderArtificerInfusionDropdown()
+                        )}
+                        <ScrollView style={{ flex: 1, marginBottom: 60 }}>
+                            {/* Render Specific Class Feature */}
+                            {selectedFeat && renderClassFeatures(false, selectedFeat)}
+                        </ScrollView>
+                    </View>
+                    <View style={styles.modalButtons}>
+                        <Button title="Close" onPress={() => {
+                            setClassFeatDescriptionModalVisible(false);
+                            setSelectedFeat(null);
+                        }} />
+                        {renderCustomFeatButton()}
+                    </View>
+                </View>
             </Modal>
 
 

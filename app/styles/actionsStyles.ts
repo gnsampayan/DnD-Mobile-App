@@ -152,8 +152,8 @@ const styles = StyleSheet.create({
       borderWidth: 2,
       padding: 10,
       borderRadius: 8,
-      width: '100%',
       alignItems: 'center',
+      flex: 1,
     },
     // Modal add/reset button
     modalButtonAdd: {

@@ -44,9 +44,17 @@ import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 import armorTypes from '../data/armorTypes.json';
+import artificerFeaturesData from '../data/class-tables/artificerFeatures.json';
 
 // Draconic Ancestry images
 import draconicAncestryImage from '@actions/draconic-ancestry-image.png';
+
+// Magical Tinkering image
+import magicalTinkeringImage from '@actions/magical-tinkering-image.png';
+// Infuse Item image
+import infuseItemImage from '@actions/infuse-item-image.png';
+import artificerInfusionsData from '../data/class-tables/artificerInfusions.json';
+
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -94,6 +102,7 @@ import tollTheDeadImage from '@images/cantrips/toll-the-dead.png';
 import trueStrikeImage from '@images/cantrips/true-strike.png';
 import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
 import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
@@ -301,6 +310,11 @@ export default function ActionsScreen() {
     infernalLegacyEnabled,
     draconicAncestry,
     breathWeaponEnabled,
+    magicalTinkeringEnabled,
+    infuseItemEnabled,
+    infuseItemSpent,
+    setInfuseItemSpent,
+    infusionsLearned,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -312,6 +326,11 @@ export default function ActionsScreen() {
     infernalLegacyEnabled: boolean;
     draconicAncestry: DraconicAncestry | null;
     breathWeaponEnabled: boolean;
+    magicalTinkeringEnabled: boolean;
+    infuseItemEnabled: boolean;
+    infuseItemSpent: boolean;
+    setInfuseItemSpent: (value: boolean) => void;
+    infusionsLearned: string[];
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -342,6 +361,8 @@ export default function ActionsScreen() {
   ];
 
   const [armorStealthDisadvantage, setArmorStealthDisadvantage] = useState<boolean>(false);
+  const [knownInfusionsOpen, setKnownInfusionsOpen] = useState<boolean>(false);
+  const [knownInfusionValue, setKnownInfusionValue] = useState<string>('');
 
 
   if (!statsData) {
@@ -442,8 +463,9 @@ export default function ActionsScreen() {
   useEffect(() => {
     const cantripActions = generateCantripActions(cantripSlotsData);
     const raceActions = generateRaceBasedActions();
+    const classActions = generateClassBasedActions();
     // Combine all actions into one array
-    const allActions = [...actions, ...cantripActions, ...raceActions];
+    const allActions = [...actions, ...cantripActions, ...raceActions, ...classActions];
     // Remove duplicates based on 'id'
     const uniqueActionsMap = new Map<string, ActionBlock>();
     allActions.forEach(action => {
@@ -451,7 +473,17 @@ export default function ActionsScreen() {
     });
     const uniqueActions = Array.from(uniqueActionsMap.values());
     setCombinedActions(uniqueActions);
-  }, [actions, cantripSlotsData, statsData.race, statsData.level, infernalLegacyEnabled, draconicAncestry, breathWeaponEnabled]);
+  }, [
+    actions,
+    cantripSlotsData,
+    statsData.race,
+    statsData.level,
+    infernalLegacyEnabled,
+    draconicAncestry,
+    breathWeaponEnabled,
+    magicalTinkeringEnabled,
+    infuseItemEnabled,
+  ]);
 
 
   // Extract Ability Modifiers from statsData
@@ -1001,6 +1033,11 @@ export default function ActionsScreen() {
         affordable = affordable && !breathWeaponSpent;
       }
 
+      // Check for infuse item
+      if (infuseItemEnabled && item.name.toLowerCase() === 'infuse item') {
+        affordable = affordable && !infuseItemSpent;
+      }
+
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
@@ -1065,9 +1102,6 @@ export default function ActionsScreen() {
       );
     }
   };
-
-  // Prepare data by adding a null item to represent the add button
-  const dataWithAddButton = [...actions, null];
 
   const isDefaultAction = (actionId: string) => {
     return defaultActions.some(action => action.id === actionId);
@@ -1241,6 +1275,8 @@ export default function ActionsScreen() {
     ].join('\n');
   }
 
+
+
   const generateRaceBasedActions = (): ActionBlock[] => {
     const raceActions: ActionBlock[] = [];
 
@@ -1341,7 +1377,126 @@ export default function ActionsScreen() {
     return raceActions;
   };
 
+  // Generate class based actions
+  const generateClassBasedActions = (): ActionBlock[] => {
+    const classActions: ActionBlock[] = [];
 
+    // Artificer
+    if (statsData.class?.toLowerCase() === 'artificer') {
+      if (magicalTinkeringEnabled === true) {
+        // find details from artificerFeatures
+        const feature = artificerFeaturesData.find((feat: any) => feat.name.toLowerCase() === 'magical tinkering');
+        // Add 'Magical Tinkering' action
+        classActions.push({
+          id: 'class-magical-tinkering',
+          name: 'Magical Tinkering',
+          cost: { actions: 1, bonus: 0 },
+          details: `${feature?.description ? feature.description : ''} (see ${statsData.class ? statsData.class : 'class'} feats)`,
+          image: magicalTinkeringImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+
+      }
+      if (infuseItemEnabled === true) {
+        const feature = artificerFeaturesData.find((feat: any) => feat.name.toLowerCase() === 'infuse item');
+        if (feature && feature.features) {
+          // Add 'Infuse Item' action
+          classActions.push({
+            id: 'class-infuse-item',
+            name: 'Infuse Item',
+            cost: { actions: 1, bonus: 0 },
+            details: `(see ${statsData.class ? statsData.class : 'class'} feats for details)`,
+            image: infuseItemImage as ImageSourcePropType,
+            type: 'feature',
+            source: 'class',
+          } as ActionBlock);
+        }
+      }
+    }
+
+    // Other classes
+    return classActions;
+  }
+
+
+  const renderKnownInfusionsDropdown = () => {
+    return (
+      <View style={{ zIndex: 2000, flexDirection: 'row', alignItems: 'center', width: '100%', gap: 10 }}>
+        <TouchableOpacity
+          style={{
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+            backgroundColor: 'black',
+            borderRadius: 8,
+            borderWidth: 1,
+          }}
+          onPress={() => {
+            console.log('open', knownInfusionValue);
+          }}
+        >
+          <Text style={{ color: 'white' }}>open</Text>
+        </TouchableOpacity>
+        <DropDownPicker
+          items={infusionsLearned.map((infusion) => ({
+            label: infusion.charAt(0).toUpperCase() + infusion.slice(1),
+            value: infusion,
+          }))}
+          value={knownInfusionValue}
+          setValue={setKnownInfusionValue}
+          open={knownInfusionsOpen}
+          setOpen={setKnownInfusionsOpen}
+          placeholder="Select an infusion"
+          containerStyle={{ zIndex: 2000, flex: 1 }}
+        />
+      </View>
+    );
+  }
+
+
+  const renderInfusionDetails = () => {
+    return (
+      <View>
+
+        {knownInfusionValue && (
+          artificerInfusionsData.map((infusion) => {
+            if (infusion.id.toLowerCase() === knownInfusionValue.toLowerCase()) {
+              return (
+                <View key={infusion.id}>
+                  {Object.entries(infusion).map(([key, value]) => {
+                    if (key === 'id') return null;
+                    if (typeof value === 'string' || typeof value === 'number') {
+                      return (
+                        <View key={key}>
+                          <Text>{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
+                          <Text>{value}</Text>
+                        </View>
+                      );
+                    } else if (typeof value === 'object' && value !== null) {
+                      return (
+                        <View key={key}>
+                          <Text>{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
+                          {Object.entries(value).map(([subKey, subValue]) => (
+                            <View key={subKey} style={{ marginLeft: 20 }}>
+                              <Text>{subKey.charAt(0).toUpperCase() + subKey.slice(1)}:</Text>
+                              <Text>{typeof subValue === 'string' ? subValue : JSON.stringify(subValue)}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      );
+                    }
+                    return null;
+                  })}
+                </View>
+              );
+            }
+            return null;
+          })
+        )}
+
+      </View>
+    );
+  }
 
 
   // Main Contents
@@ -2004,9 +2159,10 @@ export default function ActionsScreen() {
                           <>
                             {/* Modifiers Row */}
                             <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
-                              <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                              <MaterialCommunityIcons name="sword" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <View style={{ flexDirection: 'row' }}>
+                                <View style={{ flexDirection: 'row', gap: 5 }}>
+                                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                                   {getWeaponAttackBonus(rangedHandWeapon) && (
                                     <Text style={{ marginRight: 5 }}>
                                       +{getWeaponAttackBonus(rangedHandWeapon)}
@@ -2244,10 +2400,15 @@ export default function ActionsScreen() {
                         </>
                       )}
 
+                    {/* Artificer Infuse Item */}
+                    {statsData.class === 'artificer' && selectedAction.name.toLowerCase() === 'infuse item' && (
+                      renderKnownInfusionsDropdown()
+                    )}
+
 
 
                     {/* Modal Buttons */}
-                    <View style={[styles.modalButtons, { flexDirection: 'column', gap: 10 }]}>
+                    <View style={[styles.modalButtons, { flexDirection: 'row', gap: 10 }]}>
                       {/* short rest button -- only show if action is rest */}
                       {selectedAction.name.toLowerCase() === 'rest' && (
                         <TouchableOpacity
@@ -2303,7 +2464,11 @@ export default function ActionsScreen() {
                             if (breathWeaponEnabled) {
                               setBreathWeaponSpent(false);
                             }
+                            if (infuseItemEnabled) {
+                              setInfuseItemSpent(false);
+                            }
                           }
+
                           // if action is hellish rebuke, set hellish rebuke spent to true
                           if (selectedAction.name.toLowerCase() === 'hellish rebuke') {
                             setHellishRebukeSpent(true);
@@ -2315,6 +2480,11 @@ export default function ActionsScreen() {
                           if (selectedAction.name.toLowerCase() === 'breath weapon') {
                             setBreathWeaponSpent(true);
                           }
+                          if (selectedAction.name.toLowerCase() === 'infuse item') {
+                            setInfuseItemSpent(true);
+                          }
+
+                          // Default commit action
                           commitAction();
                         }}
                         disabled={
@@ -2323,41 +2493,20 @@ export default function ActionsScreen() {
                           currentBonusActionsAvailable < selectedAction.cost.bonus ||
                           (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
                           (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
-                          (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)
+                          (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
+                          (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent)
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>
 
                           {selectedAction.name.toLowerCase() !== 'rest' ? (
-                            <>
-                              {
-                                selectedAction.cost.actions === 0 ? null : (
-                                  <View style={styles.costTextContainer}>
-                                    <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.actions}</Text>
-                                    <Ionicons name="ellipse" size={16} color="green" />
-                                  </View>
-                                )
-                              }
-                              {selectedAction.cost.actions !== 0 && selectedAction.cost.bonus !== 0 && (
-                                <Text>, </Text>
-                              )}
-                              {selectedAction.cost.bonus === 0 ? null : (
-                                <View style={styles.costTextContainer}>
-                                  <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.bonus}</Text>
-                                  <Ionicons name="triangle" size={16} color="#FF8C00" />
-                                </View>
-                              )}
-                              {selectedAction.cost.reaction !== undefined && (
-                                <View style={styles.costTextContainer}>
-                                  <Text style={styles.modalButtonTextBlack}>{selectedAction.cost.reaction}</Text>
-                                  <Ionicons name="square" size={16} color="rgb(200, 0, 255)" />
-                                </View>
-                              )}
-                            </>
+                            <Text>
+                              {selectedAction.name}
+                            </Text>
                           ) :
                             <View style={styles.costTextContainer}>
                               <MaterialCommunityIcons name="campfire" size={16} color="black" />
-                              <Text style={styles.modalButtonTextBlack}>Camp</Text>
+                              <Text style={styles.modalButtonTextBlack}>Long Rest</Text>
                             </View>
                           }
 

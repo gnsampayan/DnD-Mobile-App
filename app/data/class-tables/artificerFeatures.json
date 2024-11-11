@@ -11,20 +11,16 @@
 		],
 		"properties": [
 			{
-				"name": "Light",
-				"description": "The object sheds bright light in a 5-foot radius and dim light for an additional 5 feet."
+				"Light": "The object sheds bright light in a 5-foot radius and dim light for an additional 5 feet."
 			},
 			{
-				"name": "Recorded Message",
-				"description": "Whenever tapped by a creature, the object emits a recorded message that can be heard up to 10 feet away. You utter the message when you bestow this property on the object, and the recording can be no more than 6 seconds long."
+				"Recorded Message": "Whenever tapped by a creature, the object emits a recorded message that can be heard up to 10 feet away. You utter the message when you bestow this property on the object, and the recording can be no more than 6 seconds long."
 			},
 			{
-				"name": "Continuous Effect",
-				"description": "The object continuously emits your choice of an odor or a nonverbal sound (wind, waves, chirping, or the like). The chosen phenomenon is perceivable up to 10 feet away."
+				"Continuous Effect": "The object continuously emits your choice of an odor or a nonverbal sound (wind, waves, chirping, or the like). The chosen phenomenon is perceivable up to 10 feet away."
 			},
 			{
-				"name": "Visual Effect",
-				"description": "A static visual effect appears on one of the object's surfaces. This effect can be a picture, up to 25 words of text, lines and shapes, or a mixture of these elements, as you like."
+				"Visual Effect": "A static visual effect appears on one of the object's surfaces. This effect can be a picture, up to 25 words of text, lines and shapes, or a mixture of these elements, as you like."
 			}
 		],
 		"limitations": [
@@ -51,12 +47,10 @@
 		"description": "You've gained the ability to imbue mundane items with certain magical infusions, turning those objects into magic items.",
 		"features": [
 			{
-				"name": "Infusions Known",
-				"description": "When you gain this feature, pick four artificer infusions to learn. You learn additional infusions of your choice when you reach certain levels in this class, as shown in the Infusions Known column of the Artificer table. Whenever you gain a level in this class, you can replace one of the artificer infusions you learned with a new one."
+				"Infusions Known": "When you gain this feature, pick four artificer infusions to learn. You learn additional infusions of your choice when you reach certain levels in this class, as shown in the Infusions Known column of the Artificer table. Whenever you gain a level in this class, you can replace one of the artificer infusions you learned with a new one."
 			},
 			{
-				"name": "Infusing an Item",
-				"description": "Whenever you finish a long rest, you can touch a nonmagical object and imbue it with one of your artificer infusions, turning it into a magic item. An infusion works on only certain kinds of objects, as specified in the infusion's description. If the item requires attunement, you can attune yourself to it the instant you infuse the item. If you decide to attune to the item later, you must do so using the normal process for attunement."
+				"Infusing an Item": "Whenever you finish a long rest, you can touch a nonmagical object and imbue it with one of your artificer infusions, turning it into a magic item. An infusion works on only certain kinds of objects, as specified in the infusion's description. If the item requires attunement, you can attune yourself to it the instant you infuse the item. If you decide to attune to the item later, you must do so using the normal process for attunement."
 			}
 		],
 		"limitations": [
