@@ -28,9 +28,10 @@ import artificerSpecialistData from '../data/class-tables/artificer/artificerSpe
 import armorerData from '../data/class-tables/artificer/subclass/armorer.json';
 import artilleristData from '../data/class-tables/artificer/subclass/artillerist.json';
 import battlesmithData from '../data/class-tables/artificer/subclass/battlesmith.json';
-
-// Alchemist subclass
 import alchemistData from '../data/class-tables/artificer/subclass/alchemist.json';
+import barbarianFeatures from '../data/class-tables/barbarian/barbarianFeatures.json';
+
+
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -177,6 +178,7 @@ const clearAsyncStorage = async () => {
 
 const classFeaturesMap: { [key: string]: any } = {
     artificer: artificerFeatures,
+    barbarian: barbarianFeatures,
 }
 
 // TODO: make max infusions learned a variable
@@ -1508,8 +1510,9 @@ export default function MeScreen() {
         );
     }
 
-    const renderSubclassFeatures = (isSubclassFeat: boolean) => {
-        if (isSubclassFeat) {
+    const renderSubclassFeatures = (subClassButtonName: string) => {
+        // artificer specialist
+        if (subClassButtonName.toLowerCase() === 'artificer specialist') {
             return (
                 <View>
                     <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
@@ -2574,7 +2577,7 @@ export default function MeScreen() {
                             {/* Render Specific Class Feature */}
                             {selectedFeat && renderClassFeatures(false, selectedFeat)}
                             {/* Render Specific Subclass Feature */}
-                            {selectedFeat && statsData.class && subclass && renderSubclassFeatures(true)}
+                            {selectedFeat && statsData.class && subclass && renderSubclassFeatures(selectedFeat)}
                         </ScrollView>
                     </View>
                     <View style={styles.modalButtons}>

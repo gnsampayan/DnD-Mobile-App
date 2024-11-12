@@ -55,6 +55,9 @@ import magicalTinkeringImage from '@actions/magical-tinkering-image.png';
 import infuseItemImage from '@actions/infuse-item-image.png';
 import artificerInfusionsData from '../data/class-tables/artificer/artificerInfusions.json';
 
+// Barbarian
+import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
+
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -364,7 +367,13 @@ export default function ActionsScreen() {
   const [knownInfusionsOpen, setKnownInfusionsOpen] = useState<boolean>(false);
   const [knownInfusionValue, setKnownInfusionValue] = useState<string>('');
   const [infusionModalVisible, setInfusionModalVisible] = useState<boolean>(false);
+  const [currentRages, setCurrentRages] = useState<number>(0);
 
+  // Initialize and update currentRages when level changes
+  useEffect(() => {
+    const rages = getCurrentRages();
+    setCurrentRages(rages);
+  }, [statsData.level]);
 
   if (!statsData) {
     // Render a loading indicator or return null
@@ -1516,6 +1525,11 @@ export default function ActionsScreen() {
     );
   }
 
+  const getCurrentRages = () => {
+    const feature = barbarianTable.find((feat) => feat.userLevel === statsData.level);
+    if (!feature) return 0;
+    return feature.rages.toString().toLowerCase() === "unlimited" ? Infinity : Number(feature.rages);
+  }
 
   // Main Contents
   return (
@@ -1651,7 +1665,29 @@ export default function ActionsScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Show if user class is barbarian */}
+          {statsData.class?.toLowerCase() === 'barbarian' && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity onPress={() => { }}>
+                <MaterialCommunityIcons name="emoticon-angry" size={20} color="white" />
+              </TouchableOpacity>
+              <View style={styles.headerTextBox}>
+                <Text style={[
+                  styles.headerText,
+                  currentRages === 0 && { color: 'black' }
+                ]}>
+                  x{currentRages}
+                </Text>
+              </View>
+            </View>
+          )}
+
+
         </View>
+
+
+
         <View style={styles.headerIcons}>
           <TouchableOpacity onPress={changeNumColumns}>
             <Ionicons

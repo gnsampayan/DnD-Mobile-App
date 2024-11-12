@@ -15,6 +15,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import raceBonuses from '../data/raceData.json';
 import classBonuses from '../data/classData.json';
 import xpImage from '@images/xp-image.png';
+import artificerTable from '../data/class-tables/artificer/artificerTable.json';
+import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -51,24 +53,6 @@ interface StatsData {
     hitDice: number;
     proficiencyBonus: number;
 }
-
-// Functions to get level  bonus
-const getLevelFromXp = (xp: number): number => {
-    let level = 1;
-    for (let i = 0; i < xpThresholds.length; i++) {
-        if (xp >= xpThresholds[i].xp) {
-            level = xpThresholds[i].level;
-        } else {
-            break;
-        }
-    }
-    return level;
-};
-
-
-const getAbilityPointsFromLevel = (level: number): number => {
-    return level === 1 ? 24 : 24 + (level - 1) * 2;
-};
 
 
 const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
@@ -107,6 +91,58 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         // Render a loading indicator or return null
         return null;
     }
+
+    // Functions to get level  bonus
+    const getLevelFromXp = (xp: number): number => {
+        let level = 1;
+        for (let i = 0; i < xpThresholds.length; i++) {
+            if (xp >= xpThresholds[i].xp) {
+                level = xpThresholds[i].level;
+            } else {
+                break;
+            }
+        }
+        return level;
+    };
+
+    const getAbilityPointsFromLevel = (level: number): number => {
+        // Base ability points at level 1 is 24 for all classes
+        let totalPoints = 24;
+
+        // If not level 1, check class tables for ability score improvements
+        if (level > 1) {
+            if (statsData.class?.toLowerCase() === 'artificer') {
+                // Get all artificer levels up to current level
+                const artificerLevels = artificerTable.filter(l => l.userLevel <= level);
+
+                // Add 2 points for each level that has Ability Score Improvement
+                artificerLevels.forEach(levelData => {
+                    if (levelData.features && levelData.features.some(feature =>
+                        feature.toLowerCase() === 'ability score improvement'
+                    )) {
+                        totalPoints += 2;
+                    }
+                });
+            } else if (statsData.class?.toLowerCase() === 'barbarian') {
+                // Get all barbarian levels up to current level 
+                const barbarianLevels = barbarianTable.filter(l => l.userLevel <= level);
+
+                // Add 2 points for each level that has Ability Score Improvement
+                barbarianLevels.forEach(levelData => {
+                    if (levelData.features && levelData.features.some(feature =>
+                        feature.toLowerCase() === 'ability score improvement'
+                    )) {
+                        totalPoints += 2;
+                    }
+                });
+            } else {
+                // For other classes, use default calculation
+                totalPoints += (level - 1) * 2;
+            }
+        }
+
+        return totalPoints;
+    };
 
     // Check if there are unfilled HP increases
     useEffect(() => {

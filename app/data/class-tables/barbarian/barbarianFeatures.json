@@ -1,0 +1,166 @@
+[
+	{
+		"id": "Rage",
+		"name": "Rage",
+		"level": 1,
+		"description": "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action.",
+		"benefits": [
+			"Advantage on Strength checks and Strength saving throws",
+			"Bonus damage on Strength-based melee weapon attacks (see Rage Damage column)",
+			"Resistance to bludgeoning, piercing, and slashing damage"
+		],
+		"limitations": [
+			"Cannot be wearing heavy armor",
+			"Cannot cast or concentrate on spells while raging"
+		],
+		"mechanics": {
+			"duration": "1 minute",
+			"early_end_conditions": [
+				"Knocked unconscious",
+				"Turn ends without attacking hostile creature or taking damage since last turn"
+			],
+			"action_type": "bonus action to start or end",
+			"uses": "Number shown in Rages column per long rest"
+		}
+	},
+	{
+		"id": "Unarmored Defense",
+		"name": "Unarmored Defense",
+		"level": 1,
+		"description": "While you are not wearing any armor, your armor class equals 10 + your Dexterity modifier + your Constitution modifier. You can use a shield and still gain this benefit."
+	},
+	{
+		"id": "Danger Sense",
+		"name": "Danger Sense",
+		"level": 2,
+		"description": "You gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger.",
+		"benefits": [
+			"Advantage on Dexterity saving throws against effects that you can see"
+		],
+		"limitations": [
+			"Must be able to see the effect",
+			"Cannot be blinded",
+			"Cannot be deafened",
+			"Cannot be incapacitated"
+		]
+	},
+	{
+		"id": "Reckless Attack",
+		"name": "Reckless Attack",
+		"level": 2,
+		"description": "You can throw aside all concern for defense to attack with fierce desperation.",
+		"mechanics": {
+			"trigger": "When making first attack on your turn",
+			"benefits": [
+				"Advantage on melee weapon attack rolls using Strength during this turn"
+			],
+			"drawbacks": [
+				"Attack rolls against you have advantage until your next turn"
+			]
+		}
+	},
+	{
+		"id": "Primal Path",
+		"name": "Primal Path",
+		"level": 3,
+		"description": "You choose a path that shapes the nature of your rage.",
+		"features": "Grants features at 3rd, 6th, 10th, and 14th levels",
+		"paths": [
+			"Ancestral Guardian",
+			"Battlerager",
+			"Beast",
+			"Berserker",
+			"Giant",
+			"Storm Herald",
+			"Totem Warrior",
+			"Wild Magic",
+			"Zealot"
+		]
+	},
+	{
+		"id": "Primal Knowledge",
+		"name": "Primal Knowledge",
+		"level": 3,
+		"description": "You gain proficiency in one skill of your choice from the list of skills available to barbarians at 1st level.",
+		"additional": "Gain another skill at 10th level",
+		"optional": true
+	},
+	{
+		"id": "Extra Attack",
+		"name": "Extra Attack",
+		"level": 5,
+		"description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+	},
+	{
+		"id": "Fast Movement",
+		"name": "Fast Movement",
+		"level": 5,
+		"description": "Your speed increases by 10 feet while you aren't wearing heavy armor."
+	},
+	{
+		"id": "Feral Instinct",
+		"name": "Feral Instinct",
+		"level": 7,
+		"description": "Your instincts are so honed that you have advantage on initiative rolls.",
+		"additional_feature": {
+			"description": "If surprised at combat start and not incapacitated, you can act normally on first turn if you enter rage first",
+			"requirement": "Must enter rage before any other action"
+		}
+	},
+	{
+		"id": "Instinctive Pounce",
+		"name": "Instinctive Pounce",
+		"level": 7,
+		"description": "As part of the bonus action you take to enter your rage, you can move up to half your speed.",
+		"optional": true
+	},
+	{
+		"id": "Brutal Critical",
+		"name": "Brutal Critical",
+		"level": 9,
+		"description": "You can roll additional weapon damage dice when determining the extra damage for a critical hit with a melee attack.",
+		"progression": {
+			"9": "one additional die",
+			"13": "two additional dice",
+			"17": "three additional dice"
+		}
+	},
+	{
+		"id": "Relentless Rage",
+		"name": "Relentless Rage",
+		"level": 11,
+		"description": "Your rage can keep you fighting despite grievous wounds.",
+		"mechanics": {
+			"trigger": "Drop to 0 hit points while raging (not outright death)",
+			"effect": "Make Constitution saving throw to drop to 1 HP instead",
+			"dc": {
+				"initial": 10,
+				"increase": "DC increases by 5 each use",
+				"reset": "DC resets to 10 after short or long rest"
+			}
+		}
+	},
+	{
+		"id": "Persistent Rage",
+		"name": "Persistent Rage",
+		"level": 15,
+		"description": "Your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."
+	},
+	{
+		"id": "Indomitable Might",
+		"name": "Indomitable Might",
+		"level": 18,
+		"description": "If your total for a Strength check is less than your Strength score, you can use that score in place of the total."
+	},
+	{
+		"id": "Primal Champion",
+		"name": "Primal Champion",
+		"level": 20,
+		"description": "You embody the power of the wilds.",
+		"effects": [
+			"Strength score increases by 4",
+			"Constitution score increases by 4",
+			"Maximum for both scores becomes 24"
+		]
+	}
+]
