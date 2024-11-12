@@ -1434,7 +1434,6 @@ export default function ActionsScreen() {
             opacity: knownInfusionValue === '' ? 0.1 : 1,
           }}
           onPress={() => {
-            console.log('open', knownInfusionValue);
             setInfusionModalVisible(true);
             setActionModalVisible(false);
           }}

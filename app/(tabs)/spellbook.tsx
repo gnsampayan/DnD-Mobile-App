@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import cantripsData from '@/app/data/cantrips.json';
 import spellsData from '@/app/data/spells.json';
 import emptyImage from '@images/cantrips/empty-image.png';
+import alchemistSpellsData from '@/app/data/class-tables/artificer/subclass/alchemist.json';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -230,7 +231,7 @@ export default function SpellbookScreen() {
     } = useActions();
 
 
-    const { statsData, isSpellCaster } = useContext(StatsDataContext);
+    const { statsData, isSpellCaster, subclass } = useContext(StatsDataContext);
     const { cantripSlotsData, setCantripSlotsData, saveCantripSlots } = useContext(CantripSlotsContext);
 
 
@@ -261,11 +262,40 @@ export default function SpellbookScreen() {
                 if (storedKnownSpells !== null) {
                     setKnownSpellSlotsData(JSON.parse(storedKnownSpells));
                 } else {
-                    // Initialize with empty slots based on `allKnownSpellsSlots`
-                    const initialSlots = Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => ({
+                    // Initialize slots based on `allKnownSpellsSlots` and alchemist spells if applicable
+                    let initialSlots = Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => ({
                         slotIndex: i,
-                        spellName: null,
+                        spellName: null as string | null,
                     }));
+
+                    if (subclass?.toLowerCase() === 'alchemist') {
+                        const characterLevel = statsData.level || 0;
+                        const alchemistSpells = alchemistSpellsData.alchemistSpells.spellsByLevel;
+
+                        // Get all spells up to character level
+                        let alchemistSpellsList: string[] = [];
+                        Object.entries(alchemistSpells).forEach(([level, spells]) => {
+                            if (characterLevel >= parseInt(level)) {
+                                spells.forEach((spell) => {
+                                    alchemistSpellsList.push(spell);
+                                });
+                            }
+                        });
+
+                        console.log('Alchemist Spells List:', alchemistSpellsList);
+
+                        // Assign spells to slots
+                        alchemistSpellsList.forEach((spell, index) => {
+                            if (index < initialSlots.length) {
+                                initialSlots[index] = {
+                                    slotIndex: index,
+                                    spellName: spell
+                                };
+                            }
+                        });
+                    }
+
+                    console.log('Initial Slots:', initialSlots);
                     setKnownSpellSlotsData(initialSlots);
                 }
             } catch (error) {
@@ -274,7 +304,7 @@ export default function SpellbookScreen() {
         };
 
         initializeKnownSpellSlots();
-    }, [allKnownSpellsSlots]);
+    }, [allKnownSpellsSlots, subclass, statsData.level]);
 
     // Initialize or update preparedSpellSlotsData when preparedSpellSlots changes
     useEffect(() => {
@@ -669,7 +699,7 @@ export default function SpellbookScreen() {
 
         const lowerClass = characterClass.toLowerCase();
 
-        const preparedSpellClasses = new Set(['bard', 'ranger', 'sorcerer', 'warlock']);
+        const preparedSpellClasses = new Set(['artificer', 'bard', 'ranger', 'sorcerer', 'warlock']);
         const knownButNotPreparedClasses = new Set(['artificer', 'cleric', 'druid', 'paladin']);
 
         if (preparedSpellClasses.has(lowerClass)) {
@@ -702,7 +732,7 @@ export default function SpellbookScreen() {
     }
 
     const renderAllKnownSpells = () => {
-        if (allKnownSpellsSlots !== null && preparedSpellSlots === null) {
+        if ((allKnownSpellsSlots !== null && preparedSpellSlots === null) || statsData.class?.toLowerCase() === 'artificer') {
             return null;
         } else {
             if (allKnownSpellsSlots === 0 && allKnownSpellsSlots !== null) {
@@ -773,11 +803,11 @@ export default function SpellbookScreen() {
     };
 
     const renderCastableSpells = () => {
-        if (allKnownSpellsSlots !== null && preparedSpellSlots === null) {
+        if ((allKnownSpellsSlots !== null && preparedSpellSlots === null) || subclass?.toLowerCase() === 'alchemist') {
             if (allKnownSpellsSlots === 0 && allKnownSpellsSlots !== null) {
                 return (
                     <View style={[styles.section, { paddingHorizontal: 10 }]}>
-                        <Text style={styles.label}>Spells</Text>
+                        <Text style={styles.label}>Memorized Spells</Text>
                         <Text style={styles.text}>You can't cast any spells yet.</Text>
                     </View>
                 )
@@ -789,7 +819,7 @@ export default function SpellbookScreen() {
                         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
                             <MaterialCommunityIcons name="auto-fix" size={24} color="lightgrey" />
                             <Text style={styles.label}>
-                                Spells
+                                Memorized Spells
                             </Text>
                         </View>
                         <FlatList<{ slotIndex: number, spellName: string | null }>

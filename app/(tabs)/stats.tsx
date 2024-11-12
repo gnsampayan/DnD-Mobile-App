@@ -473,7 +473,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                     onPress: () => {
                                         setSkillProficiency([...skillProficiency, item.name.toLowerCase()]);
                                         setUnusedSkillPoints(unusedSkillPoints - 1);
-                                        console.log('Skill Proficiency Gained:', skillProficiency);
                                     }
                                 }
                             ]

@@ -295,7 +295,6 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     useEffect(() => {
         if (subclassLoaded.current) {
             saveSubclass(subclass);
-            console.log('saved subclass', subclass);
         }
     }, [subclass]);
 
