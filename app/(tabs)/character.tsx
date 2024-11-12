@@ -25,6 +25,7 @@ import draconicAncestryData from '../data/draconicAncestry.json';
 import artificerFeatures from '../data/class-tables/artificer/artificerFeatures.json';
 import artificerInfusionsData from '../data/class-tables/artificer/artificerInfusions.json';
 import artificerSpecialistData from '../data/class-tables/artificer/artificerSpecialist.json';
+import armorerData from '../data/class-tables/artificer/subclass/armorer.json';
 
 // Alchemist subclass
 import alchemistData from '../data/class-tables/artificer/subclass/alchemist.json';
@@ -957,34 +958,17 @@ export default function MeScreen() {
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
-                                <Text
-                                    style={[
-                                        styles.featLabel,
-                                        // highlight text for specific class features
-                                        (() => {
-                                            const featureName = feature.name.toLowerCase();
-                                            const featureStyles: any = {};
-
-                                            const featureConditions: { [key: string]: boolean } = {
-                                                'magical tinkering': !magicalTinkeringEnabled,
-                                                'infuse item': !infuseItemEnabled,
-                                                'artificer specialist': !subclass,
-                                            };
-                                            if (featureConditions[featureName]) {
-                                                featureStyles.color = 'gold';
-                                            }
-                                            if (featureName === 'magical tinkering' && magicalTinkeringEnabled) {
-                                                featureStyles.textDecorationLine = 'line-through';
-                                            } else if (featureName === 'infuse item' && infuseItemEnabled) {
-                                                featureStyles.textDecorationLine = 'line-through';
-                                            } else if (featureName === 'artificer specialist' && subclass) {
-                                                featureStyles.textDecorationLine = 'line-through';
-                                            }
-
-                                            return featureStyles;
-                                        })()
-                                    ]}
-                                >
+                                <Text style={[
+                                    styles.featLabel,
+                                    {
+                                        color: 'white',
+                                        borderWidth: 1,
+                                        borderColor: 'rgba(255,255,255,0.2)',
+                                        paddingVertical: 2,
+                                        paddingHorizontal: 5,
+                                        borderRadius: 4,
+                                    }
+                                ]}>
                                     {feature.name}
                                 </Text>
                             </TouchableOpacity>
@@ -1528,6 +1512,7 @@ export default function MeScreen() {
                 <View>
                     <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                     {subclass === 'alchemist' && renderAlchemistFeatures()}
+                    {subclass === 'armorer' && renderArmorerFeatures()}
                 </View>
             );
         }
@@ -1587,6 +1572,62 @@ export default function MeScreen() {
             </View>
         );
     }
+
+    const renderArmorerFeatures = () => {
+        return (
+            <View>
+                <Text>Armorer</Text>
+                {Object.entries(armorerData).map(([key, value]) => {
+                    // Skip the name property since it's not a feature
+                    if (key === 'name') return null;
+                    // Only render if the feature's level requirement is met
+                    if (typeof value === 'object' && value && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                <Text>{value.description}</Text>
+                                {/* Handle spellsByLevel */}
+                                {'spellsByLevel' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text style={{ fontStyle: 'italic' }}>Spells:</Text>
+                                        {Object.entries(value.spellsByLevel).map(([level, spells]) => (
+                                            <Text key={level}>Level {level}: {(spells as string[]).join(', ')}</Text>
+                                        ))}
+                                    </View>
+                                )}
+                                {/* Handle benefits */}
+                                {'benefits' in value && value.benefits.map((benefit: string, index: number) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {benefit}</Text>
+                                ))}
+                                {/* Handle armor models */}
+                                {'models' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        {Object.entries(value.models).map(([modelName, model]) => {
+                                            if (!model) return null;
+                                            const typedModel = model as { name: string; description: string; features: Record<string, { name: string; description: string }> };
+                                            return (
+                                                <View key={modelName} style={{ marginTop: 10 }}>
+                                                    <Text style={{ fontWeight: 'bold' }}>{typedModel.name}</Text>
+                                                    <Text>{typedModel.description}</Text>
+                                                    {typedModel.features && Object.entries(typedModel.features).map(([featureName, feature]) => (
+                                                        <View key={featureName} style={{ marginTop: 5 }}>
+                                                            <Text style={{ fontStyle: 'italic' }}>{feature.name}:</Text>
+                                                            <Text>{feature.description}</Text>
+                                                        </View>
+                                                    ))}
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
 
 
     // Calculate half of the screen width
@@ -1714,27 +1755,15 @@ export default function MeScreen() {
                                                     key={`label-${key}`}
                                                     style={[
                                                         styles.featLabel,
-                                                        // highlight so user can activate lucky feat
-                                                        key.toLowerCase() === 'lucky'
-                                                        && (!luckyPointsEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                        // highlight if skill proficiency not gained yet
-                                                        key.toLowerCase() === 'skill versatility'
-                                                        && (!raceSkillProfGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                        // highlight if relentless endurance not gained yet
-                                                        key.toLowerCase() === 'relentless endurance'
-                                                        && (!relentlessEnduranceGained ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                        // highlight if infernal legacy not enabled yet
-                                                        key.toLowerCase() === 'infernal legacy'
-                                                        && (!infernalLegacyEnabled ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                        // highlight if draconic ancestry not enabled yet
-                                                        key.toLowerCase() === 'draconic ancestry'
-                                                        && (!draconicAncestry ? { color: 'gold' } : { textDecorationLine: 'line-through' }),
-                                                        // highlight if breath weapon not enabled yet
-                                                        key.toLowerCase() === 'breath weapon'
-                                                        && (!breathWeaponEnabled ? { color: draconicAncestry ? 'gold' : '#586a9f' } : { textDecorationLine: 'line-through' }),
                                                         {
                                                             flexShrink: 1,
-                                                            flexWrap: 'wrap'
+                                                            flexWrap: 'wrap',
+                                                            color: 'white',
+                                                            borderWidth: 1,
+                                                            borderColor: 'rgba(255,255,255,0.2)',
+                                                            paddingVertical: 2,
+                                                            paddingHorizontal: 5,
+                                                            borderRadius: 4,
                                                         }
                                                     ]}
                                                 >

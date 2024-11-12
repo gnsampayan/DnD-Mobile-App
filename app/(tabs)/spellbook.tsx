@@ -22,6 +22,7 @@ import cantripsData from '@/app/data/cantrips.json';
 import spellsData from '@/app/data/spells.json';
 import emptyImage from '@images/cantrips/empty-image.png';
 import alchemistSpellsData from '@/app/data/class-tables/artificer/subclass/alchemist.json';
+import armorerSpellsData from '@/app/data/class-tables/artificer/subclass/armorer.json';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -262,40 +263,41 @@ export default function SpellbookScreen() {
                 if (storedKnownSpells !== null) {
                     setKnownSpellSlotsData(JSON.parse(storedKnownSpells));
                 } else {
-                    // Initialize slots based on `allKnownSpellsSlots` and alchemist spells if applicable
+                    // Initialize slots based on `allKnownSpellsSlots` and subclass spells if applicable
                     let initialSlots = Array.from({ length: allKnownSpellsSlots || 0 }, (_, i) => ({
                         slotIndex: i,
                         spellName: null as string | null,
                     }));
 
-                    if (subclass?.toLowerCase() === 'alchemist') {
-                        const characterLevel = statsData.level || 0;
-                        const alchemistSpells = alchemistSpellsData.alchemistSpells.spellsByLevel;
+                    const characterLevel = statsData.level || 0;
+                    let subclassSpellsList: string[] = [];
 
-                        // Get all spells up to character level
-                        let alchemistSpellsList: string[] = [];
+                    if (subclass?.toLowerCase() === 'alchemist') {
+                        const alchemistSpells = alchemistSpellsData.alchemistSpells.spellsByLevel;
                         Object.entries(alchemistSpells).forEach(([level, spells]) => {
                             if (characterLevel >= parseInt(level)) {
-                                spells.forEach((spell) => {
-                                    alchemistSpellsList.push(spell);
-                                });
+                                subclassSpellsList.push(...spells);
                             }
                         });
-
-                        console.log('Alchemist Spells List:', alchemistSpellsList);
-
-                        // Assign spells to slots
-                        alchemistSpellsList.forEach((spell, index) => {
-                            if (index < initialSlots.length) {
-                                initialSlots[index] = {
-                                    slotIndex: index,
-                                    spellName: spell
-                                };
+                    } else if (subclass?.toLowerCase() === 'armorer') {
+                        const armorerSpells = armorerSpellsData.armorerSpells.spellsByLevel;
+                        Object.entries(armorerSpells).forEach(([level, spells]) => {
+                            if (characterLevel >= parseInt(level)) {
+                                subclassSpellsList.push(...spells);
                             }
                         });
                     }
 
-                    console.log('Initial Slots:', initialSlots);
+                    // Assign spells to slots
+                    subclassSpellsList.forEach((spell, index) => {
+                        if (index < initialSlots.length) {
+                            initialSlots[index] = {
+                                slotIndex: index,
+                                spellName: spell
+                            };
+                        }
+                    });
+
                     setKnownSpellSlotsData(initialSlots);
                 }
             } catch (error) {
@@ -803,7 +805,8 @@ export default function SpellbookScreen() {
     };
 
     const renderCastableSpells = () => {
-        if ((allKnownSpellsSlots !== null && preparedSpellSlots === null) || subclass?.toLowerCase() === 'alchemist') {
+        if ((allKnownSpellsSlots !== null && preparedSpellSlots === null)
+            || (subclass?.toLowerCase() === 'alchemist' || subclass?.toLowerCase() === 'armorer')) {
             if (allKnownSpellsSlots === 0 && allKnownSpellsSlots !== null) {
                 return (
                     <View style={[styles.section, { paddingHorizontal: 10 }]}>
