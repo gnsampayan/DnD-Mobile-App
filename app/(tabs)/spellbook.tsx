@@ -23,6 +23,8 @@ import spellsData from '@/app/data/spells.json';
 import emptyImage from '@images/cantrips/empty-image.png';
 import alchemistSpellsData from '@/app/data/class-tables/artificer/subclass/alchemist.json';
 import armorerSpellsData from '@/app/data/class-tables/artificer/subclass/armorer.json';
+import artilleristSpellsData from '@/app/data/class-tables/artificer/subclass/artillerist.json';
+import battlesmithSpellsData from '@/app/data/class-tables/artificer/subclass/battlesmith.json';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -282,6 +284,20 @@ export default function SpellbookScreen() {
                     } else if (subclass?.toLowerCase() === 'armorer') {
                         const armorerSpells = armorerSpellsData.armorerSpells.spellsByLevel;
                         Object.entries(armorerSpells).forEach(([level, spells]) => {
+                            if (characterLevel >= parseInt(level)) {
+                                subclassSpellsList.push(...spells);
+                            }
+                        });
+                    } else if (subclass?.toLowerCase() === 'artillerist') {
+                        const artilleristSpells = artilleristSpellsData.artilleristSpells.spellsByLevel;
+                        Object.entries(artilleristSpells).forEach(([level, spells]) => {
+                            if (characterLevel >= parseInt(level)) {
+                                subclassSpellsList.push(...spells);
+                            }
+                        });
+                    } else if (subclass?.toLowerCase() === 'battle smith') {
+                        const battlesmithSpells = battlesmithSpellsData.battleSmithSpells.spellsByLevel;
+                        Object.entries(battlesmithSpells).forEach(([level, spells]) => {
                             if (characterLevel >= parseInt(level)) {
                                 subclassSpellsList.push(...spells);
                             }
@@ -806,7 +822,12 @@ export default function SpellbookScreen() {
 
     const renderCastableSpells = () => {
         if ((allKnownSpellsSlots !== null && preparedSpellSlots === null)
-            || (subclass?.toLowerCase() === 'alchemist' || subclass?.toLowerCase() === 'armorer')) {
+            || (
+                subclass?.toLowerCase() === 'alchemist'
+                || subclass?.toLowerCase() === 'armorer'
+                || subclass?.toLowerCase() === 'artillerist'
+                || subclass?.toLowerCase() === 'battle smith'
+            )) {
             if (allKnownSpellsSlots === 0 && allKnownSpellsSlots !== null) {
                 return (
                     <View style={[styles.section, { paddingHorizontal: 10 }]}>

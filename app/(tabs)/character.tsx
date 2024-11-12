@@ -26,6 +26,8 @@ import artificerFeatures from '../data/class-tables/artificer/artificerFeatures.
 import artificerInfusionsData from '../data/class-tables/artificer/artificerInfusions.json';
 import artificerSpecialistData from '../data/class-tables/artificer/artificerSpecialist.json';
 import armorerData from '../data/class-tables/artificer/subclass/armorer.json';
+import artilleristData from '../data/class-tables/artificer/subclass/artillerist.json';
+import battlesmithData from '../data/class-tables/artificer/subclass/battlesmith.json';
 
 // Alchemist subclass
 import alchemistData from '../data/class-tables/artificer/subclass/alchemist.json';
@@ -1513,6 +1515,8 @@ export default function MeScreen() {
                     <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                     {subclass === 'alchemist' && renderAlchemistFeatures()}
                     {subclass === 'armorer' && renderArmorerFeatures()}
+                    {subclass === 'artillerist' && renderArtilleristFeatures()}
+                    {subclass === 'battle smith' && renderBattlesmithFeatures()}
                 </View>
             );
         }
@@ -1628,6 +1632,144 @@ export default function MeScreen() {
             </View>
         );
     };
+
+    const renderArtilleristFeatures = () => {
+        return (
+            <View>
+                <Text>Artillerist</Text>
+                {Object.entries(artilleristData).map(([key, value]) => {
+                    // Skip the name property since it's not a feature
+                    if (key === 'name') return null;
+                    // Only render if the feature's level requirement is met
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                <Text>{value.description}</Text>
+
+                                {/* Handle spellsByLevel */}
+                                {'spellsByLevel' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text style={{ fontStyle: 'italic' }}>Spells:</Text>
+                                        {Object.entries(value.spellsByLevel).map(([level, spells]) => (
+                                            <Text key={level}>Level {level}: {spells.join(', ')}</Text>
+                                        ))}
+                                    </View>
+                                )}
+
+                                {/* Handle rules */}
+                                {'rules' in value && value.rules.map((rule, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {rule}</Text>
+                                ))}
+
+                                {/* Handle cannonTypes */}
+                                {'cannonTypes' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text style={{ fontStyle: 'italic' }}>Cannon Types:</Text>
+                                        {Object.entries(value.cannonTypes).map(([type, cannon]) => (
+                                            <View key={type} style={{ marginTop: 5 }}>
+                                                <Text style={{ fontWeight: 'bold' }}>{cannon.name}:</Text>
+                                                <Text>{cannon.effect}</Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                )}
+
+                                {/* Handle benefits */}
+                                {'benefits' in value && (
+                                    typeof value.benefits === 'string' ?
+                                        <Text style={{ marginTop: 5 }}>{value.benefits}</Text> :
+                                        value.benefits.map((benefit, index) => (
+                                            <Text key={index} style={{ marginTop: 5 }}>• {benefit}</Text>
+                                        ))
+                                )}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
+
+    const renderBattlesmithFeatures = () => {
+        return (
+            <View>
+                <Text>Battlesmith</Text>
+                {Object.entries(battlesmithData).map(([key, value]) => {
+                    // Skip the name property since it's not a feature
+                    if (key === 'name') return null;
+                    // Only render if the feature's level requirement is met
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                <Text>{value.description}</Text>
+
+                                {/* Handle spellsByLevel */}
+                                {'spellsByLevel' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text style={{ fontStyle: 'italic' }}>Spells:</Text>
+                                        {Object.entries(value.spellsByLevel).map(([level, spells]) => (
+                                            <Text key={level}>Level {level}: {spells.join(', ')}</Text>
+                                        ))}
+                                    </View>
+                                )}
+
+                                {/* Handle rules */}
+                                {'rules' in value && value.rules.map((rule, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {rule}</Text>
+                                ))}
+
+                                {/* Handle stats */}
+                                {'stats' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text>Size: {value.stats.size}</Text>
+                                        <Text>Armor Class: {value.stats.armorClass}</Text>
+                                        <Text>Hit Points: {value.stats.hitPoints}</Text>
+                                        <Text>Speed: {value.stats.speed}</Text>
+                                        <Text style={{ fontStyle: 'italic' }}>Abilities:</Text>
+                                        {Object.entries(value.stats.abilities).map(([ability, score]) => (
+                                            <Text key={ability}>{ability.toUpperCase()}: {score}</Text>
+                                        ))}
+                                        <Text style={{ fontStyle: 'italic' }}>Saving Throws:</Text>
+                                        {value.stats.savingThrows.map((save, index) => (
+                                            <Text key={index}>• {save}</Text>
+                                        ))}
+                                        <Text style={{ fontStyle: 'italic' }}>Skills:</Text>
+                                        {value.stats.skills.map((skill, index) => (
+                                            <Text key={index}>• {skill}</Text>
+                                        ))}
+                                        <Text>Damage Immunities: {value.stats.damageImmunities.join(', ')}</Text>
+                                        <Text>Condition Immunities: {value.stats.conditionImmunities.join(', ')}</Text>
+                                        <Text>Senses: {value.stats.senses.join(', ')}</Text>
+                                        <Text>Languages: {value.stats.languages}</Text>
+                                    </View>
+                                )}
+
+                                {/* Handle benefits */}
+                                {'benefits' in value && value.benefits.map((benefit, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {benefit}</Text>
+                                ))}
+
+                                {/* Handle effects */}
+                                {'effects' in value && value.effects.map((effect, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {effect}</Text>
+                                ))}
+
+                                {/* Handle improvements */}
+                                {'improvements' in value && value.improvements.map((improvement, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {improvement}</Text>
+                                ))}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
+
 
 
     // Calculate half of the screen width
