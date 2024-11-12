@@ -22,8 +22,12 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
 import weaponData from '../data/weapons.json';
 import draconicAncestryData from '../data/draconicAncestry.json';
-import artificerFeatures from '../data/class-tables/artificerFeatures.json';
-import artificerInfusionsData from '../data/class-tables/artificerInfusions.json';
+import artificerFeatures from '../data/class-tables/artificer/artificerFeatures.json';
+import artificerInfusionsData from '../data/class-tables/artificer/artificerInfusions.json';
+import artificerSpecialistData from '../data/class-tables/artificer/artificerSpecialist.json';
+
+// Alchemist subclass
+import alchemistData from '../data/class-tables/artificer/subclass/alchemist.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -286,6 +290,8 @@ export default function MeScreen() {
     const [classFeatDescriptionModalVisible, setClassFeatDescriptionModalVisible] = useState(false);
     const [infusionModalVisible, setInfusionModalVisible] = useState(false);
     const [infusionValue, setInfusionValue] = useState<string | null>(null);
+    const [specialistModalVisible, setSpecialistModalVisible] = useState(false);
+    const [specialistValue, setSpecialistValue] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -339,7 +345,9 @@ export default function MeScreen() {
         unusedSkillPoints,
         setUnusedSkillPoints,
         raceSkillProfGained,
-        setRaceSkillProfGained
+        setRaceSkillProfGained,
+        subclass,
+        setSubclass,
     } = useContext(StatsDataContext) as {
         statsData: StatsData;
         updateStatsData: (data: StatsData) => void;
@@ -347,6 +355,8 @@ export default function MeScreen() {
         setUnusedSkillPoints: (points: number) => void;
         raceSkillProfGained: boolean;
         setRaceSkillProfGained: (value: boolean) => void;
+        subclass: string | null;
+        setSubclass: (value: string | null) => void;
     };
 
     if (!statsData) {
@@ -860,6 +870,7 @@ export default function MeScreen() {
                             gap: 5,
                             borderRadius: 8,
                             marginBottom: 5,
+                            flex: 1,
                         }}
                     >
                         <Text style={styles.featLabel}>{displayKey}</Text>
@@ -939,23 +950,39 @@ export default function MeScreen() {
                                 }}
                             >
                                 {/* Show Icon for specific class features */}
-                                {((feature.name.toLowerCase() === 'magical tinkering' && !magicalTinkeringEnabled) ||
-                                    (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled)) && (
+                                {(
+                                    (feature.name.toLowerCase() === 'magical tinkering' && !magicalTinkeringEnabled) ||
+                                    (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled) ||
+                                    (feature.name.toLowerCase() === 'artificer specialist' && !subclass)
+                                ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
                                 <Text
                                     style={[
                                         styles.featLabel,
                                         // highlight text for specific class features
-                                        feature.name.toLowerCase() === 'magical tinkering'
-                                            ? (!magicalTinkeringEnabled
-                                                ? { color: 'gold' }
-                                                : { textDecorationLine: 'line-through' })
-                                            : feature.name.toLowerCase() === 'infuse item'
-                                                ? (!infuseItemEnabled
-                                                    ? { color: 'gold' }
-                                                    : { textDecorationLine: 'line-through' })
-                                                : {}
+                                        (() => {
+                                            const featureName = feature.name.toLowerCase();
+                                            const featureStyles: any = {};
+
+                                            const featureConditions: { [key: string]: boolean } = {
+                                                'magical tinkering': !magicalTinkeringEnabled,
+                                                'infuse item': !infuseItemEnabled,
+                                                'artificer specialist': !subclass,
+                                            };
+                                            if (featureConditions[featureName]) {
+                                                featureStyles.color = 'gold';
+                                            }
+                                            if (featureName === 'magical tinkering' && magicalTinkeringEnabled) {
+                                                featureStyles.textDecorationLine = 'line-through';
+                                            } else if (featureName === 'infuse item' && infuseItemEnabled) {
+                                                featureStyles.textDecorationLine = 'line-through';
+                                            } else if (featureName === 'artificer specialist' && subclass) {
+                                                featureStyles.textDecorationLine = 'line-through';
+                                            }
+
+                                            return featureStyles;
+                                        })()
                                     ]}
                                 >
                                     {feature.name}
@@ -1262,6 +1289,29 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            case "artificer specialist":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: specialistValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="wrench" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={specialistValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
 
 
         }
@@ -1273,53 +1323,61 @@ export default function MeScreen() {
 
 
     const activateFeat = (feat: string) => {
-        // if feat is "lucky", then activate lucky
-        if (feat.toLowerCase() === "lucky") {
-            if (!luckyPointsMax || !luckyPoints || !luckyPointsEnabled) {
-                setLuckyPointsMax(1);
-                setLuckyPoints(1);
-                setLuckyPointsEnabled(true);
-            }
-        }
-        // if feat is "+1 skill proficiency", then activate +1 skill proficiency
-        if (feat.toLowerCase() === "skill versatility") {
-            setUnusedSkillPoints(unusedSkillPoints + 2);
-            setRaceSkillProfGained(true);
-        }
-        if (feat.toLowerCase() === "relentless endurance") {
-            setRelentlessEnduranceGained(true);
-            setRelentlessEnduranceUsable(true);
-        }
-        if (feat.toLowerCase() === "infernal legacy") {
-            setInfernalLegacyEnabled(true);
-        }
-        if (feat.toLowerCase() === "draconic ancestry") {
-            if (draconicAncestryValue) {
-                // match draconic ancestry value to draconic ancestry data
-                const draconicAncestry = draconicAncestryData.find(item => item.dragon === draconicAncestryValue);
-                if (draconicAncestry) {
-                    setDraconicAncestry(draconicAncestry);
+        const featName = feat.toLowerCase();
+
+        switch (featName) {
+            case "lucky":
+                if (!luckyPointsMax || !luckyPoints || !luckyPointsEnabled) {
+                    setLuckyPointsMax(1);
+                    setLuckyPoints(1);
+                    setLuckyPointsEnabled(true);
                 }
-            }
-        }
-        if (feat.toLowerCase() === "breath weapon") {
-            setBreathWeaponEnabled(true);
-        }
+                break;
 
-        // Class Features
+            case "skill versatility":
+                setUnusedSkillPoints(unusedSkillPoints + 2);
+                setRaceSkillProfGained(true);
+                break;
 
-        // Magical Tinkering
-        if (feat.toLowerCase() === "magical tinkering") {
-            setMagicalTinkeringEnabled(true);
-            setClassFeatDescriptionModalVisible(false);
-            setSelectedFeat(null);
-        }
-        // Infuse Item
-        if (feat.toLowerCase() === "infuse item") {
-            setInfuseItemEnabled(true);
-            setClassFeatDescriptionModalVisible(false);
-            setSelectedFeat(null);
+            case "relentless endurance":
+                setRelentlessEnduranceGained(true);
+                setRelentlessEnduranceUsable(true);
+                break;
 
+            case "infernal legacy":
+                setInfernalLegacyEnabled(true);
+                break;
+
+            case "draconic ancestry":
+                if (draconicAncestryValue) {
+                    const draconicAncestry = draconicAncestryData.find(item => item.dragon === draconicAncestryValue);
+                    if (draconicAncestry) {
+                        setDraconicAncestry(draconicAncestry);
+                    }
+                }
+                break;
+
+            case "breath weapon":
+                setBreathWeaponEnabled(true);
+                break;
+
+            case "magical tinkering":
+                setMagicalTinkeringEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+
+            case "infuse item":
+                setInfuseItemEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+
+            case "artificer specialist":
+                setSubclass(specialistValue);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
         }
     }
 
@@ -1437,6 +1495,99 @@ export default function MeScreen() {
         );
     }
 
+    const renderArtificerSpecialistDropdown = () => {
+        return (
+            <View style={{ zIndex: 2000, maxHeight: '50%', paddingVertical: 10 }}>
+                <View style={{ zIndex: 2000 }}>
+                    <Text>Specialist</Text>
+                    <DropDownPicker
+                        items={artificerSpecialistData.map(item => ({
+                            label: item.name,
+                            value: item.name.toLowerCase()
+                        }))}
+                        value={specialistValue}
+                        setValue={setSpecialistValue}
+                        open={specialistModalVisible}
+                        setOpen={setSpecialistModalVisible}
+                        placeholder="Select a specialist"
+                    />
+                </View>
+                <ScrollView style={{ zIndex: 1000, paddingVertical: specialistValue ? 10 : 0 }}>
+                    {/* render description */}
+                    <Text>
+                        {specialistValue && artificerSpecialistData.find(item => item.name.toLowerCase() === specialistValue.toLowerCase())?.description}
+                    </Text>
+                </ScrollView>
+            </View>
+        );
+    }
+
+    const renderSubclassFeatures = (isSubclassFeat: boolean) => {
+        if (isSubclassFeat) {
+            return (
+                <View>
+                    <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                    {subclass === 'alchemist' && renderAlchemistFeatures()}
+                </View>
+            );
+        }
+        return null;
+    }
+
+    const renderAlchemistFeatures = () => {
+        return (
+            <View>
+                <Text>Alchemist</Text>
+                {Object.entries(alchemistData).map(([key, value]) => {
+                    // Skip the name property since it's not a feature
+                    if (key === 'name') return null;
+                    // Only render if the feature's level requirement is met
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                <Text>{value.description}</Text>
+
+                                {/* Handle spellsByLevel */}
+                                {'spellsByLevel' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text style={{ fontStyle: 'italic' }}>Spells:</Text>
+                                        {Object.entries(value.spellsByLevel).map(([level, spells]) => (
+                                            <Text key={level}>Level {level}: {spells.join(', ')}</Text>
+                                        ))}
+                                    </View>
+                                )}
+
+                                {/* Handle additionalDetails */}
+                                {'additionalDetails' in value && value.additionalDetails.map((detail, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>{detail}</Text>
+                                ))}
+
+                                {/* Handle benefits */}
+                                {'benefits' in value && value.benefits.map((benefit, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {benefit}</Text>
+                                ))}
+
+                                {/* Handle elixirTable */}
+                                {'elixirTable' in value && (
+                                    <View style={{ marginTop: 5 }}>
+                                        <Text style={{ fontStyle: 'italic' }}>Elixir Effects:</Text>
+                                        {Object.entries(value.elixirTable).map(([roll, elixir]) => (
+                                            <Text key={roll}>
+                                                Roll {roll} - {elixir.name}: {elixir.effect}
+                                            </Text>
+                                        ))}
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    }
+
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
@@ -1531,12 +1682,15 @@ export default function MeScreen() {
                                     <View
                                         key={`race-feature-${key}`}
                                         style={{ flexDirection: 'row', alignItems: 'center', gap: 5, }}>
-                                        {((key.toLowerCase() === 'lucky' && !luckyPointsEnabled) ||
+                                        {(
+                                            (key.toLowerCase() === 'lucky' && !luckyPointsEnabled) ||
                                             (key.toLowerCase() === 'skill versatility' && !raceSkillProfGained) ||
                                             (key.toLowerCase() === 'relentless endurance' && !relentlessEnduranceGained) ||
                                             (key.toLowerCase() === 'infernal legacy' && !infernalLegacyEnabled) ||
                                             (key.toLowerCase() === 'draconic ancestry' && !draconicAncestry) ||
-                                            (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled && draconicAncestry)) && (
+                                            (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled && draconicAncestry) ||
+                                            (key.toLowerCase() === 'artificer specialist' && !subclass)
+                                        ) && (
                                                 <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                             )}
                                         <TouchableOpacity
@@ -2237,9 +2391,19 @@ export default function MeScreen() {
                         {statsData.class === 'artificer' && selectedFeat?.toLowerCase() === 'infuse item' && !infuseItemEnabled && (
                             renderArtificerInfusionDropdown()
                         )}
+                        {/* Artificer Specialist --- Subclass Gained Feature */}
+                        {statsData.class === 'artificer' && selectedFeat?.toLowerCase() === 'artificer specialist' && (
+                            subclass === null ? (
+                                renderArtificerSpecialistDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
                             {/* Render Specific Class Feature */}
                             {selectedFeat && renderClassFeatures(false, selectedFeat)}
+                            {/* Render Specific Subclass Feature */}
+                            {selectedFeat && statsData.class && subclass && renderSubclassFeatures(true)}
                         </ScrollView>
                     </View>
                     <View style={styles.modalButtons}>

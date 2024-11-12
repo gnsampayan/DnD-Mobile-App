@@ -44,7 +44,7 @@ import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
 import { useActions } from '../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../context/cantripSlotsContext';
 import armorTypes from '../data/armorTypes.json';
-import artificerFeaturesData from '../data/class-tables/artificerFeatures.json';
+import artificerFeaturesData from '../data/class-tables/artificer/artificerFeatures.json';
 
 // Draconic Ancestry images
 import draconicAncestryImage from '@actions/draconic-ancestry-image.png';
@@ -53,7 +53,7 @@ import draconicAncestryImage from '@actions/draconic-ancestry-image.png';
 import magicalTinkeringImage from '@actions/magical-tinkering-image.png';
 // Infuse Item image
 import infuseItemImage from '@actions/infuse-item-image.png';
-import artificerInfusionsData from '../data/class-tables/artificerInfusions.json';
+import artificerInfusionsData from '../data/class-tables/artificer/artificerInfusions.json';
 
 
 // Cantrip images
@@ -363,6 +363,7 @@ export default function ActionsScreen() {
   const [armorStealthDisadvantage, setArmorStealthDisadvantage] = useState<boolean>(false);
   const [knownInfusionsOpen, setKnownInfusionsOpen] = useState<boolean>(false);
   const [knownInfusionValue, setKnownInfusionValue] = useState<string>('');
+  const [infusionModalVisible, setInfusionModalVisible] = useState<boolean>(false);
 
 
   if (!statsData) {
@@ -1430,11 +1431,14 @@ export default function ActionsScreen() {
             backgroundColor: 'black',
             borderRadius: 8,
             borderWidth: 1,
+            opacity: knownInfusionValue === '' ? 0.1 : 1,
           }}
           onPress={() => {
             console.log('open', knownInfusionValue);
-
+            setInfusionModalVisible(true);
+            setActionModalVisible(false);
           }}
+          disabled={knownInfusionValue === ''}
         >
           <Text style={{ color: 'white' }}>open</Text>
         </TouchableOpacity>
@@ -1456,46 +1460,60 @@ export default function ActionsScreen() {
 
 
   const renderInfusionDetails = () => {
-    return (
-      <View>
+    const renderValue = (value: any, depth = 0): React.ReactNode => {
+      if (depth > 5) return null;
 
-        {knownInfusionValue && (
-          artificerInfusionsData.map((infusion) => {
+      if (typeof value === 'string' || typeof value === 'number') {
+        return <Text style={{ color: 'white' }}>{value}</Text>;
+      }
+
+      if (Array.isArray(value)) {
+        return value.map((item, index) => (
+          <View key={index} style={{ marginLeft: 20 }}>
+            {renderValue(item, depth + 1)}
+          </View>
+        ));
+      }
+
+      if (typeof value === 'object' && value !== null) {
+        return Object.entries(value).map(([key, val]) => (
+          <View key={key} style={{ marginLeft: 20 }}>
+            <Text style={{ color: 'white' }}>
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+            </Text>
+            {renderValue(val, depth + 1)}
+          </View>
+        ));
+      }
+
+      return null;
+    };
+
+    return (
+      <ScrollView style={{ padding: 20 }}>
+        {knownInfusionValue &&
+          artificerInfusionsData.map(infusion => {
             if (infusion.id.toLowerCase() === knownInfusionValue.toLowerCase()) {
               return (
                 <View key={infusion.id}>
                   {Object.entries(infusion).map(([key, value]) => {
                     if (key === 'id') return null;
-                    if (typeof value === 'string' || typeof value === 'number') {
-                      return (
-                        <View key={key}>
-                          <Text>{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
-                          <Text>{value}</Text>
-                        </View>
-                      );
-                    } else if (typeof value === 'object' && value !== null) {
-                      return (
-                        <View key={key}>
-                          <Text>{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
-                          {Object.entries(value).map(([subKey, subValue]) => (
-                            <View key={subKey} style={{ marginLeft: 20 }}>
-                              <Text>{subKey.charAt(0).toUpperCase() + subKey.slice(1)}:</Text>
-                              <Text>{typeof subValue === 'string' ? subValue : JSON.stringify(subValue)}</Text>
-                            </View>
-                          ))}
-                        </View>
-                      );
-                    }
-                    return null;
+                    return (
+                      <View key={key} style={{ marginBottom: 15 }}>
+                        <Text style={{ color: 'white' }}>
+                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </Text>
+                        {renderValue(value)}
+                      </View>
+                    );
                   })}
                 </View>
               );
             }
             return null;
           })
-        )}
-
-      </View>
+        }
+      </ScrollView>
     );
   }
 
@@ -1865,7 +1883,10 @@ export default function ActionsScreen() {
         transparent={true}
         visible={actionModalVisible}
       >
-        <TouchableWithoutFeedback onPress={() => setActionModalVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => {
+          setActionModalVisible(false);
+          setKnownInfusionValue('');
+        }}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
@@ -2483,6 +2504,7 @@ export default function ActionsScreen() {
                           }
                           if (selectedAction.name.toLowerCase() === 'infuse item') {
                             setInfuseItemSpent(true);
+                            setKnownInfusionValue('');
                           }
 
                           // Default commit action
@@ -2522,6 +2544,25 @@ export default function ActionsScreen() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Infusion Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={infusionModalVisible}
+      >
+        <View style={styles.fullScreenModalContainer}>
+          {renderInfusionDetails()}
+          <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.modalButton} onPress={() => {
+              setInfusionModalVisible(false);
+              setActionModalVisible(true);
+            }}>
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       {/* Add Action Modal */}

@@ -112,6 +112,14 @@ const styles = StyleSheet.create({
       padding: 20,
       position: 'relative',
     },
+    fullScreenModalContainer: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'black',
+      padding: 20,
+      paddingTop: 50,
+      zIndex: 1000,
+    },
     // Modal title
     modalTitle: {
       fontSize: 18,

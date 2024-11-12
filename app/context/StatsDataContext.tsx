@@ -65,6 +65,8 @@ interface StatsDataContextProps {
     setRaceSkillProfGained: (value: boolean) => void;
     skillProficiency: string[];
     setSkillProficiency: (value: string[]) => void;
+    subclass: string | null;
+    setSubclass: (value: string | null) => void;
 }
 // Create context
 const StatsDataContext = createContext<StatsDataContextProps>({
@@ -77,12 +79,15 @@ const StatsDataContext = createContext<StatsDataContextProps>({
     setRaceSkillProfGained: () => { },
     skillProficiency: [],
     setSkillProficiency: () => { },
+    subclass: null,
+    setSubclass: () => { },
 });
 
 const UNUSED_SKILL_POINTS_KEY = 'unusedSkillPoints';
 const STATS_DATA_KEY = 'statsData';
 const RACE_SKILL_PROF_GAINED_KEY = 'raceSkillProfGained';
 const SKILL_PROFICIENCY_KEY = 'skillProficiency';
+const SUBCLASS_KEY = 'subclass';
 
 // Create provider component
 export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -91,11 +96,43 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [unusedSkillPoints, setUnusedSkillPoints] = useState(0);
     const [raceSkillProfGained, setRaceSkillProfGained] = useState(false);
     const [skillProficiency, setSkillProficiency] = useState<string[]>([]);
+    const [subclass, setSubclass] = useState<string | null>(null);
 
     const unusedSkillPointsLoaded = useRef(false);
     const raceSkillProfGainedLoaded = useRef(false);
     const skillProficiencyLoaded = useRef(false);
+    const subclassLoaded = useRef(false);
 
+
+    // Load subclass from AsyncStorage
+    const loadSubclass = async () => {
+        try {
+            const value = await AsyncStorage.getItem(SUBCLASS_KEY);
+            setSubclass(value ? JSON.parse(value) : null);
+        } catch (error) {
+            console.error('Error loading subclass:', error);
+        } finally {
+            subclassLoaded.current = true;
+        }
+    }
+
+    // Save subclass to AsyncStorage
+    const saveSubclass = async (value: string | null) => {
+        try {
+            await AsyncStorage.setItem(SUBCLASS_KEY, JSON.stringify(value));
+        } catch (error) {
+            console.error('Error saving subclass:', error);
+        }
+    }
+
+    // Delete subclass from AsyncStorage
+    const deleteSubclass = async () => {
+        try {
+            await AsyncStorage.removeItem(SUBCLASS_KEY);
+        } catch (error) {
+            console.error('Error deleting subclass:', error);
+        }
+    }
 
     // Load skill proficiency from AsyncStorage
     const loadSkillProficiency = async () => {
@@ -238,6 +275,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         loadUnusedSkillPoints();
         loadRaceSkillProfGained();
         loadSkillProficiency();
+        loadSubclass();
     }, []);
 
     // Set the isSpellCaster state based on the class
@@ -247,8 +285,19 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (statsData.class != null) {
             setSkillProficiency([]); // Reset state
             deleteSkillProficiency(); // Remove from AsyncStorage
+            deleteSubclass();
+            setSubclass(null);
         }
     }, [statsData.class]);
+
+
+    // Save subclass to AsyncStorage
+    useEffect(() => {
+        if (subclassLoaded.current) {
+            saveSubclass(subclass);
+            console.log('saved subclass', subclass);
+        }
+    }, [subclass]);
 
 
     return (
@@ -262,6 +311,8 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             setRaceSkillProfGained,
             skillProficiency,
             setSkillProficiency,
+            subclass,
+            setSubclass,
         }}>
             {children}
         </StatsDataContext.Provider>
