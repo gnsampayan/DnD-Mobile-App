@@ -52,3 +52,5 @@ export const CantripSlotsProvider: React.FC<{ children: React.ReactNode }> = ({ 
         </CantripSlotsContext.Provider>
     );
 };
+
+export default CantripSlotsContext;

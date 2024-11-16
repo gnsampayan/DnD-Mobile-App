@@ -17,7 +17,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import StatsDataContext from '../context/StatsDataContext';
+import StatsDataContext from '../../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import classItems from '../data/classData.json';
 import weaponData from '../data/weapons.json';
@@ -41,9 +41,9 @@ import defaultOffhandWeaponImage from '@equipment/default-offhand.png';
 import defaultRangedWeaponImage from '@equipment/default-ranged.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import raceBonuses from '../data/raceData.json';
-import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
-import { CharacterContext, WeaponSlot } from '../context/equipmentActionsContext';
-import { useActions } from '../context/actionsSpellsContext';
+import { Item, useItemEquipment } from '../../context/ItemEquipmentContext';
+import { CharacterContext, WeaponSlot } from '../../context/equipmentActionsContext';
+import { useActions } from '../../context/actionsSpellsContext';
 import featuresImage from '@images/features-image.png';
 import armorTypes from '../data/armorTypes.json';
 
@@ -1362,7 +1362,9 @@ export default function MeScreen() {
                 break;
 
             case "artificer specialist":
-                setSubclass(specialistValue);
+                if (specialistValue) {
+                    setSubclass(specialistValue);
+                }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
                 break;

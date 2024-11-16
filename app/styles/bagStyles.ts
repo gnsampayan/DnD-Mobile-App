@@ -308,6 +308,9 @@ const styles = StyleSheet.create({
       bottom: 40,
       left: 20,
     },
+    borderRadius8: {
+      borderRadius: 8,
+    },
 
   });
 

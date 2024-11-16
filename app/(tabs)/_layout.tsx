@@ -5,7 +5,7 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-import StatsDataContext from '../context/StatsDataContext';
+import StatsDataContext from '../../context/StatsDataContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,6 +20,10 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          borderTopWidth: 0,
+        },
       }}
     >
       <Tabs.Screen

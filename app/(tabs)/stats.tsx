@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWith
 import styles from '../styles/meStyles'; // Adjust the path if necessary
 import skillsData from '../data/skills.json';
 import xpThresholds from '../data/xpThresholds.json';
-import StatsDataContext from '../context/StatsDataContext';
+import StatsDataContext from '../../context/StatsDataContext';
 
 import strengthImage from '@images/abilities/strength.png';
 import dexterityImage from '@images/abilities/dexterity.png';

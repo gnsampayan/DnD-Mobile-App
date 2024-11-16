@@ -138,3 +138,5 @@ export const useActions = (): ActionsContextType => {
     }
     return context;
 };
+
+export default ActionsContext;

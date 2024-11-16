@@ -9,7 +9,6 @@ import {
   Alert,
   Keyboard,
   TouchableWithoutFeedback,
-  Image,
   ImageBackground,
   AlertButton,
   ImageSourcePropType,
@@ -22,10 +21,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/bagStyles';
 import itemTypes from '../data/itemTypes.json';
-import { useItemEquipment } from '../context/ItemEquipmentContext';
+import { useItemEquipment } from '../../context/ItemEquipmentContext';
 import weapons from '../data/weapons.json';
 import classData from '../data/classData.json';
-import StatsDataContext from '../context/StatsDataContext';
+import StatsDataContext from '../../context/StatsDataContext';
 import raceData from '../data/raceData.json';
 import armorTypes from '../data/armorTypes.json';
 import potionTypes from '../data/potionTypes.json';
@@ -604,7 +603,7 @@ export default function BagScreen() {
 
             })()}
             style={styles.itemImageBackground}
-            imageStyle={{ borderRadius: 8 }}
+            imageStyle={styles.borderRadius8}
             resizeMode="cover"
           >
             <View style={styles.itemContent}>
@@ -1032,6 +1031,21 @@ export default function BagScreen() {
     return null;
   };
 
+  const handleWeaponTypeChange = (value: string) => {
+    setWeaponTypeValue(value);
+    if (value) {
+      const capitalizedName = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      setNewItem({ ...newItem, name: capitalizedName, weaponType: value });
+
+      // Find the weapon properties from the JSON data
+      const weapon = weapons.weapons.flatMap((category: any) => category.items).find((item: any) => item.name.toLowerCase() === value.toLowerCase());
+      if (weapon) {
+        setNewItem((prevItem) => ({ ...prevItem, details: weapon.properties.join(', ') }));
+        setSelectedWeapon(weapon);
+      }
+    }
+  };
+
   // Main Content
   return (
     <View style={styles.container}>
@@ -1132,17 +1146,8 @@ export default function BagScreen() {
                         nestedScrollEnabled: true,
                       }}
                       onChangeValue={(value) => {
-                        setWeaponTypeValue(value);
                         if (value) {
-                          const capitalizedName = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                          setNewItem({ ...newItem, name: capitalizedName, weaponType: value });
-
-                          // Find the weapon properties from the JSON data
-                          const weapon = weapons.weapons.flatMap((category: any) => category.items).find((item: any) => item.name.toLowerCase() === value.toLowerCase());
-                          if (weapon) {
-                            setNewItem((prevItem) => ({ ...prevItem, details: weapon.properties.join(', ') }));
-                            setSelectedWeapon(weapon);
-                          }
+                          handleWeaponTypeChange(value);
                         }
                       }}
                     />

@@ -4,6 +4,7 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       padding: 10,
+      backgroundColor: 'black',
     },
     header: {
       flexDirection: 'row',
@@ -116,9 +117,10 @@ const styles = StyleSheet.create({
       width: '100%',
       height: '100%',
       backgroundColor: 'black',
-      padding: 20,
-      paddingTop: 50,
-      zIndex: 1000,
+      position: 'absolute',
+      left: 10,
+      top: 50,
+      paddingBottom: 60,
     },
     // Modal title
     modalTitle: {

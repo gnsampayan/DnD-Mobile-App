@@ -186,6 +186,7 @@ export const ItemEquipmentProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 };
 
+
 // Custom hook to use the ItemEquipment context
 export const useItemEquipment = () => {
     const context = useContext(ItemEquipmentContext);
@@ -194,3 +195,5 @@ export const useItemEquipment = () => {
     }
     return context;
 };
+
+export default ItemEquipmentContext;

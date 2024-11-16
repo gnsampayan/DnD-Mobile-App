@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import styles from '@/app/styles/spellbookStyles';
 import classData from '@/app/data/classData.json';
-import StatsDataContext from '../context/StatsDataContext';
+import StatsDataContext from '../../context/StatsDataContext';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import cantripsData from '@/app/data/cantrips.json';
@@ -75,8 +75,8 @@ import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
 
 
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useActions } from '../context/actionsSpellsContext';
-import { CantripSlotsContext } from '../context/cantripSlotsContext';
+import { useActions } from '../../context/actionsSpellsContext';
+import { CantripSlotsContext } from '../../context/cantripSlotsContext';
 
 // Wizard spell level data
 import wizardTableData from '@/app/data/class-tables/wizardTable.json';

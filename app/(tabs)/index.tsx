@@ -20,9 +20,9 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
-import { CharacterContext, DraconicAncestry } from '../context/equipmentActionsContext';
+import { CharacterContext, DraconicAncestry } from '../../context/equipmentActionsContext';
 import weapons from '../data/weapons.json';
-import StatsDataContext from '../context/StatsDataContext';
+import StatsDataContext from '../../context/StatsDataContext';
 import cantripsData from '../data/cantrips.json';
 import spellsData from '../data/spells.json';
 import reactionImage from '@actions/reaction-image.png';
@@ -40,9 +40,9 @@ import defaultSprintImage from '@actions/default-sprint-image.png';
 import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Item, useItemEquipment } from '../context/ItemEquipmentContext';
-import { useActions } from '../context/actionsSpellsContext';
-import { CantripSlotsContext } from '../context/cantripSlotsContext';
+import { Item, useItemEquipment } from '../../context/ItemEquipmentContext';
+import { useActions } from '../../context/actionsSpellsContext';
+import { CantripSlotsContext } from '../../context/cantripSlotsContext';
 import armorTypes from '../data/armorTypes.json';
 import artificerFeaturesData from '../data/class-tables/artificer/artificerFeatures.json';
 
@@ -57,7 +57,8 @@ import artificerInfusionsData from '../data/class-tables/artificer/artificerInfu
 
 // Barbarian
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
-
+import rageImage from '@actions/rage-image.png';
+import recklessAttackImage from '@actions/reckless-attack-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -587,13 +588,23 @@ export default function ActionsScreen() {
       const dexterity = statsData.abilities.find(
         (ability) => ability.name.toLowerCase() === 'dexterity'
       );
+      const constitution = statsData.abilities.find(
+        (ability) => ability.name.toLowerCase() === 'constitution'
+      );
 
       if (dexterity) {
         const dexModifier = Math.floor((dexterity.value - 10) / 2);
+        const conModifier = constitution ? Math.floor((constitution.value - 10) / 2) : 0;
 
         if (!equippedArmor) {
           // No armor equipped
-          setAc(10 + dexModifier + (equippedShield ? 2 : 0));
+          if (statsData.class?.toLowerCase() === 'barbarian') {
+            // Barbarian unarmored defense
+            setAc(10 + dexModifier + conModifier + (equippedShield ? 2 : 0));
+          } else {
+            // Normal unarmored
+            setAc(10 + dexModifier + (equippedShield ? 2 : 0));
+          }
           return;
         }
 
@@ -1048,6 +1059,11 @@ export default function ActionsScreen() {
         affordable = affordable && !infuseItemSpent;
       }
 
+      // Check for rage
+      if (statsData.class?.toLowerCase() === 'barbarian' && item.name.toLowerCase() === 'rage') {
+        affordable = affordable && currentRages > 0;
+      }
+
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
@@ -1425,6 +1441,33 @@ export default function ActionsScreen() {
       }
     }
 
+    // Barbarian
+    if (statsData.class?.toLowerCase() === 'barbarian') {
+      // Add 'Rage' action
+      classActions.push({
+        id: 'class-rage',
+        name: 'Rage',
+        cost: { actions: 0, bonus: 1 },
+        details: 'Lasts 10 turns (1 minute). Please keep track of your turns. (see Rage feat for details)',
+        image: rageImage as ImageSourcePropType,
+        type: 'feature',
+        source: 'class',
+      } as ActionBlock);
+
+      if (statsData.level >= 2) {
+        // Add Reckless Attack action
+        classActions.push({
+          id: 'class-reckless-attack',
+          name: 'Reckless Attack',
+          cost: { actions: 1, bonus: 0 },
+          details: 'You can recklessly attack on the first attack of your turn, you have advantage on melee weapon attack rolls using Strength during this turn. Attack rolls against you also have advantage until your next turn.\n\n(see "Armed Attack" action for attack roll and damage)',
+          image: recklessAttackImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+    }
+
     // Other classes
     return classActions;
   }
@@ -1443,8 +1486,8 @@ export default function ActionsScreen() {
             opacity: knownInfusionValue === '' ? 0.1 : 1,
           }}
           onPress={() => {
-            setInfusionModalVisible(true);
             setActionModalVisible(false);
+            setInfusionModalVisible(true);
           }}
           disabled={knownInfusionValue === ''}
         >
@@ -1531,6 +1574,12 @@ export default function ActionsScreen() {
     return feature.rages.toString().toLowerCase() === "unlimited" ? Infinity : Number(feature.rages);
   }
 
+  const getRageDamageBonus = () => {
+    const feature = barbarianTable.find((feat) => feat.userLevel === statsData.level);
+    if (!feature) return '';
+    return feature.rageDamage as string;
+  }
+
   // Main Contents
   return (
     <View style={styles.container}>
@@ -1538,11 +1587,32 @@ export default function ActionsScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
-            <Ionicons
-              name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
-              size={16}
-              color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
-            />
+            <TouchableOpacity
+              disabled={currentActionsAvailable === 0}
+              onPress={() => {
+                Alert.alert(
+                  'Actions',
+                  'Actions are the primary way to interact with the world. They are used for most of your turns, and they can be used to perform a wide range of tasks, from simple attacks to complex maneuvers.',
+                  [
+                    {
+                      text: 'OK',
+                      style: 'cancel'
+                    },
+                    {
+                      text: 'Commit',
+                      onPress: () => {
+                        setCurrentActionsAvailable(prev => Math.max(0, prev - 1));
+                      }
+                    }
+                  ]
+                );
+              }}>
+              <Ionicons
+                name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
+                size={16}
+                color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
+              />
+            </TouchableOpacity>
             <View style={styles.headerTextBox}>
               <Text style={[
                 styles.headerText,
@@ -1553,11 +1623,32 @@ export default function ActionsScreen() {
             </View>
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons
-              name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
-              size={16}
-              color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
-            />
+            <TouchableOpacity
+              disabled={currentBonusActionsAvailable === 0}
+              onPress={() => {
+                Alert.alert(
+                  'Bonus Actions',
+                  'Bonus actions are additional actions that you can take during your turn, in addition to your normal action and reaction. They are typically used for quick maneuvers or special abilities that require more time to prepare.',
+                  [
+                    {
+                      text: 'OK',
+                      style: 'cancel'
+                    },
+                    {
+                      text: 'Commit',
+                      onPress: () => {
+                        setCurrentBonusActionsAvailable(prev => Math.max(0, prev - 1));
+                      }
+                    }
+                  ]
+                );
+              }}>
+              <Ionicons
+                name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
+                size={16}
+                color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
+              />
+            </TouchableOpacity>
             <View style={styles.headerTextBox}>
               <Text style={[
                 styles.headerText,
@@ -1568,11 +1659,15 @@ export default function ActionsScreen() {
             </View>
           </View>
           <View style={styles.headerTextContainer}>
-            <Ionicons
-              name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
-              size={16}
-              color={currentReactionsAvailable > 0 ? "rgb(200, 0, 255)" : "rgba(200, 0, 255, 0.2)"}
-            />
+            <TouchableOpacity onPress={() => {
+              Alert.alert('Reactions', 'Reactions are actions that you can take in response to events that happen around you. They are typically triggered by specific conditions or stimuli, such as an enemy attacking you or a situation requiring a quick response.');
+            }}>
+              <Ionicons
+                name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
+                size={16}
+                color={currentReactionsAvailable > 0 ? "rgb(200, 0, 255)" : "rgba(200, 0, 255, 0.2)"}
+              />
+            </TouchableOpacity>
             <View style={styles.headerTextBox}>
               <Text style={[
                 styles.headerText,
@@ -1669,7 +1764,9 @@ export default function ActionsScreen() {
           {/* Show if user class is barbarian */}
           {statsData.class?.toLowerCase() === 'barbarian' && (
             <View style={styles.headerTextContainer}>
-              <TouchableOpacity onPress={() => { }}>
+              <TouchableOpacity onPress={() => {
+                Alert.alert('Rages', 'You can use your Rages to fuel your rage powers. You regain all your rages after a long rest.');
+              }}>
                 <MaterialCommunityIcons name="emoticon-angry" size={20} color="white" />
               </TouchableOpacity>
               <View style={styles.headerTextBox}>
@@ -1757,7 +1854,7 @@ export default function ActionsScreen() {
                       <Text style={styles.hpText}>{ac}</Text>
                       <View style={styles.subheaderSideBySide}>
                         <TouchableOpacity
-                          onPress={() => Alert.alert('Armor Class', 'Your Armor Class is determined by your Dexterity modifier, armor, and shield. It is used to calculate the effectiveness of your armor and shield against attacks.')}
+                          onPress={() => Alert.alert('Armor Class', 'Your Armor Class is usually determined by your Dexterity modifier, armor, and shield. It is used to calculate the effectiveness of your armor and shield against attacks.')}
                         >
                           <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey"
                           />
@@ -2028,6 +2125,14 @@ export default function ActionsScreen() {
                               <Text style={{ color: 'black' }}>{selectedAction.cost.castingTimeText}</Text>
                             </View>
                           )}
+                          {selectedAction.name.toLowerCase() === 'rage' && (
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text>
+                                , 1
+                              </Text>
+                              <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                            </View>
+                          )}
 
                         </View>
 
@@ -2130,6 +2235,12 @@ export default function ActionsScreen() {
                                     <Text> or </Text>}
                                   {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
                                 </View>
+                                {statsData.class?.toLowerCase() === 'barbarian' && (
+                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                    <Text>{getRageDamageBonus()} if</Text>
+                                    <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                                  </View>
+                                )}
                               </View>
                             </View>
                             <View style={styles.modalWeaponProperty}>
@@ -2185,9 +2296,11 @@ export default function ActionsScreen() {
                             }
                           </>
                         ) : (
+                          // Unarmed Attack
                           <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
                             <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
                               <MaterialCommunityIcons name="sword" size={20} color="black" />
+                              {/* Attack Roll Row */}
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                                 <Text>+({currentStrengthModifier} Str) or +({currentDexModifier} Dex)</Text>
@@ -2199,9 +2312,18 @@ export default function ActionsScreen() {
                                 }
                               </View>
                             </View>
+                            {/* Damage Row */}
                             <View style={styles.modalWeaponProperty}>
                               <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
-                              <Text>1+({currentStrengthModifier} Str)</Text>
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <Text>1+({currentStrengthModifier} Str)</Text>
+                                {statsData.class?.toLowerCase() === 'barbarian' && (
+                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                    <Text>{getRageDamageBonus()} if</Text>
+                                    <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                                  </View>
+                                )}
+                              </View>
                             </View>
                           </View>
 
@@ -2482,6 +2604,21 @@ export default function ActionsScreen() {
                         </TouchableOpacity>
                       )}
 
+                      {/* End Rage Button --- only if class is barbarian */}
+                      {selectedAction.name.toLowerCase() === 'rage' && (
+                        <TouchableOpacity
+                          style={[styles.modalButtonCommit, { flexDirection: 'row', gap: 5, justifyContent: 'center', alignItems: 'center' }]}
+                          onPress={() => {
+                            if (currentBonusActionsAvailable > 0) {
+                              setCurrentBonusActionsAvailable(prev => Math.max(0, prev - 1));
+                            }
+                            setActionModalVisible(false);
+                          }}
+                        >
+                          <Text>End Rage</Text>
+                        </TouchableOpacity>
+                      )}
+
                       {/* Commit Button */}
                       <TouchableOpacity
                         style={[
@@ -2494,52 +2631,65 @@ export default function ActionsScreen() {
                             (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)) && { opacity: 0.2 }
                         ]}
                         onPress={() => {
-                          if (selectedAction.name.toLowerCase() === 'rest') {
-                            handleHpChange('replenish');
-                            setSpentSpellSlots({
-                              ...spentSpellSlots,
-                              SpLv1: 0,
-                              SpLv2: 0,
-                              SpLv3: 0,
-                              SpLv4: 0,
-                              SpLv5: 0,
-                              SpLv6: 0,
-                              SpLv7: 0,
-                              SpLv8: 0,
-                              SpLv9: 0
-                            });
-                            if (!luckyPoints && luckyPointsEnabled) {
-                              setLuckyPoints(luckyPointsMax);
-                            }
-                            if (relentlessEnduranceGained && !relentlessEnduranceUsable) {
-                              setRelentlessEnduranceUsable(true);
-                            }
-                            if (infernalLegacyEnabled) {
-                              setDarknessSpent(false);
-                              setHellishRebukeSpent(false);
-                            }
-                            if (breathWeaponEnabled) {
-                              setBreathWeaponSpent(false);
-                            }
-                            if (infuseItemEnabled) {
-                              setInfuseItemSpent(false);
-                            }
-                          }
+                          switch (selectedAction.name.toLowerCase()) {
+                            case 'rest':
+                              handleHpChange('replenish');
+                              setSpentSpellSlots({
+                                ...spentSpellSlots,
+                                SpLv1: 0,
+                                SpLv2: 0,
+                                SpLv3: 0,
+                                SpLv4: 0,
+                                SpLv5: 0,
+                                SpLv6: 0,
+                                SpLv7: 0,
+                                SpLv8: 0,
+                                SpLv9: 0
+                              });
+                              if (!luckyPoints && luckyPointsEnabled) {
+                                setLuckyPoints(luckyPointsMax);
+                              }
+                              if (relentlessEnduranceGained && !relentlessEnduranceUsable) {
+                                setRelentlessEnduranceUsable(true);
+                              }
+                              if (infernalLegacyEnabled) {
+                                setDarknessSpent(false);
+                                setHellishRebukeSpent(false);
+                              }
+                              if (breathWeaponEnabled) {
+                                setBreathWeaponSpent(false);
+                              }
+                              if (infuseItemEnabled) {
+                                setInfuseItemSpent(false);
+                              }
+                              if (statsData.class?.toLowerCase() === 'barbarian') {
+                                const rages = getCurrentRages();
+                                setCurrentRages(rages);
+                              }
+                              break;
 
-                          // if action is hellish rebuke, set hellish rebuke spent to true
-                          if (selectedAction.name.toLowerCase() === 'hellish rebuke') {
-                            setHellishRebukeSpent(true);
-                          }
-                          // if action is darkness, set darkness spent to true
-                          if (selectedAction.name.toLowerCase() === 'darkness') {
-                            setDarknessSpent(true);
-                          }
-                          if (selectedAction.name.toLowerCase() === 'breath weapon') {
-                            setBreathWeaponSpent(true);
-                          }
-                          if (selectedAction.name.toLowerCase() === 'infuse item') {
-                            setInfuseItemSpent(true);
-                            setKnownInfusionValue('');
+                            case 'hellish rebuke':
+                              setHellishRebukeSpent(true);
+                              break;
+
+                            case 'darkness':
+                              setDarknessSpent(true);
+                              break;
+
+                            case 'breath weapon':
+                              setBreathWeaponSpent(true);
+                              break;
+
+                            case 'infuse item':
+                              setInfuseItemSpent(true);
+                              setKnownInfusionValue('');
+                              break;
+
+                            case 'rage':
+                              if (currentRages > 0) {
+                                setCurrentRages(prev => Math.max(0, prev - 1));
+                              }
+                              break;
                           }
 
                           // Default commit action
@@ -2581,24 +2731,6 @@ export default function ActionsScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Infusion Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={infusionModalVisible}
-      >
-        <View style={styles.fullScreenModalContainer}>
-          {renderInfusionDetails()}
-          <View style={styles.modalButtons}>
-            <TouchableOpacity style={styles.modalButton} onPress={() => {
-              setInfusionModalVisible(false);
-              setActionModalVisible(true);
-            }}>
-              <Text style={styles.modalButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       {/* Add Action Modal */}
       <Modal
@@ -2709,6 +2841,26 @@ export default function ActionsScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
-    </View>
+
+      {/* Infusion Modal */}
+      <View
+        style={[
+          styles.fullScreenModalContainer,
+          {
+            display: infusionModalVisible ? 'flex' : 'none'
+          }]}
+      >
+        {renderInfusionDetails()}
+        <View style={styles.modalButtons}>
+          <TouchableOpacity style={styles.modalButton} onPress={() => {
+            setInfusionModalVisible(false);
+            setActionModalVisible(true);
+          }}>
+            <Text style={styles.modalButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+    </View >
   );
 }

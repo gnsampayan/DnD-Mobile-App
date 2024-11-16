@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import classData from '../data/classData.json';
+import classData from '../app/data/classData.json';
 
 // Define interfaces for statsData
 interface Ability {
@@ -291,7 +291,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, [statsData.class]);
 
 
-    // Save subclass to AsyncStorage
+    // Save subclass to AsyncStorage when it changes
     useEffect(() => {
         if (subclassLoaded.current) {
             saveSubclass(subclass);

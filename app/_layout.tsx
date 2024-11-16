@@ -6,11 +6,11 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-import { ItemEquipmentProvider } from '@/app/context/ItemEquipmentContext';
-import { CharacterProvider } from '@/app/context/equipmentActionsContext';
-import { StatsDataProvider } from '@/app/context/StatsDataContext';
-import { ActionsProvider } from './context/actionsSpellsContext';
-import { CantripSlotsProvider } from './context/cantripSlotsContext';
+import { ItemEquipmentProvider } from '../context/ItemEquipmentContext';
+import { CharacterProvider } from '../context/equipmentActionsContext';
+import { StatsDataProvider } from '../context/StatsDataContext';
+import { ActionsProvider } from '../context/actionsSpellsContext';
+import { CantripSlotsProvider } from '../context/cantripSlotsContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { Item, useItemEquipment } from './ItemEquipmentContext'; // Assuming you have an Item interface defined here.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import weaponsData from '../data/weapons.json';
-import StatsDataContext from '../context/StatsDataContext';
+import weaponsData from '../app/data/weapons.json';
+import StatsDataContext from './StatsDataContext';
 
 export type WeaponSlot = 'mainHand' | 'offHand' | 'rangedHand';
 
@@ -492,3 +492,5 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         </CharacterContext.Provider>
     );
 };
+
+export default CharacterContext;
