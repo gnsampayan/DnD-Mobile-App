@@ -198,12 +198,18 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     useEffect(() => {
         const availablePoints = getAvailableAbilityPoints();
         setAvailableAbilityPoints(availablePoints);
-        if (availablePoints === 0 && Object.keys(allocationsPerLevel).length !== 0) {
+
+        // Check if there are allocations for current level
+        const currentLevelAllocations = allocationsPerLevel[level];
+        const hasAllocationsForCurrentLevel = currentLevelAllocations && Object.keys(currentLevelAllocations).length > 0;
+
+        // Only show save button if points were allocated this level and now at 0
+        if (availablePoints === 0 && hasAllocationsForCurrentLevel) {
             setAbilityAllocationsSaveVisible(true);
         } else {
             setAbilityAllocationsSaveVisible(false);
         }
-    }, [statsData.level, statsData.abilities]);
+    }, [statsData.level, statsData.abilities, allocationsPerLevel, level]);
 
 
     // Function to handle XP changes
@@ -559,8 +565,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     {/* XP */}
                     <TouchableOpacity
                         style={[styles.firstRowContents, {
-                            borderColor: availableAbilityPoints > 0 || abilityAllocationsSaveVisible ? 'grey' : 'white',
-                            opacity: availableAbilityPoints > 0 || abilityAllocationsSaveVisible ? 0.5 : 1
+                            borderColor: (availableAbilityPoints > 0 || abilityAllocationsSaveVisible || hasUnfilledHpIncreases) ? 'grey' : 'white',
+                            opacity: (availableAbilityPoints > 0 || abilityAllocationsSaveVisible || hasUnfilledHpIncreases) ? 0.5 : 1
                         }]}
                         onPress={() => {
                             if (!abilityAllocationsSaveVisible && availableAbilityPoints === 0) {
@@ -573,7 +579,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 );
                             }
                         }}
-                        disabled={abilityAllocationsSaveVisible}
+                        disabled={abilityAllocationsSaveVisible || hasUnfilledHpIncreases}
                     >
                         <ImageBackground
                             source={xpImage as ImageSourcePropType}

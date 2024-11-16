@@ -30,6 +30,8 @@ import artilleristData from '../data/class-tables/artificer/subclass/artillerist
 import battlesmithData from '../data/class-tables/artificer/subclass/battlesmith.json';
 import alchemistData from '../data/class-tables/artificer/subclass/alchemist.json';
 import barbarianFeatures from '../data/class-tables/barbarian/barbarianFeatures.json';
+import primalPathData from '../data/class-tables/barbarian/primalPath.json';
+import ancestralGuardianData from '../data/class-tables/barbarian/subclass/ancestralGuardian.json';
 
 
 
@@ -235,6 +237,8 @@ export default function MeScreen() {
         setInfuseItemEnabled,
         infusionsLearned,
         setInfusionsLearned,
+        primalKnowledgeEnabled,
+        setPrimalKnowledgeEnabled,
     } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
@@ -261,6 +265,8 @@ export default function MeScreen() {
         setInfuseItemEnabled: (value: boolean) => void;
         infusionsLearned: string[];
         setInfusionsLearned: (value: string[]) => void;
+        primalKnowledgeEnabled: boolean;
+        setPrimalKnowledgeEnabled: (value: boolean) => void;
     };
     const {
         items,
@@ -297,6 +303,8 @@ export default function MeScreen() {
     const [infusionValue, setInfusionValue] = useState<string | null>(null);
     const [specialistModalVisible, setSpecialistModalVisible] = useState(false);
     const [specialistValue, setSpecialistValue] = useState<string | null>(null);
+    const [primalPathValue, setPrimalPathValue] = useState<string | null>(null);
+    const [primalPathOpen, setPrimalPathOpen] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -958,7 +966,9 @@ export default function MeScreen() {
                                 {(
                                     (feature.name.toLowerCase() === 'magical tinkering' && !magicalTinkeringEnabled) ||
                                     (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled) ||
-                                    (feature.name.toLowerCase() === 'artificer specialist' && !subclass)
+                                    (feature.name.toLowerCase() === 'artificer specialist' && !subclass) ||
+                                    (feature.name.toLowerCase() === 'primal path' && !subclass) ||
+                                    (feature.name.toLowerCase() === 'primal knowledge' && !primalKnowledgeEnabled)
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
@@ -1233,6 +1243,7 @@ export default function MeScreen() {
 
 
             // Class Features
+            // Artificer
             case "magical tinkering":
                 if (!magicalTinkeringEnabled) {
                     return (
@@ -1300,6 +1311,31 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            // Barbarian
+            case "primal path":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: primalPathValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="paw" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={primalPathValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
+
 
 
         }
@@ -1364,6 +1400,15 @@ export default function MeScreen() {
             case "artificer specialist":
                 if (specialistValue) {
                     setSubclass(specialistValue);
+                }
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+
+            // Barbarian
+            case "primal path":
+                if (primalPathValue) {
+                    setSubclass(primalPathValue);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -1522,6 +1567,23 @@ export default function MeScreen() {
                     {subclass === 'armorer' && renderArmorerFeatures()}
                     {subclass === 'artillerist' && renderArtilleristFeatures()}
                     {subclass === 'battle smith' && renderBattlesmithFeatures()}
+                </View>
+            );
+        }
+        // barbarian primal path
+        if (subClassButtonName.toLowerCase() === 'primal path') {
+            return (
+                <View>
+                    <Text>Subclass: {subclass}</Text>
+                    {subclass === 'ancestral guardian' && renderAncestralGuardianFeatures()}
+                    {/* {subclass === 'battlerager' && renderBattleragerFeatures()}
+                    {subclass === 'beast' && renderBeastFeatures()}
+                    {subclass === 'berserker' && renderBerserkerFeatures()}
+                    {subclass === 'giant' && renderGiantFeatures()}
+                    {subclass === 'storm herald' && renderStormHeraldFeatures()}
+                    {subclass === 'totem warrior' && renderTotemWarriorFeatures()}
+                    {subclass === 'wild magic' && renderWildMagicFeatures()}
+                    {subclass === 'zealot' && renderZealotFeatures()} */}
                 </View>
             );
         }
@@ -1776,11 +1838,75 @@ export default function MeScreen() {
     };
 
 
+    // Render Primal Path Dropdown Subclass Options
+    const renderPrimalPathDropdown = () => {
+        return (
+            <View>
+                <Text>Primal Path</Text>
+                <DropDownPicker
+                    items={primalPathData.map(item => ({
+                        label: item.name,
+                        value: item.id
+                    }))}
+                    open={primalPathOpen}
+                    setOpen={setPrimalPathOpen}
+                    value={primalPathValue}
+                    setValue={setPrimalPathValue}
+                    placeholder="Select a Primal Path"
+                />
+            </View>
+        );
+    };
+
+    const renderPrimalPathDescription = () => {
+        return (
+            <View>
+                <Text>{primalPathData.find(item => item.id === primalPathValue)?.description}</Text>
+            </View>
+        );
+    };
+
+    const renderAncestralGuardianFeatures = () => {
+        const ancestralGuardianInfo = primalPathData.find(path => path.id === 'ancestral guardian');
+
+        return (
+            <View>
+                <Text>Ancestral Guardian</Text>
+                <Text style={{ marginVertical: 10 }}>{ancestralGuardianInfo?.description}</Text>
+                {Object.entries(ancestralGuardianData).map(([key, value]) => {
+                    // Skip the name property since it's not a feature
+                    if (key === 'name') return null;
+                    // Only render if the feature's level requirement is met
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                <Text>{value.description}</Text>
+
+                                {/* Handle improvements */}
+                                {'improvements' in value && value.improvements.map((improvement, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {improvement}</Text>
+                                ))}
+
+                                {/* Handle additionalDetails */}
+                                {'additionalDetails' in value && value.additionalDetails.map((detail, index) => (
+                                    <Text key={index} style={{ marginTop: 5 }}>• {detail}</Text>
+                                ))}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
 
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
 
+
+    // Main Render
     return (
         <View style={styles.container}>
             {/* Section 1: Header */}
@@ -2575,11 +2701,23 @@ export default function MeScreen() {
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
                         )}
+                        {/* Primal Path Dropdown */}
+                        {statsData.class === 'barbarian' && selectedFeat?.toLowerCase() === 'primal path' && (
+                            subclass === null ? (
+                                renderPrimalPathDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
                             {/* Render Specific Class Feature */}
                             {selectedFeat && renderClassFeatures(false, selectedFeat)}
                             {/* Render Specific Subclass Feature */}
                             {selectedFeat && statsData.class && subclass && renderSubclassFeatures(selectedFeat)}
+                            {/* Primal Path Dropdown Value chosen --- description */}
+                            {selectedFeat?.toLowerCase() === 'primal path' && subclass === null && (
+                                renderPrimalPathDescription()
+                            )}
                         </ScrollView>
                     </View>
                     <View style={styles.modalButtons}>

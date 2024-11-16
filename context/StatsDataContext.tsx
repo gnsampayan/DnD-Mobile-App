@@ -102,13 +102,25 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const raceSkillProfGainedLoaded = useRef(false);
     const skillProficiencyLoaded = useRef(false);
     const subclassLoaded = useRef(false);
+    const [statsDataLoaded, setStatsDataLoaded] = useState(false);
+
+    // Inside your StatsDataProvider component
+    const prevClassRef = useRef<string | null>(null);
+    const firstUpdate = useRef(true);
 
 
     // Load subclass from AsyncStorage
     const loadSubclass = async () => {
         try {
             const value = await AsyncStorage.getItem(SUBCLASS_KEY);
-            setSubclass(value ? JSON.parse(value) : null);
+            if (value && value !== 'null') {
+                const parsedValue = JSON.parse(value);
+                // Ensure we set the string value of the subclass
+                setSubclass(typeof parsedValue === 'string' ? parsedValue : String(parsedValue));
+                console.log('Loaded subclass:', value);
+            } else {
+                setSubclass(null);
+            }
         } catch (error) {
             console.error('Error loading subclass:', error);
         } finally {
@@ -119,6 +131,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Save subclass to AsyncStorage
     const saveSubclass = async (value: string | null) => {
         try {
+            console.log('Saving subclass:', value);
             await AsyncStorage.setItem(SUBCLASS_KEY, JSON.stringify(value));
         } catch (error) {
             console.error('Error saving subclass:', error);
@@ -170,11 +183,17 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             if (dataString) {
                 const data = JSON.parse(dataString);
                 setStatsData(data);
+
+                // Initialize prevClassRef.current with the loaded class
+                prevClassRef.current = data.class || null;
             } else {
                 setStatsData(initialStatsData);
+                prevClassRef.current = initialStatsData.class || null;
             }
         } catch (error) {
             console.error('Error loading stats data:', error);
+        } finally {
+            setStatsDataLoaded(true);
         }
     };
 
@@ -271,24 +290,38 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     // Load statsData on mount
     useEffect(() => {
-        loadStatsData();
-        loadUnusedSkillPoints();
-        loadRaceSkillProfGained();
-        loadSkillProficiency();
-        loadSubclass();
+        const loadData = async () => {
+            await loadStatsData();
+            await loadUnusedSkillPoints();
+            await loadRaceSkillProfGained();
+            await loadSkillProficiency();
+            await loadSubclass();
+        }
+        loadData();
     }, []);
 
     // Set the isSpellCaster state based on the class
     useEffect(() => {
+        if (!statsDataLoaded) return;
         handleSpellCaster();
         loadRaceSkillProfGained();
-        if (statsData.class != null) {
-            setSkillProficiency([]); // Reset state
-            deleteSkillProficiency(); // Remove from AsyncStorage
+
+        if (prevClassRef.current === null) {
+            // This should not happen since we initialize prevClassRef.current in loadStatsData
+            prevClassRef.current = statsData.class || null;
+            return;
+        }
+        if (statsData.class !== prevClassRef.current) {
+            // The class has changed after data has been loaded
+            setSkillProficiency([]);
+            deleteSkillProficiency();
             deleteSubclass();
             setSubclass(null);
+            console.log('Subclass deleted');
         }
-    }, [statsData.class]);
+        // Update the ref with the current class value
+        prevClassRef.current = statsData.class || null;
+    }, [statsData.class, statsDataLoaded]);
 
 
     // Save subclass to AsyncStorage when it changes
@@ -296,6 +329,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (subclassLoaded.current) {
             saveSubclass(subclass);
         }
+        console.log('Current subclass:', subclass);
     }, [subclass]);
 
 

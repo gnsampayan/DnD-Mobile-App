@@ -40,6 +40,7 @@ import defaultSprintImage from '@actions/default-sprint-image.png';
 import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { Item, useItemEquipment } from '../../context/ItemEquipmentContext';
 import { useActions } from '../../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../../context/cantripSlotsContext';
@@ -59,6 +60,7 @@ import artificerInfusionsData from '../data/class-tables/artificer/artificerInfu
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
 import rageImage from '@actions/rage-image.png';
 import recklessAttackImage from '@actions/reckless-attack-image.png';
+import consultTheSpiritsImage from '@actions/consult-spirits-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -106,7 +108,6 @@ import tollTheDeadImage from '@images/cantrips/toll-the-dead.png';
 import trueStrikeImage from '@images/cantrips/true-strike.png';
 import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
 import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
@@ -286,6 +287,8 @@ export default function ActionsScreen() {
     setDarknessSpent,
     breathWeaponSpent,
     setBreathWeaponSpent,
+    consultTheSpiritsSpent,
+    setConsultTheSpiritsSpent,
   } = useActions();
   const { weaponsProficientIn, equippedArmor, equippedShield } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
@@ -294,7 +297,13 @@ export default function ActionsScreen() {
   // Path to the actions.json file
   const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
   // Use context for statsData
-  const { statsData } = useContext(StatsDataContext) as { statsData: StatsData };
+  const {
+    statsData,
+    subclass
+  } = useContext(StatsDataContext) as {
+    statsData: StatsData,
+    subclass: string | null
+  };
 
   const {
     mainHandWeapon,
@@ -1064,6 +1073,11 @@ export default function ActionsScreen() {
         affordable = affordable && currentRages > 0;
       }
 
+      // Check for consult the spirits spent
+      if (subclass?.toLowerCase() === 'ancestral guardian' && item.name.toLowerCase() === 'consult the spirits') {
+        affordable = affordable && !consultTheSpiritsSpent;
+      }
+
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
@@ -1462,6 +1476,19 @@ export default function ActionsScreen() {
           cost: { actions: 1, bonus: 0 },
           details: 'You can recklessly attack on the first attack of your turn, you have advantage on melee weapon attack rolls using Strength during this turn. Attack rolls against you also have advantage until your next turn.\n\n(see "Armed Attack" action for attack roll and damage)',
           image: recklessAttackImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+
+      if (subclass?.toLowerCase() === 'ancestral guardian' && statsData.level >= 10) {
+        // Add 'Consult the Spirits' action
+        classActions.push({
+          id: 'class-consult-the-spirits',
+          name: 'Consult the Spirits',
+          cost: { actions: 1, bonus: 0 },
+          details: 'You cast Clairvoyance or Augury, invisibly summoning one of your ancestral spirits to the chosen location. You can\'t use this feature again until you finish a short or long rest.\n\n(see Primal Path feat for details)',
+          image: consultTheSpiritsImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2598,6 +2625,10 @@ export default function ActionsScreen() {
                             setCurrentActionsAvailable(1);
                             setCurrentBonusActionsAvailable(1);
                             setCurrentReactionsAvailable(1);
+                            if (subclass?.toLowerCase() === 'ancestral guardian') {
+                              setConsultTheSpiritsSpent(false);
+                            }
+                            commitAction();
                           }}>
                           <MaterialCommunityIcons name="sleep" size={16} color="black" />
                           <Text>Short Rest</Text>
@@ -2666,6 +2697,9 @@ export default function ActionsScreen() {
                                 const rages = getCurrentRages();
                                 setCurrentRages(rages);
                               }
+                              if (subclass?.toLowerCase() === 'ancestral guardian') {
+                                setConsultTheSpiritsSpent(false);
+                              }
                               break;
 
                             case 'hellish rebuke':
@@ -2690,6 +2724,10 @@ export default function ActionsScreen() {
                                 setCurrentRages(prev => Math.max(0, prev - 1));
                               }
                               break;
+
+                            case 'consult the spirits':
+                              setConsultTheSpiritsSpent(true);
+                              break;
                           }
 
                           // Default commit action
@@ -2702,7 +2740,8 @@ export default function ActionsScreen() {
                           (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
                           (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
                           (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
-                          (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent)
+                          (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
+                          (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent)
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>
