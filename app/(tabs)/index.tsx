@@ -1945,14 +1945,14 @@ export default function ActionsScreen() {
                     </View>
                   </View>
 
-                  {/* Perception and Movement Speed */}
+                  {/* Passive Perception and Movement Speed */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
-                    {/* Perception */}
+                    {/* Passive Perception */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={styles.hpText}>+{currentWisdomModifier + proficiencyBonus}</Text>
                       <View style={styles.subheaderSideBySide}>
                         <TouchableOpacity
-                          onPress={() => Alert.alert('Perception', 'Your Perception is determined by your Wisdom modifier and your proficiency bonus. It is used to calculate your ability to detect and respond to hidden or subtle details.')}
+                          onPress={() => Alert.alert('Passive Perception', 'Your Passive Perception is determined by your Wisdom modifier and your proficiency bonus. It is used to calculate your ability to detect and respond to hidden or subtle details. This is different from your skill Perception, which is your active ability to actively search for these details.')}
                         >
                           <Ionicons name="eye" size={24} color="lightgrey" />
                         </TouchableOpacity>

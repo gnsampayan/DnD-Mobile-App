@@ -7,6 +7,7 @@ interface Ability {
     id: number;
     name: string;
     value: number;
+    maxValue?: number;
 }
 
 

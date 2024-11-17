@@ -13,7 +13,7 @@ export interface DraconicAncestry {
     typicalAlignment: string;
 }
 
-interface CharacterContextProps {
+export interface CharacterContextProps {
     mainHandWeapon: Item | null;
     offHandWeapon: Item | null;
     rangedHandWeapon: Item | null;
@@ -50,6 +50,8 @@ interface CharacterContextProps {
     setPrimalKnowledgeEnabled: (value: boolean) => void;
     primalKnowledgeEnabledAgain: boolean;
     setPrimalKnowledgeEnabledAgain: (value: boolean) => void;
+    primalChampionEnabled: boolean;
+    setPrimalChampionEnabled: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -81,6 +83,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [infusionsLearned, setInfusionsLearned] = useState<string[]>([]);
     const [primalKnowledgeEnabled, setPrimalKnowledgeEnabled] = useState<boolean>(false);
     const [primalKnowledgeEnabledAgain, setPrimalKnowledgeEnabledAgain] = useState<boolean>(false);
+    const [primalChampionEnabled, setPrimalChampionEnabled] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -97,6 +100,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const INFUSIONS_LEARNED_STORAGE_KEY = '@infusions_learned';
     const PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY = '@primal_knowledge_enabled';
     const PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY = '@primal_knowledge_enabled_again';
+    const PRIMAL_CHAMPION_ENABLED_STORAGE_KEY = '@primal_champion_enabled';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -162,6 +166,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 if (storedPrimalKnowledgeEnabledAgain) {
                     setPrimalKnowledgeEnabledAgain(storedPrimalKnowledgeEnabledAgain === 'true');
                 }
+                const storedPrimalChampionEnabled = await AsyncStorage.getItem(PRIMAL_CHAMPION_ENABLED_STORAGE_KEY);
+                if (storedPrimalChampionEnabled) {
+                    setPrimalChampionEnabled(storedPrimalChampionEnabled === 'true');
+                }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
             } finally {
@@ -187,7 +195,22 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setInfusionsLearned([]);
         setPrimalKnowledgeEnabled(false);
         setPrimalKnowledgeEnabledAgain(false);
+        setPrimalChampionEnabled(false);
     }, [statsData.class]);
+
+    // save primal champion enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const savePrimalChampionEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(PRIMAL_CHAMPION_ENABLED_STORAGE_KEY, primalChampionEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving primal champion enabled to AsyncStorage:', error);
+                }
+            }
+            savePrimalChampionEnabledToStorage();
+        }
+    }, [primalChampionEnabled, isLoading]);
 
     // save primal knowledge enabled again to AsyncStorage whenever it changes
     useEffect(() => {
@@ -535,6 +558,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setPrimalKnowledgeEnabled,
                 primalKnowledgeEnabledAgain,
                 setPrimalKnowledgeEnabledAgain,
+                primalChampionEnabled,
+                setPrimalChampionEnabled,
             }}
         >
             {children}

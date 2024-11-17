@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { View, Text, TouchableOpacity, Modal, TextInput, Keyboard, TouchableWithoutFeedback, Alert, FlatList, ImageBackground, Button, ImageSourcePropType } from 'react-native';
 import styles from '../styles/meStyles'; // Adjust the path if necessary
 import skillsData from '../data/skills.json';
@@ -17,7 +17,7 @@ import classBonuses from '../data/classData.json';
 import xpImage from '@images/xp-image.png';
 import artificerTable from '../data/class-tables/artificer/artificerTable.json';
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
-import EquipmentActionsContext from '../../context/equipmentActionsContext';
+import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -71,6 +71,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [selectedAbility, setSelectedAbility] = useState<Ability | null>(null);
     const [levelModalVisible, setLevelModalVisible] = useState<boolean>(false);
 
+    // Ref to track if the primal champion boost has been applied
+    const primalChampionApplied = useRef(false);
+
     // Use context for statsData
     const {
         statsData,
@@ -93,9 +96,48 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         return null;
     }
 
-    const { primalKnowledgeEnabled } = useContext(EquipmentActionsContext) as {
-        primalKnowledgeEnabled: boolean;
-    };
+    const {
+        primalKnowledgeEnabled,
+        primalChampionEnabled
+    } = useContext(CharacterContext) as CharacterContextProps;
+
+    useEffect(() => {
+        if (primalChampionEnabled && !primalChampionApplied.current) {
+            // Apply the boost
+            const updatedAbilities = statsData.abilities.map((ability) => {
+                if (ability.name === 'Strength' || ability.name === 'Constitution') {
+                    return {
+                        ...ability,
+                        value: Math.min(ability.value + 4, 24),
+                        maxValue: 24, // Set the new max value
+                    };
+                }
+                return ability;
+            });
+            updateStatsData({
+                ...statsData,
+                abilities: updatedAbilities
+            });
+            primalChampionApplied.current = true;
+        } else if (!primalChampionEnabled && primalChampionApplied.current) {
+            // Optionally remove the boost if primalChampionEnabled is turned off
+            const updatedAbilities = statsData.abilities.map((ability) => {
+                if (ability.name === 'Strength' || ability.name === 'Constitution') {
+                    return {
+                        ...ability,
+                        value: Math.max(ability.value - 4, 8), // Reset to base or previous value
+                        maxValue: 20, // Reset the max value
+                    };
+                }
+                return ability;
+            });
+            updateStatsData({
+                ...statsData,
+                abilities: updatedAbilities
+            });
+            primalChampionApplied.current = false;
+        }
+    }, [primalChampionEnabled]);
 
     // Functions to get level  bonus
     const getLevelFromXp = (xp: number): number => {
@@ -196,7 +238,14 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     // Calculate Available Ability Points
     const getAvailableAbilityPoints = (): number => {
         const totalPoints = getAbilityPointsFromLevel(level) + getRaceBonusTotal(statsData.race || '');
-        const usedPoints = abilities.reduce((acc, ability) => acc + (ability.value - 8), 0);
+        const usedPoints = abilities.reduce((acc, ability) => {
+            // Don't count the +4 from Primal Champion in Str/Con when calculating used points
+            let abilityValue = ability.value;
+            if (primalChampionEnabled && (ability.name === 'Strength' || ability.name === 'Constitution')) {
+                abilityValue = Math.max(8, abilityValue - 4); // Subtract the Primal Champion bonus
+            }
+            return acc + (abilityValue - 8);
+        }, 0);
         return totalPoints - usedPoints;
     };
 
@@ -258,15 +307,20 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return;
         }
 
-        // Check available points
+        // Determine the maximum value based on primalChampionEnabled
+        const isPrimalChamp = primalChampionEnabled &&
+            (currentAbility.name === 'Strength' || currentAbility.name === 'Constitution');
+        const maxAllowed = isPrimalChamp ? 24 : 20;
+
+        // Check if ability points available is 0
         if (availableAbilityPoints <= 0) {
             Alert.alert('No More Ability Points', 'Gain XP to level up and get more ability points.');
             return;
         }
 
-        // Check if ability would exceed maximum of 20
-        if (currentAbility.value >= 20) {
-            Alert.alert('Maximum Value Reached', 'Abilities cannot exceed 20.');
+        // Check if ability would exceed maximum
+        if (currentAbility.value >= maxAllowed) {
+            Alert.alert('Maximum Value Reached', `${currentAbility.name} cannot exceed ${maxAllowed}.`);
             return;
         }
 
@@ -490,7 +544,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
         // Calculate the total skill modifier
         const skillModifier =
-            abilityModifier + (raceProficiency || gainedProficiency ? statsData.proficiencyBonus : 0);
+            abilityModifier + (raceProficiency || gainedProficiency ? proficiencyBonus : 0);
 
         // Determine if the skill is proficient (either from race or gained)
         const isProficient = raceProficiency || gainedProficiency;
@@ -707,7 +761,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                             <Text style={{ color: 'white' }}>+</Text>
                         }
                         <Text style={styles.availableAbilityPoints}>
-                            {availableAbilityPoints}
+                            {availableAbilityPoints >= 0 ? availableAbilityPoints : 0}
                         </Text>
                         <MaterialCommunityIcons name="lightning-bolt" size={20} color={availableAbilityPoints > 0 ? 'gold' : 'lightgrey'} />
                     </View>

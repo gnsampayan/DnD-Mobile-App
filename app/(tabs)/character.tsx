@@ -44,7 +44,7 @@ import defaultRangedWeaponImage from '@equipment/default-ranged.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../../context/ItemEquipmentContext';
-import { CharacterContext, WeaponSlot } from '../../context/equipmentActionsContext';
+import { CharacterContext, WeaponSlot, CharacterContextProps } from '../../context/equipmentActionsContext';
 import { useActions } from '../../context/actionsSpellsContext';
 import featuresImage from '@images/features-image.png';
 import armorTypes from '../data/armorTypes.json';
@@ -241,37 +241,9 @@ export default function MeScreen() {
         setPrimalKnowledgeEnabled,
         primalKnowledgeEnabledAgain,
         setPrimalKnowledgeEnabledAgain,
-    } = useContext(CharacterContext) as {
-        mainHandWeapon: Item | null;
-        offHandWeapon: Item | null;
-        rangedHandWeapon: Item | null;
-        equipWeapon: (slot: 'mainHand' | 'offHand' | 'rangedHand', weapon: Item | null) => void;
-        luckyPoints: number | null;
-        luckyPointsEnabled: boolean;
-        setLuckyPoints: (points: number) => void;
-        luckyPointsMax: number;
-        setLuckyPointsMax: (points: number) => void;
-        relentlessEnduranceGained: boolean;
-        setRelentlessEnduranceGained: (value: boolean) => void;
-        setRelentlessEnduranceUsable: (value: boolean) => void;
-        setLuckyPointsEnabled: (value: boolean) => void;
-        infernalLegacyEnabled: boolean;
-        setInfernalLegacyEnabled: (value: boolean) => void;
-        draconicAncestry: DraconicAncestry | null;
-        setDraconicAncestry: (value: DraconicAncestry | null) => void;
-        breathWeaponEnabled: boolean;
-        setBreathWeaponEnabled: (value: boolean) => void;
-        magicalTinkeringEnabled: boolean;
-        setMagicalTinkeringEnabled: (value: boolean) => void;
-        infuseItemEnabled: boolean;
-        setInfuseItemEnabled: (value: boolean) => void;
-        infusionsLearned: string[];
-        setInfusionsLearned: (value: string[]) => void;
-        primalKnowledgeEnabled: boolean;
-        setPrimalKnowledgeEnabled: (value: boolean) => void;
-        primalKnowledgeEnabledAgain: boolean;
-        setPrimalKnowledgeEnabledAgain: (value: boolean) => void;
-    };
+        primalChampionEnabled,
+        setPrimalChampionEnabled,
+    } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
         weaponsProficientIn,
@@ -972,7 +944,9 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled) ||
                                     (feature.name.toLowerCase() === 'artificer specialist' && !subclass) ||
                                     (feature.name.toLowerCase() === 'primal path' && !subclass) ||
-                                    (feature.name.toLowerCase() === 'primal knowledge' && (!primalKnowledgeEnabled || (!primalKnowledgeEnabledAgain && statsData.level >= 10)))
+                                    (feature.name.toLowerCase() === 'primal knowledge' && (!primalKnowledgeEnabled ||
+                                        (!primalKnowledgeEnabledAgain && statsData.level >= 10))) ||
+                                    (feature.name.toLowerCase() === 'primal champion' && !primalChampionEnabled)
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
@@ -1362,9 +1336,29 @@ export default function MeScreen() {
                     )
                 }
                 break;
-
-
-
+            case "primal champion":
+                if (!primalChampionEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: primalChampionEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="paw" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={primalChampionEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1448,6 +1442,11 @@ export default function MeScreen() {
                 if (statsData.level >= 10) {
                     setPrimalKnowledgeEnabledAgain(true);
                 }
+                break;
+            case "primal champion":
+                setPrimalChampionEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
                 break;
         }
     }
