@@ -289,6 +289,8 @@ export default function ActionsScreen() {
     setBreathWeaponSpent,
     consultTheSpiritsSpent,
     setConsultTheSpiritsSpent,
+    extraAttackSpent,
+    setExtraAttackSpent
   } = useActions();
   const { weaponsProficientIn, equippedArmor, equippedShield } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
@@ -393,10 +395,32 @@ export default function ActionsScreen() {
   // Calculate movement speed based on race
   useEffect(() => {
     if (statsData.race) {
-      const raceData = raceBonuses.find((race) => race.race === statsData.race);
-      setMovementSpeed(raceData ? raceData.speed : 30);
+      const speed = calculateMovementSpeed(statsData.race);
+      setMovementSpeed(speed);
     }
-  }, [statsData.race]);
+  }, [statsData.race, equippedArmor, statsData.class, statsData.level]);
+
+  const calculateMovementSpeed = (race: string): number => {
+    const raceData = raceBonuses.find((raceBonus) => raceBonus.race === race);
+    const baseSpeed = raceData ? raceData.speed : 30;
+
+    // Add Fast Movement bonus for Barbarians level 5+ if not wearing heavy armor
+    if (statsData.class?.toLowerCase() === 'barbarian' && statsData.level >= 5) {
+      // Check if wearing heavy armor
+      const isWearingHeavyArmor = equippedArmor && armorTypes.find(
+        type => type.label.toLowerCase() === "heavy armor" &&
+          Object.keys(type.versions).some(
+            version => version.toLowerCase() === equippedArmor.toLowerCase()
+          )
+      );
+      // Only add speed bonus if not wearing heavy armor
+      if (!isWearingHeavyArmor) {
+        return baseSpeed + 10;
+      }
+    }
+
+    return baseSpeed;
+  };
 
   // Function to get the correct action image based on the action and if the character is armed
   function getActionImage(action: ActionBlock): ImageSourcePropType | string {
@@ -1013,6 +1037,7 @@ export default function ActionsScreen() {
   const commitAction = () => {
     if (selectedAction) {
       const { actions: costActions, bonus: costBonus, reaction: costReaction } = selectedAction.cost;
+      const isAttack = selectedAction.name.toLowerCase() === 'attack';
 
       if (
         currentActionsAvailable >= costActions &&
@@ -1025,6 +1050,16 @@ export default function ActionsScreen() {
         if (costReaction !== undefined) {
           setCurrentReactionsAvailable(prev => prev - costReaction);
         }
+
+        // Set extra attack to false if attack or reckless attack
+        if (isAttack || selectedAction.name.toLowerCase() === 'reckless attack') {
+          setExtraAttackSpent(false);
+        }
+
+        setActionModalVisible(false);
+      } else if (isAttack) {
+        // Allow attack without cost if insufficient resources
+        setExtraAttackSpent(true);
         setActionModalVisible(false);
       } else {
         Alert.alert('Insufficient Resources', 'You do not have enough actions or bonus actions for this.');
@@ -1037,6 +1072,7 @@ export default function ActionsScreen() {
     setCurrentActionsAvailable(1);
     setCurrentBonusActionsAvailable(1);
     setCurrentReactionsAvailable(1);
+    setExtraAttackSpent(true);
   };
 
   const windowWidth = Dimensions.get('window').width;
@@ -1076,6 +1112,11 @@ export default function ActionsScreen() {
       // Check for consult the spirits spent
       if (subclass?.toLowerCase() === 'ancestral guardian' && item.name.toLowerCase() === 'consult the spirits') {
         affordable = affordable && !consultTheSpiritsSpent;
+      }
+
+      // Check for extra attack, if not spent, make attack action free and affordable
+      if (item.name.toLowerCase() === 'attack' && !extraAttackSpent) {
+        affordable = true;
       }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
@@ -1790,21 +1831,33 @@ export default function ActionsScreen() {
 
           {/* Show if user class is barbarian */}
           {statsData.class?.toLowerCase() === 'barbarian' && (
-            <View style={styles.headerTextContainer}>
-              <TouchableOpacity onPress={() => {
-                Alert.alert('Rages', 'You can use your Rages to fuel your rage powers. You regain all your rages after a long rest.');
-              }}>
-                <MaterialCommunityIcons name="emoticon-angry" size={20} color="white" />
-              </TouchableOpacity>
-              <View style={styles.headerTextBox}>
-                <Text style={[
-                  styles.headerText,
-                  currentRages === 0 && { color: 'black' }
-                ]}>
-                  x{currentRages}
-                </Text>
+            <>
+              <View style={styles.headerTextContainer}>
+                <TouchableOpacity onPress={() => {
+                  Alert.alert('Rages', 'You can use your Rages to fuel your rage powers. You regain all your rages after a long rest.');
+                }}>
+                  <MaterialCommunityIcons name="emoticon-angry" size={20} color="white" />
+                </TouchableOpacity>
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    currentRages === 0 && { color: 'black' }
+                  ]}>
+                    x{currentRages}
+                  </Text>
+                </View>
               </View>
-            </View>
+              {/* Show extra attack icon if statsData.level >= 5 */}
+              {statsData.level >= 5 && (
+                <View style={[styles.headerTextContainer, { opacity: extraAttackSpent ? 0.2 : 1 }]}>
+                  <TouchableOpacity onPress={() => {
+                    Alert.alert('Extra Attack', 'You can attack twice, instead of once, when you take the Attack action on your turn.');
+                  }}>
+                    <MaterialCommunityIcons name="sword" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
           )}
 
 
@@ -1890,7 +1943,7 @@ export default function ActionsScreen() {
                     </View>
                   </View>
 
-                  {/* Movement Speed */}
+                  {/* Perception and Movement Speed */}
                   <View style={[styles.subheaderHpContainer, { borderColor: 'rgba(255, 255, 255, 0.1)', flexDirection: 'row' }]}>
                     {/* Perception */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
@@ -2655,11 +2708,14 @@ export default function ActionsScreen() {
                         style={[
                           styles.modalButtonCommit,
                           selectedAction &&
-                          (currentActionsAvailable < selectedAction.cost.actions ||
-                            currentBonusActionsAvailable < selectedAction.cost.bonus ||
-                            selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction ||
-                            (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
-                            (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)) && { opacity: 0.2 }
+                          (selectedAction.name.toLowerCase() === 'attack' && !extraAttackSpent ?
+                            { opacity: 1 } :
+                            (currentActionsAvailable < selectedAction.cost.actions ||
+                              currentBonusActionsAvailable < selectedAction.cost.bonus ||
+                              selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction ||
+                              (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
+                              (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)) && { opacity: 0.2 }
+                          )
                         ]}
                         onPress={() => {
                           switch (selectedAction.name.toLowerCase()) {
@@ -2735,13 +2791,15 @@ export default function ActionsScreen() {
                         }}
                         disabled={
                           !selectedAction ||
-                          currentActionsAvailable < selectedAction.cost.actions ||
-                          currentBonusActionsAvailable < selectedAction.cost.bonus ||
-                          (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
-                          (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
-                          (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
-                          (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
-                          (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent)
+                          (selectedAction.name.toLowerCase() !== 'attack' || extraAttackSpent) && (
+                            currentActionsAvailable < selectedAction.cost.actions ||
+                            currentBonusActionsAvailable < selectedAction.cost.bonus ||
+                            (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
+                            (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
+                            (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
+                            (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
+                            (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent)
+                          )
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>

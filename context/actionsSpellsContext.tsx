@@ -9,6 +9,7 @@ const HELLISH_REBUKE_SPENT_STORAGE_KEY = 'hellish_rebuke_spent';
 const DARKNESS_SPENT_STORAGE_KEY = 'darkness_spent';
 const BREATH_WEAPON_SPENT_STORAGE_KEY = 'breath_weapon_spent';
 const CONSULT_THE_SPIRITS_SPENT_STORAGE_KEY = 'consult_the_spirits_spent';
+const EXTRA_ATTACK_SPENT_STORAGE_KEY = 'extra_attack_spent';
 
 interface ActionsContextType {
     currentActionsAvailable: number;
@@ -27,6 +28,8 @@ interface ActionsContextType {
     setBreathWeaponSpent: React.Dispatch<React.SetStateAction<boolean>>;
     consultTheSpiritsSpent: boolean;
     setConsultTheSpiritsSpent: React.Dispatch<React.SetStateAction<boolean>>;
+    extraAttackSpent: boolean;
+    setExtraAttackSpent: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ActionsContext = createContext<ActionsContextType | undefined>(undefined);
@@ -50,7 +53,7 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [darknessSpent, setDarknessSpent] = useState<boolean>(false);
     const [breathWeaponSpent, setBreathWeaponSpent] = useState<boolean>(false);
     const [consultTheSpiritsSpent, setConsultTheSpiritsSpent] = useState<boolean>(false);
-
+    const [extraAttackSpent, setExtraAttackSpent] = useState<boolean>(true);
     // Load saved values on mount
     useEffect(() => {
         const loadSavedValues = async () => {
@@ -63,6 +66,7 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 const savedDarknessSpent = await AsyncStorage.getItem(DARKNESS_SPENT_STORAGE_KEY);
                 const savedBreathWeaponSpent = await AsyncStorage.getItem(BREATH_WEAPON_SPENT_STORAGE_KEY);
                 const savedConsultTheSpiritsSpent = await AsyncStorage.getItem(CONSULT_THE_SPIRITS_SPENT_STORAGE_KEY);
+                const savedExtraAttackSpent = await AsyncStorage.getItem(EXTRA_ATTACK_SPENT_STORAGE_KEY);
 
                 if (savedActions) {
                     setCurrentActionsAvailable(Number(savedActions));
@@ -88,6 +92,9 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 if (savedConsultTheSpiritsSpent) {
                     setConsultTheSpiritsSpent(savedConsultTheSpiritsSpent === 'true');
                 }
+                if (savedExtraAttackSpent) {
+                    setExtraAttackSpent(savedExtraAttackSpent === 'true');
+                }
             } catch (error) {
                 console.error('Error loading actions from storage:', error);
             }
@@ -108,6 +115,7 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 await AsyncStorage.setItem(DARKNESS_SPENT_STORAGE_KEY, darknessSpent.toString());
                 await AsyncStorage.setItem(BREATH_WEAPON_SPENT_STORAGE_KEY, breathWeaponSpent.toString());
                 await AsyncStorage.setItem(CONSULT_THE_SPIRITS_SPENT_STORAGE_KEY, consultTheSpiritsSpent.toString());
+                await AsyncStorage.setItem(EXTRA_ATTACK_SPENT_STORAGE_KEY, extraAttackSpent.toString());
             } catch (error) {
                 console.error('Error saving actions to storage:', error);
             }
@@ -122,7 +130,8 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
         hellishRebukeSpent,
         darknessSpent,
         breathWeaponSpent,
-        consultTheSpiritsSpent
+        consultTheSpiritsSpent,
+        extraAttackSpent
     ]);
 
     return (
@@ -143,7 +152,9 @@ export const ActionsProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 breathWeaponSpent,
                 setBreathWeaponSpent,
                 consultTheSpiritsSpent,
-                setConsultTheSpiritsSpent
+                setConsultTheSpiritsSpent,
+                extraAttackSpent,
+                setExtraAttackSpent
             }}
         >
             {children}
