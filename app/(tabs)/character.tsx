@@ -239,6 +239,8 @@ export default function MeScreen() {
         setInfusionsLearned,
         primalKnowledgeEnabled,
         setPrimalKnowledgeEnabled,
+        primalKnowledgeEnabledAgain,
+        setPrimalKnowledgeEnabledAgain,
     } = useContext(CharacterContext) as {
         mainHandWeapon: Item | null;
         offHandWeapon: Item | null;
@@ -267,6 +269,8 @@ export default function MeScreen() {
         setInfusionsLearned: (value: string[]) => void;
         primalKnowledgeEnabled: boolean;
         setPrimalKnowledgeEnabled: (value: boolean) => void;
+        primalKnowledgeEnabledAgain: boolean;
+        setPrimalKnowledgeEnabledAgain: (value: boolean) => void;
     };
     const {
         items,
@@ -968,7 +972,7 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled) ||
                                     (feature.name.toLowerCase() === 'artificer specialist' && !subclass) ||
                                     (feature.name.toLowerCase() === 'primal path' && !subclass) ||
-                                    (feature.name.toLowerCase() === 'primal knowledge' && !primalKnowledgeEnabled)
+                                    (feature.name.toLowerCase() === 'primal knowledge' && (!primalKnowledgeEnabled || (!primalKnowledgeEnabledAgain && statsData.level >= 10)))
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
@@ -1335,6 +1339,29 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            case "primal knowledge":
+                if (!primalKnowledgeEnabled || (statsData.level >= 10 && primalKnowledgeEnabled)) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: (primalKnowledgeEnabled && statsData.level < 10) || primalKnowledgeEnabledAgain ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="brain" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={(primalKnowledgeEnabled && statsData.level < 10) || primalKnowledgeEnabledAgain}
+                            />
+                        </View>
+                    )
+                }
+                break;
 
 
 
@@ -1412,6 +1439,15 @@ export default function MeScreen() {
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
+                break;
+            case "primal knowledge":
+                setPrimalKnowledgeEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                setUnusedSkillPoints(unusedSkillPoints + 2);
+                if (statsData.level >= 10) {
+                    setPrimalKnowledgeEnabledAgain(true);
+                }
                 break;
         }
     }

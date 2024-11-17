@@ -48,6 +48,8 @@ interface CharacterContextProps {
     setInfusionsLearned: (value: string[]) => void;
     primalKnowledgeEnabled: boolean;
     setPrimalKnowledgeEnabled: (value: boolean) => void;
+    primalKnowledgeEnabledAgain: boolean;
+    setPrimalKnowledgeEnabledAgain: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -78,6 +80,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [infuseItemSpent, setInfuseItemSpent] = useState<boolean>(false);
     const [infusionsLearned, setInfusionsLearned] = useState<string[]>([]);
     const [primalKnowledgeEnabled, setPrimalKnowledgeEnabled] = useState<boolean>(false);
+    const [primalKnowledgeEnabledAgain, setPrimalKnowledgeEnabledAgain] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -93,6 +96,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const INFUSE_ITEM_SPENT_STORAGE_KEY = '@infuse_item_spent';
     const INFUSIONS_LEARNED_STORAGE_KEY = '@infusions_learned';
     const PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY = '@primal_knowledge_enabled';
+    const PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY = '@primal_knowledge_enabled_again';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -154,6 +158,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 if (storedPrimalKnowledgeEnabled) {
                     setPrimalKnowledgeEnabled(storedPrimalKnowledgeEnabled === 'true');
                 }
+                const storedPrimalKnowledgeEnabledAgain = await AsyncStorage.getItem(PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY);
+                if (storedPrimalKnowledgeEnabledAgain) {
+                    setPrimalKnowledgeEnabledAgain(storedPrimalKnowledgeEnabledAgain === 'true');
+                }
             } catch (error) {
                 console.error('Error loading weapons from AsyncStorage:', error);
             } finally {
@@ -178,8 +186,22 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setInfuseItemSpent(false);
         setInfusionsLearned([]);
         setPrimalKnowledgeEnabled(false);
+        setPrimalKnowledgeEnabledAgain(false);
     }, [statsData.class]);
 
+    // save primal knowledge enabled again to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const savePrimalKnowledgeEnabledAgainToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY, primalKnowledgeEnabledAgain.toString());
+                } catch (error) {
+                    console.error('Error saving primal knowledge enabled again to AsyncStorage:', error);
+                }
+            }
+            savePrimalKnowledgeEnabledAgainToStorage();
+        }
+    }, [primalKnowledgeEnabledAgain, isLoading]);
 
     // save primal knowledge enabled to AsyncStorage whenever it changes
     useEffect(() => {
@@ -511,6 +533,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setInfusionsLearned,
                 primalKnowledgeEnabled,
                 setPrimalKnowledgeEnabled,
+                primalKnowledgeEnabledAgain,
+                setPrimalKnowledgeEnabledAgain,
             }}
         >
             {children}

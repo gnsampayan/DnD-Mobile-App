@@ -17,6 +17,7 @@ import classBonuses from '../data/classData.json';
 import xpImage from '@images/xp-image.png';
 import artificerTable from '../data/class-tables/artificer/artificerTable.json';
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
+import EquipmentActionsContext from '../../context/equipmentActionsContext';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -91,6 +92,10 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         // Render a loading indicator or return null
         return null;
     }
+
+    const { primalKnowledgeEnabled } = useContext(EquipmentActionsContext) as {
+        primalKnowledgeEnabled: boolean;
+    };
 
     // Functions to get level  bonus
     const getLevelFromXp = (xp: number): number => {
@@ -496,8 +501,12 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     styles.skillContainer,
                     { borderColor: 'gold' },
                     isProficient ? { backgroundColor: 'white' } : {},
-                    // set border color to gold if unused skill points are greater than 0
-                    unusedSkillPoints > 0 ? { borderWidth: 1 } : {}
+                    // set border color to gold if unused skill points are greater than 0 and skill is available
+                    (unusedSkillPoints > 0 &&
+                        (statsData.class?.toLowerCase() !== 'barbarian' ||
+                            !primalKnowledgeEnabled ||
+                            ['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'].includes(item.name.toLowerCase())
+                        )) ? { borderWidth: 1 } : {}
                 ]}
                 onPress={() => {
                     // Handle adding proficiency if there are unused skill points
@@ -521,6 +530,12 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         );
                     }
                 }}
+                disabled={
+                    statsData.class?.toLowerCase() === 'barbarian' &&
+                    unusedSkillPoints > 0 &&
+                    primalKnowledgeEnabled &&
+                    !['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'].includes(item.name.toLowerCase())
+                }
             >
                 <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>
                     {skillModifier >= 0 ? `+${skillModifier}` : `${skillModifier}`}

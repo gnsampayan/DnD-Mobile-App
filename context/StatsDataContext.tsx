@@ -117,7 +117,6 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 const parsedValue = JSON.parse(value);
                 // Ensure we set the string value of the subclass
                 setSubclass(typeof parsedValue === 'string' ? parsedValue : String(parsedValue));
-                console.log('Loaded subclass:', value);
             } else {
                 setSubclass(null);
             }
@@ -131,7 +130,6 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Save subclass to AsyncStorage
     const saveSubclass = async (value: string | null) => {
         try {
-            console.log('Saving subclass:', value);
             await AsyncStorage.setItem(SUBCLASS_KEY, JSON.stringify(value));
         } catch (error) {
             console.error('Error saving subclass:', error);
@@ -317,7 +315,6 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             deleteSkillProficiency();
             deleteSubclass();
             setSubclass(null);
-            console.log('Subclass deleted');
         }
         // Update the ref with the current class value
         prevClassRef.current = statsData.class || null;
@@ -329,7 +326,6 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (subclassLoaded.current) {
             saveSubclass(subclass);
         }
-        console.log('Current subclass:', subclass);
     }, [subclass]);
 
 
