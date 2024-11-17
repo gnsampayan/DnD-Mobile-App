@@ -1038,6 +1038,8 @@ export default function ActionsScreen() {
     if (selectedAction) {
       const { actions: costActions, bonus: costBonus, reaction: costReaction } = selectedAction.cost;
       const isAttack = selectedAction.name.toLowerCase() === 'attack';
+      const isBarbarianClass = statsData.class?.toLowerCase() === 'barbarian';
+      const isBarbarianLevel5Plus = isBarbarianClass && statsData.level >= 5;
 
       if (
         currentActionsAvailable >= costActions &&
@@ -1051,14 +1053,14 @@ export default function ActionsScreen() {
           setCurrentReactionsAvailable(prev => prev - costReaction);
         }
 
-        // Set extra attack to false if attack or reckless attack
-        if (isAttack || selectedAction.name.toLowerCase() === 'reckless attack') {
+        // Set extra attack to false if attack or reckless attack, but only for barbarians level 5+
+        if (isBarbarianLevel5Plus && (isAttack || selectedAction.name.toLowerCase() === 'reckless attack')) {
           setExtraAttackSpent(false);
         }
 
         setActionModalVisible(false);
-      } else if (isAttack) {
-        // Allow attack without cost if insufficient resources
+      } else if (isBarbarianLevel5Plus && isAttack) {
+        // Allow attack without cost if insufficient resources, but only for barbarians level 5+
         setExtraAttackSpent(true);
         setActionModalVisible(false);
       } else {

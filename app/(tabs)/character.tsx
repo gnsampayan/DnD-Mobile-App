@@ -1340,7 +1340,7 @@ export default function MeScreen() {
                 }
                 break;
             case "primal knowledge":
-                if (!primalKnowledgeEnabled || (statsData.level >= 10 && primalKnowledgeEnabled)) {
+                if (!primalKnowledgeEnabled || (statsData.level >= 10 && !primalKnowledgeEnabledAgain)) {
                     return (
                         <View style={{
                             paddingHorizontal: 10,
