@@ -32,8 +32,24 @@ import alchemistData from '../data/class-tables/artificer/subclass/alchemist.jso
 import barbarianFeatures from '../data/class-tables/barbarian/barbarianFeatures.json';
 import primalPathData from '../data/class-tables/barbarian/primalPath.json';
 import ancestralGuardianData from '../data/class-tables/barbarian/subclass/ancestralGuardian.json';
-
-
+import battleragerData from '../data/class-tables/barbarian/subclass/battlerager.json';
+import beastData from '../data/class-tables/barbarian/subclass/beast.json';
+import berserkerData from '../data/class-tables/barbarian/subclass/berserker.json';
+import giantData from '../data/class-tables/barbarian/subclass/giant.json';
+import stormHeraldData from '../data/class-tables/barbarian/subclass/stormHerald.json';
+import totemWarriorData from '../data/class-tables/barbarian/subclass/totemWarrior.json';
+import wildMagicData from '../data/class-tables/barbarian/subclass/wildMagic.json';
+import zealotData from '../data/class-tables/barbarian/subclass/zealot.json';
+import bardFeatures from '../data/class-tables/bard/bardFeatures.json';
+import bardCollegeData from '../data/class-tables/bard/bardCollege.json';
+import creationData from '../data/class-tables/bard/subclass/creation.json';
+import eloquenceData from '../data/class-tables/bard/subclass/eloquence.json';
+import glamourData from '../data/class-tables/bard/subclass/glamour.json';
+import loreData from '../data/class-tables/bard/subclass/lore.json';
+import spiritsData from '../data/class-tables/bard/subclass/spirits.json';
+import swordsData from '../data/class-tables/bard/subclass/swords.json';
+import valorData from '../data/class-tables/bard/subclass/valor.json';
+import whispersData from '../data/class-tables/bard/subclass/whispers.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -181,6 +197,7 @@ const clearAsyncStorage = async () => {
 const classFeaturesMap: { [key: string]: any } = {
     artificer: artificerFeatures,
     barbarian: barbarianFeatures,
+    bard: bardFeatures,
 }
 
 // TODO: make max infusions learned a variable
@@ -243,6 +260,10 @@ export default function MeScreen() {
         setPrimalKnowledgeEnabledAgain,
         primalChampionEnabled,
         setPrimalChampionEnabled,
+        expertiseEnabled,
+        setExpertiseEnabled,
+        expertiseEnabledAgain,
+        setExpertiseEnabledAgain,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -281,6 +302,8 @@ export default function MeScreen() {
     const [specialistValue, setSpecialistValue] = useState<string | null>(null);
     const [primalPathValue, setPrimalPathValue] = useState<string | null>(null);
     const [primalPathOpen, setPrimalPathOpen] = useState(false);
+    const [bardCollegeOpen, setBardCollegeOpen] = useState(false);
+    const [bardCollegeValue, setBardCollegeValue] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -946,7 +969,11 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'primal path' && !subclass) ||
                                     (feature.name.toLowerCase() === 'primal knowledge' && (!primalKnowledgeEnabled ||
                                         (!primalKnowledgeEnabledAgain && statsData.level >= 10))) ||
-                                    (feature.name.toLowerCase() === 'primal champion' && !primalChampionEnabled)
+                                    (feature.name.toLowerCase() === 'primal champion' && !primalChampionEnabled) ||
+                                    (feature.name.toLowerCase() === 'bard college' && !subclass) ||
+                                    (feature.name.toLowerCase() === 'expertise' && (!expertiseEnabled ||
+                                        (!expertiseEnabledAgain && statsData.level >= 10)))
+                                    // add more here
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
@@ -1359,6 +1386,53 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            // Bard
+            case "bard college":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: bardCollegeValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="music" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={bardCollegeValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
+            case "expertise":
+                if (!expertiseEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: expertiseEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="book" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={expertiseEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1406,6 +1480,7 @@ export default function MeScreen() {
                 setBreathWeaponEnabled(true);
                 break;
 
+            // Artificer
             case "magical tinkering":
                 setMagicalTinkeringEnabled(true);
                 setClassFeatDescriptionModalVisible(false);
@@ -1447,6 +1522,24 @@ export default function MeScreen() {
                 setPrimalChampionEnabled(true);
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
+                break;
+
+            // Bard
+            case "bard college":
+                if (bardCollegeValue) {
+                    setSubclass(bardCollegeValue);
+                }
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            case "expertise":
+                setExpertiseEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                setUnusedSkillPoints(unusedSkillPoints + 2);
+                if (statsData.level >= 10) {
+                    setExpertiseEnabledAgain(true);
+                }
                 break;
         }
     }
@@ -1610,15 +1703,16 @@ export default function MeScreen() {
             return (
                 <View>
                     <Text>Subclass: {subclass}</Text>
-                    {subclass === 'ancestral guardian' && renderAncestralGuardianFeatures()}
-                    {/* {subclass === 'battlerager' && renderBattleragerFeatures()}
-                    {subclass === 'beast' && renderBeastFeatures()}
-                    {subclass === 'berserker' && renderBerserkerFeatures()}
-                    {subclass === 'giant' && renderGiantFeatures()}
-                    {subclass === 'storm herald' && renderStormHeraldFeatures()}
-                    {subclass === 'totem warrior' && renderTotemWarriorFeatures()}
-                    {subclass === 'wild magic' && renderWildMagicFeatures()}
-                    {subclass === 'zealot' && renderZealotFeatures()} */}
+                    {subclass && renderBarbarianSubclassFeatures(subclass)}
+                </View>
+            );
+        }
+        // bard subclass
+        if (subClassButtonName.toLowerCase() === 'bard college') {
+            return (
+                <View>
+                    <Text>Subclass: {subclass}</Text>
+                    {subclass && renderBardSubclassFeatures(subclass)}
                 </View>
             );
         }
@@ -1901,14 +1995,43 @@ export default function MeScreen() {
         );
     };
 
-    const renderAncestralGuardianFeatures = () => {
-        const ancestralGuardianInfo = primalPathData.find(path => path.id === 'ancestral guardian');
+    const renderBarbarianSubclassFeatures = (subclassId: string) => {
+        // Get the appropriate data based on subclass
+        const getSubclassData = (id: string) => {
+            switch (id) {
+                case 'ancestral guardian':
+                    return ancestralGuardianData;
+                case 'battlerager':
+                    return battleragerData;
+                case 'beast':
+                    return beastData;
+                case 'berserker':
+                    return berserkerData;
+                case 'giant':
+                    return giantData;
+                case 'storm herald':
+                    return stormHeraldData;
+                case 'totem warrior':
+                    return totemWarriorData;
+                case 'wild magic':
+                    return wildMagicData;
+                case 'zealot':
+                    return zealotData;
+                default:
+                    return null;
+            }
+        };
+
+        const subclassData = getSubclassData(subclassId);
+        const subclassInfo = primalPathData.find(path => path.id === subclassId);
+
+        if (!subclassData || !subclassInfo) return null;
 
         return (
             <View>
-                <Text>Ancestral Guardian</Text>
-                <Text style={{ marginVertical: 10 }}>{ancestralGuardianInfo?.description}</Text>
-                {Object.entries(ancestralGuardianData).map(([key, value]) => {
+                <Text style={{ textTransform: 'capitalize' }}>{subclassId.replace('-', ' ')}</Text>
+                <Text style={{ marginVertical: 10 }}>{subclassInfo.description}</Text>
+                {Object.entries(subclassData).map(([key, value]) => {
                     // Skip the name property since it's not a feature
                     if (key === 'name') return null;
                     // Only render if the feature's level requirement is met
@@ -1917,16 +2040,124 @@ export default function MeScreen() {
                             <View key={key} style={{ marginVertical: 10 }}>
                                 <Text style={{ fontWeight: 'bold' }}>{key}</Text>
                                 <Text>{value.description}</Text>
-
-                                {/* Handle improvements */}
-                                {'improvements' in value && value.improvements.map((improvement, index) => (
+                                {/* Handle improvements if they exist */}
+                                {'improvements' in value && Array.isArray(value.improvements) && value.improvements.map((improvement: string, index: number) => (
                                     <Text key={index} style={{ marginTop: 5 }}>• {improvement}</Text>
                                 ))}
 
-                                {/* Handle additionalDetails */}
-                                {'additionalDetails' in value && value.additionalDetails.map((detail, index) => (
+                                {/* Handle additionalDetails if they exist */}
+                                {'additionalDetails' in value && value.additionalDetails?.map((detail, index) => (
                                     <Text key={index} style={{ marginTop: 5 }}>• {detail}</Text>
                                 ))}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
+
+    // Render Bard College Dropdown Subclass Options
+    const renderBardCollegeDropdown = () => {
+        return (
+            <View>
+                <Text>Bard College</Text>
+                <DropDownPicker
+                    items={bardCollegeData.map(item => ({
+                        label: item.name,
+                        value: item.id
+                    }))}
+                    open={bardCollegeOpen}
+                    setOpen={setBardCollegeOpen}
+                    value={bardCollegeValue}
+                    setValue={setBardCollegeValue}
+                    placeholder="Select a Bard College"
+                />
+            </View>
+        );
+    };
+
+    const renderBardCollegeDescription = () => {
+        return (
+            <View>
+                <Text>{bardCollegeData.find(item => item.id === bardCollegeValue)?.description}</Text>
+            </View>
+        );
+    };
+
+    const renderBardSubclassFeatures = (subclassId: string) => {
+        // Get the appropriate data based on subclass
+        const getSubclassData = (id: string) => {
+            switch (id) {
+                case 'creation':
+                    return creationData;
+                case 'eloquence':
+                    return eloquenceData;
+                case 'glamour':
+                    return glamourData;
+                case 'lore':
+                    return loreData;
+                case 'spirits':
+                    return spiritsData;
+                case 'swords':
+                    return swordsData;
+                case 'valor':
+                    return valorData;
+                case 'whispers':
+                    return whispersData;
+                default:
+                    return null;
+            }
+        };
+
+        const subclassData = getSubclassData(subclassId);
+        const subclassInfo = bardCollegeData.find(college => college.id === subclassId);
+
+        if (!subclassData || !subclassInfo) return null;
+
+        const renderNestedObject = (obj: any, depth: number = 0) => {
+            return Object.entries(obj).map(([key, value]) => {
+                if (typeof value === 'string' || typeof value === 'number') {
+                    return (
+                        <Text key={key} style={{ marginLeft: depth * 10, marginTop: 5 }}>
+                            {depth > 0 && '• '}{key !== 'description' && `${key}: `}{value}
+                        </Text>
+                    );
+                } else if (Array.isArray(value)) {
+                    return (
+                        <View key={key} style={{ marginLeft: depth * 10 }}>
+                            <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{key}:</Text>
+                            {value.map((item, index) => (
+                                <Text key={index} style={{ marginTop: 5, marginLeft: 10 }}>
+                                    • {item}
+                                </Text>
+                            ))}
+                        </View>
+                    );
+                } else if (typeof value === 'object' && value !== null) {
+                    return (
+                        <View key={key} style={{ marginLeft: depth * 10, marginTop: 5 }}>
+                            <Text style={{ fontWeight: 'bold' }}>{key}:</Text>
+                            {renderNestedObject(value, depth + 1)}
+                        </View>
+                    );
+                }
+                return null;
+            });
+        };
+
+        return (
+            <View>
+                <Text style={{ textTransform: 'capitalize' }}>{subclassId.replace('-', ' ')}</Text>
+                <Text style={{ marginVertical: 10 }}>{subclassInfo.description}</Text>
+                {Object.entries(subclassData).map(([key, value]) => {
+                    if (key === 'name') return null;
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                {renderNestedObject(value)}
                             </View>
                         );
                     }
@@ -2744,6 +2975,14 @@ export default function MeScreen() {
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
                         )}
+                        {/* Bard College Dropdown */}
+                        {statsData.class === 'bard' && selectedFeat?.toLowerCase() === 'bard college' && (
+                            subclass === null ? (
+                                renderBardCollegeDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
                             {/* Render Specific Class Feature */}
                             {selectedFeat && renderClassFeatures(false, selectedFeat)}
@@ -2752,6 +2991,10 @@ export default function MeScreen() {
                             {/* Primal Path Dropdown Value chosen --- description */}
                             {selectedFeat?.toLowerCase() === 'primal path' && subclass === null && (
                                 renderPrimalPathDescription()
+                            )}
+                            {/* Bard College Dropdown Value chosen --- description */}
+                            {selectedFeat?.toLowerCase() === 'bard college' && subclass === null && (
+                                renderBardCollegeDescription()
                             )}
                         </ScrollView>
                     </View>

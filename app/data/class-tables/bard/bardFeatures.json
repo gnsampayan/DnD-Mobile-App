@@ -1,0 +1,144 @@
+[
+	{
+		"id": "Spellcasting",
+		"name": "Spellcasting",
+		"level": 1,
+		"description": "You have learned to untangle and reshape the fabric of reality in harmony with your wishes and music. Your spells are part of your vast repertoire, magic that you can tune to different situations.",
+		"features": [
+			{
+				"Cantrips": "You know two cantrips of your choice from the bard spell list. You learn additional bard cantrips at higher levels, as shown in the Cantrips Known column of the Bard table."
+			},
+			{
+				"Spell Slots": "The Bard table shows how many spell slots you have to cast your bard spells of 1st level and higher. To cast one of these spells, you must expend a slot of the spell's level or higher. You regain all expended spell slots when you finish a long rest."
+			},
+			{
+				"Spells Known": "You know four 1st-level spells of your choice from the bard spell list. The Spells Known column shows when you learn more bard spells of your choice. Each spell must be of a level for which you have spell slots."
+			}
+		],
+		"mechanics": {
+			"spellcasting_ability": "Charisma",
+			"spell_save_dc": "8 + proficiency bonus + Charisma modifier",
+			"spell_attack_modifier": "proficiency bonus + Charisma modifier",
+			"ritual_casting": "Can cast known bard spells with ritual tag as rituals",
+			"spellcasting_focus": "Can use musical instrument as spellcasting focus"
+		}
+	},
+	{
+		"id": "Bardic Inspiration",
+		"name": "Bardic Inspiration",
+		"level": 1,
+		"description": "You can inspire others through stirring words or music.",
+		"mechanics": {
+			"action": "bonus action",
+			"range": "60 feet",
+			"target": "One creature other than yourself who can hear you",
+			"effect": {
+				"die": {
+					"1-4": "d6",
+					"5-9": "d8",
+					"10-14": "d10",
+					"15-20": "d12"
+				},
+				"usage": "Add to one ability check, attack roll, or saving throw",
+				"timing": "Within 10 minutes, after rolling d20 but before knowing success/failure"
+			},
+			"uses": {
+				"amount": "Charisma modifier (minimum 1)",
+				"reset": "long rest"
+			},
+			"limitations": "Creature can have only one Bardic Inspiration die at a time"
+		}
+	},
+	{
+		"id": "Jack of All Trades",
+		"name": "Jack of All Trades",
+		"level": 2,
+		"description": "You can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus."
+	},
+	{
+		"id": "Song of Rest",
+		"name": "Song of Rest",
+		"level": 2,
+		"description": "You can use soothing music or oration to help revitalize your wounded allies during a short rest.",
+		"mechanics": {
+			"trigger": "When friendly creatures who can hear your performance spend Hit Dice during short rest",
+			"effect": {
+				"2-8": "Extra 1d6 hit points",
+				"9-12": "Extra 1d8 hit points",
+				"13-16": "Extra 1d10 hit points",
+				"17-20": "Extra 1d12 hit points"
+			}
+		}
+	},
+	{
+		"id": "Magical Inspiration",
+		"name": "Magical Inspiration",
+		"level": 2,
+		"description": "If a creature has a Bardic Inspiration die from you and casts a spell that restores hit points or deals damage, the creature can roll that die and add the number rolled to the healing or damage.",
+		"optional": true
+	},
+	{
+		"id": "Bard College",
+		"name": "Bard College",
+		"level": 3,
+		"description": "You delve into the advanced techniques of a bard college of your choice.",
+		"features": "Grants features at 3rd, 6th, and 14th level",
+		"colleges": [
+			"Creation",
+			"Eloquence",
+			"Glamour",
+			"Lore",
+			"Spirits",
+			"Swords",
+			"Valor",
+			"Whispers"
+		]
+	},
+	{
+		"id": "Expertise",
+		"name": "Expertise",
+		"level": 3,
+		"description": "Choose two of your skill proficiencies. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies.",
+		"additional": "Choose two more skills at 10th level"
+	},
+	{
+		"id": "Font of Inspiration",
+		"name": "Font of Inspiration",
+		"level": 5,
+		"description": "You regain all of your expended uses of Bardic Inspiration when you finish a short or long rest."
+	},
+	{
+		"id": "Countercharm",
+		"name": "Countercharm",
+		"level": 6,
+		"description": "You gain the ability to use musical notes or words of power to disrupt mind-influencing effects.",
+		"mechanics": {
+			"action": "action",
+			"duration": "Until the end of your next turn",
+			"effect": "Friendly creatures within 30 feet have advantage on saves against being frightened or charmed",
+			"requirements": "Creatures must be able to hear you",
+			"early_end": "If incapacitated, silenced, or voluntarily ended"
+		}
+	},
+	{
+		"id": "Magical Secrets",
+		"name": "Magical Secrets",
+		"level": 10,
+		"description": "You have plundered magical knowledge from a wide spectrum of disciplines.",
+		"features": [
+			"Choose two spells from any class at 10th level",
+			"Choose two more at 14th level",
+			"Choose two more at 18th level"
+		],
+		"mechanics": {
+			"restrictions": "Must be of a level you can cast or cantrips",
+			"effect": "Spells count as bard spells and add to Spells Known"
+		}
+	},
+	{
+		"id": "Superior Inspiration",
+		"name": "Superior Inspiration",
+		"level": 20,
+		"description": "When you roll initiative and have no uses of Bardic Inspiration left, you regain one use."
+	}
+]

@@ -1,0 +1,74 @@
+{
+	"name": "Creation",
+	"moteOfPotential": {
+		"level": 3,
+		"description": "When you join the College of Creation at 3rd level, whenever you give a creature a Bardic Inspiration die, you can utter a note from the Song of Creation to create a Tiny mote of potential, which orbits within 5 feet of that creature. The mote is intangible and invulnerable, and it lasts until the Bardic Inspiration die is lost. The mote looks like a musical note, a star, a flower, or another symbol of art or life that you choose.",
+		"effects": {
+			"abilityCheck": "When the creature rolls the Bardic Inspiration die to add it to an ability check, the creature can roll the Bardic Inspiration die again and choose which roll to use, as the mote pops and emits colorful, harmless sparks for a moment.",
+			"attackRoll": "Immediately after the creature rolls the Bardic Inspiration die to add it to an attack roll against a target, the mote thunderously shatters. The target and each creature of your choice that you can see within 5 feet of it must succeed on a Constitution saving throw against your spell save DC or take thunder damage equal to the number rolled on the Bardic Inspiration die.",
+			"savingThrow": "Immediately after the creature rolls the Bardic Inspiration die and adds it to a saving throw, the mote vanishes with the sound of soft music, causing the creature to gain temporary hit points equal to the number rolled on the Bardic Inspiration die plus your Charisma modifier (minimum of 1 temporary hit point)."
+		}
+	},
+	"performanceOfCreation": {
+		"level": 3,
+		"description": "As an action, you can channel the magic of the Song of Creation to create one nonmagical item of your choice in an unoccupied space within 10 feet of you. The item must appear on a surface or in a liquid that can support it. The gp value of the item can't be more than 20 times your bard level, and the item must be Medium or smaller. The item glimmers softly, and a creature can faintly hear music when touching it. The created item disappears after a number of hours equal to your proficiency bonus.",
+		"limitations": [
+			"Once you create an item with this feature, you can't do so again until you finish a long rest, unless you expend a spell slot of 2nd level or higher",
+			"You can have only one item created by this feature at a time",
+			"If you use this action and already have an item from this feature, the first one immediately vanishes"
+		],
+		"improvements": [
+			"6th level: Can create Large items",
+			"14th level: Can create Huge items"
+		]
+	},
+	"animatingPerformance": {
+		"level": 6,
+		"description": "As an action, you can animate one Large or smaller nonmagical item within 30 feet of you that isn't being worn or carried. The animate item uses the Dancing Item stat block, which uses your proficiency bonus (PB). The item is friendly to you and your companions and obeys your commands. It lives for 1 hour, until it is reduced to 0 hit points, or until you die.",
+		"combatRules": [
+			"The item shares your initiative count, but takes its turn immediately after yours",
+			"It can move and use its reaction on its own",
+			"Only takes Dodge action unless commanded with bonus action",
+			"If you are incapacitated, the item can take any action of its choice"
+		],
+		"limitations": [
+			"Once animated, can't do so again until long rest unless expending 3rd level or higher spell slot",
+			"Can only have one animated item at a time"
+		],
+		"dancingItem": {
+			"stats": {
+				"armorClass": "16 (natural armor)",
+				"hitPoints": "10 + 5 times your bard level",
+				"speed": "30 ft., fly 30 ft. (hover)",
+				"abilities": {
+					"str": "18 (+4)",
+					"dex": "14 (+2)",
+					"con": "16 (+3)",
+					"int": "4 (-3)",
+					"wis": "10 (+0)",
+					"cha": "6 (-2)"
+				},
+				"immunities": {
+					"damage": ["poison", "psychic"],
+					"conditions": ["charmed", "exhaustion", "poisoned", "frightened"]
+				},
+				"senses": "darkvision 60 ft., passive Perception 10",
+				"languages": "understands the languages you speak"
+			},
+			"features": {
+				"immutableForm": "The item is immune to any spell or effect that would alter its form.",
+				"irrepressibleDance": "When any creature starts its turn within 10 feet of the item, the item can increase or decrease (your choice) the walking speed of that creature by 10 feet until the end of the turn, provided the item isn't incapacitated."
+			},
+			"actions": {
+				"forceEmpoweredSlam": "Melee Weapon Attack: your spell attack modifier to hit, reach 5 ft., one target you can see. Hit: 1d10 + PB force damage."
+			}
+		}
+	},
+	"creativeCrescendo": {
+		"level": 14,
+		"description": "When you use your Performance of Creation feature, you can create more than one item at once. The number of items equals your Charisma modifier (minimum of two items). If you create an item that would exceed that number, you choose which of the previously created items disappears. Only one of these items can be of the maximum size you can create; the rest must be Small or Tiny.",
+		"additionalDetails": [
+			"You are no longer limited by gp value when creating items with Performance of Creation."
+		]
+	}
+}

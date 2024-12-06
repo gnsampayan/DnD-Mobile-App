@@ -52,6 +52,10 @@ export interface CharacterContextProps {
     setPrimalKnowledgeEnabledAgain: (value: boolean) => void;
     primalChampionEnabled: boolean;
     setPrimalChampionEnabled: (value: boolean) => void;
+    expertiseEnabled: boolean;
+    setExpertiseEnabled: (value: boolean) => void;
+    expertiseEnabledAgain: boolean;
+    setExpertiseEnabledAgain: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -84,6 +88,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [primalKnowledgeEnabled, setPrimalKnowledgeEnabled] = useState<boolean>(false);
     const [primalKnowledgeEnabledAgain, setPrimalKnowledgeEnabledAgain] = useState<boolean>(false);
     const [primalChampionEnabled, setPrimalChampionEnabled] = useState<boolean>(false);
+    const [expertiseEnabled, setExpertiseEnabled] = useState<boolean>(false);
+    const [expertiseEnabledAgain, setExpertiseEnabledAgain] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -101,77 +107,105 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY = '@primal_knowledge_enabled';
     const PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY = '@primal_knowledge_enabled_again';
     const PRIMAL_CHAMPION_ENABLED_STORAGE_KEY = '@primal_champion_enabled';
+    const EXPERTISE_ENABLED_STORAGE_KEY = '@expertise_enabled';
+    const EXPERTISE_ENABLED_AGAIN_STORAGE_KEY = '@expertise_enabled_again';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
         const loadDataFromStorage = async () => {
             try {
-                const storedWeapons = await AsyncStorage.getItem(WEAPONS_STORAGE_KEY);
-                if (storedWeapons) {
-                    setWeapons(JSON.parse(storedWeapons));
-                }
-                const storedLuckyPoints = await AsyncStorage.getItem(LUCKY_POINTS_STORAGE_KEY);
-                if (storedLuckyPoints) {
-                    setLuckyPoints(parseInt(storedLuckyPoints));
-                }
-                const storedLuckyPointsMax = await AsyncStorage.getItem(LUCKY_POINTS_MAX_STORAGE_KEY);
-                if (storedLuckyPointsMax) {
-                    setLuckyPointsMax(parseInt(storedLuckyPointsMax));
-                }
-                const storedRelentlessEnduranceGained = await AsyncStorage.getItem(RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY);
-                if (storedRelentlessEnduranceGained) {
-                    setRelentlessEnduranceGained(storedRelentlessEnduranceGained === 'true');
-                }
-                const storedRelentlessEnduranceUsable = await AsyncStorage.getItem(RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY);
-                if (storedRelentlessEnduranceUsable) {
-                    setRelentlessEnduranceUsable(storedRelentlessEnduranceUsable === 'true');
-                }
-                const storedLuckyPointsEnabled = await AsyncStorage.getItem(LUCKY_POINTS_ENABLED_STORAGE_KEY);
-                if (storedLuckyPointsEnabled) {
-                    setLuckyPointsEnabled(storedLuckyPointsEnabled === 'true');
-                }
-                const storedInfernalLegacyEnabled = await AsyncStorage.getItem(INFERNAL_LEGACY_ENABLED_STORAGE_KEY);
-                if (storedInfernalLegacyEnabled) {
-                    setInfernalLegacyEnabled(storedInfernalLegacyEnabled === 'true');
-                }
-                const storedDraconicAncestryEnabled = await AsyncStorage.getItem(DRACONIC_ANCESTRY_ENABLED_STORAGE_KEY);
-                if (storedDraconicAncestryEnabled) {
-                    setDraconicAncestry(JSON.parse(storedDraconicAncestryEnabled));
-                }
-                const storedBreathWeaponEnabled = await AsyncStorage.getItem(BREATH_WEAPON_ENABLED_STORAGE_KEY);
-                if (storedBreathWeaponEnabled) {
-                    setBreathWeaponEnabled(storedBreathWeaponEnabled === 'true');
-                }
-                const storedMagicalTinkeringEnabled = await AsyncStorage.getItem(MAGICAL_TINKERING_ENABLED_STORAGE_KEY);
-                if (storedMagicalTinkeringEnabled) {
-                    setMagicalTinkeringEnabled(storedMagicalTinkeringEnabled === 'true');
-                }
-                const storedInfuseItemEnabled = await AsyncStorage.getItem(INFUSE_ITEM_ENABLED_STORAGE_KEY);
-                if (storedInfuseItemEnabled) {
-                    setInfuseItemEnabled(storedInfuseItemEnabled === 'true');
-                }
-                const storedInfuseItemSpent = await AsyncStorage.getItem(INFUSE_ITEM_SPENT_STORAGE_KEY);
-                if (storedInfuseItemSpent) {
-                    setInfuseItemSpent(storedInfuseItemSpent === 'true');
-                }
-                const storedInfusionsLearned = await AsyncStorage.getItem(INFUSIONS_LEARNED_STORAGE_KEY);
-                if (storedInfusionsLearned) {
-                    setInfusionsLearned(JSON.parse(storedInfusionsLearned));
-                }
-                const storedPrimalKnowledgeEnabled = await AsyncStorage.getItem(PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY);
-                if (storedPrimalKnowledgeEnabled) {
-                    setPrimalKnowledgeEnabled(storedPrimalKnowledgeEnabled === 'true');
-                }
-                const storedPrimalKnowledgeEnabledAgain = await AsyncStorage.getItem(PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY);
-                if (storedPrimalKnowledgeEnabledAgain) {
-                    setPrimalKnowledgeEnabledAgain(storedPrimalKnowledgeEnabledAgain === 'true');
-                }
-                const storedPrimalChampionEnabled = await AsyncStorage.getItem(PRIMAL_CHAMPION_ENABLED_STORAGE_KEY);
-                if (storedPrimalChampionEnabled) {
-                    setPrimalChampionEnabled(storedPrimalChampionEnabled === 'true');
-                }
+                const storageItems = [
+                    { key: WEAPONS_STORAGE_KEY, setter: setWeapons, parser: JSON.parse },
+                    { key: LUCKY_POINTS_STORAGE_KEY, setter: setLuckyPoints, parser: parseInt },
+                    { key: LUCKY_POINTS_MAX_STORAGE_KEY, setter: setLuckyPointsMax, parser: parseInt },
+                    {
+                        key: RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY,
+                        setter: setRelentlessEnduranceGained,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY,
+                        setter: setRelentlessEnduranceUsable,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: LUCKY_POINTS_ENABLED_STORAGE_KEY,
+                        setter: setLuckyPointsEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: INFERNAL_LEGACY_ENABLED_STORAGE_KEY,
+                        setter: setInfernalLegacyEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: DRACONIC_ANCESTRY_ENABLED_STORAGE_KEY,
+                        setter: setDraconicAncestry,
+                        parser: JSON.parse
+                    },
+                    {
+                        key: BREATH_WEAPON_ENABLED_STORAGE_KEY,
+                        setter: setBreathWeaponEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: MAGICAL_TINKERING_ENABLED_STORAGE_KEY,
+                        setter: setMagicalTinkeringEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: INFUSE_ITEM_ENABLED_STORAGE_KEY,
+                        setter: setInfuseItemEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: INFUSE_ITEM_SPENT_STORAGE_KEY,
+                        setter: setInfuseItemSpent,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: INFUSIONS_LEARNED_STORAGE_KEY,
+                        setter: setInfusionsLearned,
+                        parser: JSON.parse
+                    },
+                    {
+                        key: PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY,
+                        setter: setPrimalKnowledgeEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY,
+                        setter: setPrimalKnowledgeEnabledAgain,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: PRIMAL_CHAMPION_ENABLED_STORAGE_KEY,
+                        setter: setPrimalChampionEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: EXPERTISE_ENABLED_STORAGE_KEY,
+                        setter: setExpertiseEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: EXPERTISE_ENABLED_AGAIN_STORAGE_KEY,
+                        setter: setExpertiseEnabledAgain,
+                        parser: (val: string) => val === 'true'
+                    }
+                ];
+
+                await Promise.all(
+                    storageItems.map(async ({ key, setter, parser }) => {
+                        const storedValue = await AsyncStorage.getItem(key);
+                        if (storedValue !== null) {
+                            setter(parser(storedValue));
+                        }
+                    })
+                );
+
             } catch (error) {
-                console.error('Error loading weapons from AsyncStorage:', error);
+                console.error('Error loading data from AsyncStorage:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -181,7 +215,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
 
-    // set relentless endurance boolean to false when class is changed
+    // reset all state variables to false when class is changed
     useEffect(() => {
         setRelentlessEnduranceGained(false);
         setRelentlessEnduranceUsable(false);
@@ -196,7 +230,39 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setPrimalKnowledgeEnabled(false);
         setPrimalKnowledgeEnabledAgain(false);
         setPrimalChampionEnabled(false);
+        setExpertiseEnabled(false);
+        setExpertiseEnabledAgain(false);
     }, [statsData.class]);
+
+
+
+    // save expertise enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveExpertiseEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(EXPERTISE_ENABLED_STORAGE_KEY, expertiseEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving expertise enabled to AsyncStorage:', error);
+                }
+            }
+            saveExpertiseEnabledToStorage();
+        }
+    }, [expertiseEnabled, isLoading]);
+
+    // save expertise enabled again to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveExpertiseEnabledAgainToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(EXPERTISE_ENABLED_AGAIN_STORAGE_KEY, expertiseEnabledAgain.toString());
+                } catch (error) {
+                    console.error('Error saving expertise enabled again to AsyncStorage:', error);
+                }
+            }
+            saveExpertiseEnabledAgainToStorage();
+        }
+    }, [expertiseEnabledAgain, isLoading]);
 
     // save primal champion enabled to AsyncStorage whenever it changes
     useEffect(() => {
@@ -560,6 +626,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setPrimalKnowledgeEnabledAgain,
                 primalChampionEnabled,
                 setPrimalChampionEnabled,
+                expertiseEnabled,
+                setExpertiseEnabled,
+                expertiseEnabledAgain,
+                setExpertiseEnabledAgain,
             }}
         >
             {children}

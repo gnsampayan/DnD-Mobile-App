@@ -83,7 +83,7 @@ import wizardTableData from '@/app/data/class-tables/wizardTable.json';
 import warlockTableData from '@/app/data/class-tables/warlockTable.json';
 import sorcererTableData from '@/app/data/class-tables/sorcererTable.json';
 import artificerTableData from '@/app/data/class-tables/artificer/artificerTable.json';
-import bardTableData from '@/app/data/class-tables/bardTable.json';
+import bardTableData from '@/app/data/class-tables/bard/bardTable.json';
 import clericTableData from '@/app/data/class-tables/clericTable.json';
 import druidTableData from '@/app/data/class-tables/druidTable.json';
 import rangerTableData from '@/app/data/class-tables/rangerTable.json';

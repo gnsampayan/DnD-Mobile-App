@@ -17,6 +17,7 @@ import classBonuses from '../data/classData.json';
 import xpImage from '@images/xp-image.png';
 import artificerTable from '../data/class-tables/artificer/artificerTable.json';
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
+import bardTable from '../data/class-tables/bard/bardTable.json';
 import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
 
 interface CharacterStatsScreenProps {
@@ -158,34 +159,33 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
         // If not level 1, check class tables for ability score improvements
         if (level > 1) {
-            if (statsData.class?.toLowerCase() === 'artificer') {
-                // Get all artificer levels up to current level
-                const artificerLevels = artificerTable.filter(l => l.userLevel <= level);
+            const classType = statsData.class?.toLowerCase();
+            let classLevels;
 
-                // Add 2 points for each level that has Ability Score Improvement
-                artificerLevels.forEach(levelData => {
-                    if (levelData.features && levelData.features.some(feature =>
-                        feature.toLowerCase() === 'ability score improvement'
-                    )) {
-                        totalPoints += 2;
-                    }
-                });
-            } else if (statsData.class?.toLowerCase() === 'barbarian') {
-                // Get all barbarian levels up to current level 
-                const barbarianLevels = barbarianTable.filter(l => l.userLevel <= level);
-
-                // Add 2 points for each level that has Ability Score Improvement
-                barbarianLevels.forEach(levelData => {
-                    if (levelData.features && levelData.features.some(feature =>
-                        feature.toLowerCase() === 'ability score improvement'
-                    )) {
-                        totalPoints += 2;
-                    }
-                });
-            } else {
-                // For other classes, use default calculation
-                totalPoints += (level - 1) * 2;
+            // Get class table data based on class type
+            switch (classType) {
+                case 'artificer':
+                    classLevels = artificerTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'barbarian':
+                    classLevels = barbarianTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'bard':
+                    classLevels = bardTable.filter(l => l.userLevel <= level);
+                    break;
+                default:
+                    // For other classes, use default calculation
+                    return totalPoints + (level - 1) * 2;
             }
+
+            // Add 2 points for each level that has Ability Score Improvement
+            classLevels.forEach(levelData => {
+                if (levelData.features && levelData.features.some(feature =>
+                    feature.toLowerCase() === 'ability score improvement'
+                )) {
+                    totalPoints += 2;
+                }
+            });
         }
 
         return totalPoints;
