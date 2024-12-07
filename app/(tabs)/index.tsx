@@ -64,6 +64,7 @@ import consultTheSpiritsImage from '@actions/consult-spirits-image.png';
 
 // Bard
 import bardicInspirationImage from '@actions/bardic-inspiration-image.png';
+import countercharmImage from '@actions/countercharm-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -334,6 +335,8 @@ export default function ActionsScreen() {
     setInfuseItemSpent,
     infusionsLearned,
     bardicInspirationEnabled,
+    fontOfInspirationEnabled,
+    countercharmEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -351,6 +354,8 @@ export default function ActionsScreen() {
     setInfuseItemSpent: (value: boolean) => void;
     infusionsLearned: string[];
     bardicInspirationEnabled: boolean;
+    fontOfInspirationEnabled: boolean;
+    countercharmEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -540,6 +545,8 @@ export default function ActionsScreen() {
     magicalTinkeringEnabled,
     infuseItemEnabled,
     bardicInspirationEnabled,
+    countercharmEnabled,
+    // Add other dependencies as needed for new actions gained from class features
   ]);
 
 
@@ -1570,6 +1577,18 @@ export default function ActionsScreen() {
           source: 'class',
         } as ActionBlock);
       }
+    }
+    if (countercharmEnabled === true) {
+      // Add 'Countercharm' action
+      classActions.push({
+        id: 'class-countercharm',
+        name: 'Countercharm',
+        cost: { actions: 1, bonus: 0 },
+        details: 'As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed. A creature must be able to hear you to gain this benefit. The performance ends early if you are incapacitated or silenced or if you voluntarily end it (no action required).',
+        image: countercharmImage as ImageSourcePropType,
+        type: 'feature',
+        source: 'class',
+      } as ActionBlock);
     }
 
     // Other classes
@@ -2777,6 +2796,10 @@ export default function ActionsScreen() {
                               setConsultTheSpiritsSpent(false);
                             }
                             commitAction();
+                            if (statsData.class?.toLowerCase() === 'bard' && fontOfInspirationEnabled) {
+                              const charismaModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Charisma')?.value || 10);
+                              setCurrentBardicInspirationPoints(charismaModifier);
+                            }
                           }}>
                           <MaterialCommunityIcons name="sleep" size={16} color="black" />
                           <Text>Short Rest</Text>

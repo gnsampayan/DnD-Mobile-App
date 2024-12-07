@@ -266,6 +266,10 @@ export default function MeScreen() {
         setExpertiseEnabled,
         expertiseEnabledAgain,
         setExpertiseEnabledAgain,
+        fontOfInspirationEnabled,
+        setFontOfInspirationEnabled,
+        countercharmEnabled,
+        setCountercharmEnabled,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -975,7 +979,9 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'bard college' && !subclass) ||
                                     (feature.name.toLowerCase() === 'expertise' && (!expertiseEnabled ||
                                         (!expertiseEnabledAgain && statsData.level >= 10))) ||
-                                    (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled)
+                                    (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
+                                    (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
+                                    (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled)
                                     // add more here
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
@@ -1459,6 +1465,52 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            case "font of inspiration":
+                if (!fontOfInspirationEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: fontOfInspirationEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="music" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={fontOfInspirationEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
+            case "countercharm":
+                if (!countercharmEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: countercharmEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="music" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={countercharmEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1571,6 +1623,16 @@ export default function MeScreen() {
                 if (statsData.level >= 10) {
                     setExpertiseEnabledAgain(true);
                 }
+                break;
+            case "font of inspiration":
+                setFontOfInspirationEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            case "countercharm":
+                setCountercharmEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
                 break;
         }
     }

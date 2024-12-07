@@ -58,6 +58,10 @@ export interface CharacterContextProps {
     setExpertiseEnabled: (value: boolean) => void;
     expertiseEnabledAgain: boolean;
     setExpertiseEnabledAgain: (value: boolean) => void;
+    fontOfInspirationEnabled: boolean;
+    setFontOfInspirationEnabled: (value: boolean) => void;
+    countercharmEnabled: boolean;
+    setCountercharmEnabled: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -93,6 +97,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [bardicInspirationEnabled, setBardicInspirationEnabled] = useState<boolean>(false);
     const [expertiseEnabled, setExpertiseEnabled] = useState<boolean>(false);
     const [expertiseEnabledAgain, setExpertiseEnabledAgain] = useState<boolean>(false);
+    const [fontOfInspirationEnabled, setFontOfInspirationEnabled] = useState<boolean>(false);
+    const [countercharmEnabled, setCountercharmEnabled] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -113,6 +119,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const BARDIC_INSPIRATION_ENABLED_STORAGE_KEY = '@bardic_inspiration_enabled';
     const EXPERTISE_ENABLED_STORAGE_KEY = '@expertise_enabled';
     const EXPERTISE_ENABLED_AGAIN_STORAGE_KEY = '@expertise_enabled_again';
+    const FONT_OF_INSPIRATION_ENABLED_STORAGE_KEY = '@font_of_inspiration_enabled';
+    const COUNTERCHARM_ENABLED_STORAGE_KEY = '@countercharm_enabled';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -201,6 +209,16 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                         key: EXPERTISE_ENABLED_AGAIN_STORAGE_KEY,
                         setter: setExpertiseEnabledAgain,
                         parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: FONT_OF_INSPIRATION_ENABLED_STORAGE_KEY,
+                        setter: setFontOfInspirationEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: COUNTERCHARM_ENABLED_STORAGE_KEY,
+                        setter: setCountercharmEnabled,
+                        parser: (val: string) => val === 'true'
                     }
                 ];
 
@@ -269,6 +287,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setBardicInspirationEnabled(false);
                     setExpertiseEnabled(false);
                     setExpertiseEnabledAgain(false);
+                    setFontOfInspirationEnabled(false);
+                    setCountercharmEnabled(false);
                 }
                 // If goingFromNoClassToClass is true, we don't reset since the user is just
                 // picking their class for the first time.
@@ -278,6 +298,33 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [statsData.class, isLoading]);
 
+    // save countercharm enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveCountercharmEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(COUNTERCHARM_ENABLED_STORAGE_KEY, countercharmEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving countercharm enabled to AsyncStorage:', error);
+                }
+            }
+            saveCountercharmEnabledToStorage();
+        }
+    }, [countercharmEnabled, isLoading]);
+
+    // save font of inspiration enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveFontOfInspirationEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(FONT_OF_INSPIRATION_ENABLED_STORAGE_KEY, fontOfInspirationEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving font of inspiration enabled to AsyncStorage:', error);
+                }
+            }
+            saveFontOfInspirationEnabledToStorage();
+        }
+    }, [fontOfInspirationEnabled, isLoading]);
 
     // save bardic inspiration enabled to AsyncStorage whenever it changes
     useEffect(() => {
@@ -689,6 +736,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setExpertiseEnabled,
                 expertiseEnabledAgain,
                 setExpertiseEnabledAgain,
+                fontOfInspirationEnabled,
+                setFontOfInspirationEnabled,
+                countercharmEnabled,
+                setCountercharmEnabled,
             }}
         >
             {children}
