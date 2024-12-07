@@ -321,6 +321,21 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         prevClassRef.current = statsData.class || null;
     }, [statsData.class, statsDataLoaded]);
 
+    useEffect(() => {
+        switch (statsData.class?.toLowerCase()) {
+            case 'artificer':
+            case 'barbarian':
+                setUnusedSkillPoints(2);
+                break;
+            case 'bard':
+                setUnusedSkillPoints(3);
+                break;
+            default:
+                setUnusedSkillPoints(0);
+                break;
+        }
+    }, [statsData.class]);
+
 
     // Save subclass to AsyncStorage when it changes
     useEffect(() => {

@@ -260,6 +260,8 @@ export default function MeScreen() {
         setPrimalKnowledgeEnabledAgain,
         primalChampionEnabled,
         setPrimalChampionEnabled,
+        bardicInspirationEnabled,
+        setBardicInspirationEnabled,
         expertiseEnabled,
         setExpertiseEnabled,
         expertiseEnabledAgain,
@@ -972,7 +974,8 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'primal champion' && !primalChampionEnabled) ||
                                     (feature.name.toLowerCase() === 'bard college' && !subclass) ||
                                     (feature.name.toLowerCase() === 'expertise' && (!expertiseEnabled ||
-                                        (!expertiseEnabledAgain && statsData.level >= 10)))
+                                        (!expertiseEnabledAgain && statsData.level >= 10))) ||
+                                    (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled)
                                     // add more here
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
@@ -1387,6 +1390,29 @@ export default function MeScreen() {
                 }
                 break;
             // Bard
+            case "bardic inspiration":
+                if (!bardicInspirationEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: bardicInspirationEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="music" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={bardicInspirationEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
             case "bard college":
                 if (!subclass) {
                     return (
@@ -1411,7 +1437,7 @@ export default function MeScreen() {
                 }
                 break;
             case "expertise":
-                if (!expertiseEnabled) {
+                if (!expertiseEnabled || (statsData.level >= 10 && !expertiseEnabledAgain)) {
                     return (
                         <View style={{
                             paddingHorizontal: 10,
@@ -1420,14 +1446,14 @@ export default function MeScreen() {
                             borderWidth: 1,
                             flexDirection: 'row',
                             alignItems: 'center',
-                            opacity: expertiseEnabled ? 0.2 : 1
+                            opacity: (expertiseEnabled && statsData.level < 10) || expertiseEnabledAgain ? 0.2 : 1
                         }}>
                             <MaterialCommunityIcons name="book" size={20} color="gold" />
                             <Button
                                 title="Activate"
                                 color="gold"
                                 onPress={() => activateFeat(selectedFeat as string)}
-                                disabled={expertiseEnabled}
+                                disabled={(expertiseEnabled && statsData.level < 10) || expertiseEnabledAgain}
                             />
                         </View>
                     )
@@ -1525,6 +1551,11 @@ export default function MeScreen() {
                 break;
 
             // Bard
+            case "bardic inspiration":
+                setBardicInspirationEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
             case "bard college":
                 if (bardCollegeValue) {
                     setSubclass(bardCollegeValue);

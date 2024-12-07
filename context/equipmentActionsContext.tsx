@@ -52,6 +52,8 @@ export interface CharacterContextProps {
     setPrimalKnowledgeEnabledAgain: (value: boolean) => void;
     primalChampionEnabled: boolean;
     setPrimalChampionEnabled: (value: boolean) => void;
+    bardicInspirationEnabled: boolean;
+    setBardicInspirationEnabled: (value: boolean) => void;
     expertiseEnabled: boolean;
     setExpertiseEnabled: (value: boolean) => void;
     expertiseEnabledAgain: boolean;
@@ -88,6 +90,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [primalKnowledgeEnabled, setPrimalKnowledgeEnabled] = useState<boolean>(false);
     const [primalKnowledgeEnabledAgain, setPrimalKnowledgeEnabledAgain] = useState<boolean>(false);
     const [primalChampionEnabled, setPrimalChampionEnabled] = useState<boolean>(false);
+    const [bardicInspirationEnabled, setBardicInspirationEnabled] = useState<boolean>(false);
     const [expertiseEnabled, setExpertiseEnabled] = useState<boolean>(false);
     const [expertiseEnabledAgain, setExpertiseEnabledAgain] = useState<boolean>(false);
 
@@ -107,6 +110,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY = '@primal_knowledge_enabled';
     const PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY = '@primal_knowledge_enabled_again';
     const PRIMAL_CHAMPION_ENABLED_STORAGE_KEY = '@primal_champion_enabled';
+    const BARDIC_INSPIRATION_ENABLED_STORAGE_KEY = '@bardic_inspiration_enabled';
     const EXPERTISE_ENABLED_STORAGE_KEY = '@expertise_enabled';
     const EXPERTISE_ENABLED_AGAIN_STORAGE_KEY = '@expertise_enabled_again';
 
@@ -184,6 +188,11 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                         parser: (val: string) => val === 'true'
                     },
                     {
+                        key: BARDIC_INSPIRATION_ENABLED_STORAGE_KEY,
+                        setter: setBardicInspirationEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
                         key: EXPERTISE_ENABLED_STORAGE_KEY,
                         setter: setExpertiseEnabled,
                         parser: (val: string) => val === 'true'
@@ -214,27 +223,75 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         loadDataFromStorage();
     }, []);
 
+    const [previousClass, setPreviousClass] = useState<string | null>(null);
 
-    // reset all state variables to false when class is changed
+
+    // Only reset if class actually changes from a previous value to a new value
     useEffect(() => {
-        setRelentlessEnduranceGained(false);
-        setRelentlessEnduranceUsable(false);
-        setLuckyPointsEnabled(false);
-        setInfernalLegacyEnabled(false);
-        setDraconicAncestry(null);
-        setBreathWeaponEnabled(false);
-        setMagicalTinkeringEnabled(false);
-        setInfuseItemEnabled(false);
-        setInfuseItemSpent(false);
-        setInfusionsLearned([]);
-        setPrimalKnowledgeEnabled(false);
-        setPrimalKnowledgeEnabledAgain(false);
-        setPrimalChampionEnabled(false);
-        setExpertiseEnabled(false);
-        setExpertiseEnabledAgain(false);
-    }, [statsData.class]);
+        if (!isLoading) {
+            // If this is the first time we're setting previousClass (meaning previousClass is null),
+            // just record the current class. Do not reset.
+            if (previousClass === null) {
+                setPreviousClass(statsData.class || null);
+                return;
+            }
+
+            // If we're switching classes, decide under what conditions to reset:
+            const currentClass = statsData.class;
+            const classChanged = previousClass !== currentClass;
+
+            if (classChanged) {
+                // If the previousClass was empty string and we're now choosing a real class for the first time,
+                // you may or may not want to reset. Typically, going from '' to a real class is the user selecting
+                // their first class, so probably no reset needed.
+                //
+                // If going from one real class to another real class (e.g., Fighter -> Rogue),
+                // or returning to '' (no class) from a class, then reset.
+
+                const goingFromNoClassToClass = previousClass === '' && currentClass !== '';
+                const goingFromClassToNoClass = previousClass !== '' && currentClass === '';
+                const goingFromClassToClass = previousClass !== '' && currentClass !== '';
+
+                if (goingFromClassToNoClass || goingFromClassToClass) {
+                    setRelentlessEnduranceGained(false);
+                    setRelentlessEnduranceUsable(false);
+                    setLuckyPointsEnabled(false);
+                    setInfernalLegacyEnabled(false);
+                    setDraconicAncestry(null);
+                    setBreathWeaponEnabled(false);
+                    setMagicalTinkeringEnabled(false);
+                    setInfuseItemEnabled(false);
+                    setInfuseItemSpent(false);
+                    setInfusionsLearned([]);
+                    setPrimalKnowledgeEnabled(false);
+                    setPrimalKnowledgeEnabledAgain(false);
+                    setPrimalChampionEnabled(false);
+                    setBardicInspirationEnabled(false);
+                    setExpertiseEnabled(false);
+                    setExpertiseEnabledAgain(false);
+                }
+                // If goingFromNoClassToClass is true, we don't reset since the user is just
+                // picking their class for the first time.
+
+                setPreviousClass(currentClass || null);
+            }
+        }
+    }, [statsData.class, isLoading]);
 
 
+    // save bardic inspiration enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveBardicInspirationEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(BARDIC_INSPIRATION_ENABLED_STORAGE_KEY, bardicInspirationEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving bardic inspiration enabled to AsyncStorage:', error);
+                }
+            }
+            saveBardicInspirationEnabledToStorage();
+        }
+    }, [bardicInspirationEnabled, isLoading]);
 
     // save expertise enabled to AsyncStorage whenever it changes
     useEffect(() => {
@@ -626,6 +683,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setPrimalKnowledgeEnabledAgain,
                 primalChampionEnabled,
                 setPrimalChampionEnabled,
+                bardicInspirationEnabled,
+                setBardicInspirationEnabled,
                 expertiseEnabled,
                 setExpertiseEnabled,
                 expertiseEnabledAgain,

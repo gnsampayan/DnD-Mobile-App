@@ -316,10 +316,15 @@ const styles = StyleSheet.create({
       overflow: 'hidden',
       flex: 1,
     },  
+    footerButtonVariantContainer: {
+      borderRadius: 8,
+      overflow: 'hidden',
+      flex: .5,
+    },  
     footerButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'center', 
       borderRadius: 8,
       padding: 10,
       backgroundColor: 'rgba(0, 0, 0, 0.2)',

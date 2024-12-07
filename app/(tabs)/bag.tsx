@@ -1053,16 +1053,16 @@ export default function BagScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>{carryingCapacity}</Text>
             <MaterialCommunityIcons name="anvil" size={20} color="lightgrey" />
+            <Text style={styles.headerText}>{carryingCapacity}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>{foodUnits}</Text>
             <MaterialCommunityIcons name="food-apple" size={20} color="lightgrey" />
+            <Text style={styles.headerText}>{foodUnits}</Text>
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerText}>{money}</Text>
             <MaterialCommunityIcons name="gold" size={20} color="lightgrey" />
+            <Text style={styles.headerText}>{money}</Text>
           </View>
         </View>
         <View style={styles.headerIcons}>

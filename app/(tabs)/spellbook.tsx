@@ -202,6 +202,7 @@ export default function SpellbookScreen() {
     const [spellChoiceInputValue, setSpellChoiceInputValue] = useState<string | null>(null);
     const [openSpellDropdown, setOpenSpellDropdown] = useState(false);
     const [preparedSpellModalVisible, setPreparedSpellModalVisible] = useState(false);
+    const [proficiencyBonus, setProficiencyBonus] = useState<number>(2);
 
 
     // Key for AsyncStorage
@@ -387,6 +388,17 @@ export default function SpellbookScreen() {
 
         loadPreparedSpells();
     }, []);
+
+    // Load proficiency bonus from AsyncStorage when component mounts and when level changes
+    useEffect(() => {
+        AsyncStorage.getItem('proficiencyBonus')
+            .then(value => {
+                if (value !== null) {
+                    setProficiencyBonus(parseInt(value, 10));
+                }
+            })
+            .catch(error => console.error('Failed to load proficiency bonus:', error));
+    }, [statsData.level]);
 
     // Function to update spellSlotsData based on the new number of slots
     const updateSpellSlotsData = (newSlotCount: number) => {
@@ -1339,7 +1351,7 @@ export default function SpellbookScreen() {
                     paddingVertical: 0,
                     backgroundColor: 'transparent'
                 }]}>
-                    <Text style={[styles.headerText, { fontSize: 16 }]}>{8 + statsData.proficiencyBonus + spellcastingModifier}</Text>
+                    <Text style={[styles.headerText, { fontSize: 16 }]}>{8 + proficiencyBonus + spellcastingModifier}</Text>
                     <MaterialCommunityIcons name="skull-scan" size={16} color="lightgrey" />
                 </View>
             </View>

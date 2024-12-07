@@ -26,7 +26,7 @@ import StatsDataContext from '../../context/StatsDataContext';
 import cantripsData from '../data/cantrips.json';
 import spellsData from '../data/spells.json';
 import reactionImage from '@actions/reaction-image.png';
-import defaultLongRestImage from '@actions/long-rest-image-v2.png';
+import defaultLongRestImage from '@actions/rest-image.png';
 import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
 import defaultDisengageImage from '@actions/default-disengage-image.png';
 import defaultRangedAttackImage from '@actions/default-ranged-attack-image.png';
@@ -61,6 +61,9 @@ import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
 import rageImage from '@actions/rage-image.png';
 import recklessAttackImage from '@actions/reckless-attack-image.png';
 import consultTheSpiritsImage from '@actions/consult-spirits-image.png';
+
+// Bard
+import bardicInspirationImage from '@actions/bardic-inspiration-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -330,6 +333,7 @@ export default function ActionsScreen() {
     infuseItemSpent,
     setInfuseItemSpent,
     infusionsLearned,
+    bardicInspirationEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -346,6 +350,7 @@ export default function ActionsScreen() {
     infuseItemSpent: boolean;
     setInfuseItemSpent: (value: boolean) => void;
     infusionsLearned: string[];
+    bardicInspirationEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -380,6 +385,13 @@ export default function ActionsScreen() {
   const [knownInfusionValue, setKnownInfusionValue] = useState<string>('');
   const [infusionModalVisible, setInfusionModalVisible] = useState<boolean>(false);
   const [currentRages, setCurrentRages] = useState<number>(0);
+  const [currentBardicInspirationPoints, setCurrentBardicInspirationPoints] = useState<number>(0);
+
+  // Initialize currentBardicInspirationPoints based on Charisma modifier
+  useEffect(() => {
+    const charismaModifier = calculateModifier(statsData.abilities.find(ability => ability.name.toLowerCase() === 'charisma')?.value || 10);
+    setCurrentBardicInspirationPoints(charismaModifier);
+  }, [statsData.abilities]);
 
   // Initialize and update currentRages when level changes
   useEffect(() => {
@@ -527,6 +539,7 @@ export default function ActionsScreen() {
     breathWeaponEnabled,
     magicalTinkeringEnabled,
     infuseItemEnabled,
+    bardicInspirationEnabled,
   ]);
 
 
@@ -1121,6 +1134,11 @@ export default function ActionsScreen() {
         affordable = true;
       }
 
+      // Check for bardic inspiration
+      if (statsData.class?.toLowerCase() === 'bard' && item.name.toLowerCase() === 'bardic inspiration') {
+        affordable = affordable && currentBardicInspirationPoints > 0;
+      }
+
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
@@ -1538,6 +1556,22 @@ export default function ActionsScreen() {
       }
     }
 
+    // Bard
+    if (statsData.class?.toLowerCase() === 'bard') {
+      if (bardicInspirationEnabled === true) {
+        // Add 'Bardic Inspiration' action
+        classActions.push({
+          id: 'class-bardic-inspiration',
+          name: 'Bardic Inspiration',
+          cost: { actions: 0, bonus: 1 },
+          details: 'You can inspire others with your music. Choose one creature other than yourself within 30 feet of you that you can see. That creature gains advantage on one saving throw it makes before the end of your next turn.\n\n(see Bardic Inspiration feat for details)',
+          image: bardicInspirationImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+    }
+
     // Other classes
     return classActions;
   }
@@ -1648,6 +1682,17 @@ export default function ActionsScreen() {
     const feature = barbarianTable.find((feat) => feat.userLevel === statsData.level);
     if (!feature) return '';
     return feature.rageDamage as string;
+  }
+
+  const [turnsDone, setTurnsDone] = useState(0);
+
+  const turnsToMinutes = (turns: number) => {
+    // Each turn is 6 seconds
+    const totalSeconds = turns * 6;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
   // Main Contents
@@ -1862,6 +1907,24 @@ export default function ActionsScreen() {
             </>
           )}
 
+          {/* Show if user class is bard */}
+          {statsData.class?.toLowerCase() === 'bard' && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity onPress={() => {
+                Alert.alert('Bardic Inspiration', 'You can inspire others with your music. Points are based on your Charisma modifier. Regain your points after a long rest.');
+              }}>
+                <MaterialCommunityIcons name="music" size={20} color="white" />
+              </TouchableOpacity>
+              <View style={styles.headerTextBox}>
+                <Text style={[
+                  styles.headerText,
+                  currentBardicInspirationPoints === 0 && { color: 'black' }
+                ]}>
+                  x{currentBardicInspirationPoints}
+                </Text>
+              </View>
+            </View>
+          )}
 
         </View>
 
@@ -2079,12 +2142,42 @@ export default function ActionsScreen() {
       />
 
       {/* Footer Section */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        {/* Footer Button */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+        {/* Counter Button */}
+        <View style={styles.footerButtonVariantContainer} >
+          <TouchableOpacity style={styles.footerButton}
+            onPress={() => {
+              Alert.alert(
+                'Reset Turn Counter',
+                'Are you sure you want to reset the turn counter to 0?',
+                [
+                  {
+                    text: 'Cancel',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'Reset',
+                    onPress: () => setTurnsDone(0)
+                  }
+                ]
+              );
+              return;
+            }}
+          >
+            <Ionicons name="timer" size={22} color="white" style={{ marginRight: 5 }} />
+            <Text style={styles.footerButtonText}>{turnsToMinutes(turnsDone)}</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Next Turn Button */}
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
-          <TouchableOpacity style={styles.footerButton} onPress={endTurn}>
-            <Text style={styles.footerButtonText}>Wait 6s</Text>
-            <Ionicons name="hourglass" size={22} color="white" style={{ marginLeft: 5 }} />
+          <TouchableOpacity style={styles.footerButton}
+            onPress={() => {
+              setTurnsDone(turnsDone + 1);
+              endTurn();
+            }}
+          >
+            <Ionicons name="hourglass" size={22} color="white" style={{ marginRight: 5 }} />
+            <Text style={styles.footerButtonText}>Next Turn</Text>
           </TouchableOpacity>
         </ImageBackground>
 
@@ -2758,6 +2851,10 @@ export default function ActionsScreen() {
                               if (subclass?.toLowerCase() === 'ancestral guardian') {
                                 setConsultTheSpiritsSpent(false);
                               }
+                              if (statsData.class?.toLowerCase() === 'bard') {
+                                const charismaModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Charisma')?.value || 10);
+                                setCurrentBardicInspirationPoints(charismaModifier);
+                              }
                               break;
 
                             case 'hellish rebuke':
@@ -2786,6 +2883,11 @@ export default function ActionsScreen() {
                             case 'consult the spirits':
                               setConsultTheSpiritsSpent(true);
                               break;
+
+                            case 'bardic inspiration':
+                              setCurrentBardicInspirationPoints(prev => Math.max(0, prev - 1));
+                              break;
+
                           }
 
                           // Default commit action

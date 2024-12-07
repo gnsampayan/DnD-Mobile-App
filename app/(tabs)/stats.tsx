@@ -549,6 +549,26 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         // Determine if the skill is proficient (either from race or gained)
         const isProficient = raceProficiency || gainedProficiency;
 
+        // Define allowed skills per class
+        const allowedSkillsByClass: { [key: string]: string[] } = {
+            barbarian: ['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
+            artificer: ['arcana', 'history', 'investigation', 'medicine', 'nature', 'perception', 'sleight of hand']
+        };
+
+        // Check if skill is allowed for current class
+        const isSkillAllowedForClass = () => {
+            if (!statsData.class) return true; // If no class selected, all skills allowed
+            const currentClass = statsData.class.toLowerCase();
+            const allowedSkills = allowedSkillsByClass[currentClass];
+
+            // If class has restrictions, check if skill is in allowed list
+            if (allowedSkills) {
+                return allowedSkills.includes(item.name.toLowerCase());
+            }
+
+            return true; // If class has no restrictions, all skills allowed
+        };
+
         return (
             <TouchableOpacity
                 style={[
@@ -556,11 +576,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     { borderColor: 'gold' },
                     isProficient ? { backgroundColor: 'white' } : {},
                     // set border color to gold if unused skill points are greater than 0 and skill is available
-                    (unusedSkillPoints > 0 &&
-                        (statsData.class?.toLowerCase() !== 'barbarian' ||
-                            !primalKnowledgeEnabled ||
-                            ['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'].includes(item.name.toLowerCase())
-                        )) ? { borderWidth: 1 } : {}
+                    (unusedSkillPoints > 0 && isSkillAllowedForClass()) ? { borderWidth: 1 } : {}
                 ]}
                 onPress={() => {
                     // Handle adding proficiency if there are unused skill points
@@ -584,12 +600,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         );
                     }
                 }}
-                disabled={
-                    statsData.class?.toLowerCase() === 'barbarian' &&
-                    unusedSkillPoints > 0 &&
-                    primalKnowledgeEnabled &&
-                    !['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'].includes(item.name.toLowerCase())
-                }
+                disabled={unusedSkillPoints > 0 && !isSkillAllowedForClass()}
             >
                 <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>
                     {skillModifier >= 0 ? `+${skillModifier}` : `${skillModifier}`}
