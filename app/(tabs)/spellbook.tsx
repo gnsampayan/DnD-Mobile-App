@@ -238,9 +238,6 @@ export default function SpellbookScreen() {
 
     const characterClass = classData.find(cls => cls.value.toLowerCase() === statsData?.class?.toLowerCase());
 
-    // TODO: make this dynamic
-    const spellLevelAccess = statsData.level;
-
     useEffect(() => {
         getPreparedSpellSlotsAmount();
         getCantripSlotsAmount();
@@ -1357,6 +1354,53 @@ export default function SpellbookScreen() {
             </View>
         );
     }
+
+    const spellLevelAccess = (() => {
+        let spellSlotsPerUserLevelPerSpellLevel;
+        switch (statsData.class) {
+            case 'wizard':
+                spellSlotsPerUserLevelPerSpellLevel = wizardTableData;
+                break;
+            case 'warlock':
+                spellSlotsPerUserLevelPerSpellLevel = warlockTableData;
+                break;
+            case 'sorcerer':
+                spellSlotsPerUserLevelPerSpellLevel = sorcererTableData;
+                break;
+            case 'artificer':
+                spellSlotsPerUserLevelPerSpellLevel = artificerTableData;
+                break;
+            case 'bard':
+                spellSlotsPerUserLevelPerSpellLevel = bardTableData;
+                break;
+            case 'cleric':
+                spellSlotsPerUserLevelPerSpellLevel = clericTableData;
+                break;
+            case 'druid':
+                spellSlotsPerUserLevelPerSpellLevel = druidTableData;
+                break;
+            case 'ranger':
+                spellSlotsPerUserLevelPerSpellLevel = rangerTableData;
+                break;
+            case 'paladin':
+                spellSlotsPerUserLevelPerSpellLevel = paladinTableData;
+                break;
+            default:
+                return 0;
+        }
+
+        const currentLevelData = spellSlotsPerUserLevelPerSpellLevel.find(
+            level => level.userLevel === statsData.level
+        );
+
+        if (!currentLevelData?.spellSlotSquares) return 0;
+
+        const spellLevels = Object.keys(currentLevelData.spellSlotSquares)
+            .map(key => parseInt(key.replace('SpLv', '')));
+
+        return Math.max(...spellLevels);
+    })();
+
 
     const assignSpellToSlot = () => {
         if (spellPressedIndex === null || !spellChoiceInputValue) {
