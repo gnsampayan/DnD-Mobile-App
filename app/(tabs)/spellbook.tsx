@@ -16,7 +16,7 @@ import {
 import styles from '@/app/styles/spellbookStyles';
 import classData from '@/app/data/classData.json';
 import StatsDataContext from '../../context/StatsDataContext';
-import DropDownPicker from 'react-native-dropdown-picker';
+import DropDownPicker, { ItemType } from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import cantripsData from '@/app/data/cantrips.json';
 import spellsData from '@/app/data/spells.json';
@@ -142,9 +142,6 @@ const cantripImages = {
 const learnedSpellsFromOtherWizards = 0;
 const learnedSpellsFromScrolls = 0;
 
-// TODO: make this dynamic
-const spellLevelAccess = 1;
-
 
 // Key for AsyncStorage
 const CANTRIP_SLOTS_KEY = '@cantrip_slots';
@@ -240,6 +237,9 @@ export default function SpellbookScreen() {
 
 
     const characterClass = classData.find(cls => cls.value.toLowerCase() === statsData?.class?.toLowerCase());
+
+    // TODO: make this dynamic
+    const spellLevelAccess = statsData.level;
 
     useEffect(() => {
         getPreparedSpellSlotsAmount();
@@ -1427,30 +1427,58 @@ export default function SpellbookScreen() {
             )
             .map(slot => slot.spellName!.toLowerCase());
 
-        // Prepare the list of available spells, excluding assigned ones and filtering by class
+        // Prepare the list of available spells grouped by level
         const availableSpells = spellsData
             .filter(spellLevel => spellLevel.level <= spellLevelAccess)
-            .flatMap(spellLevel =>
-                spellLevel.spells.filter(spellItem => {
-                    const spellName = typeof spellItem === 'string' ? spellItem : spellItem.name;
-                    const spellClasses = typeof spellItem === 'object' ? spellItem.classes?.map(c => c.toLowerCase()) : [];
-                    return !assignedSpells.includes(spellName.toLowerCase()) &&
-                        (typeof spellItem === 'string' || spellClasses?.includes((statsData?.class || '').toLowerCase()));
-                })
-            )
-            .map(spellItem => ({
-                label: typeof spellItem === 'string' ? spellItem : spellItem.name,
-                value: typeof spellItem === 'string' ? spellItem : spellItem.id,
-            }));
+            .reduce((acc, levelGroup) => {
+                // Add level group label
+                acc.push({
+                    label: `Level ${levelGroup.level}`,
+                    value: `level_${levelGroup.level}`,
+                    parent: null,
+                    selectable: false,
+                    labelStyle: {
+                        fontWeight: 'bold',
+                    },
+                });
 
-        // Render the dropdown with the filtered list
+                // Add filtered spells under this level
+                levelGroup.spells
+                    .filter(spellItem => {
+                        const spellName = typeof spellItem === 'string' ? spellItem : spellItem.name;
+                        const spellClasses = typeof spellItem === 'object' ? spellItem.classes?.map(c => c.toLowerCase()) : [];
+                        return !assignedSpells.includes(spellName.toLowerCase()) &&
+                            (typeof spellItem === 'string' || spellClasses?.includes((statsData?.class || '').toLowerCase()));
+                    })
+                    .forEach(spellItem => {
+                        acc.push({
+                            label: typeof spellItem === 'string' ? spellItem : spellItem.name,
+                            value: typeof spellItem === 'string' ? spellItem : spellItem.id,
+                            parent: `level_${levelGroup.level}`,
+                            selectable: true,
+                            labelStyle: {
+                                fontWeight: 'normal',
+                            },
+                        });
+                    });
+
+                return acc;
+            }, [] as {
+                label: string;
+                value: string;
+                parent: string | null;
+                selectable: boolean;
+                labelStyle?: object;
+            }[]);
+
+        // Render the dropdown with the grouped and filtered list
         return (
             <DropDownPicker
                 open={openSpellDropdown}
                 setOpen={setOpenSpellDropdown}
                 value={spellChoiceInputValue}
                 setValue={setSpellChoiceInputValue}
-                items={availableSpells}
+                items={availableSpells as ItemType<string>[]}
                 placeholder="Select a spell"
                 style={{ marginBottom: 10 }}
                 zIndex={1000}

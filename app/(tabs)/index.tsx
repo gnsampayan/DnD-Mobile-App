@@ -2183,7 +2183,7 @@ export default function ActionsScreen() {
               return;
             }}
           >
-            <Ionicons name="timer" size={22} color="white" style={{ marginRight: 5 }} />
+            <Ionicons name="hourglass" size={22} color="white" style={{ marginRight: 5 }} />
             <Text style={styles.footerButtonText}>{turnsToMinutes(turnsDone)}</Text>
           </TouchableOpacity>
         </View>
@@ -2195,7 +2195,7 @@ export default function ActionsScreen() {
               endTurn();
             }}
           >
-            <Ionicons name="hourglass" size={22} color="white" style={{ marginRight: 5 }} />
+            <Ionicons name="arrow-redo" size={22} color="white" style={{ marginRight: 5 }} />
             <Text style={styles.footerButtonText}>Next Turn</Text>
           </TouchableOpacity>
         </ImageBackground>
