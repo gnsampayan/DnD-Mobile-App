@@ -1471,6 +1471,10 @@ export default function SpellbookScreen() {
             )
             .map(slot => slot.spellName!.toLowerCase());
 
+        // Check if user is a bard with Magical Secrets (levels 10, 14, or 18)
+        const isMagicalSecretsUnlocked = statsData?.class?.toLowerCase() === 'bard' &&
+            [10, 14, 18].includes(statsData?.level || 0);
+
         // Prepare the list of available spells grouped by level
         const availableSpells = spellsData
             .filter(spellLevel => spellLevel.level <= spellLevelAccess)
@@ -1492,7 +1496,7 @@ export default function SpellbookScreen() {
                         const spellName = typeof spellItem === 'string' ? spellItem : spellItem.name;
                         const spellClasses = typeof spellItem === 'object' ? spellItem.classes?.map(c => c.toLowerCase()) : [];
                         return !assignedSpells.includes(spellName.toLowerCase()) &&
-                            (typeof spellItem === 'string' || spellClasses?.includes((statsData?.class || '').toLowerCase()));
+                            (typeof spellItem === 'string' || isMagicalSecretsUnlocked || spellClasses?.includes((statsData?.class || '').toLowerCase()));
                     })
                     .forEach(spellItem => {
                         acc.push({
@@ -1838,21 +1842,52 @@ export default function SpellbookScreen() {
         return (
             <View style={{ width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {Object.entries(remainingSlots).map(([spellLevel, slotInfo]) => {
+                    const spellLevelNum = parseInt(spellLevel.replace('SpLv', ''));
+                    const romanNumeral = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'][spellLevelNum - 1];
+
                     return (
-                        <View key={spellLevel} style={{
-                            borderWidth: 1,
-                            borderColor: 'rgba(255, 253, 247, 0.1)',
-                            backgroundColor: 'rgba(124, 124, 124, 0.1)',
-                            borderRadius: 4,
-                            padding: 5,
-                            margin: 3,
-                            flex: 1,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            paddingBottom: 10
-                        }}>
+                        <TouchableOpacity
+                            key={spellLevel}
+                            disabled={slotInfo.remaining <= 0}
+                            onPress={() => {
+                                if (slotInfo.remaining > 0) {
+                                    Alert.alert(
+                                        `Expend SpLv${romanNumeral}`,
+                                        `Do you want to expend one SpLv${spellLevelNum}?`,
+                                        [
+                                            {
+                                                text: 'Cancel',
+                                                style: 'cancel'
+                                            },
+                                            {
+                                                text: 'Expend',
+                                                onPress: () => {
+                                                    setSpentSpellSlots(prev => ({
+                                                        ...prev,
+                                                        [spellLevel]: (prev[spellLevel] || 0) + 1
+                                                    }));
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }
+                            }}
+                            style={{
+                                borderWidth: 1,
+                                borderColor: 'rgba(255, 253, 247, 0.1)',
+                                backgroundColor: slotInfo.remaining > 0 ? 'rgba(124, 124, 124, 0.1)' : 'rgba(124, 124, 124, 0.05)',
+                                borderRadius: 4,
+                                padding: 5,
+                                margin: 3,
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                paddingBottom: 10,
+                                opacity: slotInfo.remaining > 0 ? 1 : 0.5
+                            }}
+                        >
                             <Text style={{ marginBottom: 5, color: 'white', alignSelf: 'center' }}>
-                                {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'][parseInt(spellLevel.replace('SpLv', '')) - 1]}
+                                {romanNumeral}
                             </Text>
                             <View style={{
                                 flexDirection: 'row',
@@ -1876,7 +1911,7 @@ export default function SpellbookScreen() {
                                     </View>
                                 ))}
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     );
                 })}
             </View>

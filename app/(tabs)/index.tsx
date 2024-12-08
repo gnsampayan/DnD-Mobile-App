@@ -392,10 +392,10 @@ export default function ActionsScreen() {
   const [currentRages, setCurrentRages] = useState<number>(0);
   const [currentBardicInspirationPoints, setCurrentBardicInspirationPoints] = useState<number>(0);
 
-  // Initialize currentBardicInspirationPoints based on Charisma modifier
+  // Initialize currentBardicInspirationPoints based on Charisma modifier (minimum of 1)
   useEffect(() => {
     const charismaModifier = calculateModifier(statsData.abilities.find(ability => ability.name.toLowerCase() === 'charisma')?.value || 10);
-    setCurrentBardicInspirationPoints(charismaModifier);
+    setCurrentBardicInspirationPoints(Math.max(1, charismaModifier));
   }, [statsData.abilities]);
 
   // Initialize and update currentRages when level changes
@@ -1930,7 +1930,19 @@ export default function ActionsScreen() {
           {statsData.class?.toLowerCase() === 'bard' && (
             <View style={styles.headerTextContainer}>
               <TouchableOpacity onPress={() => {
-                Alert.alert('Bardic Inspiration', 'You can inspire others with your music. Points are based on your Charisma modifier. Regain your points after a long rest.');
+                Alert.alert(
+                  'Bardic Inspiration',
+                  'You can inspire others with your music. Points are based on your Charisma modifier. Regain your points after a long rest.',
+                  [
+                    { text: 'OK' },
+                    ...(statsData.level === 20 && currentBardicInspirationPoints === 0 ? [{
+                      text: 'Superior Inspiration',
+                      onPress: () => {
+                        setCurrentBardicInspirationPoints(1);
+                      }
+                    }] : [])
+                  ]
+                );
               }}>
                 <MaterialCommunityIcons name="music" size={20} color="white" />
               </TouchableOpacity>
