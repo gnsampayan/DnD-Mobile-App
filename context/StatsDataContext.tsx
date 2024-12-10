@@ -330,6 +330,9 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'bard':
                 setUnusedSkillPoints(3);
                 break;
+            case 'cleric':
+                setUnusedSkillPoints(2);
+                break;
             default:
                 setUnusedSkillPoints(0);
                 break;

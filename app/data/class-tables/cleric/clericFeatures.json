@@ -1,0 +1,97 @@
+[
+	{
+		"id": "Spellcasting",
+		"name": "Spellcasting",
+		"level": 1,
+		"description": "As a conduit for divine power, you can cast cleric spells.",
+		"features": [
+			{
+				"Cantrips": "At 1st level, you know three cantrips from the cleric spell list. You learn additional cleric cantrips at higher levels, as shown in the Cantrips Known column of the Cleric table."
+			},
+			{
+				"Spell Slots": "The Cleric table shows your available spell slots. To cast a spell, expend a slot of the spell's level or higher. You regain all expended slots on a long rest."
+			},
+			{
+				"Preparing Spells": "Choose cleric spells equal to your Wisdom modifier + cleric level (minimum 1). Spells must be of a level for which you have slots. You can change prepared spells after a long rest, requiring 1 minute per spell level in prayer."
+			}
+		],
+		"mechanics": {
+			"spellcasting_ability": "Wisdom",
+			"spell_save_dc": "8 + proficiency bonus + Wisdom modifier",
+			"spell_attack": "proficiency bonus + Wisdom modifier",
+			"ritual_casting": "Can cast prepared cleric spells with ritual tag as rituals",
+			"focus": "Can use a holy symbol as spellcasting focus"
+		}
+	},
+	{
+		"id": "Divine Domain",
+		"name": "Divine Domain",
+		"level": 1,
+		"description": "Choose a domain shaped by your deity and the gifts they grant you.",
+		"features": [
+			"Grants domain spells and features at 1st level",
+			"Additional Channel Divinity options at 2nd level",
+			"Additional benefits at 6th, 8th, and 17th levels"
+		],
+		"domain_spells": {
+			"description": "Domain spells are always prepared and don't count against prepared spells. They are cleric spells for you even if not on the cleric spell list."
+		}
+	},
+	{
+		"id": "Channel Divinity",
+		"name": "Channel Divinity",
+		"level": 2,
+		"description": "Channel divine energy directly from your deity to fuel magical effects.",
+		"features": [
+			"Start with Turn Undead and domain effect",
+			"Choose which effect to create when using",
+			"Requires short/long rest to use again",
+			"DC equals cleric spell save DC"
+		],
+		"uses": {
+			"level_6": "2 uses between rests",
+			"level_18": "3 uses between rests"
+		},
+		"turn_undead": {
+			"action": "Present holy symbol and speak prayer",
+			"range": "30 feet",
+			"effect": "Undead must make Wisdom save or be turned for 1 minute/until damaged",
+			"turned_behavior": [
+				"Must move away from you",
+				"Can't willingly move within 30 feet",
+				"Can only use Dash or escape actions",
+				"Can Dodge if nowhere to move",
+				"Can't take reactions"
+			]
+		}
+	},
+	{
+		"id": "Ability Score Improvement",
+		"name": "Ability Score Improvement",
+		"level": 4,
+		"description": "Increase one ability score by 2 or two ability scores by 1. Can't increase score above 20.",
+		"additional_levels": [8, 12, 16, 19]
+	},
+	{
+		"id": "Destroy Undead",
+		"name": "Destroy Undead",
+		"level": 5,
+		"description": "When undead fails Turn Undead save, it's destroyed if CR is at/below threshold shown in Cleric table."
+	},
+	{
+		"id": "Divine Intervention",
+		"name": "Divine Intervention",
+		"level": 10,
+		"description": "Call on deity to intervene when need is great.",
+		"mechanics": {
+			"action": "Describe assistance sought and roll percentile dice",
+			"success": "Roll ≤ cleric level",
+			"effect": "DM chooses intervention (cleric/domain spell effect appropriate)",
+			"cooldown": {
+				"success": "7 days",
+				"failure": "Next long rest"
+			}
+		},
+		"level_20_improvement": "Succeeds automatically, no roll required"
+	}
+]

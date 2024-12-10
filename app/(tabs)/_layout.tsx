@@ -10,10 +10,17 @@ import StatsDataContext from '../../context/StatsDataContext';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   // Use context for statsData
-  const { isSpellCaster } = useContext(StatsDataContext) as {
+  const { isSpellCaster, statsData } = useContext(StatsDataContext) as {
     isSpellCaster: boolean;
+    statsData: { class?: string; level?: number };
   };
 
+  // Check if user is a paladin or ranger below level 2
+  const isLowLevelSpellcaster = (
+    (statsData.class?.toLowerCase() === 'paladin' || statsData.class?.toLowerCase() === 'ranger')
+    && (statsData.level || 0) < 2
+  );
+  const showSpellbook = isSpellCaster && !isLowLevelSpellcaster;
 
   return (
     <Tabs
@@ -40,7 +47,7 @@ export default function TabLayout() {
         name="spellbook"
         options={{
           title: 'Spells',
-          href: isSpellCaster ? undefined : null,
+          href: showSpellbook ? undefined : null,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'star-shooting' : 'star-shooting-outline'} color={color} family="MaterialCommunityIcons" />
           ),

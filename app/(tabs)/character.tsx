@@ -50,6 +50,7 @@ import spiritsData from '../data/class-tables/bard/subclass/spirits.json';
 import swordsData from '../data/class-tables/bard/subclass/swords.json';
 import valorData from '../data/class-tables/bard/subclass/valor.json';
 import whispersData from '../data/class-tables/bard/subclass/whispers.json';
+import clericFeatures from '../data/class-tables/cleric/clericFeatures.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -198,6 +199,7 @@ const classFeaturesMap: { [key: string]: any } = {
     artificer: artificerFeatures,
     barbarian: barbarianFeatures,
     bard: bardFeatures,
+    cleric: clericFeatures,
 }
 
 // TODO: make max infusions learned a variable

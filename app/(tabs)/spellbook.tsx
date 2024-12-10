@@ -84,7 +84,7 @@ import warlockTableData from '@/app/data/class-tables/warlockTable.json';
 import sorcererTableData from '@/app/data/class-tables/sorcererTable.json';
 import artificerTableData from '@/app/data/class-tables/artificer/artificerTable.json';
 import bardTableData from '@/app/data/class-tables/bard/bardTable.json';
-import clericTableData from '@/app/data/class-tables/clericTable.json';
+import clericTableData from '@/app/data/class-tables/cleric/clericTable.json';
 import druidTableData from '@/app/data/class-tables/druidTable.json';
 import rangerTableData from '@/app/data/class-tables/rangerTable.json';
 import paladinTableData from '@/app/data/class-tables/paladinTable.json';
@@ -577,6 +577,12 @@ export default function SpellbookScreen() {
     };
 
     const renderPreparedSpellBlocksForClass = () => {
+        // Helper to determine if class should use grid layout
+        const shouldUseGridLayout = () => {
+            const gridLayoutClasses = ['artificer', 'cleric', 'druid', 'paladin']; // Add more classes here that should use grid layout
+            return gridLayoutClasses.includes(statsData?.class?.toLowerCase() || '');
+        };
+
         if (preparedSpellSlots !== null && preparedSpellSlots <= 0) {
             return (
                 <View style={[styles.section, {
@@ -600,8 +606,9 @@ export default function SpellbookScreen() {
         } else if (preparedSpellSlots === null) {
             return null;
         } else {
+            const isGridLayout = shouldUseGridLayout();
             return (
-                <View style={styles.section}>
+                <View style={[styles.section, isGridLayout ? { flex: 1 } : {}]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
                         <MaterialCommunityIcons name="book-check" size={24} color="lightgrey" />
                         <Text style={styles.label}>
@@ -609,16 +616,19 @@ export default function SpellbookScreen() {
                         </Text>
                     </View>
                     <FlatList
-                        style={{ marginLeft: 10 }}
-                        contentContainerStyle={{ gap: 10 }}
+                        style={!isGridLayout ? { marginLeft: 10 } : {}}
+                        contentContainerStyle={{ gap: 10, padding: 10 }}
                         data={Array.from({ length: preparedSpellSlots || 0 }, (_, i) => ({
                             slotIndex: i,
                             spellName: null
                         }))}
                         renderItem={({ item }) => renderSpellBlock({ item }, "prepared-spells")}
                         keyExtractor={(item) => item.slotIndex.toString()}
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
+                        horizontal={!isGridLayout}
+                        numColumns={isGridLayout ? 3 : 1}
+                        key={isGridLayout ? 'grid' : 'list'}
+                        showsVerticalScrollIndicator={isGridLayout}
+                        showsHorizontalScrollIndicator={!isGridLayout}
                     />
                 </View>
             )
@@ -1685,21 +1695,92 @@ export default function SpellbookScreen() {
     }
 
     const renderPreparedSpellChoices = () => {
+        // Don't show dropdown if selected slot already has a spell
+        if (spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName) {
+            return null;
+        }
+
         // Get list of already prepared spells, excluding current slot
         const preparedSpells = preparedSpellSlotsData
             .filter(slot => slot.spellName !== null && slot.slotIndex !== spellPressedIndex)
             .map(slot => slot.spellName!.toLowerCase());
 
-        // Filter out already prepared spells from options
-        const availableSpells = preparedSpellOptionsBasedOnClass()
-            .filter(item => {
-                const spellName = (typeof item.label === 'string' ? item.label : item.label.label).toLowerCase();
-                return !preparedSpells.includes(spellName);
-            })
-            .map(item => ({
-                label: typeof item.label === 'string' ? item.label : item.label.label,
-                value: typeof item.value === 'string' ? item.value : item.value.value
-            }));
+        // Get list of known spells for wizard
+        const knownSpells = statsData?.class?.toLowerCase() === 'wizard'
+            ? knownSpellSlotsData
+                .filter(slot => slot.spellName !== null)
+                .map(slot => slot.spellName!.toLowerCase())
+            : [];
+
+        // Prepare the list of available spells grouped by level
+        const availableSpells = spellsData
+            .filter(spellLevel => spellLevel.level <= spellLevelAccess)
+            .reduce((acc, levelGroup) => {
+                // Add level group label
+                acc.push({
+                    label: `Level ${levelGroup.level}`,
+                    value: `level_${levelGroup.level}`,
+                    parent: null,
+                    selectable: false,
+                    labelStyle: {
+                        fontWeight: 'bold',
+                    },
+                });
+
+                // Add filtered spells under this level
+                levelGroup.spells
+                    .filter(spellItem => {
+                        const spellName = typeof spellItem === 'string' ? spellItem : spellItem.name;
+                        const spellClasses = typeof spellItem === 'object' ? spellItem.classes?.map(c => c.toLowerCase()) : [];
+                        const spellNameLower = spellName.toLowerCase();
+
+                        // For wizards, only show spells from their spellbook (known spells)
+                        if (statsData?.class?.toLowerCase() === 'wizard') {
+                            return !preparedSpells.includes(spellNameLower) &&
+                                knownSpells.includes(spellNameLower);
+                        }
+
+                        // For druids, filter based on druid spells
+                        if (statsData?.class?.toLowerCase() === 'druid') {
+                            return !preparedSpells.includes(spellNameLower) &&
+                                spellClasses?.includes('druid');
+                        }
+
+                        // For clerics, filter based on cleric spells
+                        if (statsData?.class?.toLowerCase() === 'cleric') {
+                            return !preparedSpells.includes(spellNameLower) &&
+                                spellClasses?.includes('cleric');
+                        }
+
+                        // For paladins, filter based on paladin spells
+                        if (statsData?.class?.toLowerCase() === 'paladin') {
+                            return !preparedSpells.includes(spellNameLower) &&
+                                spellClasses?.includes('paladin');
+                        }
+
+                        // For other classes, just filter based on already prepared spells
+                        return !preparedSpells.includes(spellNameLower);
+                    })
+                    .forEach(spellItem => {
+                        acc.push({
+                            label: typeof spellItem === 'string' ? spellItem : spellItem.name,
+                            value: typeof spellItem === 'string' ? spellItem : spellItem.id,
+                            parent: `level_${levelGroup.level}`,
+                            selectable: true,
+                            labelStyle: {
+                                fontWeight: 'normal',
+                            },
+                        });
+                    });
+
+                return acc;
+            }, [] as {
+                label: string;
+                value: string;
+                parent: string | null;
+                selectable: boolean;
+                labelStyle?: object;
+            }[]);
 
         return <DropDownPicker
             placeholder="Select a spell to prepare"
@@ -1707,7 +1788,7 @@ export default function SpellbookScreen() {
             setOpen={setOpenPreparedSpellDropdown}
             value={preparedSpellChoiceInputValue}
             setValue={setPreparedSpellChoiceInputValue}
-            items={availableSpells}
+            items={availableSpells as ItemType<string>[]}
             multiple={false}
             containerStyle={{ height: 40, marginBottom: 20 }}
             style={{ backgroundColor: 'white', borderRadius: 8 }}
