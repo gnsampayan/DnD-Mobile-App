@@ -1,0 +1,41 @@
+{
+	"name": "Nature",
+	"domain spells": {
+		"level": 1,
+		"description": "You gain domain spells at the cleric levels listed in the Nature Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+		"spells by level": {
+			"1": ["Animal Friendship", "Speak with Animals"],
+			"3": ["Barkskin", "Spike Growth"],
+			"5": ["Plant Growth", "Wind Wall"],
+			"7": ["Dominate Beast", "Grasping Vine"],
+			"9": ["Insect Plague", "Tree Stride"]
+		}
+	},
+	"acolyte of nature": {
+		"level": 1,
+		"description": "At 1st level, you learn one cantrip of your choice from the druid spell list. This cantrip counts as a cleric cantrip for you, but it doesn't count against the number of cleric cantrips you know. You also gain proficiency in one of the following skills of your choice: Animal Handling, Nature, or Survival."
+	},
+	"bonus proficiency": {
+		"level": 1,
+		"description": "Also at 1st level, you gain proficiency with heavy armor."
+	},
+	"channel divinity charm animals and plants": {
+		"level": 2,
+		"description": "Starting at 2nd level, you can use your Channel Divinity to charm animals and plants.",
+		"effects": [
+			"As an action, you present your holy symbol and invoke the name of your deity. Each beast or plant creature that can see you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is charmed by you for 1 minute or until it takes damage. While it is charmed by you, it is friendly to you and other creatures you designate."
+		]
+	},
+	"dampen elements": {
+		"level": 6,
+		"description": "Starting at 6th level, when you or a creature within 30 feet of you takes acid, cold, fire, lightning, or thunder damage, you can use your reaction to grant resistance to the creature against that instance of the damage."
+	},
+	"divine strike": {
+		"level": 8,
+		"description": "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 cold, fire, or lightning damage (your choice) to the target. When you reach 14th level, the extra damage increases to 2d8."
+	},
+	"master of nature": {
+		"level": 17,
+		"description": "At 17th level, you gain the ability to command animals and plant creatures. While creatures are charmed by your Charm Animals and Plants feature, you can take a bonus action on your turn to verbally command what each of those creatures will do on its next turn."
+	}
+}

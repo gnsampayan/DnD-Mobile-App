@@ -391,6 +391,7 @@ export default function ActionsScreen() {
   const [infusionModalVisible, setInfusionModalVisible] = useState<boolean>(false);
   const [currentRages, setCurrentRages] = useState<number>(0);
   const [currentBardicInspirationPoints, setCurrentBardicInspirationPoints] = useState<number>(0);
+  const [counterEnabled, setCounterEnabled] = useState<boolean>(false);
 
   // Initialize currentBardicInspirationPoints based on Charisma modifier (minimum of 1)
   useEffect(() => {
@@ -2175,9 +2176,26 @@ export default function ActionsScreen() {
       {/* Footer Section */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
         {/* Counter Button */}
-        <View style={styles.footerButtonVariantContainer} >
-          <TouchableOpacity style={styles.footerButton}
-            onPress={() => {
+        <View style={styles.footerButtonVariantContainer}>
+          {!counterEnabled && (
+            <View style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,1)'
+            }}>
+              <Ionicons name="play" size={24} color="white" />
+            </View>
+          )}
+          <TouchableOpacity
+            style={[styles.footerButton, { opacity: counterEnabled ? 1 : 0.2 }]}
+            onPress={() => setCounterEnabled(!counterEnabled)}
+            onLongPress={() => {
               Alert.alert(
                 'Reset Turn Counter',
                 'Are you sure you want to reset the turn counter to 0?',
@@ -2188,6 +2206,7 @@ export default function ActionsScreen() {
                   },
                   {
                     text: 'Reset',
+                    style: 'destructive',
                     onPress: () => setTurnsDone(0)
                   }
                 ]
@@ -2195,7 +2214,7 @@ export default function ActionsScreen() {
               return;
             }}
           >
-            <Ionicons name="hourglass" size={22} color="white" style={{ marginRight: 5 }} />
+            <Ionicons name="stopwatch" size={22} color="white" style={{ marginRight: 5 }} />
             <Text style={styles.footerButtonText}>{turnsToMinutes(turnsDone)}</Text>
           </TouchableOpacity>
         </View>
@@ -2203,7 +2222,9 @@ export default function ActionsScreen() {
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
           <TouchableOpacity style={styles.footerButton}
             onPress={() => {
-              setTurnsDone(turnsDone + 1);
+              if (counterEnabled) {
+                setTurnsDone(turnsDone + 1);
+              }
               endTurn();
             }}
           >

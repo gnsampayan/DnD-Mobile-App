@@ -1,0 +1,41 @@
+{
+	"name": "War",
+	"domain spells": {
+		"level": 1,
+		"description": "You gain domain spells at the cleric levels listed in the War Domain Spells table. See the Divine Domain class feature for how domain spells work.",
+		"spells by level": {
+			"1": ["Divine Favor", "Shield of Faith"],
+			"3": ["Magic Weapon", "Spiritual Weapon"],
+			"5": ["Crusader's Mantle", "Spirit Guardians"],
+			"7": ["Freedom of Movement", "Stoneskin"],
+			"9": ["Flame Strike", "Hold Monster"]
+		}
+	},
+	"bonus proficiencies": {
+		"level": 1,
+		"description": "At 1st level, you gain proficiency with martial weapons and heavy armor."
+	},
+	"war priest": {
+		"level": 1,
+		"description": "From 1st level, your god delivers bolts of inspiration to you while you are engaged in battle. When you use the Attack action, you can make one weapon attack as a bonus action.",
+		"effects": [
+			"You can use this feature a number of times equal to your Wisdom modifier (a minimum of once). You regain all expended uses when you finish a long rest."
+		]
+	},
+	"channel divinity guided strike": {
+		"level": 2,
+		"description": "Starting at 2nd level, you can use your Channel Divinity to strike with supernatural accuracy. When you make an attack roll, you can use your Channel Divinity to gain a +10 bonus to the roll. You make this choice after you see the roll, but before the DM says whether the attack hits or misses."
+	},
+	"channel divinity war gods blessing": {
+		"level": 6,
+		"description": "At 6th level, when a creature within 30 feet of you makes an attack roll, you can use your reaction to grant that creature a +10 bonus to the roll, using your Channel Divinity. You make this choice after you see the roll, but before the DM says whether the attack hits or misses."
+	},
+	"divine strike": {
+		"level": 8,
+		"description": "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 damage of the same type dealt by the weapon to the target. When you reach 14th level, the extra damage increases to 2d8."
+	},
+	"avatar of battle": {
+		"level": 17,
+		"description": "At 17th level, you gain resistance to bludgeoning, piercing, and slashing damage from nonmagical attacks."
+	}
+}

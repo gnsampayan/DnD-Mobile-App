@@ -51,6 +51,21 @@ import swordsData from '../data/class-tables/bard/subclass/swords.json';
 import valorData from '../data/class-tables/bard/subclass/valor.json';
 import whispersData from '../data/class-tables/bard/subclass/whispers.json';
 import clericFeatures from '../data/class-tables/cleric/clericFeatures.json';
+import divineDomainData from '../data/class-tables/cleric/divineDomain.json';
+import arcanaData from '../data/class-tables/cleric/subclass/arcana.json';
+import deathData from '../data/class-tables/cleric/subclass/death.json';
+import forgeData from '../data/class-tables/cleric/subclass/forge.json';
+import graveData from '../data/class-tables/cleric/subclass/grave.json';
+import knowledgeData from '../data/class-tables/cleric/subclass/knowledge.json';
+import lifeData from '../data/class-tables/cleric/subclass/life.json';
+import lightData from '../data/class-tables/cleric/subclass/light.json';
+import natureData from '../data/class-tables/cleric/subclass/nature.json';
+import orderData from '../data/class-tables/cleric/subclass/order.json';
+import peaceData from '../data/class-tables/cleric/subclass/peace.json';
+import tempestData from '../data/class-tables/cleric/subclass/tempest.json';
+import trickeryData from '../data/class-tables/cleric/subclass/trickery.json';
+import twilightData from '../data/class-tables/cleric/subclass/twilight.json';
+import warData from '../data/class-tables/cleric/subclass/war.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -312,6 +327,8 @@ export default function MeScreen() {
     const [primalPathOpen, setPrimalPathOpen] = useState(false);
     const [bardCollegeOpen, setBardCollegeOpen] = useState(false);
     const [bardCollegeValue, setBardCollegeValue] = useState<string | null>(null);
+    const [divineDomainOpen, setDivineDomainOpen] = useState(false);
+    const [divineDomainValue, setDivineDomainValue] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -983,7 +1000,8 @@ export default function MeScreen() {
                                         (!expertiseEnabledAgain && statsData.level >= 10))) ||
                                     (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
-                                    (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled)
+                                    (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
+                                    (feature.name.toLowerCase() === 'divine domain' && !subclass)
                                     // add more here
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
@@ -1513,6 +1531,30 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            // Cleric
+            case "divine domain":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: divineDomainValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={divineDomainValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1633,6 +1675,14 @@ export default function MeScreen() {
                 break;
             case "countercharm":
                 setCountercharmEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            // Cleric
+            case "divine domain":
+                if (divineDomainValue) {
+                    setSubclass(divineDomainValue);
+                }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
                 break;
@@ -1808,6 +1858,15 @@ export default function MeScreen() {
                 <View>
                     <Text>Subclass: {subclass}</Text>
                     {subclass && renderBardSubclassFeatures(subclass)}
+                </View>
+            );
+        }
+        // cleric subclass
+        if (subClassButtonName.toLowerCase() === 'divine domain') {
+            return (
+                <View>
+                    <Text>Subclass: {subclass}</Text>
+                    {subclass && renderClericSubclassFeatures(subclass)}
                 </View>
             );
         }
@@ -2208,6 +2267,126 @@ export default function MeScreen() {
 
         const subclassData = getSubclassData(subclassId);
         const subclassInfo = bardCollegeData.find(college => college.id === subclassId);
+
+        if (!subclassData || !subclassInfo) return null;
+
+        const renderNestedObject = (obj: any, depth: number = 0) => {
+            return Object.entries(obj).map(([key, value]) => {
+                if (typeof value === 'string' || typeof value === 'number') {
+                    return (
+                        <Text key={key} style={{ marginLeft: depth * 10, marginTop: 5 }}>
+                            {depth > 0 && '• '}{key !== 'description' && `${key}: `}{value}
+                        </Text>
+                    );
+                } else if (Array.isArray(value)) {
+                    return (
+                        <View key={key} style={{ marginLeft: depth * 10 }}>
+                            <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{key}:</Text>
+                            {value.map((item, index) => (
+                                <Text key={index} style={{ marginTop: 5, marginLeft: 10 }}>
+                                    • {item}
+                                </Text>
+                            ))}
+                        </View>
+                    );
+                } else if (typeof value === 'object' && value !== null) {
+                    return (
+                        <View key={key} style={{ marginLeft: depth * 10, marginTop: 5 }}>
+                            <Text style={{ fontWeight: 'bold' }}>{key}:</Text>
+                            {renderNestedObject(value, depth + 1)}
+                        </View>
+                    );
+                }
+                return null;
+            });
+        };
+
+        return (
+            <View>
+                <Text style={{ textTransform: 'capitalize' }}>{subclassId.replace('-', ' ')}</Text>
+                <Text style={{ marginVertical: 10 }}>{subclassInfo.description}</Text>
+                {Object.entries(subclassData).map(([key, value]) => {
+                    if (key === 'name') return null;
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                {renderNestedObject(value)}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
+    const renderDivineDomainDropdown = () => {
+        return (
+            <View>
+                <Text>Divine Domain</Text>
+                <DropDownPicker
+                    items={divineDomainData.map(item => ({
+                        label: item.name,
+                        value: item.id
+                    }))}
+                    open={divineDomainOpen}
+                    setOpen={setDivineDomainOpen}
+                    value={divineDomainValue}
+                    setValue={setDivineDomainValue}
+                    placeholder="Select a Divine Domain"
+                />
+            </View>
+        );
+    };
+
+    const renderDivineDomainDescription = () => {
+        return (
+            <View>
+                <Text>{divineDomainData.find(item => item.id === divineDomainValue)?.description}</Text>
+            </View>
+        );
+    };
+
+    const renderClericSubclassFeatures = (subclassId: string) => {
+        // Get the appropriate data based on subclass
+        const getSubclassData = (id: string) => {
+            switch (id) {
+                case 'arcana':
+                    return arcanaData;
+                case 'death':
+                    return deathData;
+                case 'forge':
+                    return forgeData;
+                case 'grave':
+                    return graveData;
+                case 'knowledge':
+                    return knowledgeData;
+                case 'life':
+                    return lifeData;
+                case 'light':
+                    return lightData;
+                case 'nature':
+                    return natureData;
+                case 'order':
+                    return orderData;
+                case 'peace':
+                    return peaceData;
+                case 'tempest':
+                    return tempestData;
+                case 'trickery':
+                    return trickeryData;
+                case 'twilight':
+                    return twilightData;
+                case 'war':
+                    return warData;
+                // Add other cleric domains here
+                default:
+                    return null;
+            }
+        };
+
+        const subclassData = getSubclassData(subclassId);
+        const subclassInfo = divineDomainData.find(domain => domain.id === subclassId);
 
         if (!subclassData || !subclassInfo) return null;
 
@@ -3078,11 +3257,22 @@ export default function MeScreen() {
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
                         )}
+                        {/* Divine Domain Dropdown */}
+                        {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' && (
+                            subclass === null ? (
+                                renderDivineDomainDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
+
                             {/* Render Specific Class Feature */}
                             {selectedFeat && renderClassFeatures(false, selectedFeat)}
                             {/* Render Specific Subclass Feature */}
                             {selectedFeat && statsData.class && subclass && renderSubclassFeatures(selectedFeat)}
+
+
                             {/* Primal Path Dropdown Value chosen --- description */}
                             {selectedFeat?.toLowerCase() === 'primal path' && subclass === null && (
                                 renderPrimalPathDescription()
@@ -3090,6 +3280,10 @@ export default function MeScreen() {
                             {/* Bard College Dropdown Value chosen --- description */}
                             {selectedFeat?.toLowerCase() === 'bard college' && subclass === null && (
                                 renderBardCollegeDescription()
+                            )}
+                            {/* Divine Domain Dropdown Value chosen --- description */}
+                            {selectedFeat?.toLowerCase() === 'divine domain' && subclass === null && (
+                                renderDivineDomainDescription()
                             )}
                         </ScrollView>
                     </View>
