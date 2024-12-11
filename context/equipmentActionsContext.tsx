@@ -295,40 +295,6 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
 
-    // Reset when class changes or character is deleted
-    useEffect(() => {
-        if (!isLoading) {
-            // Reset everything when class is empty/null/undefined
-            if (!statsData.class) {
-                setRelentlessEnduranceGained(false);
-                setRelentlessEnduranceUsable(false);
-                setLuckyPointsEnabled(false);
-                setInfernalLegacyEnabled(false);
-                setDraconicAncestry(null);
-                setBreathWeaponEnabled(false);
-                setMagicalTinkeringEnabled(false);
-                setInfuseItemEnabled(false);
-                setInfuseItemSpent(false);
-                setInfusionsLearned([]);
-                setPrimalKnowledgeEnabled(false);
-                setPrimalKnowledgeEnabledAgain(false);
-                setPrimalChampionEnabled(false);
-                setBardicInspirationEnabled(false);
-                setExpertiseEnabled(false);
-                setExpertiseEnabledAgain(false);
-                setFontOfInspirationEnabled(false);
-                setCountercharmEnabled(false);
-                setArcaneInitiateEnabled(false);
-                setArcaneInitiateCantrips([]);
-                setChannelDivinityEnabled(false);
-                setArcaneMasteryEnabled(false);
-                setArcaneMasterySpellsLearned([]);
-                // add more here
-            }
-        }
-    }, [statsData.class, isLoading]);
-
-
     // save arcane mastery spells learned to AsyncStorage whenever it changes
     useEffect(() => {
         if (!isLoading) {

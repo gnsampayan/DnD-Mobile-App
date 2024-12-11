@@ -1649,9 +1649,12 @@ export default function SpellbookScreen() {
 
         if (!spellNameToRender) return null;
 
+        // Convert spellNameToRender to lowercase for case-insensitive comparison
+        const lowerCaseSpellName = spellNameToRender.toLowerCase();
+
         return spellsData.map(level => {
             const spell = level.spells.find(s =>
-                typeof s === 'object' && s.id === spellNameToRender
+                typeof s === 'object' && s.id.toLowerCase() === lowerCaseSpellName
             );
 
             if (spell && typeof spell === 'object') {
@@ -1709,12 +1712,7 @@ export default function SpellbookScreen() {
                         {spell.features && typeof spell.features === 'object' && (
                             <View>
                                 <Text>Features:</Text>
-                                {Object.entries(spell.features).map(([key, value]) => (
-                                    <View key={key}>
-                                        <Text>{key}:</Text>
-                                        <Text>{value}</Text>
-                                    </View>
-                                ))}
+                                {renderSpellFeatures(spell.features)}
                             </View>
                         )}
 
@@ -1724,6 +1722,51 @@ export default function SpellbookScreen() {
             return null;
         })
     }
+
+
+    // Add this utility function to handle rendering spell features
+    const renderSpellFeatures = (features: any) => {
+        if (Array.isArray(features)) {
+            return features.map((feature, index) => (
+                <View key={index} style={{ marginLeft: 10, marginBottom: 5 }}>
+                    {typeof feature === 'object' ? (
+                        <View>
+                            {Object.entries(feature).map(([key, value]) => (
+                                <View key={key} style={{ marginBottom: 5 }}>
+                                    <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                                        {key.charAt(0).toUpperCase() + key.slice(1)}:
+                                    </Text>
+                                    {typeof value === 'object' ? (
+                                        renderSpellFeatures(value)
+                                    ) : (
+                                        <Text style={{ marginLeft: 5 }}>{String(value)}</Text>
+                                    )}
+                                </View>
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={{ marginLeft: 5 }}>{feature}</Text>
+                    )}
+                </View>
+            ));
+        } else if (typeof features === 'object') {
+            return Object.entries(features).map(([key, value]) => (
+                <View key={key} style={{ marginLeft: 10, marginBottom: 5 }}>
+                    <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}:
+                    </Text>
+                    {typeof value === 'object' ? (
+                        renderSpellFeatures(value)
+                    ) : (
+                        <Text style={{ marginLeft: 5 }}>{String(value)}</Text>
+                    )}
+                </View>
+            ));
+        } else {
+            return <Text style={{ marginLeft: 5 }}>{features}</Text>;
+        }
+    };
+
 
     const handleLearnMoreSpells = (increment: number) => {
         // Increment or decrement the number of known spell slots

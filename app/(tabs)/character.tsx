@@ -271,6 +271,7 @@ export default function MeScreen() {
         setMagicalTinkeringEnabled,
         infuseItemEnabled,
         setInfuseItemEnabled,
+        setInfuseItemSpent,
         infusionsLearned,
         setInfusionsLearned,
         primalKnowledgeEnabled,
@@ -620,6 +621,31 @@ export default function MeScreen() {
         setArcaneMasteryValue2(null);
         setArcaneMasteryValue3(null);
         setArcaneMasteryValue4(null);
+
+        // Reset equipment actions context
+        setRelentlessEnduranceGained(false);
+        setRelentlessEnduranceUsable(false);
+        setLuckyPointsEnabled(false);
+        setInfernalLegacyEnabled(false);
+        setDraconicAncestry(null);
+        setBreathWeaponEnabled(false);
+        setMagicalTinkeringEnabled(false);
+        setInfuseItemEnabled(false);
+        setInfuseItemSpent(false);
+        setInfusionsLearned([]);
+        setPrimalKnowledgeEnabled(false);
+        setPrimalKnowledgeEnabledAgain(false);
+        setPrimalChampionEnabled(false);
+        setBardicInspirationEnabled(false);
+        setExpertiseEnabled(false);
+        setExpertiseEnabledAgain(false);
+        setFontOfInspirationEnabled(false);
+        setCountercharmEnabled(false);
+        setArcaneInitiateEnabled(false);
+        setArcaneInitiateCantrips([]);
+        setChannelDivinityEnabled(false);
+        setArcaneMasteryEnabled(false);
+        setArcaneMasterySpellsLearned([]);
     };
 
     const clearCantripSlots = async () => {
