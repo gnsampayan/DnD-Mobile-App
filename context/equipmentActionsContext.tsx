@@ -68,6 +68,10 @@ export interface CharacterContextProps {
     setArcaneInitiateCantrips: (value: string[]) => void;
     channelDivinityEnabled: boolean;
     setChannelDivinityEnabled: (value: boolean) => void;
+    arcaneMasteryEnabled: boolean;
+    setArcaneMasteryEnabled: (value: boolean) => void;
+    arcaneMasterySpellsLearned: string[];
+    setArcaneMasterySpellsLearned: (value: string[]) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -108,6 +112,9 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [arcaneInitiateEnabled, setArcaneInitiateEnabled] = useState<boolean>(false);
     const [arcaneInitiateCantrips, setArcaneInitiateCantrips] = useState<string[]>([]);
     const [channelDivinityEnabled, setChannelDivinityEnabled] = useState<boolean>(false);
+    const [arcaneMasteryEnabled, setArcaneMasteryEnabled] = useState<boolean>(false);
+    const [arcaneMasterySpellsLearned, setArcaneMasterySpellsLearned] = useState<string[]>([]);
+    const [previousClass, setPreviousClass] = useState<string | null>(null);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -133,6 +140,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const ARCANE_INITIATE_ENABLED_STORAGE_KEY = '@arcane_initiate_enabled';
     const ARCANE_INITIATE_CANTRIPS_STORAGE_KEY = '@arcane_initiate_cantrips';
     const CHANNEL_DIVINITY_ENABLED_STORAGE_KEY = '@channel_divinity_enabled';
+    const ARCANE_MASTERY_ENABLED_STORAGE_KEY = '@arcane_mastery_enabled';
+    const ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY = '@arcane_mastery_spells_learned';
+    const PREVIOUS_CLASS_STORAGE_KEY = '@previous_class';
+
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -246,6 +257,21 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                         key: CHANNEL_DIVINITY_ENABLED_STORAGE_KEY,
                         setter: setChannelDivinityEnabled,
                         parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: ARCANE_MASTERY_ENABLED_STORAGE_KEY,
+                        setter: setArcaneMasteryEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY,
+                        setter: setArcaneMasterySpellsLearned,
+                        parser: JSON.parse
+                    },
+                    {
+                        key: PREVIOUS_CLASS_STORAGE_KEY,
+                        setter: setPreviousClass,
+                        parser: (val: string) => val || null
                     }
                 ];
 
@@ -268,65 +294,69 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         loadDataFromStorage();
     }, []);
 
-    const [previousClass, setPreviousClass] = useState<string | null>(null);
 
-
-    // Only reset if class actually changes from a previous value to a new value
+    // Reset when class changes or character is deleted
     useEffect(() => {
         if (!isLoading) {
-            // If this is the first time we're setting previousClass (meaning previousClass is null),
-            // just record the current class. Do not reset.
-            if (previousClass === null) {
-                setPreviousClass(statsData.class || null);
-                return;
-            }
-
-            // If we're switching classes, decide under what conditions to reset:
-            const currentClass = statsData.class;
-            const classChanged = previousClass !== currentClass;
-
-            if (classChanged) {
-                // If the previousClass was empty string and we're now choosing a real class for the first time,
-                // you may or may not want to reset. Typically, going from '' to a real class is the user selecting
-                // their first class, so probably no reset needed.
-                //
-                // If going from one real class to another real class (e.g., Fighter -> Rogue),
-                // or returning to '' (no class) from a class, then reset.
-
-                const goingFromNoClassToClass = previousClass === '' && currentClass !== '';
-                const goingFromClassToNoClass = previousClass !== '' && currentClass === '';
-                const goingFromClassToClass = previousClass !== '' && currentClass !== '';
-
-                if (goingFromClassToNoClass || goingFromClassToClass) {
-                    setRelentlessEnduranceGained(false);
-                    setRelentlessEnduranceUsable(false);
-                    setLuckyPointsEnabled(false);
-                    setInfernalLegacyEnabled(false);
-                    setDraconicAncestry(null);
-                    setBreathWeaponEnabled(false);
-                    setMagicalTinkeringEnabled(false);
-                    setInfuseItemEnabled(false);
-                    setInfuseItemSpent(false);
-                    setInfusionsLearned([]);
-                    setPrimalKnowledgeEnabled(false);
-                    setPrimalKnowledgeEnabledAgain(false);
-                    setPrimalChampionEnabled(false);
-                    setBardicInspirationEnabled(false);
-                    setExpertiseEnabled(false);
-                    setExpertiseEnabledAgain(false);
-                    setFontOfInspirationEnabled(false);
-                    setCountercharmEnabled(false);
-                    setArcaneInitiateEnabled(false);
-                    setArcaneInitiateCantrips([]);
-                    setChannelDivinityEnabled(false);
-                }
-                // If goingFromNoClassToClass is true, we don't reset since the user is just
-                // picking their class for the first time.
-
-                setPreviousClass(currentClass || null);
+            // Reset everything when class is empty/null/undefined
+            if (!statsData.class) {
+                setRelentlessEnduranceGained(false);
+                setRelentlessEnduranceUsable(false);
+                setLuckyPointsEnabled(false);
+                setInfernalLegacyEnabled(false);
+                setDraconicAncestry(null);
+                setBreathWeaponEnabled(false);
+                setMagicalTinkeringEnabled(false);
+                setInfuseItemEnabled(false);
+                setInfuseItemSpent(false);
+                setInfusionsLearned([]);
+                setPrimalKnowledgeEnabled(false);
+                setPrimalKnowledgeEnabledAgain(false);
+                setPrimalChampionEnabled(false);
+                setBardicInspirationEnabled(false);
+                setExpertiseEnabled(false);
+                setExpertiseEnabledAgain(false);
+                setFontOfInspirationEnabled(false);
+                setCountercharmEnabled(false);
+                setArcaneInitiateEnabled(false);
+                setArcaneInitiateCantrips([]);
+                setChannelDivinityEnabled(false);
+                setArcaneMasteryEnabled(false);
+                setArcaneMasterySpellsLearned([]);
+                // add more here
             }
         }
     }, [statsData.class, isLoading]);
+
+
+    // save arcane mastery spells learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveArcaneMasterySpellsLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY, JSON.stringify(arcaneMasterySpellsLearned));
+                } catch (error) {
+                    console.error('Error saving arcane mastery spells learned to AsyncStorage:', error);
+                }
+            }
+            saveArcaneMasterySpellsLearnedToStorage();
+        }
+    }, [arcaneMasterySpellsLearned, isLoading]);
+
+
+    // save arcane mastery enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveArcaneMasteryEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ARCANE_MASTERY_ENABLED_STORAGE_KEY, arcaneMasteryEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving arcane mastery enabled to AsyncStorage:', error);
+                }
+            }
+            saveArcaneMasteryEnabledToStorage();
+        }
+    }, [arcaneMasteryEnabled, isLoading]);
 
     // save channel divinity enabled to AsyncStorage whenever it changes
     useEffect(() => {
@@ -818,6 +848,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setArcaneInitiateCantrips,
                 channelDivinityEnabled,
                 setChannelDivinityEnabled,
+                arcaneMasteryEnabled,
+                setArcaneMasteryEnabled,
+                arcaneMasterySpellsLearned,
+                setArcaneMasterySpellsLearned,
             }}
         >
             {children}

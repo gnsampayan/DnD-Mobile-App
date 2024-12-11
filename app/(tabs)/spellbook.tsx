@@ -258,6 +258,8 @@ export default function SpellbookScreen() {
     const {
         arcaneInitiateEnabled,
         arcaneInitiateCantrips,
+        arcaneMasteryEnabled,
+        arcaneMasterySpellsLearned,
     } = useContext(CharacterContext) as unknown as CharacterContextProps;
 
 
@@ -2252,7 +2254,7 @@ export default function SpellbookScreen() {
         const currentLevel = statsData.level;
 
         // Get all available spell levels from the domain data
-        const availableSpells = Object.entries(spellsByLevel)
+        let availableSpells = Object.entries(spellsByLevel)
             .reduce((acc: string[], [levelStr, spells]) => {
                 // Convert level string to number for comparison
                 const spellLevel = Number(levelStr);
@@ -2263,6 +2265,11 @@ export default function SpellbookScreen() {
                 }
                 return acc;
             }, []);
+
+        // Add Arcane Mastery spells if enabled and subclass is Arcana
+        if (arcaneMasteryEnabled && subclass.toLowerCase() === 'arcana' && arcaneMasterySpellsLearned) {
+            availableSpells = [...availableSpells, ...arcaneMasterySpellsLearned];
+        }
 
         if (availableSpells.length === 0) {
             return null;

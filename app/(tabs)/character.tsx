@@ -67,6 +67,7 @@ import trickeryData from '../data/class-tables/cleric/subclass/trickery.json';
 import twilightData from '../data/class-tables/cleric/subclass/twilight.json';
 import warData from '../data/class-tables/cleric/subclass/war.json';
 import cantripsData from '../data/cantrips.json';
+import spellsData from '../data/spells.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -294,6 +295,9 @@ export default function MeScreen() {
         setArcaneInitiateCantrips,
         channelDivinityEnabled,
         setChannelDivinityEnabled,
+        arcaneMasteryEnabled,
+        setArcaneMasteryEnabled,
+        setArcaneMasterySpellsLearned,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -338,6 +342,16 @@ export default function MeScreen() {
     const [divineDomainValue, setDivineDomainValue] = useState<string | null>(null);
     const [arcaneInitiateValue, setArcaneInitiateValue] = useState<string | null>(null);
     const [arcaneInitiateModalVisible, setArcaneInitiateModalVisible] = useState(false);
+    const [arcaneMasteryModalVisible1, setArcaneMasteryModalVisible1] = useState(false);
+    const [arcaneMasteryModalVisible2, setArcaneMasteryModalVisible2] = useState(false);
+    const [arcaneMasteryModalVisible3, setArcaneMasteryModalVisible3] = useState(false);
+    const [arcaneMasteryModalVisible4, setArcaneMasteryModalVisible4] = useState(false);
+    const [arcaneMasteryValue1, setArcaneMasteryValue1] = useState<string | null>(null);
+    const [arcaneMasteryValue2, setArcaneMasteryValue2] = useState<string | null>(null);
+    const [arcaneMasteryValue3, setArcaneMasteryValue3] = useState<string | null>(null);
+    const [arcaneMasteryValue4, setArcaneMasteryValue4] = useState<string | null>(null);
+    const [darkModalVisible, setDarkModalVisible] = useState(false);
+    const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -602,6 +616,10 @@ export default function MeScreen() {
         clearCantripSlots();
         setSettingsModalVisible(false);
         setLuckyPoints(-1);
+        setArcaneMasteryValue1(null);
+        setArcaneMasteryValue2(null);
+        setArcaneMasteryValue3(null);
+        setArcaneMasteryValue4(null);
     };
 
     const clearCantripSlots = async () => {
@@ -1010,7 +1028,8 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
-                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass || (subclass?.toLowerCase() === 'arcana' && !arcaneInitiateEnabled))) ||
+                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass || !arcaneInitiateEnabled ||
+                                        (!arcaneMasteryEnabled && statsData.level >= 17))) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled)
 
                                     // add more here
@@ -1565,6 +1584,35 @@ export default function MeScreen() {
                         </View>
                     )
                 }
+                if (!arcaneMasteryEnabled && statsData.level >= 17) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity:
+                                arcaneMasteryValue1 === null ||
+                                    arcaneMasteryValue2 === null ||
+                                    arcaneMasteryValue3 === null ||
+                                    arcaneMasteryValue4 === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={
+                                    arcaneMasteryValue1 === null ||
+                                    arcaneMasteryValue2 === null ||
+                                    arcaneMasteryValue3 === null ||
+                                    arcaneMasteryValue4 === null}
+                            />
+                        </View>
+                    )
+                }
                 break;
             case "channel divinity":
                 if (!channelDivinityEnabled) {
@@ -1716,6 +1764,10 @@ export default function MeScreen() {
             case "divine domain":
                 if (divineDomainValue) {
                     setSubclass(divineDomainValue);
+                }
+                if (arcaneMasteryValue1 && arcaneMasteryValue2 && arcaneMasteryValue3 && arcaneMasteryValue4) {
+                    setArcaneMasteryEnabled(true);
+                    setArcaneMasterySpellsLearned([arcaneMasteryValue1, arcaneMasteryValue2, arcaneMasteryValue3, arcaneMasteryValue4]);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -2624,6 +2676,230 @@ export default function MeScreen() {
         );
     };
 
+    const renderArcaneMasteryDropdown = () => {
+
+        const getAllWizardSpells = (level: number) => {
+            return spellsData
+                .find(group => group.level === level)?.spells
+                .filter((spell: any) => {
+                    if (typeof spell === 'string') {
+                        return false;
+                    }
+                    return spell.classes?.includes("Wizard");
+                }) || [];
+        };
+
+        const wizardSpells6 = getAllWizardSpells(6);
+        const wizardSpells7 = getAllWizardSpells(7);
+        const wizardSpells8 = getAllWizardSpells(8);
+        const wizardSpells9 = getAllWizardSpells(9);
+
+        return (
+            <View>
+                <Text>Arcane Mastery</Text>
+                <Text>SpLv6</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity
+                        style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 10,
+                            backgroundColor: 'black',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            opacity: !arcaneMasteryValue1 ? 0.1 : 1,
+                        }}
+                        onPress={() => {
+                            setClassFeatDescriptionModalVisible(false);
+                            setDarkModalVisible(true);
+                            setSelectedSpell(arcaneMasteryValue1);
+                        }}
+                        disabled={!arcaneMasteryValue1}
+                    >
+                        <Text style={{ color: 'white' }}>read</Text>
+                    </TouchableOpacity>
+                    <DropDownPicker
+                        items={wizardSpells6.map((spell) => ({
+                            label: typeof spell === 'string' ? spell : spell.name,
+                            value: typeof spell === 'string' ? spell : spell.name
+                        }))}
+                        value={!arcaneMasteryEnabled ? arcaneMasteryValue1 : null}
+                        setValue={setArcaneMasteryValue1}
+                        open={arcaneMasteryModalVisible1}
+                        setOpen={setArcaneMasteryModalVisible1}
+                        placeholder="Select a spell"
+                        zIndex={4000}
+                        containerStyle={{ flex: 1 }}
+                    />
+                </View>
+
+                <Text>SpLv7</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity
+                        style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 10,
+                            backgroundColor: 'black',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            opacity: !arcaneMasteryValue2 ? 0.1 : 1,
+                        }}
+                        onPress={() => {
+                            setClassFeatDescriptionModalVisible(false);
+                            setDarkModalVisible(true);
+                            setSelectedSpell(arcaneMasteryValue2);
+                        }}
+                        disabled={!arcaneMasteryValue2}
+                    >
+                        <Text style={{ color: 'white' }}>read</Text>
+                    </TouchableOpacity>
+                    <DropDownPicker
+                        items={wizardSpells7.map((spell) => ({
+                            label: typeof spell === 'string' ? spell : spell.name,
+                            value: typeof spell === 'string' ? spell : spell.name
+                        }))}
+                        value={!arcaneMasteryEnabled ? arcaneMasteryValue2 : null}
+                        setValue={setArcaneMasteryValue2}
+                        open={arcaneMasteryModalVisible2}
+                        setOpen={setArcaneMasteryModalVisible2}
+                        placeholder="Select a spell"
+                        zIndex={3000}
+                        containerStyle={{ flex: 1 }}
+                    />
+                </View>
+
+                <Text>SpLv8</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity
+                        style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 10,
+                            backgroundColor: 'black',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            opacity: !arcaneMasteryValue3 ? 0.1 : 1,
+                        }}
+                        onPress={() => {
+                            setClassFeatDescriptionModalVisible(false);
+                            setDarkModalVisible(true);
+                            setSelectedSpell(arcaneMasteryValue3);
+                        }}
+                        disabled={!arcaneMasteryValue3}
+                    >
+                        <Text style={{ color: 'white' }}>read</Text>
+                    </TouchableOpacity>
+                    <DropDownPicker
+                        items={wizardSpells8.map((spell) => ({
+                            label: typeof spell === 'string' ? spell : spell.name,
+                            value: typeof spell === 'string' ? spell : spell.name
+                        }))}
+                        value={!arcaneMasteryEnabled ? arcaneMasteryValue3 : null}
+                        setValue={setArcaneMasteryValue3}
+                        open={arcaneMasteryModalVisible3}
+                        setOpen={setArcaneMasteryModalVisible3}
+                        placeholder="Select a spell"
+                        zIndex={2000}
+                        containerStyle={{ flex: 1 }}
+                    />
+                </View>
+
+                <Text>SpLv9</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity
+                        style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 10,
+                            backgroundColor: 'black',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            opacity: !arcaneMasteryValue4 ? 0.1 : 1,
+                        }}
+                        onPress={() => {
+                            setClassFeatDescriptionModalVisible(false);
+                            setDarkModalVisible(true);
+                            setSelectedSpell(arcaneMasteryValue4);
+                        }}
+                        disabled={!arcaneMasteryValue4}
+                    >
+                        <Text style={{ color: 'white' }}>read</Text>
+                    </TouchableOpacity>
+                    <DropDownPicker
+                        items={wizardSpells9.map((spell) => ({
+                            label: typeof spell === 'string' ? spell : spell.name,
+                            value: typeof spell === 'string' ? spell : spell.name
+                        }))}
+                        value={!arcaneMasteryEnabled ? arcaneMasteryValue4 : null}
+                        setValue={setArcaneMasteryValue4}
+                        open={arcaneMasteryModalVisible4}
+                        setOpen={setArcaneMasteryModalVisible4}
+                        placeholder="Select a spell"
+                        zIndex={1000}
+                        containerStyle={{ flex: 1 }}
+                    />
+                </View>
+            </View>
+        );
+    };
+
+
+    const renderSpellDetails = () => {
+        const renderValue = (value: any, depth = 0): React.ReactNode => {
+            if (depth > 5) return null;
+
+            if (typeof value === 'string' || typeof value === 'number') {
+                return <Text style={{ color: 'white' }}>{value}</Text>;
+            }
+
+            if (Array.isArray(value)) {
+                return value.map((item, index) => (
+                    <View key={index} style={{ marginLeft: 20 }}>
+                        {renderValue(item, depth + 1)}
+                    </View>
+                ));
+            }
+
+            if (typeof value === 'object' && value !== null) {
+                return Object.entries(value).map(([key, val]) => (
+                    <View key={key} style={{ marginLeft: 20 }}>
+                        <Text style={{ color: 'white' }}>
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </Text>
+                        {renderValue(val, depth + 1)}
+                    </View>
+                ));
+            }
+
+            return null;
+        };
+
+        return (
+            <ScrollView style={{ padding: 20 }}>
+                {spellsData.map(levelData => {
+                    const foundSpell = levelData.spells.find(
+                        spell => {
+                            if (typeof spell === 'string') return false;
+                            return spell.name.toLowerCase() === selectedSpell?.toLowerCase();
+                        }
+                    );
+
+                    if (foundSpell && typeof foundSpell !== 'string') {
+                        return Object.entries(foundSpell).map(([key, value]) => {
+                            if (key === 'id') return null;
+                            return (
+                                <View key={key} style={{ marginBottom: 15 }}>
+                                    <Text style={{ color: 'white' }}>
+                                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                                    </Text>
+                                    {renderValue(value)}
+                                </View>
+                            );
+                        });
+                    }
+                    return null;
+                })}
+            </ScrollView>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -3449,10 +3725,14 @@ export default function MeScreen() {
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
                         )}
-                        {/* Cleric - Arcane Initiate */}
-                        {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' && !arcaneInitiateEnabled && (
-                            renderArcaneInitiateDropdown()
-                        )}
+                        {/* Cleric - Arcane Features */}
+                        {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' &&
+                            (!arcaneInitiateEnabled || (!arcaneMasteryEnabled && statsData.level >= 17)) && (
+                                <>
+                                    {!arcaneInitiateEnabled && renderArcaneInitiateDropdown()}
+                                    {!arcaneMasteryEnabled && statsData.level >= 17 && renderArcaneMasteryDropdown()}
+                                </>
+                            )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
 
                             {/* Render Specific Class Feature */}
@@ -3505,6 +3785,28 @@ export default function MeScreen() {
                     </View>
                 </View>
             </Modal>
+
+
+
+            {/* Dark Modal */}
+            <View
+                style={[
+                    styles.fullScreenModalContainer,
+                    {
+                        display: darkModalVisible ? 'flex' : 'none',
+                        paddingBottom: 100
+                    }]}
+            >
+                {renderSpellDetails()}
+                <View style={[styles.modalButtons, { marginBottom: 20 }]}>
+                    <TouchableOpacity style={styles.modalButton} onPress={() => {
+                        setDarkModalVisible(false);
+                        setClassFeatDescriptionModalVisible(true);
+                    }}>
+                        <Text style={styles.modalButtonText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
 
 
 

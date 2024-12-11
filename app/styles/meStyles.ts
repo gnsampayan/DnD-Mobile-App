@@ -627,6 +627,24 @@ const styles = StyleSheet.create({
         height: 60,
         paddingTop: 20,
     },
+    fullScreenModalContainer: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'black',
+        position: 'absolute',
+        left: 10,
+        top: 50,
+        paddingBottom: 60,
+      },
+      modalButton: {
+        backgroundColor: 'gray',
+        borderRadius: 4,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+      },
 });
 
 export default styles;
