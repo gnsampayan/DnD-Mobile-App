@@ -472,15 +472,13 @@ export default function SpellbookScreen() {
     };
 
     // Function to load cantrip slots from AsyncStorage
-    const loadCantripSlots = async () => {
+    async function loadCantripSlots() {
         try {
             const savedSlots = await AsyncStorage.getItem(CANTRIP_SLOTS_KEY);
-            let initialSlots: (string | null)[] = [];
+            let totalSlots = (cantripSlots !== null ? cantripSlots : 0) +
+                (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0 ? arcaneInitiateCantrips.length : 0);
 
-            // Determine the total number of cantrip slots
-            if (cantripSlots !== null) {
-                initialSlots = Array(cantripSlots).fill(null);
-            }
+            let initialSlots: (string | null)[] = Array(totalSlots).fill(null);
 
             // Merge saved data with initialSlots
             if (savedSlots !== null) {
@@ -490,13 +488,12 @@ export default function SpellbookScreen() {
                 });
             }
 
-            // Preassign arcaneInitiateCantrips to extra slots at the end
-            if (arcaneInitiateEnabled && arcaneInitiateCantrips && arcaneInitiateCantrips.length > 0 && cantripSlots !== null) {
-                let startIdx = cantripSlots - arcaneInitiateCantrips.length;
+            // Assign Arcane Initiate cantrips to specific slots without duplication
+            if (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0) {
                 for (let i = 0; i < arcaneInitiateCantrips.length; i++) {
-                    // Only assign if the slot is currently null to avoid overwriting saved assignments
-                    if (!initialSlots[startIdx + i]) {
-                        initialSlots[startIdx + i] = arcaneInitiateCantrips[i];
+                    // Assign to the beginning slots
+                    if (!initialSlots[i]) {
+                        initialSlots[i] = arcaneInitiateCantrips[i];
                     }
                 }
             }
@@ -505,7 +502,7 @@ export default function SpellbookScreen() {
         } catch (error) {
             console.error('Failed to load cantrip slots from storage', error);
         }
-    };
+    }
 
     const getCantripImage = (cantripName: string): ImageSourcePropType => {
         const image = cantripImages[cantripName as keyof typeof cantripImages] || null;
@@ -703,19 +700,18 @@ export default function SpellbookScreen() {
         }
     }
 
-    const getClassCantripsKnown = () => {
-        let cantripsKnown = characterClass?.cantripsKnown && typeof characterClass.cantripsKnown === 'object'
-            ? Object.entries(characterClass.cantripsKnown).reduce((acc, [level, cantrips]) =>
-                Number(level) <= statsData.level ? cantrips : acc, 0)
-            : 0;
-        cantripsKnown = cantripsKnown ? cantripsKnown : 0;
+    function getClassCantripsKnown() {
+        let cantripsKnown = 0;
 
-        // Include additional cantrips from Arcane Initiate
-        if (arcaneInitiateEnabled && arcaneInitiateCantrips && arcaneInitiateCantrips.length > 0) {
-            cantripsKnown += arcaneInitiateCantrips.length;
+        if (characterClass?.cantripsKnown && typeof characterClass.cantripsKnown === 'object') {
+            cantripsKnown = Object.entries(characterClass.cantripsKnown).reduce((acc, [level, cantrips]) => {
+                return Number(level) <= statsData.level ? cantrips : acc;
+            }, 0);
         }
+
         return cantripsKnown;
-    };
+    }
+
     const getCantripSlotsAmount = () => {
         if (characterClass && isSpellCaster) {
             const cantrips = getClassCantripsKnown();
@@ -778,9 +774,9 @@ export default function SpellbookScreen() {
                 </View>
                 <FlatList
                     style={{ marginLeft: 10 }}
-                    data={Array.from({ length: cantripSlots }, (_, i) => i)}
-                    renderItem={({ item: index }) => renderCantripBlock(index)}
-                    keyExtractor={(index) => index.toString()}
+                    data={cantripSlotsData}
+                    renderItem={({ item, index }) => renderCantripBlock(index)}
+                    keyExtractor={(item, index) => index.toString()}
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
                 />
@@ -1335,7 +1331,7 @@ export default function SpellbookScreen() {
         }
 
         // Parse the casting time
-        const { action, bonusAction } = parseCastingTime(selectedCantrip.castingTime);
+        const { action, bonusAction, reaction } = parseCastingTime(selectedCantrip.castingTime);
 
         // Check if the user has enough actions and bonus actions
         if (currentActionsAvailable < action) {
@@ -1348,9 +1344,15 @@ export default function SpellbookScreen() {
             return;
         }
 
+        if (currentReactionsAvailable < reaction) {
+            Alert.alert('Insufficient Reactions', 'You do not have enough reactions available.');
+            return;
+        }
+
         // Deduct the action and bonus action costs
         setCurrentActionsAvailable(prev => prev - action);
         setCurrentBonusActionsAvailable(prev => prev - bonusAction);
+        setCurrentReactionsAvailable(prev => prev - reaction);
 
         // Reset modal and selection states
         setCantripModalVisible(false);
@@ -1364,13 +1366,16 @@ export default function SpellbookScreen() {
         let bonusActionCost = 0;
         let reactionCost = 0;
 
-        if (castingTime.toLowerCase().includes("1 bonus action")) {
+        if (castingTime.toLowerCase().includes("bonus action")) {
             bonusActionCost = 1;
-        }
-        if (castingTime.toLowerCase().includes("1 action")) {
+        } else if (castingTime.toLowerCase().includes("action")) {
             actionCost = 1;
+        } else if (castingTime.toLowerCase().includes("reaction")) {
+            reactionCost = 1;
         }
-        if (castingTime.toLowerCase().includes("1 reaction")) {
+        else {
+            actionCost = 1;
+            bonusActionCost = 1;
             reactionCost = 1;
         }
 

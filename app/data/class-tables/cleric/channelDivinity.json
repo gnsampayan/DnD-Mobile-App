@@ -1,0 +1,264 @@
+{
+	"base": {
+		"Turn Undead": {
+			"id": "turn undead",
+			"name": "Turn Undead",
+			"description": "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\n\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action.",
+			"action": "action",
+			"range": "30 feet",
+			"duration": "1 minute",
+			"save": "Wisdom"
+		}
+	},
+	"subclasses": {
+		"arcana": {
+			"Arcane Abjuration": {
+				"id": "arcane abjuration",
+				"name": "Arcane Abjuration",
+				"description": "As an action, you present your holy symbol, and one celestial, elemental, fey, or fiend of your choice that is within 30 feet of you must make a Wisdom saving throw, provided that the creature can see or hear you. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\n\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly end its move in a space within 30 feet of you. It also can't take reactions. For its action, it can only use the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action.",
+				"banishment": {
+					"description": "After 5th level, when a creature fails its saving throw, it is banished for 1 minute if it isn't on its plane of origin and its CR is at/below the threshold:",
+					"thresholds": {
+						"5": "1/2",
+						"8": "1",
+						"11": "2",
+						"14": "3",
+						"17": "4"
+					}
+				},
+				"action": "action",
+				"range": "30 feet",
+				"duration": "1 minute",
+				"save": "Wisdom",
+				"affects": ["celestial", "elemental", "fey", "fiend"]
+			}
+		},
+		"death": {
+			"Touch of Death": {
+				"id": "touch of death",
+				"name": "Touch of Death",
+				"description": "When you hit a creature with a melee attack, you can use Channel Divinity to deal extra necrotic damage to the target. The damage equals 5 + twice your cleric level.",
+				"damage": {
+					"base": 5,
+					"scaling": "2 × cleric level"
+				},
+				"damageType": "necrotic",
+				"trigger": "melee hit"
+			}
+		},
+		"forge": {
+			"Artisan's Blessing": {
+				"id": "artisans blessing",
+				"name": "Artisan's Blessing",
+				"description": "You conduct an hour-long ritual that crafts a nonmagical item that must include some metal: a simple or martial weapon, a suit of armor, ten pieces of ammunition, a set of tools, or another metal object. The creation is completed at the end of the hour, coalescing in an unoccupied space of your choice on a surface within 5 feet of you.\n\nThe thing you create can be something that is worth no more than 100 gp. As part of this ritual, you must lay out metal, which can include coins, with a value equal to the creation. The metal irretrievably coalesces and transforms into the creation at the ritual's end, magically forming even nonmetal parts of the creation.\n\nThe ritual can create a duplicate of a nonmagical item that contains metal, such as a key, if you possess the original during the ritual.",
+				"duration": "1 hour",
+				"range": "5 feet",
+				"maxValue": 100,
+				"requirements": ["metal components equal to item value"],
+				"validItems": [
+					"simple weapon",
+					"martial weapon",
+					"armor",
+					"ammunition (10)",
+					"tools",
+					"metal objects"
+				]
+			}
+		},
+		"grave": {
+			"Path to the Grave": {
+				"id": "path to the grave",
+				"name": "Path to the Grave",
+				"description": "As an action, you choose one creature you can see within 30 feet of you, cursing it until the end of your next turn. The next time you or an ally of yours hits the cursed creature with an attack, the creature has vulnerability to all of that attack's damage, and then the curse ends.",
+				"action": "action",
+				"range": "30 feet",
+				"duration": "until end of your next turn",
+				"effect": "target has vulnerability to next attack's damage"
+			}
+		},
+		"knowledge": {
+			"Knowledge of the Ages": {
+				"id": "knowledge of the ages",
+				"name": "Knowledge of the Ages",
+				"description": "As an action, you choose one skill or tool. For 10 minutes, you have proficiency with the chosen skill or tool.",
+				"action": "action",
+				"duration": "10 minutes",
+				"effect": "gain proficiency with chosen skill or tool"
+			},
+			"Read Thoughts": {
+				"id": "read thoughts",
+				"name": "Read Thoughts",
+				"level": 6,
+				"description": "As an action, choose one creature that you can see within 60 feet of you. That creature must make a Wisdom saving throw. If the creature succeeds on the saving throw, you can't use this feature on it again until you finish a long rest.\n\nIf the creature fails its save, you can read its surface thoughts (those foremost in its mind, reflecting its current emotions and what it is actively thinking about) when it is within 60 feet of you. This effect lasts for 1 minute.\n\nDuring that time, you can use your action to end this effect and cast the Suggestion spell on the creature without expending a spell slot. The target automatically fails its saving throw against the spell.",
+				"action": "action",
+				"range": "60 feet",
+				"duration": "1 minute",
+				"save": "Wisdom",
+				"effects": [
+					"read surface thoughts",
+					"can cast Suggestion (auto-fail save)"
+				]
+			}
+		},
+		"life": {
+			"Preserve Life": {
+				"id": "preserve life",
+				"name": "Preserve Life",
+				"description": "As an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct.",
+				"action": "action",
+				"range": "30 feet",
+				"healing": "5 x cleric level",
+				"restrictions": [
+					"can't heal above half max HP",
+					"can't heal undead or constructs"
+				]
+			}
+		},
+		"light": {
+			"Radiance of the Dawn": {
+				"id": "radiance of the dawn",
+				"name": "Radiance of the Dawn",
+				"description": "As an action, you present your holy symbol, and any magical darkness within 30 feet of you is dispelled. Additionally, each hostile creature within 30 feet of you must make a Constitution saving throw. A creature takes radiant damage equal to 2d10 + your cleric level on a failed saving throw, and half as much damage on a successful one. A creature that has total cover from you is not affected.",
+				"action": "action",
+				"range": "30 feet",
+				"save": "Constitution",
+				"damage": "2d10 + cleric level",
+				"damage_type": "radiant",
+				"effects": [
+					"dispels magical darkness",
+					"half damage on successful save",
+					"no effect with total cover"
+				]
+			}
+		},
+		"nature": {
+			"Charm Animals and Plants": {
+				"id": "charm animals and plants",
+				"name": "Charm Animals and Plants",
+				"description": "As an action, you present your holy symbol and invoke the name of your deity. Each beast or plant creature that can see you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is charmed by you for 1 minute or until it takes damage. While it is charmed by you, it is friendly to you and other creatures you designate.",
+				"action": "action",
+				"range": "30 feet",
+				"save": "Wisdom",
+				"duration": "1 minute",
+				"effects": [
+					"charm beasts and plants",
+					"charmed creatures are friendly",
+					"effect ends if target takes damage"
+				],
+				"targets": ["beasts", "plant creatures"]
+			}
+		},
+		"order": {
+			"Order's Demand": {
+				"id": "orders demand",
+				"name": "Order's Demand",
+				"description": "As an action, you present your holy symbol, and each creature of your choice that can see or hear you within 30 feet of you must succeed on a Wisdom saving throw or be charmed by you until the end of your next turn or until the charmed creature takes any damage. You can also cause any of the charmed creatures to drop what they are holding when they fail the saving throw.",
+				"action": "action",
+				"range": "30 feet",
+				"save": "Wisdom",
+				"duration": "1 turn",
+				"effects": [
+					"charm creatures",
+					"charmed creatures can drop held items",
+					"effect ends if target takes damage"
+				]
+			}
+		},
+		"peace": {
+			"Balm of Peace": {
+				"id": "balm of peace",
+				"name": "Balm of Peace",
+				"description": "As an action, you can move up to your speed, without provoking opportunity attacks, and when you move within 5 feet of any other creature during this action, you can restore a number of hit points to that creature equal to 2d6 + your Wisdom modifier (minimum of 1 hit point). A creature can receive this healing only once whenever you take this action.",
+				"action": "action",
+				"range": "5 feet",
+				"healing": "2d6 + Wisdom modifier (minimum 1)",
+				"effects": [
+					"move up to speed without provoking opportunity attacks",
+					"heal creatures within 5 feet",
+					"each creature can only be healed once per use"
+				]
+			}
+		},
+		"tempest": {
+			"Destructive Wrath": {
+				"id": "destructive wrath",
+				"name": "Destructive Wrath",
+				"description": "When you roll lightning or thunder damage, you can use your Channel Divinity to deal maximum damage, instead of rolling.",
+				"effects": [
+					"maximize lightning damage rolls",
+					"maximize thunder damage rolls"
+				],
+				"trigger": "when rolling lightning or thunder damage"
+			}
+		},
+		"trickery": {
+			"Invoke Duplicity": {
+				"id": "invoke duplicity",
+				"name": "Invoke Duplicity",
+				"description": "As an action, you create a perfect illusion of yourself that lasts for 1 minute, or until you lose your concentration (as if you were concentrating on a spell). The illusion appears in an unoccupied space that you can see within 30 feet of you. As a bonus action on your turn, you can move the illusion up to 30 feet to a space you can see, but it must remain within 120 feet of you.",
+				"action": "action",
+				"duration": "1 minute",
+				"range": "30 feet",
+				"effects": [
+					"create illusory duplicate",
+					"move duplicate 30 feet as bonus action",
+					"cast spells from duplicate's location",
+					"advantage on attacks when you and duplicate are within 5 feet of target"
+				],
+				"concentration": true
+			},
+			"Cloak of Shadows": {
+				"id": "cloak of shadows",
+				"name": "Cloak of Shadows",
+				"description": "As an action, you become invisible until the end of your next turn. You become visible if you attack or cast a spell.",
+				"action": "action",
+				"duration": "1 turn",
+				"effects": [
+					"become invisible",
+					"invisibility ends if you attack or cast spell"
+				],
+				"level": 6
+			}
+		},
+		"twilight": {
+			"Twilight Sanctuary": {
+				"id": "twilight sanctuary",
+				"name": "Twilight Sanctuary",
+				"description": "As an action, you present your holy symbol, and a sphere of twilight emanates from you. The sphere is centered on you, has a 30-foot radius, and is filled with dim light. The sphere moves with you, and it lasts for 1 minute or until you are incapacitated or die. Whenever a creature (including you) ends its turn in the sphere, you can grant that creature one of these benefits:\n\nYou grant it temporary hit points equal to 1d6 plus your cleric level.\nYou end one effect on it causing it to be charmed or frightened.",
+				"action": "action",
+				"duration": "1 minute",
+				"range": "30 feet",
+				"effects": [
+					"create sphere of dim light",
+					"sphere moves with you",
+					"grant temp HP (1d6 + cleric level)",
+					"end charmed or frightened effects"
+				]
+			}
+		},
+		"war": {
+			"Guided Strike": {
+				"id": "guided strike",
+				"name": "Guided Strike",
+				"description": "When you make an attack roll, you can use your Channel Divinity to gain a +10 bonus to the roll. You make this choice after you see the roll, but before the DM says whether the attack hits or misses.",
+				"action": "none",
+				"effects": [
+					"+10 bonus to attack roll",
+					"used after roll but before hit/miss determined"
+				]
+			},
+			"War God's Blessing": {
+				"id": "war gods blessing",
+				"name": "War God's Blessing",
+				"description": "When a creature within 30 feet of you makes an attack roll, you can use your reaction to grant that creature a +10 bonus to the roll, using your Channel Divinity. You make this choice after you see the roll, but before the DM says whether the attack hits or misses.",
+				"action": "reaction",
+				"range": "30 feet",
+				"effects": [
+					"+10 bonus to ally's attack roll",
+					"used after roll but before hit/miss determined"
+				],
+				"level": 6
+			}
+		}
+	}
+}

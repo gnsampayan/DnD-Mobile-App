@@ -292,6 +292,8 @@ export default function MeScreen() {
         setArcaneInitiateEnabled,
         arcaneInitiateCantrips,
         setArcaneInitiateCantrips,
+        channelDivinityEnabled,
+        setChannelDivinityEnabled,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -1008,7 +1010,8 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
-                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass || (subclass?.toLowerCase() === 'arcana' && !arcaneInitiateEnabled)))
+                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass || (subclass?.toLowerCase() === 'arcana' && !arcaneInitiateEnabled))) ||
+                                    (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled)
 
                                     // add more here
                                 ) && (
@@ -1563,6 +1566,29 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            case "channel divinity":
+                if (!channelDivinityEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: channelDivinityEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={channelDivinityEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1691,6 +1717,11 @@ export default function MeScreen() {
                 if (divineDomainValue) {
                     setSubclass(divineDomainValue);
                 }
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            case "channel divinity":
+                setChannelDivinityEnabled(true);
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
                 break;
@@ -2828,8 +2859,7 @@ export default function MeScreen() {
                             (() => {
                                 const weapon = weapons.find((w) => w.value === mainHandWeapon.name.toLowerCase() || '');
                                 const isTwoHanded = mainHandWeapon.properties?.includes("Two-handed");
-                                const isProficient = weaponsProficientIn.map(w => w.toLowerCase()).includes(mainHandWeapon.weaponType?.toLowerCase() || '');
-
+                                const isProficient = weaponsProficientIn.includes(mainHandWeapon.weaponType?.toLowerCase() || '');
                                 const weaponImage = getWeaponImage(mainHandWeapon.name.toLowerCase()) as ImageSourcePropType;
 
                                 return (
@@ -2845,10 +2875,7 @@ export default function MeScreen() {
                                                 color: 'white',
                                                 fontSize: 16,
                                                 textAlign: 'center'
-                                            }}
-                                            >
-                                                {weapon?.label || mainHandWeapon.name} {!isProficient && '(Inept)'}
-                                            </Text>
+                                            }}>{weapon?.label || mainHandWeapon.name} {!isProficient && '(Inept)'}</Text>
                                         )}
                                         {isTwoHanded && (
                                             <>
@@ -2861,10 +2888,9 @@ export default function MeScreen() {
                                 );
                             })()
                         ) : (
-                            <Image
+                            <ImageBackground
                                 source={equipmentItems.find((item) => item.id === 'mainMelee')?.defaultImage}
                                 style={styles.equipmentItemImage}
-                                resizeMode="contain"
                             />
                         )}
                     </TouchableOpacity>
@@ -2899,7 +2925,13 @@ export default function MeScreen() {
                                                 textAlign: 'center'
                                             }}>{weapon?.label || offHandWeapon.name} {!isProficient && '(Inept)'}</Text>
                                         )}
-                                        {isTwoHanded && <Text style={styles.twoHandedLabel}>2H</Text>}
+                                        {isTwoHanded && (
+                                            <>
+                                                <View style={styles.twoHandedLabel}>
+                                                    <MaterialIcons name="sign-language" size={24} color="white" />
+                                                </View>
+                                            </>
+                                        )}
                                     </ImageBackground>
                                 );
                             })()

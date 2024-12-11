@@ -66,6 +66,10 @@ import consultTheSpiritsImage from '@actions/consult-spirits-image.png';
 import bardicInspirationImage from '@actions/bardic-inspiration-image.png';
 import countercharmImage from '@actions/countercharm-image.png';
 
+// Cleric
+import channelDivinityImage from '@actions/channel-divinity-image.png';
+import channelDivinityData from '../data/class-tables/cleric/channelDivinity.json';
+
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
 import bladeWardImage from '@images/cantrips/blade-ward.png';
@@ -337,6 +341,7 @@ export default function ActionsScreen() {
     bardicInspirationEnabled,
     fontOfInspirationEnabled,
     countercharmEnabled,
+    channelDivinityEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -356,6 +361,7 @@ export default function ActionsScreen() {
     bardicInspirationEnabled: boolean;
     fontOfInspirationEnabled: boolean;
     countercharmEnabled: boolean;
+    channelDivinityEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -388,10 +394,25 @@ export default function ActionsScreen() {
   const [armorStealthDisadvantage, setArmorStealthDisadvantage] = useState<boolean>(false);
   const [knownInfusionsOpen, setKnownInfusionsOpen] = useState<boolean>(false);
   const [knownInfusionValue, setKnownInfusionValue] = useState<string>('');
-  const [infusionModalVisible, setInfusionModalVisible] = useState<boolean>(false);
+  const [darkModalVisible, setDarkModalVisible] = useState<boolean>(false);
   const [currentRages, setCurrentRages] = useState<number>(0);
   const [currentBardicInspirationPoints, setCurrentBardicInspirationPoints] = useState<number>(0);
   const [counterEnabled, setCounterEnabled] = useState<boolean>(false);
+  const [knownChannelDivinityValue, setKnownChannelDivinityValue] = useState<string>('');
+  const [knownChannelDivinityOpen, setKnownChannelDivinityOpen] = useState<boolean>(false);
+  const [turnsDone, setTurnsDone] = useState(0);
+  const [currentChannelDivinityPoints, setCurrentChannelDivinityPoints] = useState<number>(0);
+
+  // Initialize currentChannelDivinityPoints based on level
+  useEffect(() => {
+    let points = 1; // 1 point for levels 1-5
+    if (statsData.level >= 18) {
+      points = 3; // 3 points for levels 18-20
+    } else if (statsData.level >= 6) {
+      points = 2; // 2 points for levels 6-17
+    }
+    setCurrentChannelDivinityPoints(points);
+  }, [statsData.level]);
 
   // Initialize currentBardicInspirationPoints based on Charisma modifier (minimum of 1)
   useEffect(() => {
@@ -501,23 +522,25 @@ export default function ActionsScreen() {
     });
   };
 
-  const parseCastingTime = (
-    castingTime: string | undefined): {
-      actions: number;
-      bonus: number;
-      castingTimeText?: string
-    } => {
+  const parseCastingTime = (castingTime: string | undefined): {
+    actions: number;
+    bonus: number;
+    reaction: number;
+    castingTimeText?: string
+  } => {
     if (!castingTime) {
-      return { actions: 0, bonus: 0 };
+      return { actions: 0, bonus: 0, reaction: 0 };
     }
     const lowerCastingTime = castingTime.toLowerCase();
     if (lowerCastingTime.includes('bonus action')) {
-      return { actions: 0, bonus: 1 };
+      return { actions: 0, bonus: 1, reaction: 0 };
     } else if (lowerCastingTime.includes('action')) {
-      return { actions: 1, bonus: 0 };
+      return { actions: 1, bonus: 0, reaction: 0 };
+    } else if (lowerCastingTime.includes('reaction')) {
+      return { actions: 0, bonus: 0, reaction: 1 };
     } else {
-      // Return the original casting time string for other cases
-      return { actions: 0, bonus: 0, castingTimeText: castingTime };
+      // If not action, bonus action, or reaction, cost 1 of each
+      return { actions: 1, bonus: 1, reaction: 1, castingTimeText: castingTime };
     }
   };
 
@@ -547,6 +570,7 @@ export default function ActionsScreen() {
     infuseItemEnabled,
     bardicInspirationEnabled,
     countercharmEnabled,
+    channelDivinityEnabled,
     // Add other dependencies as needed for new actions gained from class features
   ]);
 
@@ -1147,6 +1171,11 @@ export default function ActionsScreen() {
         affordable = affordable && currentBardicInspirationPoints > 0;
       }
 
+      // Check for channel divinity
+      if (statsData.class?.toLowerCase() === 'cleric' && item.name.toLowerCase() === 'channel divinity') {
+        affordable = affordable && currentChannelDivinityPoints > 0;
+      }
+
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
       const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
@@ -1592,6 +1621,22 @@ export default function ActionsScreen() {
       } as ActionBlock);
     }
 
+    // Cleric
+    if (statsData.class?.toLowerCase() === 'cleric') {
+      if (channelDivinityEnabled === true) {
+        // Add 'Channel Divinity' action
+        classActions.push({
+          id: 'class-channel-divinity',
+          name: 'Channel Divinity',
+          cost: { actions: 1, bonus: 0 },
+          details: 'Channel divine energy directly from your deity to fuel magical effects.',
+          image: channelDivinityImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+    }
+
     // Other classes
     return classActions;
   }
@@ -1611,11 +1656,11 @@ export default function ActionsScreen() {
           }}
           onPress={() => {
             setActionModalVisible(false);
-            setInfusionModalVisible(true);
+            setDarkModalVisible(true);
           }}
           disabled={knownInfusionValue === ''}
         >
-          <Text style={{ color: 'white' }}>open</Text>
+          <Text style={{ color: 'white' }}>read</Text>
         </TouchableOpacity>
         <DropDownPicker
           items={infusionsLearned.map((infusion) => ({
@@ -1627,6 +1672,63 @@ export default function ActionsScreen() {
           open={knownInfusionsOpen}
           setOpen={setKnownInfusionsOpen}
           placeholder="Select an infusion"
+          containerStyle={{ zIndex: 2000, flex: 1 }}
+        />
+      </View>
+    );
+  }
+
+  const renderChannelDivinityDropdown = () => {
+    const getChannelDivinityOptions = () => {
+      // Start with base Channel Divinity options that all clerics get
+      const options = Object.entries(channelDivinityData.base).map(([key, value]) => ({
+        label: value.name,
+        value: value.id
+      }));
+
+      // Add subclass specific options if they exist
+      if (subclass?.toLowerCase() && channelDivinityData.subclasses[subclass.toLowerCase() as keyof typeof channelDivinityData.subclasses]) {
+        const subclassOptions = Object.entries(channelDivinityData.subclasses[subclass.toLowerCase() as keyof typeof channelDivinityData.subclasses])
+          .filter(([key, value]) => {
+            // Only include if no level requirement or if level requirement is met
+            return !(value as any).level || statsData.level >= (value as any).level;
+          })
+          .map(([key, value]) => ({
+            label: (value as { name: string }).name,
+            value: value.id
+          }));
+        options.push(...subclassOptions);
+      }
+
+      return options;
+    };
+
+    return (
+      <View style={{ zIndex: 2000, flexDirection: 'row', alignItems: 'center', width: '100%', gap: 10 }}>
+        <TouchableOpacity
+          style={{
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+            backgroundColor: 'black',
+            borderRadius: 8,
+            borderWidth: 1,
+            opacity: knownChannelDivinityValue === '' ? 0.1 : 1,
+          }}
+          onPress={() => {
+            setActionModalVisible(false);
+            setDarkModalVisible(true);
+          }}
+          disabled={knownChannelDivinityValue === ''}
+        >
+          <Text style={{ color: 'white' }}>read</Text>
+        </TouchableOpacity>
+        <DropDownPicker
+          items={getChannelDivinityOptions()}
+          value={knownChannelDivinityValue}
+          setValue={setKnownChannelDivinityValue}
+          open={knownChannelDivinityOpen}
+          setOpen={setKnownChannelDivinityOpen}
+          placeholder="Select Channel Divinity option"
           containerStyle={{ zIndex: 2000, flex: 1 }}
         />
       </View>
@@ -1692,6 +1794,89 @@ export default function ActionsScreen() {
     );
   }
 
+  const renderChannelDivinityDetails = () => {
+    const renderValue = (value: any, depth = 0) => {
+      if (typeof value === 'string' || typeof value === 'number') {
+        return <Text style={{ color: 'white', marginLeft: 20 }}>{value}</Text>;
+      }
+
+      if (Array.isArray(value)) {
+        return value.map((item, index) => (
+          <View key={index} style={{ marginLeft: 20 }}>
+            {renderValue(item, depth + 1)}
+          </View>
+        ));
+      }
+
+      if (typeof value === 'object' && value !== null) {
+        return Object.entries(value).map(([key, val]) => (
+          <View key={key} style={{ marginLeft: 20 }}>
+            <Text style={{ color: 'white' }}>
+              {key.charAt(0).toUpperCase() + key.slice(1)}
+            </Text>
+            {renderValue(val, depth + 1)}
+          </View>
+        ));
+      }
+
+      return null;
+    };
+
+    return (
+      <ScrollView style={{ padding: 20 }}>
+        {knownChannelDivinityValue && (
+          <>
+            {/* Check base channel divinity options */}
+            {Object.values(channelDivinityData.base).map(divinity => {
+              if (divinity.id.toLowerCase() === knownChannelDivinityValue.toLowerCase()) {
+                return (
+                  <View key={divinity.id}>
+                    {Object.entries(divinity).map(([key, value]) => {
+                      if (key === 'id') return null;
+                      return (
+                        <View key={key} style={{ marginBottom: 15 }}>
+                          <Text style={{ color: 'white' }}>
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </Text>
+                          {renderValue(value)}
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              }
+              return null;
+            })}
+
+            {/* Check subclass channel divinity options */}
+            {Object.values(channelDivinityData.subclasses).map(subclass =>
+              Object.values(subclass).map(divinity => {
+                if (divinity.id.toLowerCase() === knownChannelDivinityValue.toLowerCase()) {
+                  return (
+                    <View key={divinity.id}>
+                      {Object.entries(divinity).map(([key, value]) => {
+                        if (key === 'id') return null;
+                        return (
+                          <View key={key} style={{ marginBottom: 15 }}>
+                            <Text style={{ color: 'white' }}>
+                              {key.charAt(0).toUpperCase() + key.slice(1)}
+                            </Text>
+                            {renderValue(value)}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  );
+                }
+                return null;
+              })
+            )}
+          </>
+        )}
+      </ScrollView>
+    );
+  }
+
   const getCurrentRages = () => {
     const feature = barbarianTable.find((feat) => feat.userLevel === statsData.level);
     if (!feature) return 0;
@@ -1704,8 +1889,6 @@ export default function ActionsScreen() {
     return feature.rageDamage as string;
   }
 
-  const [turnsDone, setTurnsDone] = useState(0);
-
   const turnsToMinutes = (turns: number) => {
     // Each turn is 6 seconds
     const totalSeconds = turns * 6;
@@ -1713,6 +1896,16 @@ export default function ActionsScreen() {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
     return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  const resetChannelDivinityPoints = () => {
+    let points = 1;
+    if (statsData.level >= 18) {
+      points = 3;
+    } else if (statsData.level >= 6) {
+      points = 2;
+    }
+    setCurrentChannelDivinityPoints(points);
   }
 
   // Main Contents
@@ -1966,6 +2159,27 @@ export default function ActionsScreen() {
                   x{currentBardicInspirationPoints}
                 </Text>
               </View>
+            </View>
+          )}
+
+          {/* Show if user class is cleric */}
+          {statsData.class?.toLowerCase() === 'cleric' && channelDivinityEnabled && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+                onPress={() => {
+                  Alert.alert('Channel Divinity', 'You can use your Channel Divinity to perform powerful abilities.');
+                }}>
+                <MaterialCommunityIcons name="cross-bolnisi" size={20} color="white" style={{ opacity: currentChannelDivinityPoints === 0 ? 0.2 : 1 }} />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    currentChannelDivinityPoints === 0 && { color: 'black' }
+                  ]}>
+                    x{currentChannelDivinityPoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -2822,6 +3036,11 @@ export default function ActionsScreen() {
                       renderKnownInfusionsDropdown()
                     )}
 
+                    {/* Cleric Channel Divinity */}
+                    {statsData.class === 'cleric' && selectedAction.name.toLowerCase() === 'channel divinity' && (
+                      renderChannelDivinityDropdown()
+                    )}
+
 
 
                     {/* Modal Buttons */}
@@ -2844,6 +3063,10 @@ export default function ActionsScreen() {
                               const charismaModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Charisma')?.value || 10);
                               setCurrentBardicInspirationPoints(charismaModifier);
                             }
+                            if (statsData.class?.toLowerCase() === 'cleric') {
+                              resetChannelDivinityPoints();
+                            }
+                            // add more conditions here
                           }}>
                           <MaterialCommunityIcons name="sleep" size={16} color="black" />
                           <Text>Short Rest</Text>
@@ -2876,11 +3099,22 @@ export default function ActionsScreen() {
                               currentBonusActionsAvailable < selectedAction.cost.bonus ||
                               selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction ||
                               (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
-                              (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent)) && { opacity: 0.2 }
+                              (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
+                              (selectedAction.name.toLowerCase() === 'breath weapon' && breathWeaponSpent) ||
+                              (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
+                              (selectedAction.name.toLowerCase() === 'rage' && currentRages < 1) ||
+                              (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent) ||
+                              (selectedAction.name.toLowerCase() === 'bardic inspiration' && currentBardicInspirationPoints < 1) ||
+                              (selectedAction.name.toLowerCase() === 'channel divinity' && (currentChannelDivinityPoints < 1 || knownChannelDivinityValue === ''))
+                              // add more conditions here
+                            )
+                            && { opacity: 0.2 }
                           )
                         ]}
                         onPress={() => {
                           switch (selectedAction.name.toLowerCase()) {
+
+                            // rest case -- visual guide
                             case 'rest':
                               handleHpChange('replenish');
                               setSpentSpellSlots({
@@ -2922,7 +3156,12 @@ export default function ActionsScreen() {
                                 const charismaModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Charisma')?.value || 10);
                                 setCurrentBardicInspirationPoints(charismaModifier);
                               }
+                              if (statsData.class?.toLowerCase() === 'cleric') {
+                                resetChannelDivinityPoints();
+                              }
+                              // add more conditions here
                               break;
+                            // end of rest case -- visual guide
 
                             case 'hellish rebuke':
                               setHellishRebukeSpent(true);
@@ -2955,6 +3194,10 @@ export default function ActionsScreen() {
                               setCurrentBardicInspirationPoints(prev => Math.max(0, prev - 1));
                               break;
 
+                            case 'channel divinity':
+                              setCurrentChannelDivinityPoints(prev => Math.max(0, prev - 1));
+                              break;
+
                           }
 
                           // Default commit action
@@ -2968,8 +3211,13 @@ export default function ActionsScreen() {
                             (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
                             (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
                             (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
+                            (selectedAction.name.toLowerCase() === 'breath weapon' && breathWeaponSpent) ||
                             (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
-                            (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent)
+                            (selectedAction.name.toLowerCase() === 'rage' && currentRages < 1) ||
+                            (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent) ||
+                            (selectedAction.name.toLowerCase() === 'bardic inspiration' && currentBardicInspirationPoints < 1) ||
+                            (selectedAction.name.toLowerCase() === 'channel divinity' && currentChannelDivinityPoints < 1)
+                            // add more conditions here
                           )
                         }
                       >
@@ -3110,18 +3358,20 @@ export default function ActionsScreen() {
       </Modal>
 
 
-      {/* Infusion Modal */}
+      {/* Dark Modal */}
+      {/* Infusion Modal && Channel Divinity Modal */}
       <View
         style={[
           styles.fullScreenModalContainer,
           {
-            display: infusionModalVisible ? 'flex' : 'none'
+            display: darkModalVisible ? 'flex' : 'none'
           }]}
       >
         {renderInfusionDetails()}
+        {renderChannelDivinityDetails()}
         <View style={styles.modalButtons}>
           <TouchableOpacity style={styles.modalButton} onPress={() => {
-            setInfusionModalVisible(false);
+            setDarkModalVisible(false);
             setActionModalVisible(true);
           }}>
             <Text style={styles.modalButtonText}>Close</Text>

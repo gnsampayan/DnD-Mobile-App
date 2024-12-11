@@ -66,6 +66,8 @@ export interface CharacterContextProps {
     setArcaneInitiateEnabled: (value: boolean) => void;
     arcaneInitiateCantrips: string[];
     setArcaneInitiateCantrips: (value: string[]) => void;
+    channelDivinityEnabled: boolean;
+    setChannelDivinityEnabled: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -105,6 +107,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [countercharmEnabled, setCountercharmEnabled] = useState<boolean>(false);
     const [arcaneInitiateEnabled, setArcaneInitiateEnabled] = useState<boolean>(false);
     const [arcaneInitiateCantrips, setArcaneInitiateCantrips] = useState<string[]>([]);
+    const [channelDivinityEnabled, setChannelDivinityEnabled] = useState<boolean>(false);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -129,6 +132,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const COUNTERCHARM_ENABLED_STORAGE_KEY = '@countercharm_enabled';
     const ARCANE_INITIATE_ENABLED_STORAGE_KEY = '@arcane_initiate_enabled';
     const ARCANE_INITIATE_CANTRIPS_STORAGE_KEY = '@arcane_initiate_cantrips';
+    const CHANNEL_DIVINITY_ENABLED_STORAGE_KEY = '@channel_divinity_enabled';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -237,6 +241,11 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                         key: ARCANE_INITIATE_CANTRIPS_STORAGE_KEY,
                         setter: setArcaneInitiateCantrips,
                         parser: JSON.parse
+                    },
+                    {
+                        key: CHANNEL_DIVINITY_ENABLED_STORAGE_KEY,
+                        setter: setChannelDivinityEnabled,
+                        parser: (val: string) => val === 'true'
                     }
                 ];
 
@@ -309,6 +318,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setCountercharmEnabled(false);
                     setArcaneInitiateEnabled(false);
                     setArcaneInitiateCantrips([]);
+                    setChannelDivinityEnabled(false);
                 }
                 // If goingFromNoClassToClass is true, we don't reset since the user is just
                 // picking their class for the first time.
@@ -317,6 +327,20 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
             }
         }
     }, [statsData.class, isLoading]);
+
+    // save channel divinity enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveChannelDivinityEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(CHANNEL_DIVINITY_ENABLED_STORAGE_KEY, channelDivinityEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving channel divinity enabled to AsyncStorage:', error);
+                }
+            }
+            saveChannelDivinityEnabledToStorage();
+        }
+    }, [channelDivinityEnabled, isLoading]);
 
     // save arcane initiate cantrips to AsyncStorage whenever it changes
     useEffect(() => {
@@ -792,6 +816,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setArcaneInitiateEnabled,
                 arcaneInitiateCantrips,
                 setArcaneInitiateCantrips,
+                channelDivinityEnabled,
+                setChannelDivinityEnabled,
             }}
         >
             {children}
