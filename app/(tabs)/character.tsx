@@ -66,6 +66,7 @@ import tempestData from '../data/class-tables/cleric/subclass/tempest.json';
 import trickeryData from '../data/class-tables/cleric/subclass/trickery.json';
 import twilightData from '../data/class-tables/cleric/subclass/twilight.json';
 import warData from '../data/class-tables/cleric/subclass/war.json';
+import cantripsData from '../data/cantrips.json';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -287,6 +288,10 @@ export default function MeScreen() {
         setFontOfInspirationEnabled,
         countercharmEnabled,
         setCountercharmEnabled,
+        arcaneInitiateEnabled,
+        setArcaneInitiateEnabled,
+        arcaneInitiateCantrips,
+        setArcaneInitiateCantrips,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -329,6 +334,8 @@ export default function MeScreen() {
     const [bardCollegeValue, setBardCollegeValue] = useState<string | null>(null);
     const [divineDomainOpen, setDivineDomainOpen] = useState(false);
     const [divineDomainValue, setDivineDomainValue] = useState<string | null>(null);
+    const [arcaneInitiateValue, setArcaneInitiateValue] = useState<string | null>(null);
+    const [arcaneInitiateModalVisible, setArcaneInitiateModalVisible] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -1001,7 +1008,8 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
-                                    (feature.name.toLowerCase() === 'divine domain' && !subclass)
+                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass || (subclass?.toLowerCase() === 'arcana' && !arcaneInitiateEnabled)))
+
                                     // add more here
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
@@ -2441,6 +2449,150 @@ export default function MeScreen() {
         );
     };
 
+
+
+
+    const renderArcaneInitiateDropdown = () => {
+        // Only render if subclass is "arcana"
+        if (subclass?.toLowerCase() !== "arcana") {
+            return null;
+        }
+
+        // Recursive function to render nested JSON content
+        const renderNestedContent = (content: any, depth: number = 0) => {
+            if (!content) return null;
+            if (Array.isArray(content)) {
+                return content.map((item, index) => (
+                    <View key={index} style={{ marginLeft: depth * 10 }}>
+                        {typeof item === 'object'
+                            ? renderNestedContent(item, depth + 1)
+                            : <Text>• {item}</Text>
+                        }
+                    </View>
+                ));
+            }
+            if (typeof content === 'object') {
+                return Object.entries(content).map(([key, value]) => (
+                    <View key={key} style={{ marginBottom: 5, marginLeft: depth * 10 }}>
+                        <Text style={{ fontWeight: depth === 0 ? 'bold' : '500', textTransform: 'capitalize' }}>
+                            {depth > 0 && '• '}{key}:
+                        </Text>
+                        {typeof value === 'object'
+                            ? renderNestedContent(value, depth + 1)
+                            : <Text>{String(value)}</Text>
+                        }
+                    </View>
+                ));
+            }
+            return <Text>{String(content)}</Text>;
+        };
+
+        const wizardCantrips = cantripsData.filter((value): boolean => {
+            return value?.classes?.includes("Wizard") ?? false;
+        });
+
+        return (
+            <View style={{
+                paddingVertical: 10,
+                zIndex: 2000,
+            }}>
+                <View style={{ flexDirection: 'column', gap: 10, justifyContent: 'space-between', alignItems: 'center', zIndex: 2000 }}>
+                    <Text style={{ color: 'black', fontWeight: 'bold' }}>Arcane Initiate Cantrips ({arcaneInitiateCantrips.length}/2)</Text>
+                    <View style={{ flexDirection: 'row', gap: 10, justifyContent: 'space-between', alignItems: 'center', zIndex: 2000 }}>
+
+                        <DropDownPicker
+                            items={wizardCantrips
+                                .filter((item) => !arcaneInitiateCantrips.includes(item.name))
+                                .map((item) => ({
+                                    label: item.name,
+                                    value: item.name
+                                }))}
+                            value={arcaneInitiateValue}
+                            setValue={setArcaneInitiateValue}
+                            open={arcaneInitiateModalVisible}
+                            setOpen={setArcaneInitiateModalVisible}
+                            placeholder="Select a wizard cantrip"
+                            dropDownContainerStyle={{ backgroundColor: 'white', zIndex: 2000 }}
+                            containerStyle={{ flex: 1 }}
+                            disabled={arcaneInitiateCantrips.length === 2}
+                            style={{ opacity: arcaneInitiateCantrips.length === 2 ? 0.2 : 1 }}
+                        />
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: 'black',
+                                paddingHorizontal: 10,
+                                paddingVertical: 5,
+                                borderRadius: 8,
+                                opacity: arcaneInitiateCantrips.length === 2 ? 0.2 : 1
+                            }}
+                            onPress={() => {
+                                if (arcaneInitiateValue) {
+                                    setArcaneInitiateCantrips([...arcaneInitiateCantrips, arcaneInitiateValue]);
+                                    setArcaneInitiateValue(null);
+                                }
+                            }}
+                            disabled={!arcaneInitiateValue || arcaneInitiateCantrips.length === 2}
+                        >
+                            <Text style={{ color: 'white' }}>Select</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {arcaneInitiateCantrips.length > 0 && (
+                    <View style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                        {arcaneInitiateCantrips.map(cantrip => (
+                            <View key={cantrip} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{cantrip}</Text>
+                                <TouchableOpacity onPress={() => setArcaneInitiateCantrips(arcaneInitiateCantrips.filter(c => c !== cantrip))}>
+                                    <Ionicons name="remove-circle" size={24} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                <ScrollView style={{
+                    height: arcaneInitiateValue ? '40%' : 0,
+                    borderBottomWidth: 1,
+                    borderTopWidth: 1,
+                    borderColor: arcaneInitiateValue ? 'black' : 'transparent'
+                }}>
+                    {arcaneInitiateValue && wizardCantrips
+                        .filter((cantrip) => cantrip.name === arcaneInitiateValue)
+                        .map((cantrip) => (
+                            <View key={cantrip.name} style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                                {renderNestedContent(
+                                    Object.fromEntries(
+                                        Object.entries(cantrip).filter(([key]) => key !== 'id')
+                                    )
+                                )}
+                            </View>
+                        ))
+                    }
+                </ScrollView>
+
+                {arcaneInitiateCantrips.length === 2 && (
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: 'green',
+                            paddingHorizontal: 20,
+                            paddingVertical: 10,
+                            borderRadius: 8,
+                            marginTop: 10,
+                            alignSelf: 'center'
+                        }}
+                        onPress={() => {
+                            setArcaneInitiateEnabled(true);
+                            setFeaturesModalVisible(false);
+                        }}
+                    >
+                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Confirm Cantrips</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -3257,13 +3409,17 @@ export default function MeScreen() {
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
                         )}
-                        {/* Divine Domain Dropdown */}
+                        {/* Cleric - Divine Domain Dropdown */}
                         {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' && (
                             subclass === null ? (
                                 renderDivineDomainDropdown()
                             ) : (
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
+                        )}
+                        {/* Cleric - Arcane Initiate */}
+                        {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' && !arcaneInitiateEnabled && (
+                            renderArcaneInitiateDropdown()
                         )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
 

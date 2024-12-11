@@ -25,6 +25,24 @@ import alchemistSpellsData from '@/app/data/class-tables/artificer/subclass/alch
 import armorerSpellsData from '@/app/data/class-tables/artificer/subclass/armorer.json';
 import artilleristSpellsData from '@/app/data/class-tables/artificer/subclass/artillerist.json';
 import battlesmithSpellsData from '@/app/data/class-tables/artificer/subclass/battlesmith.json';
+import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
+
+
+// Cleric subclass data
+import arcanaData from '@/app/data/class-tables/cleric/subclass/arcana.json';
+import deathData from '@/app/data/class-tables/cleric/subclass/death.json';
+import forgeData from '@/app/data/class-tables/cleric/subclass/forge.json';
+import graveData from '@/app/data/class-tables/cleric/subclass/grave.json';
+import knowledgeData from '@/app/data/class-tables/cleric/subclass/knowledge.json';
+import lifeData from '@/app/data/class-tables/cleric/subclass/life.json';
+import lightData from '@/app/data/class-tables/cleric/subclass/light.json';
+import natureData from '@/app/data/class-tables/cleric/subclass/nature.json';
+import orderData from '@/app/data/class-tables/cleric/subclass/order.json';
+import peaceData from '@/app/data/class-tables/cleric/subclass/peace.json';
+import tempestData from '@/app/data/class-tables/cleric/subclass/tempest.json';
+import trickeryData from '@/app/data/class-tables/cleric/subclass/trickery.json';
+import twilightData from '@/app/data/class-tables/cleric/subclass/twilight.json';
+import warData from '@/app/data/class-tables/cleric/subclass/war.json';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -235,6 +253,13 @@ export default function SpellbookScreen() {
     const { statsData, isSpellCaster, subclass } = useContext(StatsDataContext);
     const { cantripSlotsData, setCantripSlotsData, saveCantripSlots } = useContext(CantripSlotsContext);
 
+    const [isDomainSpell, setIsDomainSpell] = useState(false);
+
+    const {
+        arcaneInitiateEnabled,
+        arcaneInitiateCantrips,
+    } = useContext(CharacterContext) as unknown as CharacterContextProps;
+
 
     const characterClass = classData.find(cls => cls.value.toLowerCase() === statsData?.class?.toLowerCase());
 
@@ -247,7 +272,7 @@ export default function SpellbookScreen() {
         if (allKnownSpellsSlots !== null) {
             updateSpellSlotsData(allKnownSpellsSlots);
         }
-    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race]);
+    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race, cantripSlots, arcaneInitiateEnabled]);
 
     useEffect(() => {
         getAllKnownSpellsSlotsAmount();
@@ -397,6 +422,31 @@ export default function SpellbookScreen() {
             .catch(error => console.error('Failed to load proficiency bonus:', error));
     }, [statsData.level]);
 
+    // Sync cantripSlots and cantripSlotsData
+    useEffect(() => {
+        // Whenever cantripSlots changes, ensure cantripSlotsData has the right length while preserving existing cantrips
+        if (cantripSlots !== null) {
+            setCantripSlotsData((prevData) => {
+                const currentSlotsCount = prevData.length;
+                if (cantripSlots > currentSlotsCount) {
+                    // Add new slots without clearing existing ones
+                    const newSlots = Array.from(
+                        { length: cantripSlots - currentSlotsCount },
+                        (_, i) => null as string | null
+                    );
+                    return [...prevData, ...newSlots];
+                } else if (cantripSlots < currentSlotsCount) {
+                    // Remove extra slots but keep existing ones up to the new count
+                    return prevData.slice(0, cantripSlots);
+                } else {
+                    // No change in slots
+                    return prevData;
+                }
+            });
+        }
+    }, [cantripSlots]);
+
+
     // Function to update spellSlotsData based on the new number of slots
     const updateSpellSlotsData = (newSlotCount: number) => {
         setSpellSlotsData((prevData) => {
@@ -425,14 +475,33 @@ export default function SpellbookScreen() {
     const loadCantripSlots = async () => {
         try {
             const savedSlots = await AsyncStorage.getItem(CANTRIP_SLOTS_KEY);
+            let initialSlots: (string | null)[] = [];
+
+            // Determine the total number of cantrip slots
+            if (cantripSlots !== null) {
+                initialSlots = Array(cantripSlots).fill(null);
+            }
+
+            // Merge saved data with initialSlots
             if (savedSlots !== null) {
-                setCantripSlotsData(JSON.parse(savedSlots));
-            } else {
-                // Initialize slots as empty
-                if (cantripSlots) {
-                    setCantripSlotsData(Array(cantripSlots).fill(null));
+                const savedSlotsData: (string | null)[] = JSON.parse(savedSlots);
+                initialSlots = initialSlots.map((slot, index) => {
+                    return savedSlotsData[index] !== undefined ? savedSlotsData[index] : slot;
+                });
+            }
+
+            // Preassign arcaneInitiateCantrips to extra slots at the end
+            if (arcaneInitiateEnabled && arcaneInitiateCantrips && arcaneInitiateCantrips.length > 0 && cantripSlots !== null) {
+                let startIdx = cantripSlots - arcaneInitiateCantrips.length;
+                for (let i = 0; i < arcaneInitiateCantrips.length; i++) {
+                    // Only assign if the slot is currently null to avoid overwriting saved assignments
+                    if (!initialSlots[startIdx + i]) {
+                        initialSlots[startIdx + i] = arcaneInitiateCantrips[i];
+                    }
                 }
             }
+
+            setCantripSlotsData(initialSlots);
         } catch (error) {
             console.error('Failed to load cantrip slots from storage', error);
         }
@@ -448,13 +517,6 @@ export default function SpellbookScreen() {
         return { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' };
     };
 
-
-    useEffect(() => {
-        // Whenever cantripSlots or cantripSlotsData changes, ensure they are in sync
-        if (cantripSlots && cantripSlotsData.length !== cantripSlots) {
-            setCantripSlotsData(Array(cantripSlots).fill(null));
-        }
-    }, [cantripSlots]);
 
     const getPreparedSpellSlotsAmount = () => {
         if (characterClass && isSpellCaster) {
@@ -527,6 +589,12 @@ export default function SpellbookScreen() {
                     setSpellPressedIndex(item.slotIndex as number);
                     if (section === "known-spells" || section === "castable-spells") {
                         setSpellModalVisible(true);
+                        setSpellChoiceInputValue(displaySpellName || null);
+                        setIsDomainSpell(false);
+                    } else if (section === "domain-spells") {
+                        setSpellModalVisible(true);
+                        setSpellChoiceInputValue(displaySpellName || null);
+                        setIsDomainSpell(true);
                     } else if (section === "prepared-spells") {
                         setPreparedSpellModalVisible(true);
                         setPreparedSpellChoiceInputValue(displaySpellName || null);
@@ -636,13 +704,18 @@ export default function SpellbookScreen() {
     }
 
     const getClassCantripsKnown = () => {
-        const cantripsKnown = characterClass?.cantripsKnown && typeof characterClass.cantripsKnown === 'object' ?
-            Object.entries(characterClass.cantripsKnown).reduce((acc, [level, cantrips]) =>
-                Number(level) <= statsData.level ? cantrips : acc
-                , 0) : 0;
-        const cantripsAmount = cantripsKnown ? cantripsKnown : 0;
-        return cantripsAmount;
-    }
+        let cantripsKnown = characterClass?.cantripsKnown && typeof characterClass.cantripsKnown === 'object'
+            ? Object.entries(characterClass.cantripsKnown).reduce((acc, [level, cantrips]) =>
+                Number(level) <= statsData.level ? cantrips : acc, 0)
+            : 0;
+        cantripsKnown = cantripsKnown ? cantripsKnown : 0;
+
+        // Include additional cantrips from Arcane Initiate
+        if (arcaneInitiateEnabled && arcaneInitiateCantrips && arcaneInitiateCantrips.length > 0) {
+            cantripsKnown += arcaneInitiateCantrips.length;
+        }
+        return cantripsKnown;
+    };
     const getCantripSlotsAmount = () => {
         if (characterClass && isSpellCaster) {
             const cantrips = getClassCantripsKnown();
@@ -653,9 +726,9 @@ export default function SpellbookScreen() {
     const handleCantripPress = (index: number) => {
         setCantripModalVisible(true);
         setCantripPressedIndex(index);
-    }
+    };
+
     const renderCantripBlock = (index: number) => {
-        // Use index directly from parameter to access correct slot
         const canAfford = canAffordCantrip(cantripSlotsData[index] || '');
         const isEmpty = !cantripSlotsData[index];
         const darken = !isEmpty && !canAfford;
@@ -687,8 +760,8 @@ export default function SpellbookScreen() {
                     </View>
                 </ImageBackground>
             </TouchableOpacity>
-        )
-    }
+        );
+    };
 
     const renderCantripBlocks = () => {
         if (!cantripSlots) {
@@ -882,16 +955,28 @@ export default function SpellbookScreen() {
         }
     }
 
-    const getAvailableCantrips = (currentClass: string): Cantrip[] => {
-        if (!currentClass) return [];
-        return cantripsData.filter(cantrip =>
-            cantrip.classes?.map(cls => cls?.toLowerCase()).includes(currentClass?.toLowerCase())
-        ) as Cantrip[];
-    }
+    const getAvailableCantrips = (): Cantrip[] => {
+        // Get all cantrips for the character's class
+        const classCantrips = cantripsData.filter(cantrip =>
+            cantrip.classes?.map(cls => cls.toLowerCase()).includes(statsData.class?.toLowerCase() || '')
+        );
 
+        // Get cantrips from arcaneInitiateCantrips
+        const arcaneInitiateCantripObjects = cantripsData.filter(cantrip =>
+            arcaneInitiateCantrips?.includes(cantrip.name)
+        );
+
+        // Combine and remove duplicates
+        const combinedCantrips = [...classCantrips, ...arcaneInitiateCantripObjects];
+        const uniqueCantrips = combinedCantrips.filter((cantrip, index, self) =>
+            index === self.findIndex(c => c.name === cantrip.name)
+        );
+
+        return uniqueCantrips as Cantrip[];
+    };
 
     const getDamageFromCantrip = (cantripName: string): string => {
-        const allCantrips = getAvailableCantrips(statsData.class || '');
+        const allCantrips = getAvailableCantrips();
         const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
 
         if (selectedCantrip && selectedCantrip.damage) {
@@ -907,14 +992,14 @@ export default function SpellbookScreen() {
     }
 
     const getDamageTypeFromCantrip = (cantripName: string): string => {
-        const allCantrips = getAvailableCantrips(statsData.class || '');
+        const allCantrips = getAvailableCantrips();
         const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
         return selectedCantrip?.damageType || '';
     }
 
 
     const renderCantripChoicesBasedOnLevel = () => {
-        const availableCantrips = getAvailableCantrips(statsData.class || '');
+        const availableCantrips = getAvailableCantrips();
         const unusedCantrips = availableCantrips.filter(cantrip => !cantripSlotsData.includes(cantrip.name));
         const handleCantripPreview = (cantrip: {
             name: string;
@@ -929,7 +1014,7 @@ export default function SpellbookScreen() {
         }
 
         const getSavingThrowFromCantrip = (cantripName: string): string => {
-            const allCantrips = getAvailableCantrips(statsData.class || '');
+            const allCantrips = getAvailableCantrips();
             const selectedCantrip = allCantrips.find(cantrip => cantrip.name === cantripName);
             return selectedCantrip?.savingThrow || '';
         }
@@ -1666,34 +1751,6 @@ export default function SpellbookScreen() {
         }
     };
 
-    const preparedSpellOptionsBasedOnClass = () => {
-        if (statsData?.class?.toLowerCase() === 'wizard') {
-            // Get list of known spells
-            const knownSpells = knownSpellSlotsData
-                .filter(slot => slot.spellName !== null)
-                .map(slot => slot.spellName);
-
-            // Return only spells that are in the known spells list
-            return spellsData.flatMap(level =>
-                level.spells
-                    .filter(spell => {
-                        const spellName = typeof spell === 'string' ? spell : spell.name;
-                        return knownSpells.includes(spellName);
-                    })
-                    .map(spell => ({
-                        label: typeof spell === 'string' ? spell : spell.name,
-                        value: typeof spell === 'string' ? spell : spell.id
-                    }))
-            );
-        }
-
-        // For non-wizards, return the cleanSpellList formatted for dropdown
-        return cleanSpellList.map(spell => ({
-            label: spell,
-            value: spell
-        }));
-    }
-
     const renderPreparedSpellChoices = () => {
         // Don't show dropdown if selected slot already has a spell
         if (spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName) {
@@ -1738,6 +1795,12 @@ export default function SpellbookScreen() {
                         if (statsData?.class?.toLowerCase() === 'wizard') {
                             return !preparedSpells.includes(spellNameLower) &&
                                 knownSpells.includes(spellNameLower);
+                        }
+
+                        // For artificers, filter based on artificer spells
+                        if (statsData?.class?.toLowerCase() === 'artificer') {
+                            return !preparedSpells.includes(spellNameLower) &&
+                                spellClasses?.includes('artificer');
                         }
 
                         // For druids, filter based on druid spells
@@ -2152,6 +2215,78 @@ export default function SpellbookScreen() {
         }
     }
 
+    const renderDomainSpells = () => {
+        if (statsData?.class?.toLowerCase() !== 'cleric' || !subclass) {
+            return null;
+        }
+
+        // Map subclass to corresponding data
+        const subclassDataMap: { [key: string]: any } = {
+            'arcana': arcanaData,
+            'death': deathData,
+            'forge': forgeData,
+            'grave': graveData,
+            'knowledge': knowledgeData,
+            'life': lifeData,
+            'light': lightData,
+            'nature': natureData,
+            'order': orderData,
+            'peace': peaceData,
+            'tempest': tempestData,
+            'trickery': trickeryData,
+            'twilight': twilightData,
+            'war': warData
+        };
+
+        const domainData = subclassDataMap[subclass.toLowerCase()];
+        if (!domainData || !domainData['domain spells']) {
+            return null;
+        }
+
+        const spellsByLevel = domainData['domain spells']['spells by level'];
+        const currentLevel = statsData.level;
+
+        // Get all available spell levels from the domain data
+        const availableSpells = Object.entries(spellsByLevel)
+            .reduce((acc: string[], [levelStr, spells]) => {
+                // Convert level string to number for comparison
+                const spellLevel = Number(levelStr);
+                // Check if character level is high enough to access these domain spells
+                if (currentLevel >= spellLevel) {
+                    // Add all spells of this level to accumulator
+                    acc.push(...(spells as string[]));
+                }
+                return acc;
+            }, []);
+
+        if (availableSpells.length === 0) {
+            return null;
+        }
+
+        return (
+            <View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, gap: 10, marginBottom: 5 }}>
+                    <MaterialCommunityIcons name="book-cross" size={24} color="lightgrey" />
+                    <Text style={styles.label}>
+                        Domain Spells
+                    </Text>
+                </View>
+                <FlatList<{ slotIndex: number, spellName: string }>
+                    style={{ paddingHorizontal: 10 }}
+                    contentContainerStyle={{ paddingBottom: 10, gap: 10 }}
+                    data={availableSpells.map((spell, index) => ({
+                        slotIndex: index,
+                        spellName: spell
+                    }))}
+                    renderItem={({ item }) => renderSpellBlock({ item }, "domain-spells")}
+                    keyExtractor={(item) => item.slotIndex.toString()}
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                />
+            </View>
+        );
+    };
+
     // Main Spellbook Render
     return (
         <>
@@ -2162,7 +2297,26 @@ export default function SpellbookScreen() {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.headerLeft}>
-                        <View style={styles.headerTextContainer}>
+                        <TouchableOpacity style={styles.headerTextContainer}
+                            disabled={currentActionsAvailable === 0}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Actions',
+                                    'Actions are the primary way to interact with the world. They are used for most of your turns, and they can be used to perform a wide range of tasks, from simple attacks to complex maneuvers.',
+                                    [
+                                        {
+                                            text: 'OK',
+                                            style: 'cancel'
+                                        },
+                                        {
+                                            text: 'Commit',
+                                            onPress: () => {
+                                                setCurrentActionsAvailable(prev => Math.max(0, prev - 1));
+                                            }
+                                        }
+                                    ]
+                                );
+                            }}>
                             <Ionicons
                                 name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
                                 size={16}
@@ -2176,8 +2330,27 @@ export default function SpellbookScreen() {
                                     x{currentActionsAvailable}
                                 </Text>
                             </View>
-                        </View>
-                        <View style={styles.headerTextContainer}>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.headerTextContainer}
+                            disabled={currentBonusActionsAvailable === 0}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Bonus Actions',
+                                    'Bonus actions are additional actions that you can take during your turn, in addition to your normal action and reaction. They are typically used for quick maneuvers or special abilities that require more time to prepare.',
+                                    [
+                                        {
+                                            text: 'OK',
+                                            style: 'cancel'
+                                        },
+                                        {
+                                            text: 'Commit',
+                                            onPress: () => {
+                                                setCurrentBonusActionsAvailable(prev => Math.max(0, prev - 1));
+                                            }
+                                        }
+                                    ]
+                                );
+                            }}>
                             <Ionicons
                                 name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
                                 size={16}
@@ -2191,8 +2364,27 @@ export default function SpellbookScreen() {
                                     x{currentBonusActionsAvailable}
                                 </Text>
                             </View>
-                        </View>
-                        <View style={styles.headerTextContainer}>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.headerTextContainer}
+                            disabled={currentReactionsAvailable === 0}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Reactions',
+                                    'Reactions are actions that you can take in response to events that happen around you. They are typically triggered by specific conditions or stimuli, such as an enemy attacking you or a situation requiring a quick response.',
+                                    [
+                                        {
+                                            text: 'OK',
+                                            style: 'cancel'
+                                        },
+                                        {
+                                            text: 'Commit',
+                                            onPress: () => {
+                                                setCurrentReactionsAvailable(prev => Math.max(0, prev - 1));
+                                            }
+                                        }
+                                    ]
+                                );
+                            }}>
                             <Ionicons
                                 name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
                                 size={16}
@@ -2206,7 +2398,7 @@ export default function SpellbookScreen() {
                                     x{currentReactionsAvailable}
                                 </Text>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     </View>
 
                     <View style={styles.headerIcons}>
@@ -2231,10 +2423,15 @@ export default function SpellbookScreen() {
 
                 <View style={{ flex: 1 }}>
                     <View style={{ flex: 1 }}>
+                        {/* For Cantrips */}
                         {renderCantripBlocks()}
+                        {/* For Cleric Domain Spells */}
+                        {renderDomainSpells()}
+                        {/* For Prepared Spells */}
                         {renderPreparedSpellBlocksForClass()}
+                        {/* For Known Spells */}
                         {renderAllKnownSpells()}
-                        {/* For Bards, Rangers, Sorcerers, and Warlocks */}
+                        {/* For Memorized Spells */}
                         {renderCastableSpells()}
                     </View>
                 </View>
@@ -2348,7 +2545,7 @@ export default function SpellbookScreen() {
             >
                 <View style={styles.spellModal}>
                     <View style={{ flex: 1 }}>
-                        {renderSpellChoices()}
+                        {!isDomainSpell && renderSpellChoices()}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
                             {renderSpellContent()}
                         </ScrollView>
@@ -2360,9 +2557,10 @@ export default function SpellbookScreen() {
                             onPress={() => {
                                 setSpellModalVisible(false);
                                 setSpellChoiceInputValue(null);
+                                setIsDomainSpell(false);
                             }}
                         />
-                        {spellPressedIndex !== null && !knownSpellSlotsData[spellPressedIndex]?.spellName ? (
+                        {spellPressedIndex !== null && !knownSpellSlotsData[spellPressedIndex]?.spellName && !isDomainSpell ? (
                             <Button
                                 title="Assign"
                                 color="green"
@@ -2378,14 +2576,19 @@ export default function SpellbookScreen() {
                                     title="Cast"
                                     color="#007cba"
                                     onPress={() => {
-                                        if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
+                                        if (isDomainSpell && spellChoiceInputValue) {
+                                            castSpell(spellChoiceInputValue.toLowerCase());
+                                        } else if (spellPressedIndex !== null && knownSpellSlotsData[spellPressedIndex]?.spellName) {
                                             castSpell(knownSpellSlotsData[spellPressedIndex].spellName.toLowerCase());
                                         }
                                         setSpellModalVisible(false);
+                                        setIsDomainSpell(false);
                                     }}
-                                    disabled={spellPressedIndex !== null
-                                        ? handleCanAffordCastButtonDisabled(knownSpellSlotsData[spellPressedIndex]?.spellName)
-                                        : true}
+                                    disabled={isDomainSpell
+                                        ? handleCanAffordCastButtonDisabled(spellChoiceInputValue)
+                                        : spellPressedIndex !== null
+                                            ? handleCanAffordCastButtonDisabled(knownSpellSlotsData[spellPressedIndex]?.spellName)
+                                            : true}
                                 />
                             )
                         )}

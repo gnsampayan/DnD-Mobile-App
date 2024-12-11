@@ -66,17 +66,17 @@
 		}
 	},
 	{
-		"id": "Ability Score Improvement",
-		"name": "Ability Score Improvement",
-		"level": 4,
-		"description": "Increase one ability score by 2 or two ability scores by 1. Can't increase score above 20.",
-		"additional_levels": [8, 12, 16, 19]
-	},
-	{
 		"id": "Destroy Undead",
 		"name": "Destroy Undead",
 		"level": 5,
-		"description": "When undead fails Turn Undead save, it's destroyed if CR is at/below threshold shown in Cleric table."
+		"description": "When undead fails Turn Undead save, it's destroyed if CR is at/below threshold shown in CR thresholds table.",
+		"CR thresholds": {
+			"5": "1/2 or lower",
+			"8": "1 or lower",
+			"11": "2 or lower",
+			"14": "3 or lower",
+			"17": "4 or lower"
+		}
 	},
 	{
 		"id": "Divine Intervention",

@@ -62,6 +62,10 @@ export interface CharacterContextProps {
     setFontOfInspirationEnabled: (value: boolean) => void;
     countercharmEnabled: boolean;
     setCountercharmEnabled: (value: boolean) => void;
+    arcaneInitiateEnabled: boolean;
+    setArcaneInitiateEnabled: (value: boolean) => void;
+    arcaneInitiateCantrips: string[];
+    setArcaneInitiateCantrips: (value: string[]) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -99,6 +103,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [expertiseEnabledAgain, setExpertiseEnabledAgain] = useState<boolean>(false);
     const [fontOfInspirationEnabled, setFontOfInspirationEnabled] = useState<boolean>(false);
     const [countercharmEnabled, setCountercharmEnabled] = useState<boolean>(false);
+    const [arcaneInitiateEnabled, setArcaneInitiateEnabled] = useState<boolean>(false);
+    const [arcaneInitiateCantrips, setArcaneInitiateCantrips] = useState<string[]>([]);
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -121,6 +127,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const EXPERTISE_ENABLED_AGAIN_STORAGE_KEY = '@expertise_enabled_again';
     const FONT_OF_INSPIRATION_ENABLED_STORAGE_KEY = '@font_of_inspiration_enabled';
     const COUNTERCHARM_ENABLED_STORAGE_KEY = '@countercharm_enabled';
+    const ARCANE_INITIATE_ENABLED_STORAGE_KEY = '@arcane_initiate_enabled';
+    const ARCANE_INITIATE_CANTRIPS_STORAGE_KEY = '@arcane_initiate_cantrips';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -219,6 +227,16 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                         key: COUNTERCHARM_ENABLED_STORAGE_KEY,
                         setter: setCountercharmEnabled,
                         parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: ARCANE_INITIATE_ENABLED_STORAGE_KEY,
+                        setter: setArcaneInitiateEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
+                    {
+                        key: ARCANE_INITIATE_CANTRIPS_STORAGE_KEY,
+                        setter: setArcaneInitiateCantrips,
+                        parser: JSON.parse
                     }
                 ];
 
@@ -289,6 +307,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setExpertiseEnabledAgain(false);
                     setFontOfInspirationEnabled(false);
                     setCountercharmEnabled(false);
+                    setArcaneInitiateEnabled(false);
+                    setArcaneInitiateCantrips([]);
                 }
                 // If goingFromNoClassToClass is true, we don't reset since the user is just
                 // picking their class for the first time.
@@ -297,6 +317,34 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
             }
         }
     }, [statsData.class, isLoading]);
+
+    // save arcane initiate cantrips to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveArcaneInitiateCantripsToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ARCANE_INITIATE_CANTRIPS_STORAGE_KEY, JSON.stringify(arcaneInitiateCantrips));
+                } catch (error) {
+                    console.error('Error saving arcane initiate cantrips to AsyncStorage:', error);
+                }
+            }
+            saveArcaneInitiateCantripsToStorage();
+        }
+    }, [arcaneInitiateCantrips, isLoading]);
+
+    // save arcane initiate enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveArcaneInitiateEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ARCANE_INITIATE_ENABLED_STORAGE_KEY, arcaneInitiateEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving arcane initiate enabled to AsyncStorage:', error);
+                }
+            }
+            saveArcaneInitiateEnabledToStorage();
+        }
+    }, [arcaneInitiateEnabled, isLoading]);
 
     // save countercharm enabled to AsyncStorage whenever it changes
     useEffect(() => {
@@ -740,6 +788,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setFontOfInspirationEnabled,
                 countercharmEnabled,
                 setCountercharmEnabled,
+                arcaneInitiateEnabled,
+                setArcaneInitiateEnabled,
+                arcaneInitiateCantrips,
+                setArcaneInitiateCantrips,
             }}
         >
             {children}

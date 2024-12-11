@@ -1721,33 +1721,31 @@ export default function ActionsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={styles.headerTextContainer}>
-            <TouchableOpacity
-              disabled={currentActionsAvailable === 0}
-              onPress={() => {
-                Alert.alert(
-                  'Actions',
-                  'Actions are the primary way to interact with the world. They are used for most of your turns, and they can be used to perform a wide range of tasks, from simple attacks to complex maneuvers.',
-                  [
-                    {
-                      text: 'OK',
-                      style: 'cancel'
-                    },
-                    {
-                      text: 'Commit',
-                      onPress: () => {
-                        setCurrentActionsAvailable(prev => Math.max(0, prev - 1));
-                      }
+          <TouchableOpacity style={styles.headerTextContainer}
+            disabled={currentActionsAvailable === 0}
+            onPress={() => {
+              Alert.alert(
+                'Actions',
+                'Actions are the primary way to interact with the world. They are used for most of your turns, and they can be used to perform a wide range of tasks, from simple attacks to complex maneuvers.',
+                [
+                  {
+                    text: 'OK',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'Commit',
+                    onPress: () => {
+                      setCurrentActionsAvailable(prev => Math.max(0, prev - 1));
                     }
-                  ]
-                );
-              }}>
-              <Ionicons
-                name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
-                size={16}
-                color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
-              />
-            </TouchableOpacity>
+                  }
+                ]
+              );
+            }}>
+            <Ionicons
+              name={currentActionsAvailable > 0 ? "ellipse" : "ellipse-outline"}
+              size={16}
+              color={currentActionsAvailable > 0 ? "green" : "rgba(0, 128, 0, 0.2)"}
+            />
             <View style={styles.headerTextBox}>
               <Text style={[
                 styles.headerText,
@@ -1756,34 +1754,32 @@ export default function ActionsScreen() {
                 x{currentActionsAvailable}
               </Text>
             </View>
-          </View>
-          <View style={styles.headerTextContainer}>
-            <TouchableOpacity
-              disabled={currentBonusActionsAvailable === 0}
-              onPress={() => {
-                Alert.alert(
-                  'Bonus Actions',
-                  'Bonus actions are additional actions that you can take during your turn, in addition to your normal action and reaction. They are typically used for quick maneuvers or special abilities that require more time to prepare.',
-                  [
-                    {
-                      text: 'OK',
-                      style: 'cancel'
-                    },
-                    {
-                      text: 'Commit',
-                      onPress: () => {
-                        setCurrentBonusActionsAvailable(prev => Math.max(0, prev - 1));
-                      }
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerTextContainer}
+            disabled={currentBonusActionsAvailable === 0}
+            onPress={() => {
+              Alert.alert(
+                'Bonus Actions',
+                'Bonus actions are additional actions that you can take during your turn, in addition to your normal action and reaction. They are typically used for quick maneuvers or special abilities that require more time to prepare.',
+                [
+                  {
+                    text: 'OK',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'Commit',
+                    onPress: () => {
+                      setCurrentBonusActionsAvailable(prev => Math.max(0, prev - 1));
                     }
-                  ]
-                );
-              }}>
-              <Ionicons
-                name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
-                size={16}
-                color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
-              />
-            </TouchableOpacity>
+                  }
+                ]
+              );
+            }}>
+            <Ionicons
+              name={currentBonusActionsAvailable > 0 ? "triangle" : "triangle-outline"}
+              size={16}
+              color={currentBonusActionsAvailable > 0 ? "rgba(255, 140, 0, 1)" : "rgba(255, 140, 0, 0.2)"}
+            />
             <View style={styles.headerTextBox}>
               <Text style={[
                 styles.headerText,
@@ -1792,17 +1788,32 @@ export default function ActionsScreen() {
                 x{currentBonusActionsAvailable}
               </Text>
             </View>
-          </View>
-          <View style={styles.headerTextContainer}>
-            <TouchableOpacity onPress={() => {
-              Alert.alert('Reactions', 'Reactions are actions that you can take in response to events that happen around you. They are typically triggered by specific conditions or stimuli, such as an enemy attacking you or a situation requiring a quick response.');
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerTextContainer}
+            disabled={currentReactionsAvailable === 0}
+            onPress={() => {
+              Alert.alert(
+                'Reactions',
+                'Reactions are actions that you can take in response to events that happen around you. They are typically triggered by specific conditions or stimuli, such as an enemy attacking you or a situation requiring a quick response.',
+                [
+                  {
+                    text: 'OK',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'Commit',
+                    onPress: () => {
+                      setCurrentReactionsAvailable(prev => Math.max(0, prev - 1));
+                    }
+                  }
+                ]
+              );
             }}>
-              <Ionicons
-                name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
-                size={16}
-                color={currentReactionsAvailable > 0 ? "rgb(200, 0, 255)" : "rgba(200, 0, 255, 0.2)"}
-              />
-            </TouchableOpacity>
+            <Ionicons
+              name={currentReactionsAvailable > 0 ? "square" : "square-outline"}
+              size={16}
+              color={currentReactionsAvailable > 0 ? "rgb(200, 0, 255)" : "rgba(200, 0, 255, 0.2)"}
+            />
             <View style={styles.headerTextBox}>
               <Text style={[
                 styles.headerText,
@@ -1811,7 +1822,7 @@ export default function ActionsScreen() {
                 x{currentReactionsAvailable}
               </Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Show if lucky points */}
           {luckyPoints !== null && luckyPoints !== -1 && (
