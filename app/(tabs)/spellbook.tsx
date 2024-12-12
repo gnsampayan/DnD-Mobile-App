@@ -2135,7 +2135,7 @@ export default function SpellbookScreen() {
                 // Cantrips do not consume spell slots
                 if (spellLevel === 0) {
                     // Deduct action costs and exit
-                    deductActionCosts(foundSpell.castingTime);
+                    deductActionCosts(foundSpell.castingTime as string);
                     return;
                 }
                 const remainingSlots = getRemainingSpellSlotsByLevel();
@@ -2170,7 +2170,7 @@ export default function SpellbookScreen() {
                 });
 
                 // Use parseCastingTime to get the action costs
-                const { action, bonusAction, reaction } = parseCastingTime(castingTimeString);
+                const { action, bonusAction, reaction } = parseCastingTime(castingTimeString as string);
 
                 // Check if the user has enough actions, bonus actions, and reactions
                 if (action > 0 && currentActionsAvailable < action) {
@@ -2187,7 +2187,7 @@ export default function SpellbookScreen() {
                 }
 
                 // Deduct action costs
-                deductActionCosts(foundSpell.castingTime);
+                deductActionCosts(foundSpell.castingTime as string);
                 return;
             }
         }
