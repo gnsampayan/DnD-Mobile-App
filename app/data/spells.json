@@ -12141,29 +12141,900 @@
 				"classes": ["Sorcerer", "Wizard"],
 				"subclasses": ["Arcana Domain"]
 			},
-			"Animal Shapes",
-			"Antimagic Field",
-			"Antipathy/Sympathy",
-			"Clone",
-			"Control Weather",
-			"Dark Star",
-			"Demiplane",
-			"Dominate Monster",
-			"Earthquake",
-			"Feeblemind",
-			"Glibness",
-			"Holy Aura",
-			"Illusory Dragon",
-			"Incendiary Cloud",
-			"Maddening Darkness",
-			"Maze",
-			"Mighty Fortress",
-			"Mind Blank",
-			"Power Word Stun",
-			"Reality Break",
-			"Sunburst",
-			"Telepathy",
-			"Tsunami"
+			{
+				"id": "Animal Shapes",
+				"name": "Animal Shapes",
+				"level": 8,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 24 hours",
+				"description": "Your magic turns others into beasts. Choose any number of willing creatures that you can see within range. You transform each target into the form of a Large or smaller beast with a challenge rating of 4 or lower. On subsequent turns, you can use your action to transform affected creatures into new forms.\n\nThe transformation lasts for the duration for each target, or until the target drops to 0 hit points or dies. You can choose a different form for each target. A target's game statistics are replaced by the statistics of the chosen beast, though the target retains its alignment and Intelligence, Wisdom, and Charisma scores. The target assumes the hit points of its new form, and when it reverts to its normal form, it returns to the number of hit points it had before it transformed. If it reverts as a result of dropping to 0 hit points, any excess damage carries over to its normal form. As long as the excess damage doesn't reduce the creature's normal form to 0 hit points, it isn't knocked unconscious. The creature is limited in the actions it can perform by the nature of its new form, and it can't speak or cast spells.\n\nThe target's gear melds into the new form. The target can't activate, wield, or otherwise benefit from any of its equipment.",
+				"features": {
+					"transformation": {
+						"targets": "any number of willing creatures",
+						"beast restrictions": {
+							"size": "Large or smaller",
+							"challenge rating": "4 or lower"
+						},
+						"retained abilities": [
+							"alignment",
+							"Intelligence score",
+							"Wisdom score",
+							"Charisma score"
+						]
+					},
+					"hit points": {
+						"transformed": "assumes new form's HP",
+						"reversion": "returns to original HP",
+						"damage carryover": "excess damage transfers to normal form"
+					},
+					"limitations": {
+						"actions": "limited by new form",
+						"abilities": ["cannot speak", "cannot cast spells"],
+						"equipment": "melds into form and cannot be used"
+					},
+					"control": "can use action to transform affected creatures into new forms"
+				},
+				"classes": ["Druid"]
+			},
+			{
+				"id": "Antimagic Field",
+				"name": "Antimagic Field",
+				"level": 8,
+				"school": "Abjuration",
+				"castingTime": "1 action",
+				"range": "Self (10-foot-radius sphere)",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "A 10-foot-radius invisible sphere of antimagic surrounds you. This area is divorced from the magical energy that suffuses the multiverse. Within the sphere, spells can't be cast, summoned creatures disappear, and even magic items become mundane. Until the spell ends, the sphere moves with you, centered on you.\n\nSpells and other magical effects, except those created by an artifact or a deity, are suppressed in the sphere and can't protrude into it. A slot expended to cast a suppressed spell is consumed. While an effect is suppressed, it doesn't function, but the time it spends suppressed counts against its duration.\n\nTargeted Effects: Spells and other magical effects, such as Magic Missile and Charm Person, that target a creature or an object in the sphere have no effect on that target.\n\nAreas of Magic: The area of another spell or magical effect, such as Fireball, can't extend into the sphere. If the sphere overlaps an area of magic, the part of the area that is covered by the sphere is suppressed. For example, the flames created by a Wall of Fire are suppressed within the sphere, creating a gap in the wall if the overlap is large enough.\n\nSpells: Any active spell or other magical effect on a creature or an object in the sphere is suppressed while the creature or object is in it.\n\nMagic Items: The properties and powers of magic items are suppressed in the sphere. For example, a +1 longsword in the sphere functions as a nonmagical longsword.\n\nA magic weapon's properties and powers are suppressed if it is used against a target in the sphere or wielded by an attacker in the sphere. If a magic weapon or a piece of magic ammunition fully leaves the sphere (for example, if you fire a magic arrow or throw a magic spear at a target outside the sphere), the magic of the item ceases to be suppressed as soon as it exits.\n\nMagical Travel: Teleportation and planar travel fail to work in the sphere, whether the sphere is the destination or the departure point for such magical travel. A portal to another location, world, or plane of existence, as well as an opening to an extradimensional space such as that created by the Rope Trick spell, temporarily closes while in the sphere.\n\nCreatures and Objects: A creature or object summoned or created by magic temporarily winks out of existence in the sphere. Such a creature instantly reappears once the space the creature occupied is no longer within the sphere.\n\nDispel Magic: Spells and magical effects such as Dispel Magic have no effect on the sphere. Likewise, the spheres created by different Antimagic Field spells don't nullify each other.",
+				"features": {
+					"material component": "a pinch of powdered iron or iron filings",
+					"sphere properties": {
+						"radius": "10 feet",
+						"movement": "centered on caster",
+						"visibility": "invisible"
+					},
+					"suppression effects": {
+						"spells": {
+							"casting": "prevented within sphere",
+							"slot consumption": "consumed even if suppressed",
+							"duration": "continues counting while suppressed"
+						},
+						"targeted effects": "no effect on targets in sphere",
+						"area effects": "cannot extend into sphere",
+						"active effects": "suppressed within sphere",
+						"magic items": {
+							"general": "properties suppressed in sphere",
+							"weapons": "suppressed when used in/from sphere",
+							"ammunition": "regains magic upon leaving sphere"
+						},
+						"magical travel": {
+							"teleportation": "fails in sphere",
+							"planar travel": "fails in sphere",
+							"portals": "temporarily close in sphere"
+						},
+						"summoned beings": "temporarily disappear in sphere"
+					},
+					"exceptions": {
+						"artifact effects": "not suppressed",
+						"divine magic": "not suppressed",
+						"dispel magic": "no effect on sphere",
+						"other antimagic fields": "do not nullify each other"
+					}
+				},
+				"classes": ["Cleric", "Wizard"],
+				"subclasses": ["Arcana Domain", "Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Antipathy/Sympathy",
+				"name": "Antipathy/Sympathy",
+				"level": 8,
+				"school": "Enchantment",
+				"castingTime": "1 hour",
+				"range": "60 feet",
+				"components": ["V", "S", "M"],
+				"duration": "10 days",
+				"description": "This spell attracts or repels creatures of your choice. You target something within range, either a Huge or smaller object or creature or an area that is no larger than a 200-foot cube. Then specify a kind of intelligent creature, such as red dragons, goblins, or vampires. You invest the target with an aura that either attracts or repels the specified creatures for the duration. Choose antipathy or sympathy as the aura's effect.\n\nAntipathy: The enchantment causes creatures of the kind you designated to feel an intense urge to leave the area and avoid the target. When such a creature can see the target or comes within 60 feet of it, the creature must succeed on a Wisdom saving throw or become frightened. The creature remains frightened while it can see the target or is within 60 feet of it. While frightened by the target, the creature must use its movement to move to the nearest safe spot from which it can't see the target. If the creature moves more than 60 feet from the target and can't see it, the creature is no longer frightened, but the creature becomes frightened again if it regains sight of the target or moves within 60 feet of it.\n\nSympathy: The enchantment causes the specified creatures to feel an intense urge to approach the target while within 60 feet of it or able to see it. When such a creature can see the target or comes within 60 feet of it, the creature must succeed on a Wisdom saving throw or use its movement on each of its turns to enter the area or move within reach of the target. When the creature has done so, it can't willingly move away from the target.\n\nIf the target damages or otherwise harms an affected creature, the affected creature can make a Wisdom saving throw to end the effect, as described below.\n\nEnding the Effect: If an affected creature ends its turn while not within 60 feet of the target or able to see it, the creature makes a Wisdom saving throw. On a successful save, the creature is no longer affected by the target and recognizes the feeling of repugnance or attraction as magical. In addition, a creature affected by the spell is allowed another Wisdom saving throw every 24 hours while the spell persists.\n\nA creature that successfully saves against this effect is immune to it for 1 minute, after which time it can be affected again.",
+				"features": {
+					"material component": {
+						"antipathy": "lump of alum soaked in vinegar",
+						"sympathy": "drop of honey"
+					},
+					"target": {
+						"object/creature": "Huge or smaller",
+						"area": "up to 200-foot cube"
+					},
+					"effects": {
+						"antipathy": {
+							"trigger": "see target or within 60 feet",
+							"save": "Wisdom",
+							"effect": "frightened",
+							"behavior": "must move away to safe spot"
+						},
+						"sympathy": {
+							"trigger": "see target or within 60 feet",
+							"save": "Wisdom",
+							"effect": "must approach target",
+							"behavior": "cannot willingly leave"
+						}
+					},
+					"ending conditions": {
+						"distance": "Wisdom save at end of turn if beyond 60 feet",
+						"damage": "Wisdom save if harmed by target",
+						"periodic": "Wisdom save every 24 hours",
+						"immunity": "1 minute after successful save"
+					}
+				},
+				"classes": ["Bard", "Druid", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Clone",
+				"name": "Clone",
+				"level": 8,
+				"school": "Necromancy",
+				"castingTime": "1 hour",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "This spell grows an inert duplicate of a living creature as a safeguard against death. This clone forms inside the vessel used in the spell's casting and grows to full size and maturity after 120 days; you can also choose to have the clone be a younger version of the same creature. It remains inert and endures indefinitely, as long as its vessel remains undisturbed.\n\nAt any time after the clone matures, if the original creature dies, its soul transfers to the clone, provided that the soul is free and willing to return. The clone is physically identical to the original and has the same personality, memories, and abilities, but none of the original's equipment. The original creature's physical remains, if they still exist, become inert and can't thereafter be restored to life, since the creature's soul is elsewhere.",
+				"features": {
+					"material component": {
+						"diamond": "worth at least 1,000 gp",
+						"flesh": "1 cubic inch from creature to be cloned",
+						"vessel": {
+							"worth": "at least 2,000 gp",
+							"properties": [
+								"sealable lid",
+								"large enough to hold creature",
+								"examples: urn, coffin, mud-filled cyst, crystal container with salt water"
+							]
+						}
+					},
+					"clone properties": {
+						"maturation": "120 days",
+						"age": "can be younger version",
+						"duration": "indefinite if vessel undisturbed",
+						"activation": "when original dies",
+						"requirements": "soul must be free and willing",
+						"traits": [
+							"physically identical",
+							"same personality",
+							"same memories",
+							"same abilities",
+							"no equipment"
+						]
+					},
+					"original body": "becomes inert and cannot be restored to life"
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Control Weather",
+				"name": "Control Weather",
+				"level": 8,
+				"school": "Transmutation",
+				"castingTime": "10 minutes",
+				"range": "5 miles",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 8 hours",
+				"description": "You take control of the weather within 5 miles of you for the duration. You must be outdoors to cast this spell. Moving to a place where you don't have a clear path to the sky ends the spell early.\n\nWhen you cast the spell, you change the current weather conditions, which are determined by the DM based on the climate and season. You can change precipitation, temperature, and wind. It takes 1d4 × 10 minutes for the new conditions to take effect. Once they do so, you can change the conditions again. When the spell ends, the weather gradually returns to normal.\n\nWhen you change the weather conditions, find a current condition on the following tables and change its stage by one, up or down. When changing the wind, you can change its direction.",
+				"features": {
+					"material component": "burning incense and bits of earth and wood mixed in water",
+					"requirements": {
+						"location": "must be outdoors",
+						"visibility": "clear path to sky needed"
+					},
+					"weather control": {
+						"range": "5 miles",
+						"effect time": "1d4 × 10 minutes",
+						"changeable aspects": [
+							"precipitation",
+							"temperature",
+							"wind direction"
+						],
+						"conditions": {
+							"precipitation": {
+								"1": "Clear",
+								"2": "Light clouds",
+								"3": "Overcast or ground fog",
+								"4": "Rain, hail, or snow",
+								"5": "Torrential rain, driving hail, or blizzard"
+							},
+							"temperature": {
+								"1": "Unbearable heat",
+								"2": "Hot",
+								"3": "Warm",
+								"4": "Cool",
+								"5": "Cold",
+								"6": "Arctic cold"
+							},
+							"wind": {
+								"1": "Calm",
+								"2": "Moderate wind",
+								"3": "Strong wind",
+								"4": "Gale",
+								"5": "Storm"
+							}
+						}
+					}
+				},
+				"classes": ["Cleric", "Druid", "Wizard"],
+				"subclasses": ["Arcana Domain", "Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Dark Star",
+				"name": "Dark Star",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "150 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "This spell creates a sphere centered on a point you choose within range. The sphere can have a radius of up to 40 feet. The area within this sphere is filled with magical darkness and crushing gravitational force.\n\nFor the duration, the spell's area is difficult terrain. A creature with darkvision can't see through the magical darkness, and nonmagical light can't illuminate it. No sound can be created within or pass through the area. Any creature or object entirely inside the sphere is immune to thunder damage, and creatures are deafened while entirely inside it. Casting a spell that includes a verbal component is impossible there.\n\nAny creature that enters the spell's area for the first time on a turn or starts its turn there must make a Constitution saving throw. The creature takes 8d10 force damage on a failed save, or half as much damage on a successful one. A creature reduced to 0 hit points by this damage is disintegrated. A disintegrated creature and everything it is wearing and carrying, except magic items, are reduced to a pile of fine gray dust.",
+				"features": {
+					"material component": "a shard of onyx and a drop of the caster's blood, both of which the spell consumes",
+					"sphere": {
+						"radius": "up to 40 feet",
+						"terrain": "difficult",
+						"darkness": {
+							"darkvision": "ineffective",
+							"nonmagical light": "cannot illuminate"
+						},
+						"sound": {
+							"creation": "impossible",
+							"propagation": "blocked",
+							"effects": [
+								"thunder damage immunity",
+								"deafness",
+								"verbal spells impossible"
+							]
+						}
+					},
+					"damage": {
+						"trigger": "entering area or starting turn there",
+						"saving throw": "Constitution",
+						"amount": "8d10 force",
+						"failed save": "full damage",
+						"successful save": "half damage",
+						"disintegration": {
+							"trigger": "reduced to 0 HP",
+							"effect": "reduced to fine gray dust",
+							"exception": "magic items survive"
+						}
+					}
+				},
+				"subclasses": ["Graviturgy Magic"]
+			},
+			{
+				"id": "Demiplane",
+				"name": "Demiplane",
+				"level": 8,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["S"],
+				"duration": "1 hour",
+				"description": "You create a shadowy door on a flat solid surface that you can see within range. The door is large enough to allow Medium creatures to pass through unhindered. When opened, the door leads to a demiplane that appears to be an empty room 30 feet in each dimension, made of wood or stone. When the spell ends, the door disappears, and any creatures or objects inside the demiplane remain trapped there, as the door also disappears from the other side.\n\nEach time you cast this spell, you can create a new demiplane, or have the shadowy door connect to a demiplane you created with a previous casting of this spell. Additionally, if you know the nature and contents of a demiplane created by a casting of this spell by another creature, you can have the shadowy door connect to its demiplane instead.",
+				"features": {
+					"door": {
+						"surface": "flat and solid",
+						"size": "fits Medium creatures",
+						"visibility": "shadowy"
+					},
+					"demiplane": {
+						"dimensions": "30 feet cube",
+						"composition": "wood or stone",
+						"contents": "empty room"
+					},
+					"options": {
+						"new plane": "create new demiplane",
+						"existing plane": "connect to previously created demiplane",
+						"other caster": "connect to known demiplane created by another"
+					},
+					"ending": {
+						"door": "disappears from both sides",
+						"contents": "remain trapped inside"
+					}
+				},
+				"classes": ["Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Dominate Monster",
+				"name": "Dominate Monster",
+				"level": 8,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You attempt to beguile a creature that you can see within range. It must succeed on a Wisdom saving throw or be charmed by you for the duration. If you or creatures that are friendly to you are fighting it, it has advantage on the saving throw.\n\nWhile the creature is charmed, you have a telepathic link with it as long as the two of you are on the same plane of existence. You can use this telepathic link to issue commands to the creature while you are conscious (no action required), which it does its best to obey. You can specify a simple and general course of action, such as \"Attack that creature,\" \"Run over there,\" or \"Fetch that object.\" If the creature completes the order and doesn't receive further direction from you, it defends and preserves itself to the best of its ability.\n\nYou can use your action to take total and precise control of the target. Until the end of your next turn, the creature takes only the actions you choose, and doesn't do anything that you don't allow it to do. During this time, you can also cause the creature to use a reaction, but this requires you to use your own reaction as well.\n\nEach time the target takes damage, it makes a new Wisdom saving throw against the spell. If the saving throw succeeds, the spell ends.\n\nAt Higher Levels: When you cast this spell with a 9th-level spell slot, the duration is concentration, up to 8 hours.",
+				"features": {
+					"saving throw": "Wisdom",
+					"target": "creature you can see",
+					"disadvantage": "advantage if caster or allies fighting target",
+					"control": {
+						"telepathic link": "same plane only",
+						"basic commands": "no action required",
+						"precise control": {
+							"action": "take total control",
+							"duration": "until end of next turn",
+							"reaction": "uses both creature and caster reaction"
+						}
+					},
+					"breaking free": "new save when damaged",
+					"higher levels": "9th level extends to 8 hours"
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Earthquake",
+				"name": "Earthquake",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "500 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You create a seismic disturbance at a point on the ground that you can see within range. For the duration, an intense tremor rips through the ground in a 100-foot-radius circle centered on that point and shakes creatures and structures in contact with the ground in that area.\n\nThe ground in the area becomes difficult terrain. Each creature on the ground that is concentrating must make a Constitution saving throw. On a failed save, the creature's concentration is broken.\n\nWhen you cast this spell and at the end of each turn you spend concentrating on it, each creature on the ground in the area must make a Dexterity saving throw. On a failed save, the creature is knocked prone.\n\nThis spell can have additional effects depending on the terrain in the area, as determined by the DM.\n\nFissures: Fissures open throughout the spell's area at the start of your next turn after you cast the spell. A total of 1d6 such fissures open in locations chosen by the DM. Each is 1d10 x 10 feet deep, 10 feet wide, and extends from one edge of the spell's area to the opposite side. A creature standing on a spot where a fissure opens must succeed on a Dexterity saving throw or fall in. A creature that successfully saves moves with the fissure's edge as it opens.\nA fissure that opens beneath a structure causes it to automatically collapse (see below).\n\nStructures: The tremor deals 50 bludgeoning damage to any structure in contact with the ground in the area when you cast the spell and at the start of each of your turns until the spell ends. If a structure drops to 0 hit points, it collapses and potentially damages nearby creatures. A creature within half the distance of a structure's height must make a Dexterity saving throw. On a failed save, the creature takes 5d6 bludgeoning damage, is knocked prone, and is buried in the rubble, requiring a DC 20 Strength (Athletics) check as an action to escape. The DM can adjust the DC higher or lower, depending on the nature of the rubble. On a successful save, the creature takes half as much damage and doesn't fall prone or become buried.",
+				"features": {
+					"material component": "a pinch of dirt, a piece of rock, and a lump of clay",
+					"area": "100-foot radius circle",
+					"terrain effect": "becomes difficult terrain",
+					"saving throws": {
+						"concentration": "Constitution save or lose concentration",
+						"prone": "Dexterity save or fall prone each turn"
+					},
+					"fissures": {
+						"quantity": "1d6",
+						"dimensions": {
+							"depth": "1d10 x 10 feet",
+							"width": "10 feet",
+							"length": "spans area"
+						},
+						"effect": "Dexterity save or fall in"
+					},
+					"structure damage": {
+						"damage": "50 bludgeoning per turn",
+						"collapse effects": {
+							"range": "half structure height",
+							"damage": "5d6 bludgeoning",
+							"save": "Dexterity",
+							"failed save": {
+								"damage": "full",
+								"conditions": ["prone", "buried"],
+								"escape": "DC 20 Strength (Athletics)"
+							},
+							"successful save": {
+								"damage": "half",
+								"conditions": "none"
+							}
+						}
+					}
+				},
+				"classes": ["Cleric", "Druid", "Sorcerer"],
+				"subclasses": ["Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Feeblemind",
+				"name": "Feeblemind",
+				"level": 8,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "150 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You blast the mind of a creature that you can see within range, attempting to shatter its intellect and personality. The target takes 4d6 psychic damage and must make an Intelligence saving throw.\n\nOn a failed save, the creature's Intelligence and Charisma scores become 1. The creature can't cast spells, activate magic items, understand language, or communicate in any intelligible way. The creature can, however, identify its friends, follow them, and even protect them.\n\nAt the end of every 30 days, the creature can repeat its saving throw against this spell. If it succeeds on its saving throw, the spell ends.\n\nThe spell can also be ended by Greater Restoration, Heal, or Wish.",
+				"features": {
+					"material component": "a handful of clay, crystal, glass, or mineral spheres",
+					"saving throw": "Intelligence",
+					"damage": "4d6 psychic",
+					"failed save effects": {
+						"ability scores": {
+							"Intelligence": 1,
+							"Charisma": 1
+						},
+						"limitations": [
+							"cannot cast spells",
+							"cannot activate magic items",
+							"cannot understand language",
+							"cannot communicate intelligibly"
+						],
+						"retained abilities": [
+							"identify friends",
+							"follow friends",
+							"protect friends"
+						]
+					},
+					"end conditions": {
+						"save": "repeat save every 30 days",
+						"spells": ["Greater Restoration", "Heal", "Wish"]
+					}
+				},
+				"classes": ["Bard", "Druid", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Glibness",
+				"name": "Glibness",
+				"level": 8,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V"],
+				"duration": "1 hour",
+				"description": "Until the spell ends, when you make a Charisma check, you can replace the number you roll with a 15. Additionally, no matter what you say, magic that would determine if you are telling the truth indicates that you are being truthful.",
+				"features": {
+					"effects": {
+						"charisma checks": "can replace roll with 15",
+						"truth detection": "always registers as truthful"
+					}
+				},
+				"classes": ["Bard", "Warlock"]
+			},
+			{
+				"id": "Holy Aura",
+				"name": "Holy Aura",
+				"level": 8,
+				"school": "Abjuration",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Divine light washes out from you and coalesces in a soft radiance in a 30-foot radius around you. Creatures of your choice in that radius when you cast this spell shed dim light in a 5-foot radius and have advantage on all saving throws, and other creatures have disadvantage on attack rolls against them until the spell ends. In addition, when a fiend or an undead hits an affected creature with a melee attack, the aura flashes with brilliant light. The attacker must succeed on a Constitution saving throw or be blinded until the spell ends.",
+				"features": {
+					"material component": "a tiny reliquary worth at least 1,000 gp containing a sacred relic, such as a scrap of cloth from a saint's robe or a piece of parchment from a religious text",
+					"area": "30-foot radius",
+					"effects": {
+						"affected creatures": {
+							"light": "shed dim light in 5-foot radius",
+							"advantages": "all saving throws",
+							"defense": "attackers have disadvantage"
+						},
+						"counter attack": {
+							"trigger": "fiend or undead hits with melee attack",
+							"saving throw": "Constitution",
+							"effect": "blinded until spell ends"
+						}
+					}
+				},
+				"classes": ["Cleric"],
+				"subclasses": ["Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Illusory Dragon",
+				"name": "Illusory Dragon",
+				"level": 8,
+				"school": "Illusion",
+				"castingTime": "1 action",
+				"range": "120 feet",
+				"components": ["S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "By gathering threads of shadow material from the Shadowfell, you create a Huge shadowy dragon in an unoccupied space that you can see within range. The illusion lasts for the spell's duration and occupies its space, as if it were a creature.\n\nWhen the illusion appears, any of your enemies that can see it must succeed on a Wisdom saving throw or become frightened of it for 1 minute. If a frightened creature ends its turn in a location where it doesn't have line of sight to the illusion, it can repeat the saving throw, ending the effect on itself on a success.\n\nAs a bonus action on your turn, you can move the illusion up to 60 feet. At any point during its movement, you can cause it to exhale a blast of energy in a 60-foot cone originating from its space. When you create the dragon, choose a damage type: acid, cold, fire, lightning, necrotic, or poison. Each creature in the cone must make an Intelligence saving throw, taking 7d6 damage of the chosen damage type on a failed save, or half as much damage on a successful one.\n\nThe illusion is tangible because of the shadow stuff used to create it, but attacks miss it automatically, it succeeds on all saving throws, and it is immune to all damage and conditions. A creature that uses an action to examine the dragon can determine that it is an illusion by succeeding on an Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the creature can see through it and has advantage on saving throws against its breath.",
+				"features": {
+					"saving throws": {
+						"fear": "Wisdom",
+						"breath weapon": "Intelligence"
+					},
+					"damage": {
+						"amount": "7d6",
+						"types": ["acid", "cold", "fire", "lightning", "necrotic", "poison"]
+					},
+					"movement": {
+						"speed": "60 feet",
+						"action": "bonus action"
+					},
+					"breath weapon": {
+						"area": "60-foot cone",
+						"damage": "7d6 chosen type",
+						"save": "half damage"
+					},
+					"illusion properties": {
+						"size": "Huge",
+						"tangibility": "tangible but immune to effects",
+						"detection": "Intelligence (Investigation) vs spell DC",
+						"true sight": "advantage on breath saves"
+					},
+					"fear effect": {
+						"trigger": "seeing the dragon",
+						"duration": "1 minute",
+						"end condition": "no line of sight and successful save"
+					}
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Incendiary Cloud",
+				"name": "Incendiary Cloud",
+				"level": 8,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "150 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "A swirling cloud of smoke shot through with white-hot embers appears in a 20-foot-radius sphere centered on a point within range. The cloud spreads around corners and is heavily obscured. It lasts for the duration or until a wind of moderate or greater speed (at least 10 miles per hour) disperses it.\n\nWhen the cloud appears, each creature in it must make a Dexterity saving throw. A creature takes 10d8 fire damage on a failed save, or half as much damage on a successful one. A creature must also make this saving throw when it enters the spell's area for the first time on a turn or ends its turn there.\n\nThe cloud moves 10 feet directly away from you in a direction that you choose at the start of each of your turns.",
+				"features": {
+					"saving throw": "Dexterity",
+					"damage": "10d8 fire",
+					"area": {
+						"shape": "sphere",
+						"radius": "20 feet"
+					},
+					"cloud properties": {
+						"visibility": "heavily obscured",
+						"movement": "10 feet per turn",
+						"dispersal": "moderate wind (10+ mph)"
+					},
+					"damage triggers": [
+						"when cloud appears",
+						"entering area first time on turn",
+						"ending turn in area"
+					]
+				},
+				"classes": ["Druid", "Sorcerer", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Maddening Darkness",
+				"name": "Maddening Darkness",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "150 feet",
+				"components": ["V", "M"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "Magical darkness spreads from a point you choose within range to fill a 60-foot-radius sphere until the spell ends. The darkness spreads around corners. A creature with darkvision can't see through this darkness. Non-magical light, as well as light created by spells of 8th level or lower, can't illuminate the area.\n\nShrieks, gibbering, and mad laughter can be heard within the sphere. Whenever a creature starts its turn in the sphere, it must make a Wisdom saving throw, taking 8d8 psychic damage on a failed save, or half as much damage on a successful one.",
+				"features": {
+					"material component": "a drop of pitch mixed with a drop of mercury",
+					"saving throw": "Wisdom",
+					"damage": "8d8 psychic",
+					"area": {
+						"shape": "sphere",
+						"radius": "60 feet"
+					},
+					"darkness properties": {
+						"darkvision": "ineffective",
+						"light immunity": "blocks non-magical and spells level 8 or lower"
+					},
+					"damage trigger": "starting turn in sphere"
+				},
+				"classes": ["Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Maze",
+				"name": "Maze",
+				"level": 8,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "You banish a creature that you can see within range into a labyrinthine demiplane. The target remains there for the duration or until it escapes the maze.\n\nThe target can use its action to attempt to escape. When it does so, it makes a DC 20 Intelligence check. If it succeeds, it escapes, and the spell ends (a minotaur or goristro demon automatically succeeds).\n\nWhen the spell ends, the target reappears in the space it left or, if that space is occupied, in the nearest unoccupied space.",
+				"features": {
+					"target": "single visible creature",
+					"escape": {
+						"action": "Intelligence check",
+						"DC": 20,
+						"auto success": ["minotaur", "goristro demon"]
+					},
+					"return location": {
+						"primary": "original space",
+						"backup": "nearest unoccupied space"
+					}
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Mighty Fortress",
+				"name": "Mighty Fortress",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 minute",
+				"range": "1 mile",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "A fortress of stone erupts from a square area of ground of your choice that you can see within range. The area is 120 feet on each side, and it must not have any buildings or other structures on it. Any creatures in the area are harmlessly lifted up as the fortress rises.\n\nThe fortress has four turrets with square bases, each one 20 feet on a side and 30 feet tall, with one turret on each corner. The turrets are connected to each other by stone walls that are each 80 feet long, creating an enclosed area. Each wall is 1 foot thick and is composed of panels that are 10 feet wide and 20 feet tall. Each panel is contiguous with two other panels or one other panel and a turret. You can place up to four stone doors in the fortress's outer wall.\n\nA small keep stands inside the enclosed area. The keep has a square base that is 50 feet on each side, and it has three floors with 10-foot-high ceilings. Each of the floors can be divided into as many rooms as you like, provided each room is at least 5 feet on each side. The floors of the keep are connected by stone staircases, its walls are 6 inches thick, and interior rooms can have stone doors or open archways as you choose. The keep is furnished and decorated however you like, and it contains sufficient food to serve a nine-course banquet for up to 100 people each day. Furnishings, food, and other objects created by this spell crumble to dust if removed from the fortress.\n\nA staff of one hundred invisible servants obeys any command given to them by creatures you designate when you cast the spell. Each servant functions as if created by the unseen servant spell.\n\nThe walls, turrets, and keep are all made of stone that can be damaged. Each 10-foot-by-10-foot section of stone has AC 15 and 30 hit points per inch of thickness. It is immune to poison and psychic damage. Reducing a section of stone to 0 hit points destroys it and might cause connected sections to buckle and collapse at the DM's discretion.\n\nAfter 7 days or when you cast this spell somewhere else, the fortress harmlessly crumbles and sinks back into the ground, leaving any creatures that were inside it safely on the ground.\n\nCasting this spell on the same spot once every 7 days for a year makes the fortress permanent.",
+				"features": {
+					"material component": "a diamond worth at least 500 gp, which the spell consumes",
+					"area": {
+						"base": "120 feet square",
+						"requirements": "no existing structures"
+					},
+					"structure": {
+						"turrets": {
+							"number": 4,
+							"dimensions": {
+								"base": "20 feet square",
+								"height": "30 feet"
+							},
+							"location": "corners"
+						},
+						"walls": {
+							"length": "80 feet",
+							"thickness": "1 foot",
+							"panels": {
+								"width": "10 feet",
+								"height": "20 feet"
+							},
+							"doors": "up to 4"
+						},
+						"keep": {
+							"base": "50 feet square",
+							"floors": 3,
+							"ceiling height": "10 feet",
+							"wall thickness": "6 inches",
+							"rooms": "minimum 5 feet square",
+							"features": [
+								"stone staircases",
+								"doors or archways",
+								"furnishings",
+								"daily banquet for 100"
+							]
+						}
+					},
+					"servants": {
+						"number": 100,
+						"type": "invisible unseen servants",
+						"control": "designated creatures' commands"
+					},
+					"fortification": {
+						"section size": "10 feet square",
+						"AC": 15,
+						"hit points": "30 per inch thickness",
+						"immunities": ["poison", "psychic"],
+						"destruction": "possible collapse of connected sections"
+					},
+					"duration": {
+						"standard": "7 days",
+						"permanent": "cast weekly for one year"
+					}
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Mind Blank",
+				"name": "Mind Blank",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 minute",
+				"range": "1 mile",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "A fortress of stone erupts from a square area of ground of your choice that you can see within range. The area is 120 feet on each side, and it must not have any buildings or other structures on it. Any creatures in the area are harmlessly lifted up as the fortress rises.\n\nThe fortress has four turrets with square bases, each one 20 feet on a side and 30 feet tall, with one turret on each corner. The turrets are connected to each other by stone walls that are each 80 feet long, creating an enclosed area. Each wall is 1 foot thick and is composed of panels that are 10 feet wide and 20 feet tall. Each panel is contiguous with two other panels or one other panel and a turret. You can place up to four stone doors in the fortress's outer wall.\n\nA small keep stands inside the enclosed area. The keep has a square base that is 50 feet on each side, and it has three floors with 10-foot-high ceilings. Each of the floors can be divided into as many rooms as you like, provided each room is at least 5 feet on each side. The floors of the keep are connected by stone staircases, its walls are 6 inches thick, and interior rooms can have stone doors or open archways as you choose. The keep is furnished and decorated however you like, and it contains sufficient food to serve a nine-course banquet for up to 100 people each day. Furnishings, food, and other objects created by this spell crumble to dust if removed from the fortress.\n\nA staff of one hundred invisible servants obeys any command given to them by creatures you designate when you cast the spell. Each servant functions as if created by the unseen servant spell.\n\nThe walls, turrets, and keep are all made of stone that can be damaged. Each 10-foot-by-10-foot section of stone has AC 15 and 30 hit points per inch of thickness. It is immune to poison and psychic damage. Reducing a section of stone to 0 hit points destroys it and might cause connected sections to buckle and collapse at the DM's discretion.\n\nAfter 7 days or when you cast this spell somewhere else, the fortress harmlessly crumbles and sinks back into the ground, leaving any creatures that were inside it safely on the ground.\n\nCasting this spell on the same spot once every 7 days for a year makes the fortress permanent.",
+				"features": {
+					"material component": "a diamond worth at least 500 gp, which the spell consumes",
+					"area": {
+						"base": "120 feet square",
+						"requirements": "no existing structures"
+					},
+					"structure": {
+						"turrets": {
+							"number": 4,
+							"dimensions": {
+								"base": "20 feet square",
+								"height": "30 feet"
+							},
+							"location": "corners"
+						},
+						"walls": {
+							"length": "80 feet",
+							"thickness": "1 foot",
+							"panels": {
+								"width": "10 feet",
+								"height": "20 feet"
+							},
+							"doors": "up to 4"
+						},
+						"keep": {
+							"base": "50 feet square",
+							"floors": 3,
+							"ceiling height": "10 feet",
+							"wall thickness": "6 inches",
+							"rooms": "minimum 5 feet square",
+							"features": [
+								"stone staircases",
+								"doors or archways",
+								"furnishings",
+								"daily banquet for 100"
+							]
+						}
+					},
+					"servants": {
+						"number": 100,
+						"type": "invisible unseen servants",
+						"control": "designated creatures' commands"
+					},
+					"fortification": {
+						"section size": "10 feet square",
+						"AC": 15,
+						"hit points": "30 per inch thickness",
+						"immunities": ["poison", "psychic"],
+						"destruction": "possible collapse of connected sections"
+					},
+					"duration": {
+						"standard": "7 days",
+						"permanent": "cast weekly for one year"
+					}
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Power Word Stun",
+				"name": "Power Word Stun",
+				"level": 8,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V"],
+				"duration": "Instantaneous",
+				"description": "You speak a word of power that can overwhelm the mind of one creature you can see within range, leaving it dumbfounded. If the target has 150 hit points or fewer, it is stunned. Otherwise, the spell has no effect.\n\nThe stunned target must make a Constitution saving throw at the end of each of its turns. On a successful save, this stunning effect ends.",
+				"features": {
+					"target restrictions": {
+						"hit points": "150 or fewer",
+						"visibility": "must be visible to caster"
+					},
+					"effect": {
+						"condition": "stunned",
+						"save": "Constitution at end of each turn",
+						"end condition": "successful save ends effect"
+					}
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Reality Break",
+				"name": "Reality Break",
+				"level": 8,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You shatter the barriers between realities and timelines, thrusting a creature into turmoil and madness. The target must succeed on a Wisdom saving throw, or it can't take reactions until the spell ends. The affected target must also roll a d10 at the start of each of its turns; the number rolled determines what happens to the target, as shown on the Reality Break Effects table.\n\nAt the end of each of its turns, the affected target can repeat the Wisdom saving throw, ending the spell on itself on a success.",
+				"features": {
+					"material component": "a crystal prism",
+					"saving throw": "Wisdom",
+					"effects": {
+						"initial failure": "cannot take reactions",
+						"per turn": {
+							"1-2": {
+								"name": "Vision of the Far Realm",
+								"damage": "6d12 psychic",
+								"condition": "stunned until end of turn"
+							},
+							"3-5": {
+								"name": "Rending Rift",
+								"save": "Dexterity",
+								"damage": "8d12 force",
+								"save success": "half damage"
+							},
+							"6-8": {
+								"name": "Wormhole",
+								"teleport": "up to 30 feet",
+								"damage": "10d12 force",
+								"condition": "knocked prone"
+							},
+							"9-10": {
+								"name": "Chill of the Dark Void",
+								"damage": "10d12 cold",
+								"condition": "blinded until end of turn"
+							}
+						},
+						"end of turn": "repeat Wisdom save to end spell"
+					}
+				},
+				"subclasses": ["Chronurgy Magic"]
+			},
+			{
+				"id": "Sunburst",
+				"name": "Sunburst",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "150 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "Brilliant sunlight flashes in a 60-foot radius centered on a point you choose within range. Each creature in that light must make a Constitution saving throw. On a failed save, a creature takes 12d6 radiant damage and is blinded for 1 minute. On a successful save, it takes half as much damage and isn't blinded by this spell. Undead and oozes have disadvantage on this saving throw.\n\nA creature blinded by this spell makes another Constitution saving throw at the end of each of its turns. On a successful save, it is no longer blinded.\n\nThis spell dispels any darkness in its area that was created by a spell.",
+				"features": {
+					"material component": "fire and a piece of sunstone",
+					"area": "60-foot radius",
+					"saving throw": {
+						"type": "Constitution",
+						"disadvantage": ["Undead", "Oozes"],
+						"failed": {
+							"damage": "12d6 radiant",
+							"condition": "blinded for 1 minute"
+						},
+						"success": {
+							"damage": "half",
+							"condition": "not blinded"
+						}
+					},
+					"blinded condition": "Constitution save at end of turn to end",
+					"special": "dispels magical darkness"
+				},
+				"classes": ["Cleric", "Druid", "Sorcerer", "Wizard"],
+				"subclasses": ["Arcana Domain", "Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Telepathy",
+				"name": "Telepathy",
+				"level": 8,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "Unlimited",
+				"components": ["V", "S", "M"],
+				"duration": "24 hours",
+				"description": "You create a telepathic link between yourself and a willing creature with which you are familiar. The creature can be anywhere on the same plane of existence as you. The spell ends if you or the target are no longer on the same plane.\n\nUntil the spell ends, you and the target can instantaneously share words, images, sounds, and other sensory messages with one another through the link, and the target recognizes you as the creature it is communicating with. The spell enables a creature with an Intelligence score of at least 1 to understand the meaning of your words and take in the scope of any sensory messages you send to it.",
+				"features": {
+					"material component": "a pair of linked silver rings",
+					"target": "willing familiar creature",
+					"requirements": {
+						"target intelligence": "minimum score of 1",
+						"plane": "same plane as caster"
+					},
+					"communication": {
+						"types": ["words", "images", "sounds", "sensory messages"],
+						"speed": "instantaneous",
+						"recognition": "target recognizes caster"
+					}
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Tsunami",
+				"name": "Tsunami",
+				"level": 8,
+				"school": "Conjuration",
+				"castingTime": "1 minute",
+				"range": "Sight",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 6 rounds",
+				"description": "A wall of water springs into existence at a point you choose within range. You can make the wall up to 300 feet long, 300 feet high, and 50 feet thick. The wall lasts for the duration.\n\nWhen the wall appears, each creature within its area must make a Strength saving throw. On a failed save, a creature takes 6d10 bludgeoning damage, or half as much damage on a successful save.\n\nAt the start of each of your turns after the wall appears, the wall, along with any creatures in it, moves 50 feet away from you. Any Huge or smaller creature inside the wall or whose space the wall enters when it moves must succeed on a Strength saving throw or take 5d10 bludgeoning damage. A creature can take this damage only once per round. At the end of the turn, the wall's height is reduced by 50 feet, and the damage creatures take from the spell on subsequent rounds is reduced by 1d10. When the wall reaches 0 feet in height, the spell ends.\n\nA creature caught in the wall can move by swimming. Because of the force of the wave, though, the creature must make a successful Strength (Athletics) check against your spell save DC in order to move at all. If it fails the check, it can't move. A creature that moves out of the area falls to the ground.",
+				"features": {
+					"wall dimensions": {
+						"length": "300 feet",
+						"height": "300 feet",
+						"thickness": "50 feet"
+					},
+					"initial damage": {
+						"saving throw": "Strength",
+						"damage": "6d10 bludgeoning",
+						"save success": "half damage"
+					},
+					"movement effects": {
+						"wall movement": "50 feet per turn",
+						"creature size": "Huge or smaller",
+						"damage": {
+							"saving throw": "Strength",
+							"amount": "5d10 bludgeoning",
+							"frequency": "once per round"
+						}
+					},
+					"wall reduction": {
+						"height decrease": "50 feet per turn",
+						"damage reduction": "1d10 per round"
+					},
+					"swimming": {
+						"check": "Strength (Athletics) vs spell save DC",
+						"failure": "cannot move",
+						"exit effect": "falls to ground"
+					}
+				},
+				"classes": ["Druid"]
+			}
 		]
 	},
 	{
@@ -12205,27 +13076,773 @@
 				"classes": ["Cleric", "Monk", "Warlock", "Wizard"],
 				"subclasses": ["Arcana Domain", "Divine Soul", "Theurgy"]
 			},
-			"Blade of Disaster",
-			"Foresight",
-			"Gate",
-			"Imprisonment",
-			"Invulnerability",
-			"Mass Heal",
-			"Mass Polymorph",
-			"Meteor Swarm",
-			"Power Word Heal",
-			"Power Word Kill",
-			"Prismatic Wall",
-			"Psychic Scream",
-			"Ravenous Void",
-			"Shapechange",
-			"Storm of Vengeance",
-			"Time Ravage",
-			"Time Stop",
-			"True Polymorph",
-			"True Resurrection",
-			"Weird",
-			"Wish"
+			{
+				"id": "Blade of Disaster",
+				"name": "Blade of Disaster",
+				"level": 9,
+				"school": "Conjuration",
+				"castingTime": "1 bonus action",
+				"range": "60 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You create a blade-shaped planar rift about 3 feet long in an unoccupied space you can see within range. The blade lasts for the duration. When you cast this spell, you can make up to two melee spell attacks with the blade, each one against a creature, loose object, or structure within 5 feet of the blade. On a hit, the target takes 4d12 force damage. This attack scores a critical hit if the number on the d20 is 18 or higher. On a critical hit, the blade deals an extra 8d12 force damage (for a total of 12d12 force damage).\n\nAs a bonus action on your turn, you can move the blade up to 30 feet to an unoccupied space you can see and then make up to two melee spell attacks with it again.\n\nThe blade can harmlessly pass through any barrier, including a Wall of Force.",
+				"features": {
+					"blade properties": {
+						"size": "3 feet long",
+						"movement": "30 feet as bonus action",
+						"barriers": "passes through all barriers"
+					},
+					"attacks": {
+						"number": "up to 2 per action/bonus action",
+						"range": "within 5 feet of blade",
+						"damage": "4d12 force",
+						"critical hit": {
+							"threshold": "18-20",
+							"damage": "12d12 force"
+						}
+					},
+					"targets": ["creatures", "loose objects", "structures"]
+				},
+				"classes": ["Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Foresight",
+				"name": "Foresight",
+				"level": 9,
+				"school": "Divination",
+				"castingTime": "1 minute",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "8 hours",
+				"description": "You touch a willing creature and bestow a limited ability to see into the immediate future. For the duration, the target can't be surprised and has advantage on attack rolls, ability checks, and saving throws. Additionally, other creatures have disadvantage on attack rolls against the target for the duration.\n\nThis spell immediately ends if you cast it again before its duration ends.",
+				"features": {
+					"material component": "a hummingbird feather",
+					"target": "willing creature",
+					"effects": {
+						"immunity": "cannot be surprised",
+						"advantages": ["attack rolls", "ability checks", "saving throws"],
+						"other creatures": "disadvantage on attacks against target"
+					},
+					"limitation": "ends if cast again before duration expires"
+				},
+				"classes": ["Bard", "Druid", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Gate",
+				"name": "Gate",
+				"level": 9,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You conjure a portal linking an unoccupied space you can see within range to a precise location on a different plane of existence. The portal is a circular opening, which you can make 5 to 20 feet in diameter. You can orient the portal in any direction you choose. The portal lasts for the duration.\n\nThe portal has a front and a back on each plane where it appears. Travel through the portal is possible only by moving through its front. Anything that does so is instantly transported to the other plane, appearing in the unoccupied space nearest to the portal.\n\nDeities and other planar rulers can prevent portals created by this spell from opening in their presence or anywhere within their domains.\n\nWhen you cast this spell, you can speak the name of a specific creature (a pseudonym, title, or nickname doesn't work). If that creature is on a plane other than the one you are on, the portal opens in the named creature's immediate vicinity and draws the creature through it to the nearest unoccupied space on your side of the portal. You gain no special power over the creature, and it is free to act as the DM deems appropriate. It might leave, attack you, or help you.",
+				"features": {
+					"material component": "a diamond worth at least 5,000 gp",
+					"portal properties": {
+						"shape": "circular",
+						"size": "5-20 feet diameter",
+						"orientation": "any direction",
+						"travel": "one-way through front only"
+					},
+					"transportation": {
+						"destination": "precise location on different plane",
+						"arrival": "nearest unoccupied space to portal"
+					},
+					"limitations": "can be blocked by deities/planar rulers",
+					"creature summoning": {
+						"trigger": "speaking specific creature's true name",
+						"effect": "draws creature through portal",
+						"restrictions": "no control over summoned creature"
+					}
+				},
+				"classes": ["Cleric", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain", "Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Imprisonment",
+				"name": "Imprisonment",
+				"level": 9,
+				"school": "Abjuration",
+				"castingTime": "1 minute",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Until dispelled",
+				"description": "You create a magical restraint to hold a creature that you can see within range. The target must succeed on a Wisdom saving throw or be bound by the spell; if it succeeds, it is immune to this spell if you cast it again. While affected by this spell, the creature doesn't need to breathe, eat, or drink, and it doesn't age. Divination spells can't locate or perceive the target.\n\nWhen you cast the spell, you choose one of the following forms of imprisonment.\n\nBurial: The target is entombed far beneath the earth in a sphere of magical force that is just large enough to contain the target. Nothing can pass through the sphere, nor can any creature teleport or use planar travel to get into or out of it.\n\nChaining: Heavy chains, firmly rooted in the ground, hold the target in place. The target is restrained until the spell ends, and it can't move or be moved by any means until then.\n\nHedged Prison: The spell transports the target into a tiny demiplane that is warded against teleportation and planar travel. The demiplane can be a labyrinth, a cage, a tower, or any similar confined structure or area of your choice.\n\nMinimus Containment: The target shrinks to a height of 1 inch and is imprisoned inside a gemstone or similar object. Light can pass through the gemstone normally (allowing the target to see out and other creatures to see in), but nothing else can pass through, even by means of teleportation or planar travel. The gemstone can't be cut or broken while the spell remains in effect.\n\nSlumber: The target falls asleep and can't be awoken.\n\nEnding the Spell: During the casting of the spell, in any of its versions, you can specify a condition that will cause the spell to end and release the target. The condition can be as specific or as elaborate as you choose, but the DM must agree that the condition is reasonable and has a likelihood of coming to pass. The conditions can be based on a creature's name, identity, or deity but otherwise must be based on observable actions or qualities and not based on intangibles such as level, class, or hit points.\n\nA Dispel Magic spell can end the spell only if it is cast as a 9th-level spell, targeting either the prison or the special component used to create it.\n\nYou can use a particular special component to create only one prison at a time. If you cast the spell again using the same component, the target of the first casting is immediately freed from its binding.",
+				"features": {
+					"material component": {
+						"base": "vellum depiction or carved statuette of target",
+						"cost": "500 gp per hit die of target",
+						"variants": {
+							"burial": "small mithral orb",
+							"chaining": "fine chain of precious metal",
+							"hedged prison": "miniature jade prison",
+							"minimus containment": "large transparent gemstone",
+							"slumber": "rare soporific herbs"
+						}
+					},
+					"saving throw": "Wisdom",
+					"target effects": {
+						"basic": ["no need to breathe", "no need to eat/drink", "no aging"],
+						"protection": "immune to divination detection"
+					},
+					"imprisonment types": {
+						"burial": {
+							"effect": "entombed in force sphere",
+							"restrictions": "no passage or teleportation"
+						},
+						"chaining": {
+							"effect": "restrained by chains",
+							"restrictions": "no movement possible"
+						},
+						"hedged prison": {
+							"effect": "transported to demiplane",
+							"restrictions": "no teleportation/planar travel"
+						},
+						"minimus containment": {
+							"effect": "shrunk and trapped in gemstone",
+							"properties": ["light passes through", "unbreakable"]
+						},
+						"slumber": {
+							"effect": "permanent sleep"
+						}
+					},
+					"ending conditions": {
+						"custom trigger": "DM-approved condition",
+						"dispel magic": "requires 9th-level casting",
+						"component reuse": "frees previous target"
+					}
+				},
+				"classes": ["Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Invulnerability",
+				"name": "Invulnerability",
+				"level": 9,
+				"school": "Abjuration",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 10 minutes",
+				"description": "You are immune to all damage until the spell ends.",
+				"features": {
+					"material component": {
+						"item": "small piece of adamantine",
+						"cost": "500 gp",
+						"consumed": true
+					},
+					"effect": "complete immunity to all damage"
+				},
+				"classes": ["Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Mass Heal",
+				"name": "Mass Heal",
+				"level": 9,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "A flood of healing energy flows from you into injured creatures around you. You restore up to 700 hit points, divided as you choose among any number of creatures that you can see within range. Creatures healed by this spell are also cured of all diseases and any effect making them blinded or deafened. This spell has no effect on undead or constructs.",
+				"features": {
+					"healing": {
+						"total points": 700,
+						"distribution": "divided as chosen",
+						"target restrictions": "creatures in range that caster can see"
+					},
+					"additional effects": {
+						"diseases": "all cured",
+						"conditions removed": ["blinded", "deafened"]
+					},
+					"limitations": {
+						"immune creatures": ["undead", "constructs"]
+					}
+				},
+				"classes": ["Cleric"],
+				"subclasses": ["Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Mass Polymorph",
+				"name": "Mass Polymorph",
+				"level": 9,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "120 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You transform up to ten creatures of your choice that you can see within range. An unwilling target must succeed on a Wisdom saving throw to resist the transformation. An unwilling shapechanger automatically succeeds on the save.\n\nEach target assumes a beast form of your choice, and you can choose the same form or different ones for each target. The new form can be any beast you have seen whose challenge rating is equal to or less than the target's (or half the target's level, if the target doesn't have a challenge rating). The target's game statistics, including mental ability scores, are replaced by the statistics of the chosen beast, but the target retains its hit points, alignment, and personality.\n\nEach target gains a number of temporary hit points equal to the hit points of its new form. These temporary hit points can't be replaced by temporary hit points from another source. A target reverts to its normal form when it has no more temporary hit points or it dies. If the spell ends before then, the creature loses all its temporary hit points and reverts to its normal form.\n\nThe creature is limited in the actions it can perform by the nature of its new form. It can't speak, cast spells, or do anything else that requires hands or speech.\n\nThe target's gear melds into the new form. The target can't activate, use, wield, or otherwise benefit from any of its equipment.",
+				"features": {
+					"material component": "a caterpillar cocoon",
+					"saving throw": "Wisdom",
+					"targets": {
+						"maximum": 10,
+						"restrictions": "creatures caster can see within range",
+						"automatic save": "unwilling shapechangers"
+					},
+					"transformation": {
+						"form": "beast of caster's choice",
+						"CR limit": "equal to or less than target's CR or half level",
+						"retained traits": ["hit points", "alignment", "personality"],
+						"replaced traits": ["game statistics", "mental ability scores"]
+					},
+					"temporary hp": {
+						"amount": "equal to new form's hp",
+						"restrictions": "cannot be replaced by other temporary hp sources"
+					},
+					"limitations": {
+						"actions": [
+							"cannot speak",
+							"cannot cast spells",
+							"cannot use hands",
+							"cannot use speech"
+						],
+						"equipment": "melds into form and cannot be used"
+					},
+					"reversion conditions": [
+						"no temporary hp remaining",
+						"death",
+						"spell ends"
+					]
+				},
+				"classes": ["Bard", "Sorcerer", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Meteor Swarm",
+				"name": "Meteor Swarm",
+				"level": 9,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "1 mile",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "Blazing orbs of fire plummet to the ground at four different points you can see within range. Each creature in a 40-foot-radius sphere centered on each point you choose must make a Dexterity saving throw. The sphere spreads around corners. A creature takes 20d6 fire damage and 20d6 bludgeoning damage on a failed save, or half as much damage on a successful one. A creature in the area of more than one fiery burst is affected only once.\n\nThe spell damages objects in the area and ignites flammable objects that aren't being worn or carried.",
+				"features": {
+					"saving throw": "Dexterity",
+					"area": {
+						"points": 4,
+						"shape": "sphere",
+						"radius": "40 feet",
+						"spread": "around corners"
+					},
+					"damage": {
+						"fire": "20d6",
+						"bludgeoning": "20d6",
+						"save": "half damage",
+						"multiple hits": "affected only once"
+					},
+					"additional effects": {
+						"objects": "damaged",
+						"flammable objects": "ignited if not worn/carried"
+					}
+				},
+				"classes": ["Sorcerer", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Power Word Heal",
+				"name": "Power Word Heal",
+				"level": 9,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "Touch",
+				"components": ["V", "S"],
+				"duration": "Instantaneous",
+				"description": "A wave of healing energy washes over the creature you touch. The target regains all its hit points. If the creature is charmed, frightened, paralyzed, or stunned, the condition ends. If the creature is prone, it can use its reaction to stand up. This spell has no effect on undead or constructs.",
+				"features": {
+					"healing": "all hit points restored",
+					"condition removal": [
+						"charmed",
+						"frightened",
+						"paralyzed",
+						"stunned"
+					],
+					"prone": "can use reaction to stand",
+					"limitations": {
+						"invalid targets": ["undead", "constructs"]
+					}
+				},
+				"classes": ["Bard", "Cleric"],
+				"subclasses": ["Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Power Word Kill",
+				"name": "Power Word Kill",
+				"level": 9,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V"],
+				"duration": "Instantaneous",
+				"description": "You utter a word of power that can compel one creature you can see within range to die instantly. If the creature you choose has 100 hit points or fewer, it dies. Otherwise, the spell has no effect.",
+				"features": {
+					"target restrictions": {
+						"hit points": "100 or fewer",
+						"visibility": "must be visible to caster"
+					},
+					"effect": "instant death"
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Prismatic Wall",
+				"name": "Prismatic Wall",
+				"level": 9,
+				"school": "Abjuration",
+				"castingTime": "1 action",
+				"range": "60 feet",
+				"components": ["V", "S"],
+				"duration": "10 minutes",
+				"description": "A shimmering, multicolored plane of light forms a vertical opaque wall — up to 90 feet long, 30 feet high, and 1 inch thick — centered on a point you can see within range. Alternatively, you can shape the wall into a sphere up to 30 feet in diameter centered on a point you choose within range. The wall remains in place for the duration. If you position the wall so that it passes through a space occupied by a creature, the spell fails, and your action and the spell slot are wasted.\n\nThe wall sheds bright light out to a range of 100 feet and dim light for an additional 100 feet. You and creatures you designate at the time you cast the spell can pass through and remain near the wall without harm. If another creature that can see the wall moves to within 20 feet of it or starts its turn there, the creature must succeed on a Constitution saving throw or become blinded for 1 minute.\n\nThe wall consists of seven layers, each with a different color. When a creature attempts to reach into or pass through the wall, it does so one layer at a time through all the wall's layers. As it passes or reaches through each layer, the creature must make a Dexterity saving throw or be affected by that layer's properties as described below.\n\nThe wall can be destroyed, also one layer at a time, in order from red to violet, by means specific to each layer. Once a layer is destroyed, it remains so for the duration of the spell. An Antimagic Field has no effect on a prismatic wall.",
+				"features": {
+					"wall properties": {
+						"dimensions": {
+							"wall": {
+								"length": "90 feet",
+								"height": "30 feet",
+								"thickness": "1 inch"
+							},
+							"sphere": {
+								"diameter": "30 feet"
+							}
+						},
+						"light": {
+							"bright": "100 feet",
+							"dim": "additional 100 feet"
+						}
+					},
+					"saving throws": ["Constitution", "Dexterity"],
+					"layers": {
+						"red": {
+							"damage": "10d6 fire",
+							"save": "half damage",
+							"effect": "blocks nonmagical ranged attacks",
+							"destruction": "25 cold damage"
+						},
+						"orange": {
+							"damage": "10d6 acid",
+							"save": "half damage",
+							"effect": "blocks magical ranged attacks",
+							"destruction": "strong wind"
+						},
+						"yellow": {
+							"damage": "10d6 lightning",
+							"save": "half damage",
+							"destruction": "60 force damage"
+						},
+						"green": {
+							"damage": "10d6 poison",
+							"save": "half damage",
+							"destruction": "Passwall or similar spell"
+						},
+						"blue": {
+							"damage": "10d6 cold",
+							"save": "half damage",
+							"destruction": "25 fire damage"
+						},
+						"indigo": {
+							"effect": "restrained",
+							"save": "Constitution at end of turns",
+							"resolution": "3 successes ends spell, 3 failures causes petrification",
+							"restriction": "blocks spellcasting",
+							"destruction": "Daylight or similar spell"
+						},
+						"violet": {
+							"effect": "blinded",
+							"save": "Wisdom at start of next turn",
+							"failure": "planar transportation",
+							"destruction": "Dispel Magic or similar spell"
+						}
+					},
+					"immunities": {
+						"designated creatures": "can pass through safely",
+						"antimagic field": "no effect"
+					}
+				},
+				"classes": ["Bard", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Psychic Scream",
+				"name": "Psychic Scream",
+				"level": 9,
+				"school": "Enchantment",
+				"castingTime": "1 action",
+				"range": "90 feet",
+				"components": ["S"],
+				"duration": "Instantaneous",
+				"description": "You unleash the power of your mind to blast the intellect of up to ten creatures of your choice that you can see within range. Creatures that have an Intelligence score of 2 or lower are unaffected.\n\nEach target must make an Intelligence saving throw. On a failed save, a target takes 14d6 psychic damage and is stunned. On a successful save, a target takes half as much damage and isn't stunned. If a target is killed by this damage, its head explodes, assuming it has one.\n\nA stunned target can make an Intelligence saving throw at the end of each of its turns. On a successful save, the stunning effect ends.",
+				"features": {
+					"saving throw": "Intelligence",
+					"targets": {
+						"maximum": 10,
+						"restrictions": [
+							"creatures caster can see within range",
+							"Intelligence score greater than 2"
+						]
+					},
+					"effects": {
+						"failed save": {
+							"damage": "14d6 psychic",
+							"condition": "stunned"
+						},
+						"successful save": {
+							"damage": "half damage",
+							"condition": "none"
+						},
+						"death effect": "head explosion",
+						"stun recovery": "Intelligence save at end of turn"
+					}
+				},
+				"classes": ["Bard", "Sorcerer", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Ravenous Void",
+				"name": "Ravenous Void",
+				"level": 9,
+				"school": "Evocation",
+				"castingTime": "1 action",
+				"range": "1,000 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "You create a 20-foot-radius sphere of destructive gravitational force centered on a point you can see within range. For the spell's duration, the sphere and any space within 100 feet of it are difficult terrain, and nonmagical objects fully inside the sphere are destroyed if they aren't being worn or carried.\n\nWhen the sphere appears and at the start of each of your turns until the spell ends, unsecured objects within 100 feet of the sphere are pulled toward the sphere's center, ending in an unoccupied space as close to the center as possible.\n\nA creature that starts its turn within 100 feet of the sphere must succeed on a Strength saving throw or be pulled straight toward the sphere's center, ending in an unoccupied space as close to the center as possible. A creature that enters the sphere for the first time on a turn or starts its turn there takes 5d10 force damage and is restrained until it is no longer in the sphere. If the sphere is in the air, the restrained creature hovers inside the sphere. A creature can use its action to make a Strength check against your spell save DC, ending this restrained condition on itself or another creature in the sphere that it can reach. A creature reduced to 0 hit points by this spell is annihilated, along with any nonmagical items it is wearing or carrying.",
+				"features": {
+					"material component": "a small, nine-pointed star made of iron",
+					"saving throw": "Strength",
+					"area": {
+						"sphere radius": "20 feet",
+						"effect radius": "100 feet"
+					},
+					"terrain effects": {
+						"difficult terrain": "sphere and 100 feet around it",
+						"object destruction": "nonmagical objects in sphere"
+					},
+					"gravitational effects": {
+						"object pull": "unsecured objects pulled to center",
+						"creature pull": {
+							"trigger": "start turn within 100 feet",
+							"save": "Strength or pulled to center"
+						}
+					},
+					"sphere effects": {
+						"damage": "5d10 force",
+						"condition": "restrained",
+						"escape": "action for Strength check vs spell DC",
+						"death": "annihilation at 0 HP"
+					}
+				},
+				"subclasses": ["Graviturgy Magic"]
+			},
+			{
+				"id": "Shapechange",
+				"name": "Shapechange",
+				"level": 9,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You assume the form of a different creature for the duration. The new form can be of any creature with a challenge rating equal to your level or lower. The creature can't be a construct or an undead, and you must have seen the sort of creature at least once. You transform into an average example of that creature, one without any class levels or the Spellcasting trait.\n\nYour game statistics are replaced by the statistics of the chosen creature, though you retain your alignment and Intelligence, Wisdom, and Charisma scores. You also retain all of your skill and saving throw proficiencies, in addition to gaining those of the creature. If the creature has the same proficiency as you and the bonus listed in its statistics is higher than yours, use the creature's bonus in place of yours. You can't use any legendary actions or lair actions of the new form.\n\nYou assume the hit points and hit dice of the new form. When you revert to your normal form, you return to the number of hit points you had before you transformed. If you revert as a result of dropping to 0 hit points, any excess damage carries over to your normal form. As long as the excess damage doesn't reduce your normal form to 0 hit points, you aren't knocked unconscious.\n\nYou retain the benefit of any features from your class, race, or other source and can use them, provided that your new form is physically capable of doing so. You can't use any special senses you have (for example, darkvision) unless your new form also has that sense. You can only speak if the creature can normally speak.\n\nWhen you transform, you choose whether your equipment falls to the ground, merges into the new form, or is worn by it. Worn equipment functions as normal. The DM determines whether it is practical for the new form to wear a piece of equipment, based on the creature's shape and size. Your equipment doesn't change shape or size to match the new form, and any equipment that the new form can't wear must either fall to the ground or merge into your new form. Equipment that merges has no effect in that state.\n\nDuring this spell's duration, you can use your action to assume a different form following the same restrictions and rules for the original form, with one exception: if your new form has more hit points than your current one, your hit points remain at their current value.",
+				"features": {
+					"material component": {
+						"item": "jade circlet",
+						"cost": "1,500 gp",
+						"placement": "must be worn on head"
+					},
+					"transformation restrictions": {
+						"CR limit": "equal to caster level",
+						"excluded types": ["construct", "undead"],
+						"requirements": "must have seen creature type",
+						"form type": "average example without class levels or spellcasting"
+					},
+					"retained attributes": {
+						"mental stats": ["Intelligence", "Wisdom", "Charisma"],
+						"other": [
+							"alignment",
+							"skill proficiencies",
+							"saving throw proficiencies"
+						],
+						"class features": "if physically capable"
+					},
+					"hit points": {
+						"transformation": "assume new form's HP and HD",
+						"reversion": "return to original HP",
+						"damage overflow": "carries over if reduced to 0 HP"
+					},
+					"equipment options": {
+						"choices": ["drop", "merge", "wear"],
+						"restrictions": "based on practicality for new form"
+					},
+					"form changing": {
+						"action": "can assume different form",
+						"HP limitation": "keeps current HP if new form has more"
+					}
+				},
+				"classes": ["Druid", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Storm of Vengeance",
+				"name": "Storm of Vengeance",
+				"level": 9,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "You assume the form of a different creature for the duration. The new form can be of any creature with a challenge rating equal to your level or lower. The creature can't be a construct or an undead, and you must have seen the sort of creature at least once. You transform into an average example of that creature, one without any class levels or the Spellcasting trait.\n\nYour game statistics are replaced by the statistics of the chosen creature, though you retain your alignment and Intelligence, Wisdom, and Charisma scores. You also retain all of your skill and saving throw proficiencies, in addition to gaining those of the creature. If the creature has the same proficiency as you and the bonus listed in its statistics is higher than yours, use the creature's bonus in place of yours. You can't use any legendary actions or lair actions of the new form.\n\nYou assume the hit points and hit dice of the new form. When you revert to your normal form, you return to the number of hit points you had before you transformed. If you revert as a result of dropping to 0 hit points, any excess damage carries over to your normal form. As long as the excess damage doesn't reduce your normal form to 0 hit points, you aren't knocked unconscious.\n\nYou retain the benefit of any features from your class, race, or other source and can use them, provided that your new form is physically capable of doing so. You can't use any special senses you have (for example, darkvision) unless your new form also has that sense. You can only speak if the creature can normally speak.\n\nWhen you transform, you choose whether your equipment falls to the ground, merges into the new form, or is worn by it. Worn equipment functions as normal. The DM determines whether it is practical for the new form to wear a piece of equipment, based on the creature's shape and size. Your equipment doesn't change shape or size to match the new form, and any equipment that the new form can't wear must either fall to the ground or merge into your new form. Equipment that merges has no effect in that state.\n\nDuring this spell's duration, you can use your action to assume a different form following the same restrictions and rules for the original form, with one exception: if your new form has more hit points than your current one, your hit points remain at their current value.",
+				"features": {
+					"material component": {
+						"item": "jade circlet",
+						"cost": "1,500 gp",
+						"placement": "must be worn on head before casting"
+					},
+					"transformation restrictions": {
+						"CR limit": "equal to caster level",
+						"excluded types": ["construct", "undead"],
+						"requirements": "must have seen creature type",
+						"form type": "average example without class levels or spellcasting"
+					},
+					"retained attributes": {
+						"mental stats": ["Intelligence", "Wisdom", "Charisma"],
+						"other": [
+							"alignment",
+							"skill proficiencies",
+							"saving throw proficiencies"
+						],
+						"class features": "if physically capable"
+					},
+					"hit points": {
+						"transformation": "assume new form's HP and HD",
+						"reversion": "return to original HP",
+						"damage overflow": "carries over if reduced to 0 HP"
+					},
+					"equipment options": {
+						"choices": ["drop", "merge", "wear"],
+						"restrictions": "based on practicality for new form"
+					},
+					"form changing": {
+						"action": "can assume different form",
+						"HP limitation": "keeps current HP if new form has more"
+					}
+				},
+				"classes": ["Druid", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Time Ravage",
+				"name": "Time Ravage",
+				"level": 9,
+				"school": "Necromancy",
+				"castingTime": "1 action",
+				"range": "90 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You target a creature you can see within range, putting its physical form through the devastation of rapid aging. The target must make a Constitution saving throw, taking 10d12 necrotic damage on a failed save, or half as much damage on a successful one. If the save fails, the target also ages to the point where it has only 30 days left before it dies of old age. In this aged state, the target has disadvantage on attack rolls, ability checks, and saving throws, and its walking speed is halved. Only the Wish spell or Greater Restoration cast with a 9th-level spell slot can end these effects and restore the target to its previous age.",
+				"features": {
+					"material component": {
+						"item": "hourglass filled with diamond dust",
+						"cost": "5,000 gp",
+						"consumed": true
+					},
+					"saving throw": {
+						"type": "Constitution",
+						"success": "half damage",
+						"failure": ["full damage", "rapid aging effects"]
+					},
+					"aging effects": {
+						"time until death": "30 days",
+						"penalties": [
+							"disadvantage on attack rolls",
+							"disadvantage on ability checks",
+							"disadvantage on saving throws",
+							"halved walking speed"
+						],
+						"cure conditions": ["Wish spell", "Greater Restoration (9th-level)"]
+					}
+				},
+				"subclasses": ["Chronurgy Magic"]
+			},
+			{
+				"id": "Time Stop",
+				"name": "Time Stop",
+				"level": 9,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V"],
+				"duration": "Instantaneous",
+				"description": "You briefly stop the flow of time for everyone but yourself. No time passes for other creatures, while you take 1d4 + 1 turns in a row, during which you can use actions and move as normal.\n\nThis spell ends if one of the actions you use during this period, or any effects that you create during this period, affects a creature other than you or an object being worn or carried by someone other than you. In addition, the spell ends if you move to a place more than 1,000 feet from the location where you cast it.",
+				"features": {
+					"extra turns": {
+						"amount": "1d4 + 1",
+						"limitations": [
+							"ends if action affects other creatures",
+							"ends if action affects objects worn/carried by others",
+							"ends if moving more than 1,000 feet from cast location"
+						]
+					}
+				},
+				"classes": ["Sorcerer", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "True Polymorph",
+				"name": "True Polymorph",
+				"level": 9,
+				"school": "Transmutation",
+				"castingTime": "1 action",
+				"range": "30 feet",
+				"components": ["V", "S", "M"],
+				"duration": "Concentration, up to 1 hour",
+				"description": "Choose one creature or nonmagical object that you can see within range. You transform the creature into a different creature, the creature into a nonmagical object, or the object into a creature (the object must be neither worn nor carried by another creature). The transformation lasts for the duration, or until the target drops to 0 hit points or dies. If you concentrate on this spell for the full duration, the transformation lasts until it is dispelled.\n\nThis spell has no effect on a shapechanger or a creature with 0 hit points. An unwilling creature can make a Wisdom saving throw, and if it succeeds, it isn't affected by this spell.\n\nCreature into Creature: If you turn a creature into another kind of creature, the new form can be any kind you choose whose challenge rating is equal to or less than the target's (or its level, if the target doesn't have a challenge rating). The target's game statistics, including mental ability scores, are replaced by the statistics of the new form. It retains its alignment and personality.\nThe target assumes the hit points of its new form, and when it reverts to its normal form, the creature returns to the number of hit points it had before it transformed. If it reverts as a result of dropping to 0 hit points, any excess damage carries over to its normal form. As long as the excess damage doesn't reduce the creature's normal form to 0 hit points, it isn't knocked unconscious.\n\nThe creature is limited in the actions it can perform by the nature of its new form, and it can't speak, cast spells, or take any other action that requires hands or speech unless its new form is capable of such actions.\n\nThe target's gear melds into the new form. The creature can't activate, use, wield, or otherwise benefit from any of its equipment.\n\nObject into Creature: You can turn an object into any kind of creature, as long as the creature's size is no larger than the object's size and the creature's challenge rating is 9 or lower. The creature is friendly to you and your companions. It acts on each of your turns. You decide what action it takes and how it moves. The DM has the creature's statistics and resolves all of its actions and movement.\nIf the spell becomes permanent, you no longer control the creature. It might remain friendly to you, depending on how you have treated it.\n\nCreature into Object: If you turn a creature into an object, it transforms along with whatever it is wearing and carrying into that form, as long as the object's size is no larger than the creature's size. The creature's statistics become those of the object, and the creature has no memory of time spent in this form, after the spell ends and it returns to its normal form.",
+				"features": {
+					"material component": {
+						"item": "a drop of mercury, a dollop of gum arabic, and a wisp of smoke"
+					},
+					"saving throw": {
+						"type": "Wisdom",
+						"success": "not affected",
+						"failure": "transformed"
+					},
+					"transformation types": {
+						"creature to creature": {
+							"limitations": [
+								"new form CR must be ≤ target's CR/level",
+								"retains alignment and personality",
+								"limited by new form's capabilities"
+							]
+						},
+						"object to creature": {
+							"limitations": [
+								"creature size ≤ object size",
+								"CR must be 9 or lower",
+								"creature is friendly and controlled"
+							]
+						},
+						"creature to object": {
+							"limitations": [
+								"object size ≤ creature size",
+								"includes worn/carried items"
+							]
+						}
+					}
+				},
+				"classes": ["Bard", "Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "True Resurrection",
+				"name": "True Resurrection",
+				"level": 9,
+				"school": "Necromancy",
+				"castingTime": "1 hour",
+				"range": "Touch",
+				"components": ["V", "S", "M"],
+				"duration": "Instantaneous",
+				"description": "You touch a creature that has been dead for no longer than 200 years and that died for any reason except old age. If the creature's soul is free and willing, the creature is restored to life with all its hit points.\n\nThis spell closes all wounds, neutralizes any poison, cures all diseases, and lifts any curses affecting the creature when it died. The spell replaces damaged or missing organs and limbs. If the creature was undead, it is restored to its non-undead form.\n\nThe spell can even provide a new body if the original no longer exists, in which case you must speak the creature's name. The creature then appears in an unoccupied space you choose within 10 feet of you.",
+				"features": {
+					"material component": {
+						"item": "a sprinkle of holy water and diamonds worth at least 25,000 gp",
+						"consumed": true
+					},
+					"resurrection conditions": {
+						"time limit": "200 years",
+						"restrictions": ["cannot resurrect those who died of old age"],
+						"requirements": ["free and willing soul"]
+					}
+				},
+				"classes": ["Cleric", "Druid"],
+				"subclasses": ["Divine Soul", "Theurgy"]
+			},
+			{
+				"id": "Weird",
+				"name": "Weird",
+				"level": 9,
+				"school": "Illusion",
+				"castingTime": "1 action",
+				"range": "120 feet",
+				"components": ["V", "S"],
+				"duration": "Concentration, up to 1 minute",
+				"description": "Drawing on the deepest fears of a group of creatures, you create illusory creatures in their minds, visible only to them. Each creature in a 30-foot-radius sphere centered on a point of your choice within range must make a Wisdom saving throw. On a failed save, a creature becomes frightened for the duration. The illusion calls on the creature's deepest fears, manifesting its worst nightmares as an implacable threat. At the end of each of the frightened creature's turns, it must succeed on a Wisdom saving throw or take 4d10 psychic damage. On a successful save, the spell ends for that creature.",
+				"features": {
+					"saving throw": {
+						"type": "Wisdom",
+						"effects": {
+							"fail": [
+								"frightened for duration",
+								"4d10 psychic damage at end of turns"
+							],
+							"success": ["spell ends for that creature"]
+						}
+					},
+					"area": {
+						"type": "sphere",
+						"radius": "30 feet"
+					}
+				},
+				"classes": ["Warlock", "Wizard"],
+				"subclasses": ["Arcana Domain"]
+			},
+			{
+				"id": "Wish",
+				"name": "Wish",
+				"level": 9,
+				"school": "Conjuration",
+				"castingTime": "1 action",
+				"range": "Self",
+				"components": ["V"],
+				"duration": "Instantaneous",
+				"description": "Wish is the mightiest spell a mortal creature can cast. By simply speaking aloud, you can alter the very foundations of reality in accord with your desires.\n\nThe basic use of this spell is to duplicate any other spell of 8th level or lower. You don't need to meet any requirements in that spell, including costly components. The spell simply takes effect. Alternatively, you can create one of the following effects of your choice:\n\nYou create one object of up to 25,000 gp in value that isn't a magic item. The object can be no more than 300 feet in any dimension, and it appears in an unoccupied space you can see on the ground.\nYou allow up to twenty creatures that you can see to regain all hit points, and you end all effects on them described in the Greater Restoration spell.\nYou grant up to ten creatures that you can see resistance to a damage type you choose.\nYou grant up to ten creatures you can see immunity to a single spell or other magical effect for 8 hours. For instance, you could make yourself and all your companions immune to a lich's life drain attack.\nYou undo a single recent event by forcing a reroll of any roll made within the last round (including your last turn). Reality reshapes itself to accommodate the new result. For example, a Wish spell could undo an opponent's successful save, a foe's critical hit, or a friend's failed save. You can force the reroll to be made with advantage or disadvantage, and you can choose whether to use the reroll or the original roll.\n\nYou might be able to achieve something beyond the scope of the above examples. State your wish to the DM as precisely as possible. The DM has great latitude in ruling what occurs in such an instance; the greater the wish, the greater the likelihood that something goes wrong. This spell might simply fail, the effect you desire might only be partly achieved, or you might suffer some unforeseen consequence as a result of how you worded the wish. For example, wishing that a villain were dead might propel you forward in time to a period when that villain is no longer alive, effectively removing you from the game. Similarly, wishing for a legendary magic item or artifact might instantly transport you to the presence of the item's current owner.\n\nThe stress of casting this spell to produce any effect other than duplicating another spell weakens you. After enduring that stress, each time you cast a spell until you finish a long rest, you take 1d10 necrotic damage per level of that spell. This damage can't be reduced or prevented in any way. In addition, your Strength drops to 3, if it isn't 3 or lower already, for 2d4 days. For each of those days that you spend resting and doing nothing more than light activity, your remaining recovery time decreases by 2 days. Finally, there is a 33 percent chance that you are unable to cast Wish ever again if you suffer this stress.",
+				"features": {
+					"basic effects": {
+						"duplicate spells": "any spell of 8th level or lower",
+						"create object": {
+							"max value": "25,000 gp",
+							"max size": "300 feet per dimension",
+							"restrictions": ["non-magical items only"]
+						},
+						"heal creatures": {
+							"max targets": 20,
+							"effects": ["full healing", "greater restoration effects"]
+						},
+						"grant resistance": {
+							"max targets": 10,
+							"effect": "resistance to chosen damage type"
+						},
+						"grant spell immunity": {
+							"max targets": 10,
+							"duration": "8 hours"
+						},
+						"undo event": {
+							"timeframe": "last round",
+							"options": [
+								"force reroll",
+								"add advantage/disadvantage",
+								"choose result"
+							]
+						}
+					},
+					"stress effects": {
+						"spell damage": "1d10 necrotic damage per spell level",
+						"strength reduction": {
+							"value": 3,
+							"duration": "2d4 days",
+							"recovery": "2 days per rest day"
+						},
+						"loss chance": "33 percent"
+					}
+				},
+				"classes": ["Sorcerer", "Wizard"],
+				"subclasses": ["Arcana Domain", "The Genie"]
+			}
 		]
 	}
 ]
