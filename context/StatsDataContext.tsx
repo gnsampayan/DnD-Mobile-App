@@ -324,6 +324,8 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     useEffect(() => {
         switch (statsData.class?.toLowerCase()) {
             case 'artificer':
+                setUnusedSkillPoints(2);
+                break;
             case 'barbarian':
                 setUnusedSkillPoints(2);
                 break;
@@ -331,6 +333,9 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 setUnusedSkillPoints(3);
                 break;
             case 'cleric':
+                setUnusedSkillPoints(2);
+                break;
+            case 'druid':
                 setUnusedSkillPoints(2);
                 break;
             default:

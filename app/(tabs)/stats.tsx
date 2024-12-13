@@ -19,6 +19,7 @@ import artificerTable from '../data/class-tables/artificer/artificerTable.json';
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
 import bardTable from '../data/class-tables/bard/bardTable.json';
 import clericTable from '../data/class-tables/cleric/clericTable.json';
+import druidTable from '../data/class-tables/druid/druidTable.json';
 import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
 
 interface CharacterStatsScreenProps {
@@ -176,6 +177,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     break;
                 case 'cleric':
                     classLevels = clericTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'druid':
+                    classLevels = druidTable.filter(l => l.userLevel <= level);
                     break;
                 default:
                     // For other classes, use default calculation
@@ -555,9 +559,11 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
         // Define allowed skills per class
         const allowedSkillsByClass: { [key: string]: string[] } = {
-            barbarian: ['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
             artificer: ['arcana', 'history', 'investigation', 'medicine', 'nature', 'perception', 'sleight of hand'],
+            barbarian: ['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
+            // bard has no restrictions
             cleric: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
+            druid: ['arcana', 'animal handling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival']
         };
 
         // Check if skill is allowed for current class

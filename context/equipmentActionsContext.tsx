@@ -72,6 +72,8 @@ export interface CharacterContextProps {
     setArcaneMasteryEnabled: (value: boolean) => void;
     arcaneMasterySpellsLearned: string[];
     setArcaneMasterySpellsLearned: (value: string[]) => void;
+    wildShapeEnabled: boolean;
+    setWildShapeEnabled: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -114,7 +116,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [channelDivinityEnabled, setChannelDivinityEnabled] = useState<boolean>(false);
     const [arcaneMasteryEnabled, setArcaneMasteryEnabled] = useState<boolean>(false);
     const [arcaneMasterySpellsLearned, setArcaneMasterySpellsLearned] = useState<string[]>([]);
-    const [previousClass, setPreviousClass] = useState<string | null>(null);
+    const [wildShapeEnabled, setWildShapeEnabled] = useState<boolean>(false);
+
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
     const LUCKY_POINTS_STORAGE_KEY = '@lucky_points';
@@ -142,8 +145,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const CHANNEL_DIVINITY_ENABLED_STORAGE_KEY = '@channel_divinity_enabled';
     const ARCANE_MASTERY_ENABLED_STORAGE_KEY = '@arcane_mastery_enabled';
     const ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY = '@arcane_mastery_spells_learned';
-    const PREVIOUS_CLASS_STORAGE_KEY = '@previous_class';
-
+    const WILD_SHAPE_ENABLED_STORAGE_KEY = '@wild_shape_enabled';
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
@@ -269,10 +271,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                         parser: JSON.parse
                     },
                     {
-                        key: PREVIOUS_CLASS_STORAGE_KEY,
-                        setter: setPreviousClass,
-                        parser: (val: string) => val || null
-                    }
+                        key: WILD_SHAPE_ENABLED_STORAGE_KEY,
+                        setter: setWildShapeEnabled,
+                        parser: (val: string) => val === 'true'
+                    },
                 ];
 
                 await Promise.all(
@@ -818,6 +820,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setArcaneMasteryEnabled,
                 arcaneMasterySpellsLearned,
                 setArcaneMasterySpellsLearned,
+                wildShapeEnabled,
+                setWildShapeEnabled,
             }}
         >
             {children}

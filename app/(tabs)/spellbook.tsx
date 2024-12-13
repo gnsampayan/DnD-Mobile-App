@@ -96,14 +96,14 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useActions } from '../../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../../context/cantripSlotsContext';
 
-// Wizard spell level data
+// Classes spell level data
 import wizardTableData from '@/app/data/class-tables/wizardTable.json';
 import warlockTableData from '@/app/data/class-tables/warlockTable.json';
 import sorcererTableData from '@/app/data/class-tables/sorcererTable.json';
 import artificerTableData from '@/app/data/class-tables/artificer/artificerTable.json';
 import bardTableData from '@/app/data/class-tables/bard/bardTable.json';
 import clericTableData from '@/app/data/class-tables/cleric/clericTable.json';
-import druidTableData from '@/app/data/class-tables/druidTable.json';
+import druidTableData from '@/app/data/class-tables/druid/druidTable.json';
 import rangerTableData from '@/app/data/class-tables/rangerTable.json';
 import paladinTableData from '@/app/data/class-tables/paladinTable.json';
 

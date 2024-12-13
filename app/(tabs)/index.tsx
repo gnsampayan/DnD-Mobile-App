@@ -47,14 +47,14 @@ import { CantripSlotsContext } from '../../context/cantripSlotsContext';
 import armorTypes from '../data/armorTypes.json';
 import artificerFeaturesData from '../data/class-tables/artificer/artificerFeatures.json';
 
-// Draconic Ancestry images
+// Custom Actions Images
 import draconicAncestryImage from '@actions/draconic-ancestry-image.png';
-
-// Magical Tinkering image
+import hellishRebukeImage from '@actions/hellish-rebuke-image.png';
+import darknessImage from '@actions/darkness-image.png';
 import magicalTinkeringImage from '@actions/magical-tinkering-image.png';
-// Infuse Item image
 import infuseItemImage from '@actions/infuse-item-image.png';
 import artificerInfusionsData from '../data/class-tables/artificer/artificerInfusions.json';
+
 
 // Barbarian
 import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
@@ -69,6 +69,9 @@ import countercharmImage from '@actions/countercharm-image.png';
 // Cleric
 import channelDivinityImage from '@actions/channel-divinity-image.png';
 import channelDivinityData from '../data/class-tables/cleric/channelDivinity.json';
+
+// Druid
+import wildShapeImage from '@actions/wild-shape-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -342,6 +345,7 @@ export default function ActionsScreen() {
     fontOfInspirationEnabled,
     countercharmEnabled,
     channelDivinityEnabled,
+    wildShapeEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -362,6 +366,7 @@ export default function ActionsScreen() {
     fontOfInspirationEnabled: boolean;
     countercharmEnabled: boolean;
     channelDivinityEnabled: boolean;
+    wildShapeEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -402,6 +407,7 @@ export default function ActionsScreen() {
   const [knownChannelDivinityOpen, setKnownChannelDivinityOpen] = useState<boolean>(false);
   const [turnsDone, setTurnsDone] = useState(0);
   const [currentChannelDivinityPoints, setCurrentChannelDivinityPoints] = useState<number>(0);
+  const [currentWildShapeUses, setCurrentWildShapeUses] = useState<number>(2);
 
   // Initialize currentChannelDivinityPoints based on level
   useEffect(() => {
@@ -1140,40 +1146,42 @@ export default function ActionsScreen() {
           affordable = affordable && !hellishRebukeSpent;
         }
       }
-
       // Check for breath weapon
       if (breathWeaponEnabled && item.name.toLowerCase() === 'breath weapon') {
         affordable = affordable && !breathWeaponSpent;
       }
-
       // Check for infuse item
       if (infuseItemEnabled && item.name.toLowerCase() === 'infuse item') {
         affordable = affordable && !infuseItemSpent;
       }
-
       // Check for rage
       if (statsData.class?.toLowerCase() === 'barbarian' && item.name.toLowerCase() === 'rage') {
         affordable = affordable && currentRages > 0;
       }
-
       // Check for consult the spirits spent
       if (subclass?.toLowerCase() === 'ancestral guardian' && item.name.toLowerCase() === 'consult the spirits') {
         affordable = affordable && !consultTheSpiritsSpent;
       }
-
       // Check for extra attack, if not spent, make attack action free and affordable
       if (item.name.toLowerCase() === 'attack' && !extraAttackSpent) {
         affordable = true;
       }
-
       // Check for bardic inspiration
       if (statsData.class?.toLowerCase() === 'bard' && item.name.toLowerCase() === 'bardic inspiration') {
         affordable = affordable && currentBardicInspirationPoints > 0;
       }
-
       // Check for channel divinity
       if (statsData.class?.toLowerCase() === 'cleric' && item.name.toLowerCase() === 'channel divinity') {
         affordable = affordable && currentChannelDivinityPoints > 0;
+      }
+      // Check for wild shape
+      if (statsData.class?.toLowerCase() === 'druid' && item.name.toLowerCase() === 'wild shape') {
+        // At level 20, druids have unlimited wild shapes
+        if (statsData.level === 20) {
+          affordable = affordable;
+        } else {
+          affordable = affordable && currentWildShapeUses > 0;
+        }
       }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
@@ -1444,9 +1452,6 @@ export default function ActionsScreen() {
           .flatMap(levelData => {
             // Handle both spell objects and strings in the spells array
             return levelData.spells.map(spell => {
-              if (typeof spell === 'string') {
-                return { name: spell };
-              }
               return spell;
             });
           })
@@ -1458,6 +1463,7 @@ export default function ActionsScreen() {
             id: 'race-spell-hellish-rebuke',
             name: 'Hellish Rebuke',
             cost: parseCastingTime(spell.castingTime),
+            image: hellishRebukeImage as ImageSourcePropType,
             details: spell.description || '',
             type: 'spell',
             source: 'race',
@@ -1473,9 +1479,6 @@ export default function ActionsScreen() {
           .flatMap(levelData => {
             // Handle both spell objects and strings in the spells array
             return levelData.spells.map(spell => {
-              if (typeof spell === 'string') {
-                return { name: spell };
-              }
               return spell;
             });
           })
@@ -1487,6 +1490,7 @@ export default function ActionsScreen() {
             id: 'race-spell-darkness',
             name: 'Darkness',
             cost: parseCastingTime(spell.castingTime),
+            image: darknessImage as ImageSourcePropType,
             details: spell.description || '',
             type: 'spell',
             source: 'race',
@@ -1631,6 +1635,22 @@ export default function ActionsScreen() {
           cost: { actions: 1, bonus: 0 },
           details: 'Channel divine energy directly from your deity to fuel magical effects.',
           image: channelDivinityImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+    }
+
+    // Druid
+    if (statsData.class?.toLowerCase() === 'druid') {
+      if (wildShapeEnabled === true) {
+        // Add 'Wild Shape' action
+        classActions.push({
+          id: 'class-wild-shape',
+          name: 'Wild Shape',
+          cost: { actions: 1, bonus: 0 },
+          details: 'Magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest.',
+          image: wildShapeImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2166,7 +2186,7 @@ export default function ActionsScreen() {
           {statsData.class?.toLowerCase() === 'cleric' && channelDivinityEnabled && (
             <View style={styles.headerTextContainer}>
               <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center' }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                 onPress={() => {
                   Alert.alert('Channel Divinity', 'You can use your Channel Divinity to perform powerful abilities.');
                 }}>
@@ -2177,6 +2197,27 @@ export default function ActionsScreen() {
                     currentChannelDivinityPoints === 0 && { color: 'black' }
                   ]}>
                     x{currentChannelDivinityPoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Show if user class is druid */}
+          {statsData.class?.toLowerCase() === 'druid' && wildShapeEnabled && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                onPress={() => {
+                  Alert.alert('Wild Shape', 'You can cast many of your druid spells in any shape you assume using Wild Shape.');
+                }}>
+                <MaterialCommunityIcons name="paw" size={20} color="white" />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    statsData.level === 20 ? { color: 'white' } : (currentWildShapeUses === 0 && { color: 'black' })
+                  ]}>
+                    {statsData.level === 20 ? '∞' : `x${currentWildShapeUses}`}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -2566,7 +2607,7 @@ export default function ActionsScreen() {
                               <Ionicons name="triangle" size={16} color="#FF8C00" />
                             </View>
                           )}
-                          {selectedAction.cost.reaction !== undefined && (
+                          {selectedAction.cost.reaction !== undefined && selectedAction.cost.reaction > 0 && (
                             <View style={styles.costTextContainer}>
                               <Text>{selectedAction.cost.reaction}</Text>
                               <Ionicons name="square" size={16} color="rgb(200, 0, 255)" />
@@ -3066,6 +3107,9 @@ export default function ActionsScreen() {
                             if (statsData.class?.toLowerCase() === 'cleric') {
                               resetChannelDivinityPoints();
                             }
+                            if (statsData.class?.toLowerCase() === 'druid') {
+                              setCurrentWildShapeUses(2);
+                            }
                             // add more conditions here
                           }}>
                           <MaterialCommunityIcons name="sleep" size={16} color="black" />
@@ -3159,6 +3203,9 @@ export default function ActionsScreen() {
                               if (statsData.class?.toLowerCase() === 'cleric') {
                                 resetChannelDivinityPoints();
                               }
+                              if (statsData.class?.toLowerCase() === 'druid') {
+                                setCurrentWildShapeUses(2);
+                              }
                               // add more conditions here
                               break;
                             // end of rest case -- visual guide
@@ -3166,36 +3213,32 @@ export default function ActionsScreen() {
                             case 'hellish rebuke':
                               setHellishRebukeSpent(true);
                               break;
-
                             case 'darkness':
                               setDarknessSpent(true);
                               break;
-
                             case 'breath weapon':
                               setBreathWeaponSpent(true);
                               break;
-
                             case 'infuse item':
                               setInfuseItemSpent(true);
                               setKnownInfusionValue('');
                               break;
-
                             case 'rage':
                               if (currentRages > 0) {
                                 setCurrentRages(prev => Math.max(0, prev - 1));
                               }
                               break;
-
                             case 'consult the spirits':
                               setConsultTheSpiritsSpent(true);
                               break;
-
                             case 'bardic inspiration':
                               setCurrentBardicInspirationPoints(prev => Math.max(0, prev - 1));
                               break;
-
                             case 'channel divinity':
                               setCurrentChannelDivinityPoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'wild shape':
+                              setCurrentWildShapeUses(prev => Math.max(0, prev - 1));
                               break;
 
                           }

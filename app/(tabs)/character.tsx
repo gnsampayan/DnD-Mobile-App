@@ -68,6 +68,8 @@ import twilightData from '../data/class-tables/cleric/subclass/twilight.json';
 import warData from '../data/class-tables/cleric/subclass/war.json';
 import cantripsData from '../data/cantrips.json';
 import spellsData from '../data/spells.json';
+import druidFeatures from '../data/class-tables/druid/druidFeatures.json';
+
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -217,6 +219,7 @@ const classFeaturesMap: { [key: string]: any } = {
     barbarian: barbarianFeatures,
     bard: bardFeatures,
     cleric: clericFeatures,
+    druid: druidFeatures,
 }
 
 // TODO: make max infusions learned a variable
@@ -299,6 +302,8 @@ export default function MeScreen() {
         arcaneMasteryEnabled,
         setArcaneMasteryEnabled,
         setArcaneMasterySpellsLearned,
+        wildShapeEnabled,
+        setWildShapeEnabled,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -1056,7 +1061,8 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
                                     (feature.name.toLowerCase() === 'divine domain' && (!subclass || !arcaneInitiateEnabled ||
                                         (!arcaneMasteryEnabled && statsData.level >= 17))) ||
-                                    (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled)
+                                    (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
+                                    (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled)
 
                                     // add more here
                                 ) && (
@@ -1663,6 +1669,30 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            // Druid
+            case "wild shape":
+                if (!wildShapeEnabled) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: wildShapeEnabled ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="paw" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={wildShapeEnabled}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1800,6 +1830,12 @@ export default function MeScreen() {
                 break;
             case "channel divinity":
                 setChannelDivinityEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            // Druid
+            case "wild shape":
+                setWildShapeEnabled(true);
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
                 break;
