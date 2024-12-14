@@ -73,6 +73,7 @@ import forgeDivineStrikeImage from '@actions/forge-divine-strike-image.png';
 import eyesOfTheGraveImage from '@actions/eyes-of-the-grave-image.png';
 import sentinelAtDeathsDoorImage from '@actions/sentinel-at-deaths-door-image.png';
 import keeperOfSoulsImage from '@actions/keeper-of-souls-image.png';
+import lifeDivineStrikeImage from '@actions/life-divine-strike-image.png';
 
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
@@ -1508,6 +1509,7 @@ export default function ActionsScreen() {
           source: 'class',
         } as ActionBlock);
       }
+      // Grave Domain
       if (subclass?.toLowerCase() === 'grave') {
         // Add 'Eyes of the Grave' action
         classActions.push({
@@ -1540,6 +1542,19 @@ export default function ActionsScreen() {
           cost: { actions: 1, bonus: 0 },
           details: 'As an action, you can seize a trace of vitality from a parting soul and use it to heal the living. When an enemy you can see dies within 30 feet of you, you or one ally of your choice that is within 30 feet of you regains hit points equal to the enemy\'s number of Hit Dice. You can use this feature only if you aren\'t incapacitated. Once you use it, you can\'t do so again until the start of your next turn.',
           image: keeperOfSoulsImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      // Life Domain
+      if (subclass?.toLowerCase() === 'life' && statsData.level >= 8) {
+        // Add 'Life Domain' action
+        classActions.push({
+          id: 'class-divine-strike',
+          name: 'Divine Strike',
+          cost: { actions: 0, bonus: 0 },
+          details: 'Optional: On hit, add 1d8 radiant damage to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
+          image: lifeDivineStrikeImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2450,7 +2465,9 @@ export default function ActionsScreen() {
               }
               if (
                 statsData.class?.toLowerCase() === 'cleric' &&
-                (subclass?.toLowerCase() === 'death' || subclass?.toLowerCase() === 'forge') &&
+                (subclass?.toLowerCase() === 'death' ||
+                  subclass?.toLowerCase() === 'forge' ||
+                  subclass?.toLowerCase() === 'life') &&
                 statsData.level >= 8
               ) {
                 setDevineStrikeUsed(false);
