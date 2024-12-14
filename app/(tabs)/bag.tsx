@@ -1368,9 +1368,9 @@ export default function BagScreen() {
         <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Actions</Text>
+              <Text style={styles.modalTitle}>Reset Items</Text>
               <Text style={styles.modalText}>
-                Are you sure? This will delete all custom actions. This cannot be undone.
+                Are you sure? This will delete all items. This cannot be undone.
               </Text>
               <View style={styles.modalButtons}>
                 <TouchableOpacity

@@ -425,33 +425,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         });
     };
 
-    // Function to reset XP and level
-    const resetXpAndLevel = () => {
-        // Reset XP and level
-        const resetXp = 0;
-        const resetLevel = 1;
-
-        // Reset abilities to base values
-        const resetAbilities = abilities.map((ability) => ({
-            ...ability,
-            value: 8,
-        }));
-
-
-        // Reset allocations
-        const resetAllocations: AllocationHistory = { 1: {} };
-
-        // Update statsData without resetting hitDice
-        updateStatsData({
-            xp: resetXp,
-            level: resetLevel,
-            abilities: resetAbilities,
-            allocationsPerLevel: resetAllocations,
-            hpIncreases: {},
-            hitDice: statsData.hitDice,
-            proficiencyBonus: 2,
-        });
-    };
 
     // Function to open Ability Modal
     const openAbilityModal = (ability: Ability) => {
@@ -692,34 +665,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         </ImageBackground>
                     </TouchableOpacity>
 
-                    {/* Reset XP */}
-                    <TouchableOpacity
-                        style={styles.modalResetButton}
-                        onPress={() => {
-                            Alert.alert(
-                                'Reset XP',
-                                'Are you sure you want to reset your XP to 0?',
-                                [
-                                    {
-                                        text: 'Cancel',
-                                        style: 'cancel',
-                                    },
-                                    {
-                                        text: 'Reset',
-                                        style: 'destructive',
-                                        onPress: () => resetXpAndLevel(),
-                                    },
-                                ]
-                            );
-                        }}
-                    >
-                        <Ionicons
-                            name="warning"
-                            size={24}
-                            color="red"
-                            style={[styles.headerIcon, { color: 'white' }]}
-                        />
-                    </TouchableOpacity>
                 </View>
             </View>
 

@@ -37,11 +37,10 @@ import defaultPushImage from '@actions/default-push-image.png';
 import defaultJumpImage from '@actions/default-jump-image.png';
 import defaultHideImage from '@actions/default-hide-image.png';
 import defaultSprintImage from '@actions/default-sprint-image.png';
-import addActionImage from '@actions/add-action-image.png';
 import endActionImage from '@actions/end-action-image-v3.png';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { Item, useItemEquipment } from '../../context/ItemEquipmentContext';
+import { useItemEquipment } from '../../context/ItemEquipmentContext';
 import { useActions } from '../../context/actionsSpellsContext';
 import { CantripSlotsContext } from '../../context/cantripSlotsContext';
 import armorTypes from '../data/armorTypes.json';
@@ -71,6 +70,9 @@ import channelDivinityImage from '@actions/channel-divinity-image.png';
 import channelDivinityData from '../data/class-tables/cleric/channelDivinity.json';
 import deathDivineStrikeImage from '@actions/death-divine-strike-image.png';
 import forgeDivineStrikeImage from '@actions/forge-divine-strike-image.png';
+import eyesOfTheGraveImage from '@actions/eyes-of-the-grave-image.png';
+import sentinelAtDeathsDoorImage from '@actions/sentinel-at-deaths-door-image.png';
+import keeperOfSoulsImage from '@actions/keeper-of-souls-image.png';
 
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
@@ -122,7 +124,6 @@ import trueStrikeImage from '@images/cantrips/true-strike.png';
 import viciousMockeryImage from '@images/cantrips/vicious-mockery.png';
 import wordOfRadianceImage from '@images/cantrips/word-of-radiance.png';
 
-const addActionImageTyped: ImageSourcePropType = addActionImage as ImageSourcePropType;
 const endActionImageTyped: ImageSourcePropType = endActionImage as ImageSourcePropType;
 
 
@@ -267,12 +268,8 @@ const isUnarmedStrikeProficient = false;
 export default function ActionsScreen() {
   const [numColumns, setNumColumns] = useState(4);
   const [actions, setActions] = useState<ActionBlock[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newActionName, setNewActionName] = useState('');
-  const [resetModalVisible, setResetModalVisible] = useState(false);
   const [actionModalVisible, setActionModalVisible] = useState(false);
   const [selectedAction, setSelectedAction] = useState<ActionBlock | null>(null);
-  const [newActionImage, setNewActionImage] = useState<string | undefined>(undefined); // State for the new action image
   const [newActionDetails, setNewActionDetails] = useState<string>(''); // State for the new action details
   const [editedActionName, setEditedActionName] = useState<string>(''); // State for the edited action name
   const [editingField, setEditingField] = useState<'title' | 'details' | null>(null); // Track which field is being edited
@@ -283,7 +280,6 @@ export default function ActionsScreen() {
   const [ac, setAc] = useState(10);
   const [tempAc, setTempAc] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
   const [currentConModifier, setCurrentConModifier] = useState<number>(0);
   const [movementSpeed, setMovementSpeed] = useState<number>(30);
   const {
@@ -412,6 +408,19 @@ export default function ActionsScreen() {
   const [currentChannelDivinityPoints, setCurrentChannelDivinityPoints] = useState<number>(0);
   const [currentWildShapeUses, setCurrentWildShapeUses] = useState<number>(2);
   const [devineStrikeUsed, setDevineStrikeUsed] = useState<boolean>(false);
+  const [eyesOfTheGravePoints, setEyesOfTheGravePoints] = useState<number>(0);
+  const [sentinelAtDeathsDoorPoints, setSentinelAtDeathsDoorPoints] = useState<number>(0);
+  const [keeperOfSoulsUsed, setKeeperOfSoulsUsed] = useState<boolean>(false);
+
+
+
+  useEffect(() => {
+    const wisdomModifier = calculateModifier(statsData.abilities.find(ability => ability.name.toLowerCase() === 'wisdom')?.value || 10);
+    // Initialize eyesOfTheGravePoints based on Wisdom modifier (minimum of 1)
+    setEyesOfTheGravePoints(Math.max(1, wisdomModifier));
+    // Initialize sentinelAtDeathsDoorPoints based on Wisdom modifier (minimum of 1)
+    setSentinelAtDeathsDoorPoints(Math.max(1, wisdomModifier));
+  }, [statsData.abilities]);
 
   // Initialize currentChannelDivinityPoints based on level
   useEffect(() => {
@@ -581,6 +590,7 @@ export default function ActionsScreen() {
     bardicInspirationEnabled,
     countercharmEnabled,
     channelDivinityEnabled,
+    subclass
     // Add other dependencies as needed for new actions gained from class features
   ]);
 
@@ -799,80 +809,6 @@ export default function ActionsScreen() {
     setNumColumns((prevColumns) => (prevColumns % 3) + 2);
   };
 
-  const addAction = () => {
-    if (newActionName) {
-      // Generate new id based on maximum existing id
-      const existingIds = actions.map((action) => Number(action.id));
-      const maxId = existingIds.length > 0 ? Math.max(...existingIds) : -1;
-      const newId = String(maxId + 1);
-
-      const newAction: ActionBlock = {
-        id: newId,
-        name: newActionName,
-        details: newActionDetails,
-        image: newActionImage,
-        cost: {
-          actions: newActionCost.actions,
-          bonus: newActionCost.bonus,
-        },
-      };
-
-      const updatedActions = [...actions, newAction];
-      setActions(updatedActions);
-      saveActions(updatedActions);
-      setNewActionName('');
-      setNewActionDetails('');
-      setNewActionImage(undefined);
-      setNewActionCost({ actions: 0, bonus: 0 }); // Reset cost after adding
-      setModalVisible(false);
-    } else {
-      Alert.alert('Error', 'Please enter the name of the action.');
-    }
-  };
-
-
-
-  const deleteAction = (actionId: string) => {
-    // Check if the action is a default action
-    const actionToDelete = actions.find((action) => action.id === actionId);
-    if (actionToDelete && defaultActions.find((action) => action.id === actionId)) {
-      Alert.alert('Cannot Delete', 'Default actions cannot be deleted.');
-      return;
-    }
-
-    // Delete associated image file if it exists
-    if (actionToDelete && actionToDelete.image) {
-      FileSystem.deleteAsync(actionToDelete.image as string, { idempotent: true }).catch(error => {
-        console.error('Failed to delete image file:', error);
-      });
-    }
-
-    const updatedActions = actions.filter((action) => action.id !== actionId);
-    setActions(updatedActions);
-    saveActions(updatedActions);
-  };
-
-  const handleLongPress = (actionId: string) => {
-    if (actionId.startsWith('cantrip')) {
-      Alert.alert('Information', 'Cantrips cannot be deleted.');
-      return;
-    }
-    // Check if the action is a default action
-    if (defaultActions.find((action) => action.id === actionId)) {
-      Alert.alert('Information', 'Default actions cannot be deleted.');
-      return;
-    }
-
-    Alert.alert('Delete Action', 'Are you sure you want to delete this action?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => deleteAction(actionId),
-      },
-    ]);
-  };
-
 
   // Function to reset custom actions
   const resetActions = async () => {
@@ -892,60 +828,11 @@ export default function ActionsScreen() {
       // Reset actions to default
       setActions(defaultActions);
       saveActions(defaultActions);
-      setResetModalVisible(false);
     } catch (error) {
       console.error('Failed to reset actions:', error);
     }
   };
 
-  const pickImage = async (forNewAction: boolean = false) => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need permission to access your media library.');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-
-    if (!result.canceled) {
-      const imageUri = result.assets[0].uri;
-      const fileName = imageUri.split('/').pop();
-      const newPath = `${FileSystem.documentDirectory}${fileName}`;
-
-      try {
-        await FileSystem.copyAsync({ from: imageUri, to: newPath });
-      } catch (error) {
-        console.error('Failed to copy image:', error);
-      }
-
-      if (forNewAction) {
-        setNewActionImage(newPath);
-      } else {
-        if (selectedAction) {
-          const updatedActions = actions.map(action => {
-            if (action.id === selectedAction.id) {
-              // Delete previous image if it exists
-              if (action.image) {
-                FileSystem.deleteAsync(action.image as string, { idempotent: true }).catch(error => {
-                  console.error('Failed to delete old image:', error);
-                });
-              }
-              return { ...action, image: newPath };
-            }
-            return action;
-          });
-          setActions(updatedActions);
-          saveActions(updatedActions);
-          setSelectedAction(prev => (prev ? { ...prev, image: newPath } : null));
-        }
-      }
-    }
-  };
 
   const handleTitleLongPress = () => {
     if (selectedAction) {
@@ -1039,54 +926,6 @@ export default function ActionsScreen() {
     }
   };
 
-  const handleImageLongPress = () => {
-    if (selectedAction) {
-      if (isDefaultAction(selectedAction.id) || ('type' in selectedAction && selectedAction.type === 'cantrip')) {
-        Alert.alert('Information', 'You cannot edit the image of built-in actions');
-        return;
-      }
-
-      Alert.alert(
-        'Image Options',
-        selectedAction.image ? 'What would you like to do with the image?' : 'You can add an image.',
-        [
-          ...(selectedAction.image
-            ? [
-              {
-                text: 'Remove Image',
-                onPress: () => {
-                  // Delete the image file
-                  if (selectedAction.image) {
-                    FileSystem.deleteAsync(selectedAction.image as string, { idempotent: true }).catch(error => {
-                      console.error('Failed to delete image file:', error);
-                    });
-                  }
-                  const updatedActions = actions.map(action => {
-                    if (action.id === selectedAction.id) {
-                      return { ...action, image: undefined }; // Set image to undefined
-                    }
-                    return action;
-                  });
-                  setActions(updatedActions); // Update actions state
-                  saveActions(updatedActions); // Save the updated actions
-                  setSelectedAction({ ...selectedAction, image: undefined }); // Update selected action
-                },
-              },
-            ]
-            : []), // Only include if there is an image
-          {
-            text: selectedAction.image ? 'Replace Image' : 'Add Image',
-            onPress: () => pickImage(false), // Call pickImage for existing action
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ],
-        { cancelable: true }
-      );
-    }
-  };
 
   // Commit Action Function
   const commitAction = () => {
@@ -1182,6 +1021,18 @@ export default function ActionsScreen() {
       if (item.name.toLowerCase() === 'divine strike') {
         affordable = affordable && !devineStrikeUsed;
       }
+      // Check for eyes of the grave
+      if (item.name.toLowerCase() === 'eyes of the grave') {
+        affordable = affordable && eyesOfTheGravePoints > 0;
+      }
+      // Check for sentinel at deaths door
+      if (item.name.toLowerCase() === 'sentinel at deaths door') {
+        affordable = affordable && sentinelAtDeathsDoorPoints > 0;
+      }
+      // Check for keeper of souls
+      if (item.name.toLowerCase() === 'keeper of souls') {
+        affordable = affordable && keeperOfSoulsUsed === false;
+      }
       // Check for wild shape
       if (statsData.class?.toLowerCase() === 'druid' && item.name.toLowerCase() === 'wild shape') {
         // At level 20, druids have unlimited wild shapes
@@ -1227,7 +1078,6 @@ export default function ActionsScreen() {
               setSelectedAction(item);
               setActionModalVisible(true);
             }}
-            onLongPress={() => handleLongPress(item.id)}
             disabled={!isInfernalSpell && (!affordable || (isRangedAttack && !rangedHandWeaponEquipped) || (isOffhandAttack && !offHandWeaponEquipped))}
           >
             {!item.image && (
@@ -1235,22 +1085,6 @@ export default function ActionsScreen() {
                 <Text style={styles.itemText}>{item.name}</Text>
               </View>
             )}
-          </TouchableOpacity>
-        </ImageBackground>
-      );
-    } else {
-      // Render the plus icon as a button
-      return (
-        <ImageBackground
-          source={addActionImageTyped}
-          style={[styles.addItemContainer, { width: itemWidth }]}
-          imageStyle={{ borderRadius: 8 }}
-        >
-          <TouchableOpacity
-            style={styles.addItemButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Ionicons name="add" size={48} color="white" />
           </TouchableOpacity>
         </ImageBackground>
       );
@@ -1670,6 +1504,42 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 0 },
           details: 'Optional: On hit, add 1d8 fire damage to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
           image: forgeDivineStrikeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'grave') {
+        // Add 'Eyes of the Grave' action
+        classActions.push({
+          id: 'class-eyes-of-the-grave',
+          name: 'Eyes of the Grave',
+          cost: { actions: 1, bonus: 0 },
+          details: 'Detect any undead within 60 feet. Recharges on long rest.\n\n(see Divine Domain feat for details)',
+          image: eyesOfTheGraveImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'grave' && statsData.level >= 6) {
+        // Add 'Sentinel at Deaths Door' action
+        classActions.push({
+          id: 'class-sentinel-at-deaths-door',
+          name: 'Sentinel at Deaths Door',
+          cost: { actions: 0, bonus: 0, reaction: 1 },
+          details: 'As a reaction, when you or an ally you can see within 30 feet of you suffers a critical hit, you can turn that attack into a normal hit.\n\n(see Divine Domain feat for details)',
+          image: sentinelAtDeathsDoorImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'grave' && statsData.level >= 17) {
+        // Add 'Keeper of Souls' action
+        classActions.push({
+          id: 'class-keeper-of-souls',
+          name: 'Keeper of Souls',
+          cost: { actions: 1, bonus: 0 },
+          details: 'As an action, you can seize a trace of vitality from a parting soul and use it to heal the living. When an enemy you can see dies within 30 feet of you, you or one ally of your choice that is within 30 feet of you regains hit points equal to the enemy\'s number of Hit Dice. You can use this feature only if you aren\'t incapacitated. Once you use it, you can\'t do so again until the start of your next turn.',
+          image: keeperOfSoulsImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2238,6 +2108,48 @@ export default function ActionsScreen() {
             </View>
           )}
 
+          {/* Show if user class is cleric and subclass is grave */}
+          {statsData.class?.toLowerCase() === 'cleric' && subclass?.toLowerCase() === 'grave' && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                onPress={() => {
+                  Alert.alert('Eyes of the Grave', 'Detect any undead within 60 feet. Recharges on long rest.\n\n(see Divine Domain feat for details)');
+                }}>
+                <MaterialCommunityIcons name="grave-stone" size={20} color="white" style={{ opacity: eyesOfTheGravePoints === 0 ? 0.2 : 1 }} />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    eyesOfTheGravePoints === 0 && { color: 'black' }
+                  ]}>
+                    x{eyesOfTheGravePoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Show if user class is cleric and subclass is grave and level >= 6 */}
+          {statsData.class?.toLowerCase() === 'cleric' && subclass?.toLowerCase() === 'grave' && statsData.level >= 6 && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                onPress={() => {
+                  Alert.alert('Sentinel at Deaths Door', 'As a reaction, when you or an ally you can see within 30 feet of you suffers a critical hit, you can turn that attack into a normal hit.\n\n(see Divine Domain feat for details)');
+                }}>
+                <MaterialCommunityIcons name="shield-cross" size={20} color="white" style={{ opacity: sentinelAtDeathsDoorPoints === 0 ? 0.2 : 1 }} />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    sentinelAtDeathsDoorPoints === 0 && { color: 'black' }
+                  ]}>
+                    x{sentinelAtDeathsDoorPoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Show if user class is druid */}
           {statsData.class?.toLowerCase() === 'druid' && wildShapeEnabled && (
             <View style={styles.headerTextContainer}>
@@ -2271,14 +2183,6 @@ export default function ActionsScreen() {
               size={24}
               color="black"
               style={styles.headerIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setResetModalVisible(true)}>
-            <Ionicons
-              name="warning"
-              size={24}
-              color="red"
-              style={[styles.headerIcon, { color: 'white' }]}
             />
           </TouchableOpacity>
         </View>
@@ -2485,8 +2389,8 @@ export default function ActionsScreen() {
       <FlatList
         // data={dataWithAddButton}
         data={[...combinedActions, null]}
-        renderItem={renderActionBlocks}
-        keyExtractor={(item: ActionBlock | null) => (item ? item.id : 'add-button')}
+        renderItem={({ item }) => renderActionBlocks({ item }) as React.ReactElement}
+        keyExtractor={(item: DefaultActionBlock | null) => (item ? item.id : 'add-button')}
         key={numColumns} // Important for resetting the layout
         numColumns={numColumns}
         contentContainerStyle={styles.grid}
@@ -2551,6 +2455,9 @@ export default function ActionsScreen() {
               ) {
                 setDevineStrikeUsed(false);
               }
+              if (subclass?.toLowerCase() === 'grave' && statsData.level >= 17) {
+                setKeeperOfSoulsUsed(false);
+              }
               endTurn();
             }}
           >
@@ -2580,7 +2487,7 @@ export default function ActionsScreen() {
                     {/* Image, Title and Cost Section */}
                     <View style={{ flexDirection: 'row', gap: 10 }}>
                       {/* Image Section */}
-                      <TouchableWithoutFeedback onLongPress={handleImageLongPress} style={styles.itemModalImageContainer}>
+                      <TouchableWithoutFeedback style={styles.itemModalImageContainer}>
                         {selectedAction?.image ? (
                           <Image
                             source={getActionImage(selectedAction) as ImageSourcePropType}
@@ -3258,7 +3165,7 @@ export default function ActionsScreen() {
                               }
                               if (statsData.class?.toLowerCase() === 'bard') {
                                 const charismaModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Charisma')?.value || 10);
-                                setCurrentBardicInspirationPoints(charismaModifier);
+                                setCurrentBardicInspirationPoints(Math.max(1, charismaModifier));
                               }
                               if (statsData.class?.toLowerCase() === 'cleric') {
                                 resetChannelDivinityPoints();
@@ -3266,6 +3173,14 @@ export default function ActionsScreen() {
                               if (statsData.class?.toLowerCase() === 'druid') {
                                 setCurrentWildShapeUses(2);
                               }
+                              if (subclass?.toLowerCase() === 'grave') {
+                                const wisdomModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Wisdom')?.value || 10);
+                                setEyesOfTheGravePoints(Math.max(1, wisdomModifier));
+                                if (statsData.level >= 6) {
+                                  setSentinelAtDeathsDoorPoints(Math.max(1, wisdomModifier));
+                                }
+                              }
+                              // add more conditions here
                               // add more conditions here
                               break;
                             // end of rest case -- visual guide
@@ -3303,7 +3218,15 @@ export default function ActionsScreen() {
                             case 'divine strike':
                               setDevineStrikeUsed(true);
                               break;
-
+                            case 'eyes of the grave':
+                              setEyesOfTheGravePoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'sentinel at deaths door':
+                              setSentinelAtDeathsDoorPoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'keeper of souls':
+                              setKeeperOfSoulsUsed(true);
+                              break;
                           }
 
                           // Default commit action
@@ -3353,115 +3276,6 @@ export default function ActionsScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
-
-      {/* Add Action Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Create New Action</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Action Name"
-                  placeholderTextColor="gray"
-                  onChangeText={(text: string) => setNewActionName(text)}
-                  value={newActionName}
-                />
-                <TextInput
-                  style={[styles.modalInput, styles.detailsInput]}
-                  placeholder="Action Details"
-                  placeholderTextColor="gray"
-                  onChangeText={(text: string) => setNewActionDetails(text)}
-                  value={newActionDetails}
-                  multiline={true}
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-
-                {/* Cost Input Fields */}
-                <Text>Cost</Text>
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Actions"
-                  placeholderTextColor="gray"
-                  keyboardType="number-pad"
-                  value={newActionCost.actions.toString()}
-                  onChangeText={(text: string) => setNewActionCost({ ...newActionCost, actions: Number(text) || 0 })}
-                />
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Bonus Actions"
-                  placeholderTextColor="gray"
-                  keyboardType="number-pad"
-                  value={newActionCost.bonus.toString()}
-                  onChangeText={(text: string) => setNewActionCost({ ...newActionCost, bonus: Number(text) || 0 })}
-                />
-
-                <TouchableOpacity style={styles.imagePickerButton} onPress={() => pickImage(true)}>
-                  <Text style={styles.imagePickerButtonText}>Select Image</Text>
-                </TouchableOpacity>
-                {newActionImage && (
-                  <Image
-                    source={{ uri: newActionImage }}
-                    style={styles.selectedImage}
-                  />
-                )}
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity
-                    style={styles.modalButtonAddAction}
-                    onPress={addAction}
-                  >
-                    <Text style={styles.modalButtonText}>Create Action</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
-      {/* Reset Confirmation Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={resetModalVisible}
-      >
-        <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Reset Actions</Text>
-              <Text style={styles.modalText}>
-                Are you sure? This will delete all custom actions. This cannot be undone.
-              </Text>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalButton}
-                  onPress={() => setResetModalVisible(false)}
-                >
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalButtonReset}
-                  onPress={resetActions}
-                >
-                  <Ionicons
-                    name="nuclear"
-                    size={24}
-                    color="red"
-                    style={[styles.headerIcon, { color: 'white' }]}
-                  />
-                  <Text style={styles.modalButtonText}>Reset to Default</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
 
 
       {/* Dark Modal */}

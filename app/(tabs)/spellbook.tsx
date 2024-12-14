@@ -211,7 +211,6 @@ export default function SpellbookScreen() {
     const [openCantripChoice, setOpenCantripChoice] = useState(false);
     const [cantripChoiceValue, setCantripChoiceValue] = useState<string | null>(null);
     const [cantripChoiceDescription, setCantripChoiceDescription] = useState<string | null>(null);
-    const [resetModalVisible, setResetModalVisible] = useState(false);
     const [cantripChoiceImage, setCantripChoiceImage] = useState<ImageSourcePropType | null>(null);
     const [spellModalVisible, setSpellModalVisible] = useState(false);
     const [spellChoiceInputValue, setSpellChoiceInputValue] = useState<string | null>(null);
@@ -284,7 +283,8 @@ export default function SpellbookScreen() {
         statsData.race,
         cantripSlots,
         arcaneInitiateEnabled,
-        deathDomainEnabled
+        deathDomainEnabled,
+        subclass
     ]);
 
     useEffect(() => {
@@ -490,7 +490,8 @@ export default function SpellbookScreen() {
             const savedSlots = await AsyncStorage.getItem(CANTRIP_SLOTS_KEY);
             let totalSlots = (cantripSlots !== null ? cantripSlots : 0) +
                 (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0 ? arcaneInitiateCantrips.length : 0) +
-                (deathDomainEnabled && reaperCantripLearned ? 1 : 0);
+                (deathDomainEnabled && reaperCantripLearned ? 1 : 0) +
+                (subclass === 'grave' ? 1 : 0);
 
             let initialSlots: (string | null)[] = Array(totalSlots).fill(null);
 
@@ -517,6 +518,14 @@ export default function SpellbookScreen() {
                 const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
                 if (nextEmptySlot !== -1) {
                     initialSlots[nextEmptySlot] = reaperCantripLearned;
+                }
+            }
+
+            // Assign Spare the Dying cantrip for Grave domain
+            if (subclass === 'grave' && !initialSlots.includes('Spare the Dying')) {
+                const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
+                if (nextEmptySlot !== -1) {
+                    initialSlots[nextEmptySlot] = 'Spare the Dying';
                 }
             }
 
@@ -989,8 +998,13 @@ export default function SpellbookScreen() {
             cantripsData.filter(cantrip => cantrip.name === reaperCantripLearned) :
             [];
 
+        // Get Spare the Dying cantrip if grave domain
+        const graveCantrip = subclass === 'grave' ?
+            cantripsData.filter(cantrip => cantrip.name === 'Spare the Dying') :
+            [];
+
         // Combine and remove duplicates
-        const combinedCantrips = [...classCantrips, ...arcaneInitiateCantripObjects, ...reaperCantripObject];
+        const combinedCantrips = [...classCantrips, ...arcaneInitiateCantripObjects, ...reaperCantripObject, ...graveCantrip];
         const uniqueCantrips = combinedCantrips.filter((cantrip, index, self) =>
             index === self.findIndex(c => c.name === cantrip.name)
         );
@@ -1421,29 +1435,6 @@ export default function SpellbookScreen() {
         );
     };
 
-    const resetSpellbook = async () => {
-        try {
-            // Reset cantrip slots to an array of nulls
-            const resetCantripSlots = Array(cantripSlots).fill(null).map(() => null);
-            setCantripSlotsData(resetCantripSlots);
-            await AsyncStorage.setItem(CANTRIP_SLOTS_KEY, JSON.stringify(resetCantripSlots));
-            // Get fresh known spell slots amount
-            getAllKnownSpellsSlotsAmount();
-
-            // Reset known spells with updated amount
-            const resetKnownSpells = Array(allKnownSpellsSlots).fill(0).map((_, index) => ({
-                slotIndex: index,
-                spellName: null
-            }));
-            setKnownSpellSlotsData(resetKnownSpells);
-            await AsyncStorage.setItem(KNOWN_SPELL_SLOTS_KEY, JSON.stringify(resetKnownSpells));
-
-            // Close reset confirmation modal
-            setResetModalVisible(false);
-        } catch (error) {
-            console.error('Failed to reset spellbook:', error);
-        }
-    };
 
     const renderSpellSaveDC = () => {
         const classInfo = classData.find(
@@ -2490,18 +2481,6 @@ export default function SpellbookScreen() {
                             </View>
                         </TouchableOpacity>
                     </View>
-
-                    <View style={styles.headerIcons}>
-                        {renderSpellSaveDC()}
-                        <TouchableOpacity onPress={() => setResetModalVisible(true)}>
-                            <Ionicons
-                                name="warning"
-                                size={24}
-                                color="red"
-                                style={[styles.headerIcon, { color: 'white' }]}
-                            />
-                        </TouchableOpacity>
-                    </View>
                 </View>
 
 
@@ -2773,30 +2752,6 @@ export default function SpellbookScreen() {
                     </View>
                 </View>
             </Modal>
-
-
-            {/* Reset Modal */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={resetModalVisible}
-            >
-                <TouchableWithoutFeedback onPress={() => setResetModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <View style={styles.resetModal}>
-                            <Text>Are you sure you want to reset your spellbook?</Text>
-                            <Button
-                                title="Reset"
-                                color="red"
-                                onPress={() => {
-                                    resetSpellbook();
-                                    setResetModalVisible(false);
-                                }} />
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-
 
         </>
     );
