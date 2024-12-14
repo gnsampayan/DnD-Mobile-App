@@ -260,6 +260,8 @@ export default function SpellbookScreen() {
         arcaneInitiateCantrips,
         arcaneMasteryEnabled,
         arcaneMasterySpellsLearned,
+        deathDomainEnabled,
+        reaperCantripLearned
     } = useContext(CharacterContext) as unknown as CharacterContextProps;
 
 
@@ -274,7 +276,16 @@ export default function SpellbookScreen() {
         if (allKnownSpellsSlots !== null) {
             updateSpellSlotsData(allKnownSpellsSlots);
         }
-    }, [isSpellCaster, statsData.level, statsData.abilities, statsData.class, statsData.race, cantripSlots, arcaneInitiateEnabled]);
+    }, [
+        isSpellCaster,
+        statsData.level,
+        statsData.abilities,
+        statsData.class,
+        statsData.race,
+        cantripSlots,
+        arcaneInitiateEnabled,
+        deathDomainEnabled
+    ]);
 
     useEffect(() => {
         getAllKnownSpellsSlotsAmount();
@@ -478,7 +489,8 @@ export default function SpellbookScreen() {
         try {
             const savedSlots = await AsyncStorage.getItem(CANTRIP_SLOTS_KEY);
             let totalSlots = (cantripSlots !== null ? cantripSlots : 0) +
-                (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0 ? arcaneInitiateCantrips.length : 0);
+                (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0 ? arcaneInitiateCantrips.length : 0) +
+                (deathDomainEnabled && reaperCantripLearned ? 1 : 0);
 
             let initialSlots: (string | null)[] = Array(totalSlots).fill(null);
 
@@ -497,6 +509,14 @@ export default function SpellbookScreen() {
                     if (!initialSlots[i]) {
                         initialSlots[i] = arcaneInitiateCantrips[i];
                     }
+                }
+            }
+
+            // Assign Reaper cantrip if enabled
+            if (deathDomainEnabled && reaperCantripLearned && !initialSlots.includes(reaperCantripLearned)) {
+                const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
+                if (nextEmptySlot !== -1) {
+                    initialSlots[nextEmptySlot] = reaperCantripLearned;
                 }
             }
 
@@ -964,8 +984,13 @@ export default function SpellbookScreen() {
             arcaneInitiateCantrips?.includes(cantrip.name)
         );
 
+        // Get reaper cantrip if death domain is enabled
+        const reaperCantripObject = deathDomainEnabled && reaperCantripLearned ?
+            cantripsData.filter(cantrip => cantrip.name === reaperCantripLearned) :
+            [];
+
         // Combine and remove duplicates
-        const combinedCantrips = [...classCantrips, ...arcaneInitiateCantripObjects];
+        const combinedCantrips = [...classCantrips, ...arcaneInitiateCantripObjects, ...reaperCantripObject];
         const uniqueCantrips = combinedCantrips.filter((cantrip, index, self) =>
             index === self.findIndex(c => c.name === cantrip.name)
         );
@@ -2042,29 +2067,39 @@ export default function SpellbookScreen() {
                     return (
                         <TouchableOpacity
                             key={spellLevel}
-                            disabled={slotInfo.remaining <= 0}
                             onPress={() => {
-                                if (slotInfo.remaining > 0) {
-                                    Alert.alert(
-                                        `Expend SpLv${romanNumeral}`,
-                                        `Do you want to expend one SpLv${spellLevelNum}?`,
-                                        [
-                                            {
-                                                text: 'Cancel',
-                                                style: 'cancel'
-                                            },
-                                            {
-                                                text: 'Expend',
-                                                onPress: () => {
+                                Alert.alert(
+                                    `SpLv${spellLevelNum}`,
+                                    `Do you want to expend or gain a SpLv${spellLevelNum} spell slot?\n\nOnly use when upcasting spells and with DM approval.\n\nPlease confirm with your DM before modifying spell slots.`,
+                                    [
+                                        {
+                                            text: 'Cancel',
+                                            style: 'cancel'
+                                        },
+                                        {
+                                            text: '-1',
+                                            onPress: () => {
+                                                if (slotInfo.remaining > 0) {
                                                     setSpentSpellSlots(prev => ({
                                                         ...prev,
                                                         [spellLevel]: (prev[spellLevel] || 0) + 1
                                                     }));
                                                 }
                                             }
-                                        ]
-                                    );
-                                }
+                                        },
+                                        {
+                                            text: '+1',
+                                            onPress: () => {
+                                                if ((spentSpellSlots[spellLevel] || 0) > 0) {
+                                                    setSpentSpellSlots(prev => ({
+                                                        ...prev,
+                                                        [spellLevel]: Math.max(0, (prev[spellLevel] || 0) - 1)
+                                                    }));
+                                                }
+                                            }
+                                        }
+                                    ]
+                                );
                             }}
                             style={{
                                 borderWidth: 1,

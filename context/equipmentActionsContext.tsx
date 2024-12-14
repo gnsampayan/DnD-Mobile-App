@@ -74,6 +74,11 @@ export interface CharacterContextProps {
     setArcaneMasterySpellsLearned: (value: string[]) => void;
     wildShapeEnabled: boolean;
     setWildShapeEnabled: (value: boolean) => void;
+    deathDomainEnabled: boolean;
+    setDeathDomainEnabled: (value: boolean) => void;
+    reaperCantripLearned: string | null;
+    setReaperCantripLearned: (value: string | null) => void;
+    resetEquipmentActionsContext: () => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -117,6 +122,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [arcaneMasteryEnabled, setArcaneMasteryEnabled] = useState<boolean>(false);
     const [arcaneMasterySpellsLearned, setArcaneMasterySpellsLearned] = useState<string[]>([]);
     const [wildShapeEnabled, setWildShapeEnabled] = useState<boolean>(false);
+    const [deathDomainEnabled, setDeathDomainEnabled] = useState<boolean>(false);
+    const [reaperCantripLearned, setReaperCantripLearned] = useState<string | null>(null);
 
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
@@ -146,155 +153,233 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const ARCANE_MASTERY_ENABLED_STORAGE_KEY = '@arcane_mastery_enabled';
     const ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY = '@arcane_mastery_spells_learned';
     const WILD_SHAPE_ENABLED_STORAGE_KEY = '@wild_shape_enabled';
+    const DEATH_DOMAIN_ENABLED_STORAGE_KEY = '@death_domain_enabled';
+    const REAPER_CANTRIP_LEARNED_STORAGE_KEY = '@reaper_cantrip_learned';
+
+    const loadDataFromStorage = async () => {
+        try {
+            const storageItems = [
+                { key: WEAPONS_STORAGE_KEY, setter: setWeapons, parser: JSON.parse },
+                { key: LUCKY_POINTS_STORAGE_KEY, setter: setLuckyPoints, parser: parseInt },
+                { key: LUCKY_POINTS_MAX_STORAGE_KEY, setter: setLuckyPointsMax, parser: parseInt },
+                {
+                    key: RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY,
+                    setter: setRelentlessEnduranceGained,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY,
+                    setter: setRelentlessEnduranceUsable,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: LUCKY_POINTS_ENABLED_STORAGE_KEY,
+                    setter: setLuckyPointsEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: INFERNAL_LEGACY_ENABLED_STORAGE_KEY,
+                    setter: setInfernalLegacyEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: DRACONIC_ANCESTRY_ENABLED_STORAGE_KEY,
+                    setter: setDraconicAncestry,
+                    parser: JSON.parse
+                },
+                {
+                    key: BREATH_WEAPON_ENABLED_STORAGE_KEY,
+                    setter: setBreathWeaponEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: MAGICAL_TINKERING_ENABLED_STORAGE_KEY,
+                    setter: setMagicalTinkeringEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: INFUSE_ITEM_ENABLED_STORAGE_KEY,
+                    setter: setInfuseItemEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: INFUSE_ITEM_SPENT_STORAGE_KEY,
+                    setter: setInfuseItemSpent,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: INFUSIONS_LEARNED_STORAGE_KEY,
+                    setter: setInfusionsLearned,
+                    parser: JSON.parse
+                },
+                {
+                    key: PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY,
+                    setter: setPrimalKnowledgeEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY,
+                    setter: setPrimalKnowledgeEnabledAgain,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: PRIMAL_CHAMPION_ENABLED_STORAGE_KEY,
+                    setter: setPrimalChampionEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: BARDIC_INSPIRATION_ENABLED_STORAGE_KEY,
+                    setter: setBardicInspirationEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: EXPERTISE_ENABLED_STORAGE_KEY,
+                    setter: setExpertiseEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: EXPERTISE_ENABLED_AGAIN_STORAGE_KEY,
+                    setter: setExpertiseEnabledAgain,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: FONT_OF_INSPIRATION_ENABLED_STORAGE_KEY,
+                    setter: setFontOfInspirationEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: COUNTERCHARM_ENABLED_STORAGE_KEY,
+                    setter: setCountercharmEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: ARCANE_INITIATE_ENABLED_STORAGE_KEY,
+                    setter: setArcaneInitiateEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: ARCANE_INITIATE_CANTRIPS_STORAGE_KEY,
+                    setter: setArcaneInitiateCantrips,
+                    parser: JSON.parse
+                },
+                {
+                    key: CHANNEL_DIVINITY_ENABLED_STORAGE_KEY,
+                    setter: setChannelDivinityEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: ARCANE_MASTERY_ENABLED_STORAGE_KEY,
+                    setter: setArcaneMasteryEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY,
+                    setter: setArcaneMasterySpellsLearned,
+                    parser: JSON.parse
+                },
+                {
+                    key: WILD_SHAPE_ENABLED_STORAGE_KEY,
+                    setter: setWildShapeEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: DEATH_DOMAIN_ENABLED_STORAGE_KEY,
+                    setter: setDeathDomainEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: REAPER_CANTRIP_LEARNED_STORAGE_KEY,
+                    setter: setReaperCantripLearned,
+                    parser: (val: string) => val
+                },
+            ];
+
+            await Promise.all(
+                storageItems.map(async ({ key, setter, parser }) => {
+                    const storedValue = await AsyncStorage.getItem(key);
+                    if (storedValue !== null) {
+                        setter(parser(storedValue));
+                    }
+                })
+            );
+
+        } catch (error) {
+            console.error('Error loading data from AsyncStorage:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Load data from AsyncStorage on component mount
     useEffect(() => {
-        const loadDataFromStorage = async () => {
-            try {
-                const storageItems = [
-                    { key: WEAPONS_STORAGE_KEY, setter: setWeapons, parser: JSON.parse },
-                    { key: LUCKY_POINTS_STORAGE_KEY, setter: setLuckyPoints, parser: parseInt },
-                    { key: LUCKY_POINTS_MAX_STORAGE_KEY, setter: setLuckyPointsMax, parser: parseInt },
-                    {
-                        key: RELLENTLESS_ENDURANCE_GAINED_STORAGE_KEY,
-                        setter: setRelentlessEnduranceGained,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: RELLENTLESS_ENDURANCE_USABLE_STORAGE_KEY,
-                        setter: setRelentlessEnduranceUsable,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: LUCKY_POINTS_ENABLED_STORAGE_KEY,
-                        setter: setLuckyPointsEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: INFERNAL_LEGACY_ENABLED_STORAGE_KEY,
-                        setter: setInfernalLegacyEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: DRACONIC_ANCESTRY_ENABLED_STORAGE_KEY,
-                        setter: setDraconicAncestry,
-                        parser: JSON.parse
-                    },
-                    {
-                        key: BREATH_WEAPON_ENABLED_STORAGE_KEY,
-                        setter: setBreathWeaponEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: MAGICAL_TINKERING_ENABLED_STORAGE_KEY,
-                        setter: setMagicalTinkeringEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: INFUSE_ITEM_ENABLED_STORAGE_KEY,
-                        setter: setInfuseItemEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: INFUSE_ITEM_SPENT_STORAGE_KEY,
-                        setter: setInfuseItemSpent,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: INFUSIONS_LEARNED_STORAGE_KEY,
-                        setter: setInfusionsLearned,
-                        parser: JSON.parse
-                    },
-                    {
-                        key: PRIMAL_KNOWLEDGE_ENABLED_STORAGE_KEY,
-                        setter: setPrimalKnowledgeEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: PRIMAL_KNOWLEDGE_ENABLED_AGAIN_STORAGE_KEY,
-                        setter: setPrimalKnowledgeEnabledAgain,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: PRIMAL_CHAMPION_ENABLED_STORAGE_KEY,
-                        setter: setPrimalChampionEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: BARDIC_INSPIRATION_ENABLED_STORAGE_KEY,
-                        setter: setBardicInspirationEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: EXPERTISE_ENABLED_STORAGE_KEY,
-                        setter: setExpertiseEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: EXPERTISE_ENABLED_AGAIN_STORAGE_KEY,
-                        setter: setExpertiseEnabledAgain,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: FONT_OF_INSPIRATION_ENABLED_STORAGE_KEY,
-                        setter: setFontOfInspirationEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: COUNTERCHARM_ENABLED_STORAGE_KEY,
-                        setter: setCountercharmEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: ARCANE_INITIATE_ENABLED_STORAGE_KEY,
-                        setter: setArcaneInitiateEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: ARCANE_INITIATE_CANTRIPS_STORAGE_KEY,
-                        setter: setArcaneInitiateCantrips,
-                        parser: JSON.parse
-                    },
-                    {
-                        key: CHANNEL_DIVINITY_ENABLED_STORAGE_KEY,
-                        setter: setChannelDivinityEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: ARCANE_MASTERY_ENABLED_STORAGE_KEY,
-                        setter: setArcaneMasteryEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                    {
-                        key: ARCANE_MASTERY_SPELLS_LEARNED_STORAGE_KEY,
-                        setter: setArcaneMasterySpellsLearned,
-                        parser: JSON.parse
-                    },
-                    {
-                        key: WILD_SHAPE_ENABLED_STORAGE_KEY,
-                        setter: setWildShapeEnabled,
-                        parser: (val: string) => val === 'true'
-                    },
-                ];
-
-                await Promise.all(
-                    storageItems.map(async ({ key, setter, parser }) => {
-                        const storedValue = await AsyncStorage.getItem(key);
-                        if (storedValue !== null) {
-                            setter(parser(storedValue));
-                        }
-                    })
-                );
-
-            } catch (error) {
-                console.error('Error loading data from AsyncStorage:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         loadDataFromStorage();
     }, []);
+
+    const resetEquipmentActionsContext = async () => {
+        // Reset state variables to their initial values from useState
+        setWeapons({
+            mainHandWeapon: null,
+            offHandWeapon: null,
+            rangedHandWeapon: null,
+        });
+        setLuckyPoints(null);
+        setLuckyPointsMax(1);
+        setRelentlessEnduranceGained(false);
+        setRelentlessEnduranceUsable(false);
+        setLuckyPointsEnabled(false);
+        setInfernalLegacyEnabled(false);
+        setDraconicAncestry(null);
+        setBreathWeaponEnabled(false);
+        setMagicalTinkeringEnabled(false);
+        setInfuseItemEnabled(false);
+        setInfuseItemSpent(false);
+        setInfusionsLearned([]);
+        setPrimalKnowledgeEnabled(false);
+        setPrimalKnowledgeEnabledAgain(false);
+        setPrimalChampionEnabled(false);
+        setBardicInspirationEnabled(false);
+        setExpertiseEnabled(false);
+        setExpertiseEnabledAgain(false);
+        setFontOfInspirationEnabled(false);
+        setCountercharmEnabled(false);
+        setArcaneInitiateEnabled(false);
+        setArcaneInitiateCantrips([]);
+        setChannelDivinityEnabled(false);
+        setArcaneMasteryEnabled(false);
+        setArcaneMasterySpellsLearned([]);
+        setDeathDomainEnabled(false);
+        setWildShapeEnabled(false);
+        setReaperCantripLearned(null);
+    };
+
+    // save reaper cantrip learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveReaperCantripLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(REAPER_CANTRIP_LEARNED_STORAGE_KEY, reaperCantripLearned ?? 'null');
+                } catch (error) {
+                    console.error('Error saving reaper cantrip learned to AsyncStorage:', error);
+                }
+            }
+            saveReaperCantripLearnedToStorage();
+        }
+    }, [reaperCantripLearned, isLoading]);
+
+
+    // save deathDomainEnabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveDeathDomainEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(DEATH_DOMAIN_ENABLED_STORAGE_KEY, deathDomainEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving death domain enabled to AsyncStorage:', error);
+                }
+            }
+            saveDeathDomainEnabledToStorage();
+        }
+    }, [deathDomainEnabled, isLoading]);
 
 
     // save arcane mastery spells learned to AsyncStorage whenever it changes
@@ -754,6 +839,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         return weaponData?.properties || [];
     };
 
+
     if (isLoading) {
         // Optionally render a loading indicator
         return null;
@@ -820,8 +906,13 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setArcaneMasteryEnabled,
                 arcaneMasterySpellsLearned,
                 setArcaneMasterySpellsLearned,
+                deathDomainEnabled,
+                setDeathDomainEnabled,
                 wildShapeEnabled,
                 setWildShapeEnabled,
+                reaperCantripLearned,
+                setReaperCantripLearned,
+                resetEquipmentActionsContext,
             }}
         >
             {children}

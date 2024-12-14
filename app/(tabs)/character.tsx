@@ -304,6 +304,10 @@ export default function MeScreen() {
         setArcaneMasterySpellsLearned,
         wildShapeEnabled,
         setWildShapeEnabled,
+        deathDomainEnabled,
+        setDeathDomainEnabled,
+        setReaperCantripLearned,
+        resetEquipmentActionsContext,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -358,6 +362,8 @@ export default function MeScreen() {
     const [arcaneMasteryValue4, setArcaneMasteryValue4] = useState<string | null>(null);
     const [darkModalVisible, setDarkModalVisible] = useState(false);
     const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
+    const [reaperValue, setReaperValue] = useState<string | null>(null);
+    const [reaperOpen, setReaperOpen] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -596,6 +602,7 @@ export default function MeScreen() {
         endTurn();
         setRaceValue(null);
         setClassValue(null);
+        setSubclass(null);
         setImageUri(null);
         setIsRaceConfirmed(false);
         setIsClassConfirmed(false);
@@ -628,29 +635,8 @@ export default function MeScreen() {
         setArcaneMasteryValue4(null);
 
         // Reset equipment actions context
-        setRelentlessEnduranceGained(false);
-        setRelentlessEnduranceUsable(false);
-        setLuckyPointsEnabled(false);
-        setInfernalLegacyEnabled(false);
-        setDraconicAncestry(null);
-        setBreathWeaponEnabled(false);
-        setMagicalTinkeringEnabled(false);
-        setInfuseItemEnabled(false);
-        setInfuseItemSpent(false);
-        setInfusionsLearned([]);
-        setPrimalKnowledgeEnabled(false);
-        setPrimalKnowledgeEnabledAgain(false);
-        setPrimalChampionEnabled(false);
-        setBardicInspirationEnabled(false);
-        setExpertiseEnabled(false);
-        setExpertiseEnabledAgain(false);
-        setFontOfInspirationEnabled(false);
-        setCountercharmEnabled(false);
-        setArcaneInitiateEnabled(false);
-        setArcaneInitiateCantrips([]);
-        setChannelDivinityEnabled(false);
-        setArcaneMasteryEnabled(false);
-        setArcaneMasterySpellsLearned([]);
+        resetEquipmentActionsContext();
+
     };
 
     const clearCantripSlots = async () => {
@@ -1059,8 +1045,12 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
                                     (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
-                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass || !arcaneInitiateEnabled ||
-                                        (!arcaneMasteryEnabled && statsData.level >= 17))) ||
+                                    (feature.name.toLowerCase() === 'divine domain' && (!subclass ||
+                                        (!arcaneInitiateEnabled && subclass === 'arcana') ||
+                                        (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') ||
+                                        (!deathDomainEnabled && subclass === 'death')
+                                        // add more cleric subclasses here
+                                    )) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
                                     (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled)
 
@@ -1616,7 +1606,7 @@ export default function MeScreen() {
                         </View>
                     )
                 }
-                if (!arcaneMasteryEnabled && statsData.level >= 17) {
+                if (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') {
                     return (
                         <View style={{
                             paddingHorizontal: 10,
@@ -1641,6 +1631,27 @@ export default function MeScreen() {
                                     arcaneMasteryValue2 === null ||
                                     arcaneMasteryValue3 === null ||
                                     arcaneMasteryValue4 === null}
+                            />
+                        </View>
+                    )
+                }
+                if (!deathDomainEnabled && subclass === 'death') {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: reaperValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={reaperValue === null}
                             />
                         </View>
                     )
@@ -1824,6 +1835,10 @@ export default function MeScreen() {
                 if (arcaneMasteryValue1 && arcaneMasteryValue2 && arcaneMasteryValue3 && arcaneMasteryValue4) {
                     setArcaneMasteryEnabled(true);
                     setArcaneMasterySpellsLearned([arcaneMasteryValue1, arcaneMasteryValue2, arcaneMasteryValue3, arcaneMasteryValue4]);
+                }
+                if (reaperValue && !deathDomainEnabled && subclass === 'death') {
+                    setDeathDomainEnabled(true);
+                    setReaperCantripLearned(reaperValue);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -2962,6 +2977,92 @@ export default function MeScreen() {
         );
     };
 
+    const renderDeathDomainDropdown = () => {
+        const necromancyCantrips = cantripsData.filter(cantrip => cantrip.school.toLowerCase() === "necromancy").map(cantrip => ({
+            label: cantrip.name,
+            value: cantrip.name
+        }));
+
+        // Recursive function to render nested content
+        const renderNestedContent = (content: any, depth: number = 0) => {
+            if (!content) return null;
+            if (Array.isArray(content)) {
+                return content.map((item, index) => (
+                    <View key={index} style={{ marginLeft: depth * 10 }}>
+                        {typeof item === 'object'
+                            ? renderNestedContent(item, depth + 1)
+                            : <Text style={{ color: 'black' }}>• {item}</Text>
+                        }
+                    </View>
+                ));
+            }
+            if (typeof content === 'object') {
+                return Object.entries(content)
+                    .filter(([_, value]) => value !== null)
+                    .map(([key, value]) => (
+                        <View key={key} style={{ marginBottom: 5, marginLeft: depth * 10 }}>
+                            <Text style={{ color: 'black', fontWeight: depth === 0 ? 'bold' : '500', textTransform: 'capitalize' }}>
+                                {depth > 0 && '• '}{key}:
+                            </Text>
+                            {typeof value === 'object'
+                                ? renderNestedContent(value, depth + 1)
+                                : <Text style={{ color: 'black' }}>{String(value)}</Text>
+                            }
+                        </View>
+                    ));
+            }
+            return <Text style={{ color: 'black' }}>{String(content)}</Text>;
+        };
+
+        return (
+            <View style={{ zIndex: 2000 }}>
+                <Text style={{ color: 'black', marginBottom: 5 }}>Death Domain</Text>
+                <DropDownPicker
+                    open={reaperOpen}
+                    value={reaperValue}
+                    items={necromancyCantrips}
+                    setOpen={setReaperOpen}
+                    setValue={setReaperValue}
+                    placeholder="Select a necromancy cantrip"
+                    style={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    textStyle={{
+                        color: 'white'
+                    }}
+                    dropDownContainerStyle={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                />
+
+                <ScrollView style={{
+                    height: reaperValue ? '40%' : 0,
+                    borderBottomWidth: 1,
+                    borderTopWidth: 1,
+                    borderColor: reaperValue ? 'white' : 'transparent',
+                    marginTop: 10
+                }}>
+                    {reaperValue && cantripsData
+                        .filter((cantrip) => cantrip.name === reaperValue)
+                        .map((cantrip) => (
+                            <View key={cantrip.name} style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                                {renderNestedContent(
+                                    Object.fromEntries(
+                                        Object.entries(cantrip)
+                                            .filter(([key]) => key !== 'id')
+                                            .filter(([_, value]) => value !== null)
+                                    )
+                                )}
+                            </View>
+                        ))
+                    }
+                </ScrollView>
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -3787,14 +3888,27 @@ export default function MeScreen() {
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )
                         )}
-                        {/* Cleric - Arcane Features */}
-                        {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' &&
-                            (!arcaneInitiateEnabled || (!arcaneMasteryEnabled && statsData.level >= 17)) && (
-                                <>
-                                    {!arcaneInitiateEnabled && renderArcaneInitiateDropdown()}
-                                    {!arcaneMasteryEnabled && statsData.level >= 17 && renderArcaneMasteryDropdown()}
-                                </>
-                            )}
+                        {/* Cleric - Subclass Features */}
+                        {statsData.class === 'cleric' && selectedFeat?.toLowerCase() === 'divine domain' && (
+                            <>
+                                {/* Arcana Domain Features */}
+                                {subclass === 'arcana' && (
+                                    <>
+                                        {!arcaneInitiateEnabled && renderArcaneInitiateDropdown()}
+                                        {!arcaneMasteryEnabled && statsData.level >= 17 && renderArcaneMasteryDropdown()}
+                                    </>
+                                )}
+
+                                {/* Death Domain Features */}
+                                {subclass === 'death' && !deathDomainEnabled && renderDeathDomainDropdown()}
+
+                                {/* Add more subclass features here following the same pattern:
+                                {subclass === '[subclass]' && (
+                                    // Subclass specific dropdowns/features
+                                )} 
+                                */}
+                            </>
+                        )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
 
                             {/* Render Specific Class Feature */}

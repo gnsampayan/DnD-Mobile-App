@@ -29,6 +29,7 @@ import raceData from '../data/raceData.json';
 import armorTypes from '../data/armorTypes.json';
 import potionTypes from '../data/potionTypes.json';
 import spellsData from '../data/spells.json';
+import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
 
 
 import bedrollImage from '@items/default-item-bedroll.png';
@@ -257,6 +258,9 @@ export default function BagScreen() {
   const [scrollTypeValue, setScrollTypeValue] = useState<string | null>(null);
 
 
+  const { deathDomainEnabled } = useContext(CharacterContext) as CharacterContextProps;
+
+
 
   useEffect(() => {
     const campingSupplies = items.find(item => item.id === '1');
@@ -316,6 +320,7 @@ export default function BagScreen() {
         const isProficientWithWeapon =
           !isMartialWeapon || // Simple weapons
           isProficientInMartialWeapons || // Martial weapons if class proficient
+          deathDomainEnabled || // Martial weapons if death domain enabled
           classSpecificWeapons.some(w => w?.toLowerCase() === weaponName) || // Class specific
           raceSpecificWeapons.some(w => w?.toLowerCase() === weaponName); // Race specific
 

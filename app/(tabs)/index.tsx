@@ -69,6 +69,8 @@ import countercharmImage from '@actions/countercharm-image.png';
 // Cleric
 import channelDivinityImage from '@actions/channel-divinity-image.png';
 import channelDivinityData from '../data/class-tables/cleric/channelDivinity.json';
+import deathDivineStrikeImage from '@actions/death-divine-strike-image.png';
+import forgeDivineStrikeImage from '@actions/forge-divine-strike-image.png';
 
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
@@ -279,6 +281,7 @@ export default function ActionsScreen() {
   const [maxHp, setMaxHp] = useState(0);
   const [inputHpValue, setInputHpValue] = useState<string>('');
   const [ac, setAc] = useState(10);
+  const [tempAc, setTempAc] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [newActionCost, setNewActionCost] = useState<{ actions: number; bonus: number }>({ actions: 0, bonus: 0 });
   const [currentConModifier, setCurrentConModifier] = useState<number>(0);
@@ -408,6 +411,7 @@ export default function ActionsScreen() {
   const [turnsDone, setTurnsDone] = useState(0);
   const [currentChannelDivinityPoints, setCurrentChannelDivinityPoints] = useState<number>(0);
   const [currentWildShapeUses, setCurrentWildShapeUses] = useState<number>(2);
+  const [devineStrikeUsed, setDevineStrikeUsed] = useState<boolean>(false);
 
   // Initialize currentChannelDivinityPoints based on level
   useEffect(() => {
@@ -1174,6 +1178,10 @@ export default function ActionsScreen() {
       if (statsData.class?.toLowerCase() === 'cleric' && item.name.toLowerCase() === 'channel divinity') {
         affordable = affordable && currentChannelDivinityPoints > 0;
       }
+      // Check for divine strike
+      if (item.name.toLowerCase() === 'divine strike') {
+        affordable = affordable && !devineStrikeUsed;
+      }
       // Check for wild shape
       if (statsData.class?.toLowerCase() === 'druid' && item.name.toLowerCase() === 'wild shape') {
         // At level 20, druids have unlimited wild shapes
@@ -1639,6 +1647,33 @@ export default function ActionsScreen() {
           source: 'class',
         } as ActionBlock);
       }
+
+      // Death Domain
+      if (subclass?.toLowerCase() === 'death' && statsData.level >= 8) {
+        // Add 'Divine Strike' action
+        classActions.push({
+          id: 'class-divine-strike',
+          name: 'Divine Strike',
+          cost: { actions: 0, bonus: 0 },
+          details: 'Optional: On hit, add 1d8 necrotic damage to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
+          image: deathDivineStrikeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      // Forge Domain
+      if (subclass?.toLowerCase() === 'forge' && statsData.level >= 8) {
+        // Add 'Divine Strike' action
+        classActions.push({
+          id: 'class-divine-strike',
+          name: 'Divine Strike',
+          cost: { actions: 0, bonus: 0 },
+          details: 'Optional: On hit, add 1d8 fire damage to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
+          image: forgeDivineStrikeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
     }
 
     // Druid
@@ -2081,7 +2116,7 @@ export default function ActionsScreen() {
 
           {/* Show if relentless endurance is gained */}
           {relentlessEnduranceGained && (
-            <View style={[styles.headerTextContainer, { opacity: relentlessEnduranceUsable ? 1 : 0.1 }]}>
+            <View style={styles.headerTextContainer}>
               <TouchableOpacity
                 disabled={!relentlessEnduranceUsable}
                 onPress={() => {
@@ -2103,7 +2138,7 @@ export default function ActionsScreen() {
                     ]
                   );
                 }}>
-                <Ionicons name="fitness" size={20} color="white" />
+                <Ionicons name="fitness" size={20} color="white" style={{ opacity: relentlessEnduranceUsable ? 1 : 0.2 }} />
               </TouchableOpacity>
             </View>
           )}
@@ -2127,7 +2162,7 @@ export default function ActionsScreen() {
                 <TouchableOpacity onPress={() => {
                   Alert.alert('Rages', 'You can use your Rages to fuel your rage powers. You regain all your rages after a long rest.');
                 }}>
-                  <MaterialCommunityIcons name="emoticon-angry" size={20} color="white" />
+                  <MaterialCommunityIcons name="emoticon-angry" size={20} color="white" style={{ opacity: currentRages === 0 ? 0.2 : 1 }} />
                 </TouchableOpacity>
                 <View style={styles.headerTextBox}>
                   <Text style={[
@@ -2140,11 +2175,11 @@ export default function ActionsScreen() {
               </View>
               {/* Show extra attack icon if statsData.level >= 5 */}
               {statsData.level >= 5 && (
-                <View style={[styles.headerTextContainer, { opacity: extraAttackSpent ? 0.2 : 1 }]}>
+                <View style={styles.headerTextContainer}>
                   <TouchableOpacity onPress={() => {
                     Alert.alert('Extra Attack', 'You can attack twice, instead of once, when you take the Attack action on your turn.');
                   }}>
-                    <MaterialCommunityIcons name="sword" size={20} color="white" />
+                    <MaterialCommunityIcons name="sword" size={20} color="white" style={{ opacity: extraAttackSpent ? 0.2 : 1 }} />
                   </TouchableOpacity>
                 </View>
               )}
@@ -2169,7 +2204,7 @@ export default function ActionsScreen() {
                   ]
                 );
               }}>
-                <MaterialCommunityIcons name="music" size={20} color="white" />
+                <MaterialCommunityIcons name="music" size={20} color="white" style={{ opacity: currentBardicInspirationPoints === 0 ? 0.2 : 1 }} />
               </TouchableOpacity>
               <View style={styles.headerTextBox}>
                 <Text style={[
@@ -2211,7 +2246,7 @@ export default function ActionsScreen() {
                 onPress={() => {
                   Alert.alert('Wild Shape', 'You can cast many of your druid spells in any shape you assume using Wild Shape.');
                 }}>
-                <MaterialCommunityIcons name="paw" size={20} color="white" />
+                <MaterialCommunityIcons name="paw" size={20} color="white" style={{ opacity: currentWildShapeUses === 0 ? 0.2 : 1 }} />
                 <View style={styles.headerTextBox}>
                   <Text style={[
                     styles.headerText,
@@ -2223,6 +2258,7 @@ export default function ActionsScreen() {
               </TouchableOpacity>
             </View>
           )}
+
 
         </View>
 
@@ -2294,10 +2330,27 @@ export default function ActionsScreen() {
 
                     {/* AC */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                      <Text style={styles.hpText}>{ac}</Text>
+                      <Text style={[styles.hpText, tempAc > 0 && { color: 'cyan' }]}>{ac + tempAc}</Text>
                       <View style={styles.subheaderSideBySide}>
                         <TouchableOpacity
-                          onPress={() => Alert.alert('Armor Class', 'Your Armor Class is usually determined by your Dexterity modifier, armor, and shield. It is used to calculate the effectiveness of your armor and shield against attacks.')}
+                          onPress={() => Alert.alert(
+                            'Armor Class',
+                            'Your Armor Class is usually determined by your Dexterity modifier, armor, and shield. It is used to calculate the effectiveness of your armor and shield against attacks. \n\nAsk DM before increasing your AC.',
+                            [
+                              {
+                                text: '+1',
+                                onPress: () => setTempAc(prev => prev + 1)
+                              },
+                              {
+                                text: 'Reset to Normal',
+                                onPress: () => setTempAc(0)
+                              },
+                              {
+                                text: 'OK',
+                                style: 'default'
+                              }
+                            ]
+                          )}
                         >
                           <MaterialCommunityIcons name="shield-sword" size={24} color="lightgrey"
                           />
@@ -2490,6 +2543,13 @@ export default function ActionsScreen() {
             onPress={() => {
               if (counterEnabled) {
                 setTurnsDone(turnsDone + 1);
+              }
+              if (
+                statsData.class?.toLowerCase() === 'cleric' &&
+                (subclass?.toLowerCase() === 'death' || subclass?.toLowerCase() === 'forge') &&
+                statsData.level >= 8
+              ) {
+                setDevineStrikeUsed(false);
               }
               endTurn();
             }}
@@ -3239,6 +3299,9 @@ export default function ActionsScreen() {
                               break;
                             case 'wild shape':
                               setCurrentWildShapeUses(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'divine strike':
+                              setDevineStrikeUsed(true);
                               break;
 
                           }
