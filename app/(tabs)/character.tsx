@@ -308,6 +308,10 @@ export default function MeScreen() {
         setDeathDomainEnabled,
         setReaperCantripLearned,
         resetEquipmentActionsContext,
+        blessingsOfKnowledgeEnabled,
+        setBlessingsOfKnowledgeEnabled,
+        blessingsOfKnowledgeSkillsLearned,
+        setBlessingsOfKnowledgeSkillsLearned,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -364,6 +368,10 @@ export default function MeScreen() {
     const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
     const [reaperValue, setReaperValue] = useState<string | null>(null);
     const [reaperOpen, setReaperOpen] = useState(false);
+    const [blessingsOfKnowledgeValue1, setBlessingsOfKnowledgeValue1] = useState<string | null>(null);
+    const [blessingsOfKnowledgeOpen1, setBlessingsOfKnowledgeOpen1] = useState(false);
+    const [blessingsOfKnowledgeValue2, setBlessingsOfKnowledgeValue2] = useState<string | null>(null);
+    const [blessingsOfKnowledgeOpen2, setBlessingsOfKnowledgeOpen2] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -1048,7 +1056,8 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'divine domain' && (!subclass ||
                                         (!arcaneInitiateEnabled && subclass === 'arcana') ||
                                         (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') ||
-                                        (!deathDomainEnabled && subclass === 'death')
+                                        (!deathDomainEnabled && subclass === 'death') ||
+                                        (!blessingsOfKnowledgeEnabled && subclass === 'knowledge')
                                         // add more cleric subclasses here
                                     )) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
@@ -1656,6 +1665,30 @@ export default function MeScreen() {
                         </View>
                     )
                 }
+                if (!blessingsOfKnowledgeEnabled && subclass === 'knowledge') {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: blessingsOfKnowledgeValue1 === null ||
+                                blessingsOfKnowledgeValue2 === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={
+                                    blessingsOfKnowledgeValue1 === null ||
+                                    blessingsOfKnowledgeValue2 === null}
+                            />
+                        </View>
+                    )
+                }
                 break;
             case "channel divinity":
                 if (!channelDivinityEnabled) {
@@ -1839,6 +1872,10 @@ export default function MeScreen() {
                 if (reaperValue && !deathDomainEnabled && subclass === 'death') {
                     setDeathDomainEnabled(true);
                     setReaperCantripLearned(reaperValue);
+                }
+                if (blessingsOfKnowledgeValue1 && blessingsOfKnowledgeValue2 && !blessingsOfKnowledgeEnabled && subclass === 'knowledge') {
+                    setBlessingsOfKnowledgeEnabled(true);
+                    setBlessingsOfKnowledgeSkillsLearned([blessingsOfKnowledgeValue1, blessingsOfKnowledgeValue2]);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -3063,6 +3100,62 @@ export default function MeScreen() {
         );
     };
 
+    const renderBlessingsOfKnowledgeDropdown = () => {
+        const knowledgeSkills = [
+            { label: 'Arcana', value: 'arcana' },
+            { label: 'History', value: 'history' },
+            { label: 'Nature', value: 'nature' },
+            { label: 'Religion', value: 'religion' }
+        ];
+
+        return (
+            <View style={{ zIndex: 2000 }}>
+                <Text style={{ color: 'black', marginBottom: 5 }}>Blessings of Knowledge (Choose 2)</Text>
+                <DropDownPicker
+                    open={blessingsOfKnowledgeOpen1}
+                    value={blessingsOfKnowledgeValue1}
+                    items={knowledgeSkills.filter(skill => skill.value !== blessingsOfKnowledgeValue2)}
+                    setOpen={setBlessingsOfKnowledgeOpen1}
+                    setValue={setBlessingsOfKnowledgeValue1}
+                    placeholder="Select first knowledge skill"
+                    style={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        marginBottom: 10
+                    }}
+                    textStyle={{
+                        color: 'white'
+                    }}
+                    dropDownContainerStyle={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    zIndex={2000}
+                />
+                <DropDownPicker
+                    open={blessingsOfKnowledgeOpen2}
+                    value={blessingsOfKnowledgeValue2}
+                    items={knowledgeSkills.filter(skill => skill.value !== blessingsOfKnowledgeValue1)}
+                    setOpen={setBlessingsOfKnowledgeOpen2}
+                    setValue={setBlessingsOfKnowledgeValue2}
+                    placeholder="Select second knowledge skill"
+                    style={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    textStyle={{
+                        color: 'white'
+                    }}
+                    dropDownContainerStyle={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    zIndex={1000}
+                />
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -3901,6 +3994,9 @@ export default function MeScreen() {
 
                                 {/* Death Domain Features */}
                                 {subclass === 'death' && !deathDomainEnabled && renderDeathDomainDropdown()}
+
+                                {/* Blessings of Knowledge */}
+                                {subclass === 'knowledge' && !blessingsOfKnowledgeEnabled && renderBlessingsOfKnowledgeDropdown()}
 
                                 {/* Add more subclass features here following the same pattern:
                                 {subclass === '[subclass]' && (

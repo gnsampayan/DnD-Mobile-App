@@ -79,6 +79,10 @@ export interface CharacterContextProps {
     reaperCantripLearned: string | null;
     setReaperCantripLearned: (value: string | null) => void;
     resetEquipmentActionsContext: () => void;
+    blessingsOfKnowledgeEnabled: boolean;
+    setBlessingsOfKnowledgeEnabled: (value: boolean) => void;
+    blessingsOfKnowledgeSkillsLearned: string[];
+    setBlessingsOfKnowledgeSkillsLearned: (value: string[]) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -124,6 +128,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [wildShapeEnabled, setWildShapeEnabled] = useState<boolean>(false);
     const [deathDomainEnabled, setDeathDomainEnabled] = useState<boolean>(false);
     const [reaperCantripLearned, setReaperCantripLearned] = useState<string | null>(null);
+    const [blessingsOfKnowledgeEnabled, setBlessingsOfKnowledgeEnabled] = useState<boolean>(false);
+    const [blessingsOfKnowledgeSkillsLearned, setBlessingsOfKnowledgeSkillsLearned] = useState<string[]>([]);
 
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
@@ -155,6 +161,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const WILD_SHAPE_ENABLED_STORAGE_KEY = '@wild_shape_enabled';
     const DEATH_DOMAIN_ENABLED_STORAGE_KEY = '@death_domain_enabled';
     const REAPER_CANTRIP_LEARNED_STORAGE_KEY = '@reaper_cantrip_learned';
+    const BLESSINGS_OF_KNOWLEDGE_ENABLED_STORAGE_KEY = '@blessings_of_knowledge_enabled';
+    const BLESSINGS_OF_KNOWLEDGE_SKILLS_LEARNED_STORAGE_KEY = '@blessings_of_knowledge_skills_learned';
 
     const loadDataFromStorage = async () => {
         try {
@@ -292,6 +300,16 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setter: setReaperCantripLearned,
                     parser: (val: string) => val
                 },
+                {
+                    key: BLESSINGS_OF_KNOWLEDGE_ENABLED_STORAGE_KEY,
+                    setter: setBlessingsOfKnowledgeEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: BLESSINGS_OF_KNOWLEDGE_SKILLS_LEARNED_STORAGE_KEY,
+                    setter: setBlessingsOfKnowledgeSkillsLearned,
+                    parser: JSON.parse
+                },
             ];
 
             await Promise.all(
@@ -350,7 +368,37 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setDeathDomainEnabled(false);
         setWildShapeEnabled(false);
         setReaperCantripLearned(null);
+        setBlessingsOfKnowledgeEnabled(false);
+        setBlessingsOfKnowledgeSkillsLearned([]);
     };
+
+    // save blessings of knowledge skills learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveBlessingsOfKnowledgeSkillsLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(BLESSINGS_OF_KNOWLEDGE_SKILLS_LEARNED_STORAGE_KEY, JSON.stringify(blessingsOfKnowledgeSkillsLearned));
+                } catch (error) {
+                    console.error('Error saving blessings of knowledge skills learned to AsyncStorage:', error);
+                }
+            }
+            saveBlessingsOfKnowledgeSkillsLearnedToStorage();
+        }
+    }, [blessingsOfKnowledgeSkillsLearned, isLoading]);
+
+    // save blessings of knowledge enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveBlessingsOfKnowledgeEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(BLESSINGS_OF_KNOWLEDGE_ENABLED_STORAGE_KEY, blessingsOfKnowledgeEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving blessings of knowledge enabled to AsyncStorage:', error);
+                }
+            }
+            saveBlessingsOfKnowledgeEnabledToStorage();
+        }
+    }, [blessingsOfKnowledgeEnabled, isLoading]);
 
     // save reaper cantrip learned to AsyncStorage whenever it changes
     useEffect(() => {
@@ -913,6 +961,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 reaperCantripLearned,
                 setReaperCantripLearned,
                 resetEquipmentActionsContext,
+                blessingsOfKnowledgeEnabled,
+                setBlessingsOfKnowledgeEnabled,
+                blessingsOfKnowledgeSkillsLearned,
+                setBlessingsOfKnowledgeSkillsLearned,
             }}
         >
             {children}

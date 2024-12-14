@@ -101,7 +101,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
     const {
         primalKnowledgeEnabled,
-        primalChampionEnabled
+        primalChampionEnabled,
+        blessingsOfKnowledgeSkillsLearned
     } = useContext(CharacterContext) as CharacterContextProps;
 
     useEffect(() => {
@@ -523,12 +524,15 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         // Determine if the skill proficiency is gained from skills learned (skillProficienciesGained)
         const gainedProficiency = skillProficiency?.includes(item.name.toLowerCase());
 
-        // Calculate the total skill modifier
+        // Determine if the skill proficiency is gained from blessings of knowledge
+        const blessingsOfKnowledgeProficiency = blessingsOfKnowledgeSkillsLearned?.includes(item.name.toLowerCase());
+
+        // Calculate the total skill modifier, if from blessings of knowledge, add proficiency bonus twice
         const skillModifier =
-            abilityModifier + (raceProficiency || gainedProficiency ? proficiencyBonus : 0);
+            abilityModifier + (raceProficiency || gainedProficiency || blessingsOfKnowledgeProficiency ? proficiencyBonus : 0);
 
         // Determine if the skill is proficient (either from race or gained)
-        const isProficient = raceProficiency || gainedProficiency;
+        const isProficient = raceProficiency || gainedProficiency || blessingsOfKnowledgeProficiency;
 
         // Define allowed skills per class
         const allowedSkillsByClass: { [key: string]: string[] } = {
@@ -586,7 +590,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                 disabled={isProficient || (unusedSkillPoints > 0 && !isSkillAllowedForClass())}
             >
                 <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>
-                    {skillModifier >= 0 ? `+${skillModifier}` : `${skillModifier}`}
+                    {skillModifier >= 0 ?
+                        `+${skillModifier + (blessingsOfKnowledgeProficiency ? proficiencyBonus : 0)}` :
+                        `${skillModifier + (blessingsOfKnowledgeProficiency ? proficiencyBonus : 0)}`}
                 </Text>
                 <Text style={[styles.skillName, isProficient ? { color: 'black' } : {}]}>
                     {item.name.substring(0, 5)}
