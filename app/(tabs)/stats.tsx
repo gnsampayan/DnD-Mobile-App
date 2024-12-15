@@ -20,6 +20,15 @@ import barbarianTable from '../data/class-tables/barbarian/barbarianTable.json';
 import bardTable from '../data/class-tables/bard/bardTable.json';
 import clericTable from '../data/class-tables/cleric/clericTable.json';
 import druidTable from '../data/class-tables/druid/druidTable.json';
+import fighterTable from '../data/class-tables/fighter/fighterTable.json';
+import monkTable from '../data/class-tables/monk/monkTable.json';
+import paladinTable from '../data/class-tables/paladin/paladinTable.json';
+import rangerTable from '../data/class-tables/ranger/rangerTable.json';
+import rogueTable from '../data/class-tables/rogue/rogueTable.json';
+import sorcererTable from '../data/class-tables/sorcerer/sorcererTable.json';
+import warlockTable from '../data/class-tables/warlock/warlockTable.json';
+import wizardTable from '../data/class-tables/wizard/wizardTable.json';
+
 import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
 
 interface CharacterStatsScreenProps {
@@ -182,6 +191,30 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     break;
                 case 'druid':
                     classLevels = druidTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'fighter':
+                    classLevels = fighterTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'monk':
+                    classLevels = monkTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'paladin':
+                    classLevels = paladinTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'ranger':
+                    classLevels = rangerTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'rogue':
+                    classLevels = rogueTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'sorcerer':
+                    classLevels = sorcererTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'warlock':
+                    classLevels = warlockTable.filter(l => l.userLevel <= level);
+                    break;
+                case 'wizard':
+                    classLevels = wizardTable.filter(l => l.userLevel <= level);
                     break;
                 default:
                     // For other classes, use default calculation

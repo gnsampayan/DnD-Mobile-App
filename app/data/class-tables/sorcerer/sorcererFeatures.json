@@ -1,0 +1,137 @@
+[
+	{
+		"id": "Spellcasting",
+		"name": "Spellcasting",
+		"level": 1,
+		"description": "An event in your past, or in the life of a parent or ancestor, left an indelible mark on you, infusing you with arcane magic. This font of magic, whatever its origin, fuels your spells.",
+		"mechanics": {
+			"spellcasting_ability": "Charisma",
+			"spell_save_dc": "8 + proficiency bonus + Charisma modifier",
+			"spell_attack_modifier": "proficiency bonus + Charisma modifier",
+			"spellcasting_focus": "arcane focus",
+			"cantrips_known": {
+				"1": 4,
+				"4": 5,
+				"10": 6
+			}
+		}
+	},
+	{
+		"id": "Sorcerous Origin",
+		"name": "Sorcerous Origin",
+		"level": 1,
+		"description": "Choose a sorcerous origin, which describes the source of your innate magical power. Your choice grants you features when you choose it at 1st level and again at 6th, 14th, and 18th level.",
+		"origins": [
+			"Aberrant Mind",
+			"Clockwork Soul",
+			"Draconic Bloodline",
+			"Divine Soul",
+			"Lunar Sorcery",
+			"Shadow Magic",
+			"Storm Sorcery",
+			"Wild Magic"
+		]
+	},
+	{
+		"id": "Font of Magic",
+		"name": "Font of Magic",
+		"level": 2,
+		"description": "At 2nd level, you tap into a deep wellspring of magic within yourself. This wellspring is represented by sorcery points, which allow you to create a variety of magical effects.",
+		"mechanics": {
+			"sorcery_points": "Equal to sorcerer level",
+			"reset": "long rest",
+			"flexible_casting": {
+				"create_spell_slots": {
+					"action": "bonus action",
+					"max_level": 5,
+					"costs": {
+						"1st": 2,
+						"2nd": 3,
+						"3rd": 5,
+						"4th": 6,
+						"5th": 7
+					}
+				},
+				"convert_slots": {
+					"action": "bonus action",
+					"points_gained": "Equal to spell slot level"
+				}
+			}
+		}
+	},
+	{
+		"id": "Metamagic",
+		"name": "Metamagic",
+		"level": 3,
+		"description": "At 3rd level, you gain the ability to twist your spells to suit your needs. You gain two of the following Metamagic options of your choice. You gain another one at 10th and 17th level.",
+		"mechanics": {
+			"options_gained": {
+				"3": 2,
+				"10": 1,
+				"17": 1
+			},
+			"options": [
+				{
+					"name": "Careful Spell",
+					"cost": 1,
+					"effect": "Choose creatures up to Charisma modifier to automatically succeed on saving throws"
+				},
+				{
+					"name": "Distant Spell",
+					"cost": 1,
+					"effect": "Double range of 5ft+ spells or make touch spells 30ft range"
+				},
+				{
+					"name": "Empowered Spell",
+					"cost": 1,
+					"effect": "Reroll damage dice up to Charisma modifier"
+				},
+				{
+					"name": "Extended Spell",
+					"cost": 1,
+					"effect": "Double duration up to 24 hours"
+				},
+				{
+					"name": "Heightened Spell",
+					"cost": 3,
+					"effect": "Give one target disadvantage on first save"
+				},
+				{
+					"name": "Quickened Spell",
+					"cost": 2,
+					"effect": "Change casting time to bonus action"
+				},
+				{
+					"name": "Seeking Spell",
+					"cost": 2,
+					"effect": "Reroll missed attack roll"
+				},
+				{
+					"name": "Subtle Spell",
+					"cost": 1,
+					"effect": "Cast without somatic or verbal components"
+				},
+				{
+					"name": "Transmuted Spell",
+					"cost": 1,
+					"effect": "Change damage type between acid, cold, fire, lightning, poison, thunder"
+				},
+				{
+					"name": "Twinned Spell",
+					"cost": "Spell level (1 for cantrips)",
+					"effect": "Target second creature with single-target spell"
+				}
+			]
+		}
+	},
+	{
+		"id": "Sorcerous Restoration",
+		"name": "Sorcerous Restoration",
+		"level": 20,
+		"description": "At 20th level, you regain 4 expended sorcery points whenever you finish a short rest.",
+		"mechanics": {
+			"points_restored": 4,
+			"trigger": "short rest"
+		}
+	}
+]

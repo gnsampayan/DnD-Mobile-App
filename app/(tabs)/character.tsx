@@ -69,6 +69,14 @@ import warData from '../data/class-tables/cleric/subclass/war.json';
 import cantripsData from '../data/cantrips.json';
 import spellsData from '../data/spells.json';
 import druidFeatures from '../data/class-tables/druid/druidFeatures.json';
+import fighterFeatures from '../data/class-tables/fighter/fighterFeatures.json';
+import monkFeatures from '../data/class-tables/monk/monkFeatures.json';
+import paladinFeatures from '../data/class-tables/paladin/paladinFeatures.json';
+import rangerFeatures from '../data/class-tables/ranger/rangerFeatures.json';
+import rogueFeatures from '../data/class-tables/rogue/rogueFeatures.json';
+import sorcererFeatures from '../data/class-tables/sorcerer/sorcererFeatures.json';
+import warlockFeatures from '../data/class-tables/warlock/warlockFeatures.json';
+import wizardFeatures from '../data/class-tables/wizard/wizardFeatures.json';
 
 
 // Import default images
@@ -220,6 +228,14 @@ const classFeaturesMap: { [key: string]: any } = {
     bard: bardFeatures,
     cleric: clericFeatures,
     druid: druidFeatures,
+    fighter: fighterFeatures,
+    monk: monkFeatures,
+    paladin: paladinFeatures,
+    ranger: rangerFeatures,
+    rogue: rogueFeatures,
+    sorcerer: sorcererFeatures,
+    warlock: warlockFeatures,
+    wizard: wizardFeatures,
 }
 
 // TODO: make max infusions learned a variable

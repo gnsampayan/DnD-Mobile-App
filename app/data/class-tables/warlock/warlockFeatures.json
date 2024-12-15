@@ -1,0 +1,142 @@
+[
+	{
+		"id": "Otherworldly Patron",
+		"name": "Otherworldly Patron",
+		"level": 1,
+		"description": "At 1st level, you have struck a bargain with an otherworldly being of your choice. Your choice grants you features at 1st level and again at 6th, 10th, and 14th level.",
+		"subclass_features": {
+			"feature_levels": [1, 6, 10, 14],
+			"options": [
+				"Archfey",
+				"Celestial",
+				"Fathomless",
+				"Fiend",
+				"Genie",
+				"Great Old One",
+				"Hexblade",
+				"Undead",
+				"Undying"
+			]
+		}
+	},
+	{
+		"id": "Pact Magic",
+		"name": "Pact Magic",
+		"level": 1,
+		"description": "Your arcane research and the magic bestowed on you by your patron have given you facility with spells.",
+		"mechanics": {
+			"spellcasting": {
+				"ability": "Charisma",
+				"save_dc": "8 + proficiency bonus + Charisma modifier",
+				"attack_modifier": "proficiency bonus + Charisma modifier",
+				"focus": "arcane focus",
+				"spell_slots": {
+					"type": "pact magic",
+					"reset": "short or long rest",
+					"scaling": "all slots same level"
+				},
+				"spells_known": {
+					"cantrips": {
+						"start": 2,
+						"scaling": "Cantrips Known column"
+					},
+					"spells": {
+						"start": "2 1st-level spells",
+						"learning": "Spells Known column",
+						"max_level": "Slot Level column",
+						"replacement": "1 spell on level up"
+					}
+				}
+			}
+		}
+	},
+	{
+		"id": "Eldritch Invocations",
+		"name": "Eldritch Invocations",
+		"level": 2,
+		"description": "In your study of occult lore, you have unearthed Eldritch Invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability.",
+		"mechanics": {
+			"invocations_known": {
+				"start": 2,
+				"scaling": "Invocations Known column"
+			},
+			"replacement": "1 invocation on level up",
+			"requirements": "Level prerequisites based on warlock level"
+		}
+	},
+	{
+		"id": "Pact Boon",
+		"name": "Pact Boon",
+		"level": 3,
+		"description": "At 3rd level, your otherworldly patron bestows a gift upon you for your loyal service. You gain one of the following features of your choice.",
+		"mechanics": {
+			"options": [
+				{
+					"name": "Pact of the Blade",
+					"features": [
+						"Create magical pact weapon as action",
+						"Proficient with created weapon",
+						"Can transform magic weapons into pact weapon",
+						"1-hour ritual to bond/unbond",
+						"Weapon disappears if separated for 1 minute"
+					]
+				},
+				{
+					"name": "Pact of the Chain",
+					"features": [
+						"Learn find familiar spell (doesn't count against spells known)",
+						"Can cast as ritual",
+						"Additional familiar options: imp, pseudodragon, quasit, sprite",
+						"Familiar can attack using your reaction"
+					]
+				},
+				{
+					"name": "Pact of the Tome",
+					"features": [
+						"Receive Book of Shadows",
+						"Learn 3 cantrips from any class",
+						"Cast chosen cantrips at will",
+						"1-hour ceremony to replace if lost"
+					]
+				},
+				{
+					"name": "Pact of the Talisman",
+					"features": [
+						"Receive magical talisman",
+						"Add d4 to failed ability checks",
+						"Uses equal to proficiency bonus",
+						"Reset on long rest",
+						"1-hour ceremony to replace if lost"
+					]
+				}
+			]
+		}
+	},
+	{
+		"id": "Mystic Arcanum",
+		"name": "Mystic Arcanum",
+		"level": 11,
+		"description": "At 11th level, your patron bestows upon you a magical secret called an arcanum. Choose one 6th-level spell from the warlock spell list as this arcanum.",
+		"mechanics": {
+			"spells": {
+				"11": "6th-level spell",
+				"13": "7th-level spell",
+				"15": "8th-level spell",
+				"17": "9th-level spell"
+			},
+			"usage": "Once per long rest per spell",
+			"cost": "No spell slot required"
+		}
+	},
+	{
+		"id": "Eldritch Master",
+		"name": "Eldritch Master",
+		"level": 20,
+		"description": "At 20th level, you can draw on your inner reserve of mystical power while entreating your patron to regain expended spell slots. You can spend 1 minute entreating your patron for aid to regain all your expended spell slots from your Pact Magic feature. Once you regain spell slots with this feature, you must finish a long rest before you can do so again.",
+		"mechanics": {
+			"action": "1 minute entreaty",
+			"effect": "Regain all expended Pact Magic spell slots",
+			"recharge": "long rest"
+		}
+	}
+]

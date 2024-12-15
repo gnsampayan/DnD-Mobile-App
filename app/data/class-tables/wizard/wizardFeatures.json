@@ -1,0 +1,111 @@
+[
+	{
+		"id": "Spellcasting",
+		"name": "Spellcasting",
+		"level": 1,
+		"description": "As a student of arcane magic, you have a spellbook containing spells that show the first glimmerings of your true power.",
+		"mechanics": {
+			"cantrips": {
+				"initial": 3,
+				"source": "Wizard spell list"
+			},
+			"spellbook": {
+				"initial_spells": "Six 1st-level wizard spells",
+				"copying_spells": {
+					"time": "2 hours per spell level",
+					"cost": "50 gp per spell level",
+					"requirements": [
+						"Spell must be wizard spell",
+						"Must be of preparable level"
+					]
+				},
+				"replacing_book": {
+					"time": "1 hour per spell level",
+					"cost": "10 gp per spell level",
+					"limitation": "Only for spells already in original book"
+				}
+			},
+			"spell_preparation": {
+				"spells_prepared": "Intelligence modifier + wizard level (minimum 1)",
+				"preparation_time": "1 minute per spell level",
+				"change_timing": "After long rest"
+			},
+			"spellcasting_ability": "Intelligence",
+			"spell_save_dc": "8 + proficiency bonus + Intelligence modifier",
+			"spell_attack_modifier": "Proficiency bonus + Intelligence modifier",
+			"ritual_casting": "Can cast ritual spells from spellbook without preparation",
+			"focus": "Arcane focus"
+		}
+	},
+	{
+		"id": "Arcane Recovery",
+		"name": "Arcane Recovery",
+		"level": 1,
+		"description": "You have learned to regain some of your magical energy by studying your spellbook. Once per day when you finish a short rest, you can choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your wizard level (rounded up), and none of the slots can be 6th level or higher.",
+		"mechanics": {
+			"usage": "Once per day",
+			"trigger": "Short rest",
+			"recovery": {
+				"max_levels": "Half wizard level (rounded up)",
+				"limitation": "No slots of 6th level or higher"
+			}
+		}
+	},
+	{
+		"id": "Arcane Tradition",
+		"name": "Arcane Tradition",
+		"level": 2,
+		"description": "When you reach 2nd level, you choose an arcane tradition, shaping your practice of magic through one of the following schools.",
+		"mechanics": {
+			"feature_levels": [2, 6, 10, 14],
+			"schools": [
+				"Abjuration",
+				"Bladesinging",
+				"Chronurgy",
+				"Conjuration",
+				"Divination",
+				"Enchantment",
+				"Evocation",
+				"Graviturgy",
+				"Illusion",
+				"Necromancy",
+				"Order of Scribes",
+				"Transmutation",
+				"War Magic"
+			]
+		}
+	},
+	{
+		"id": "Spell Mastery",
+		"name": "Spell Mastery",
+		"level": 18,
+		"description": "At 18th level, you have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared. If you want to cast either spell at a higher level, you must expend a spell slot as normal.",
+		"mechanics": {
+			"spells_mastered": {
+				"1st_level": 1,
+				"2nd_level": 1
+			},
+			"casting": "At will (lowest level only)",
+			"change_spells": {
+				"time": "8 hours study",
+				"flexibility": "Can change one or both spells"
+			}
+		}
+	},
+	{
+		"id": "Signature Spells",
+		"name": "Signature Spells",
+		"level": 20,
+		"description": "When you reach 20th level, you gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot. When you do so, you can't do so again until you finish a short or long rest.",
+		"mechanics": {
+			"spells": "Two 3rd-level wizard spells",
+			"benefits": [
+				"Always prepared",
+				"Don't count against prepared spells",
+				"Cast once each at 3rd level without spell slot"
+			],
+			"recharge": "Short or long rest",
+			"higher_levels": "Must expend spell slot as normal"
+		}
+	}
+]
