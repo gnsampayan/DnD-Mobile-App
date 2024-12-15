@@ -1,5 +1,27 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["All armor", "Shields"],
+		"weapons": ["Simple weapons", "Martial weapons"],
+		"tools": ["None"],
+		"saving_throws": ["Wisdom", "Charisma"],
+		"skills": "Choose two from Athletics, Insight, Intimidation, Medicine, Persuasion, and Religion"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a martial weapon and a shield or (b) two martial weapons",
+			"(a) five javelins or (b) any simple melee weapon",
+			"(a) a priest's pack or (b) an explorer's pack",
+			"Chain mail and a holy symbol"
+		]
+	},
+	{
 		"id": "Divine Sense",
 		"name": "Divine Sense",
 		"level": 1,

@@ -1,5 +1,26 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["None"],
+		"weapons": ["Simple weapons", "Shortswords"],
+		"tools": "Choose one type of artisan's tools or one musical instrument",
+		"saving_throws": ["Strength", "Dexterity"],
+		"skills": "Choose two from Acrobatics, Athletics, History, Insight, Religion, and Stealth"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a shortsword or (b) any simple weapon",
+			"(a) a dungeoneer's pack or (b) an explorer's pack",
+			"10 darts"
+		]
+	},
+	{
 		"id": "Unarmored Defense",
 		"name": "Unarmored Defense",
 		"level": 1,

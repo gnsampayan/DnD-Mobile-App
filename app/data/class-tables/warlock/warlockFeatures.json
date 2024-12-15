@@ -1,5 +1,27 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor"],
+		"weapons": ["Simple weapons"],
+		"tools": ["None"],
+		"saving_throws": ["Wisdom", "Charisma"],
+		"skills": "Choose two from Arcana, Deception, History, Intimidation, Investigation, Nature, and Religion"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a light crossbow and 20 bolts or (b) any simple weapon",
+			"(a) a component pouch or (b) an arcane focus",
+			"(a) a scholar's pack or (b) a dungeoneer's pack",
+			"Leather armor, any simple weapon, and two daggers"
+		]
+	},
+	{
 		"id": "Otherworldly Patron",
 		"name": "Otherworldly Patron",
 		"level": 1,

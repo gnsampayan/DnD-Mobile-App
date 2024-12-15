@@ -1,5 +1,32 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor", "Medium armor", "Shields"],
+		"weapons": ["Simple weapons"],
+		"tools": [
+			"Thieves' tools",
+			"Tinker's tools",
+			"One type of artisan's tools of your choice"
+		],
+		"saving_throws": ["Constitution", "Intelligence"],
+		"skills": "Choose two from Arcana, History, Investigation, Medicine, Nature, Perception, Sleight of Hand"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"Any two simple weapons",
+			"A light crossbow and 20 bolts",
+			"(a) studded leather armor or (b) scale mail",
+			"Thieves' tools and a dungeoneer's pack"
+		],
+		"starting_gold_alternative": "5d4 x 10"
+	},
+	{
 		"id": "Magical Tinkering",
 		"name": "Magical Tinkering",
 		"level": 1,

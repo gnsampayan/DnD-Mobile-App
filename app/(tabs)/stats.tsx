@@ -592,7 +592,15 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             barbarian: ['animal handling', 'athletics', 'intimidation', 'nature', 'perception', 'survival'],
             // bard has no restrictions
             cleric: ['history', 'insight', 'medicine', 'persuasion', 'religion'],
-            druid: ['arcana', 'animal handling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival']
+            druid: ['arcana', 'animal handling', 'insight', 'medicine', 'nature', 'perception', 'religion', 'survival'],
+            fighter: ['acrobatics', 'animal handling', 'athletics', 'history', 'insight', 'intimidation', 'perception', 'survival'],
+            monk: ['acrobatics', 'athletics', 'history', 'insight', 'religion', 'stealth'],
+            paladin: ['athletics', 'insight', 'intimidation', 'medicine', 'persuasion', 'religion'],
+            ranger: ['animal handling', 'athletics', 'insight', 'investigation', 'nature', 'perception', 'stealth', 'survival'],
+            rogue: ['acrobatics', 'athletics', 'deception', 'insight', 'intimidation', 'investigation', 'perception', 'performance', 'persuasion', 'sleight of hand', 'stealth'],
+            sorcerer: ['arcana', 'deception', 'insight', 'intimidation', 'persuasion', 'religion'],
+            warlock: ['arcana', 'deception', 'history', 'intimidation', 'investigation', 'nature', 'religion'],
+            wizard: ['arcana', 'history', 'insight', 'investigation', 'medicine', 'religion'],
         };
 
         // Check if skill is allowed for current class

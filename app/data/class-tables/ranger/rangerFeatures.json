@@ -1,5 +1,27 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor", "Medium armor", "Shields"],
+		"weapons": ["Simple weapons", "Martial weapons"],
+		"tools": ["None"],
+		"saving_throws": ["Strength", "Dexterity"],
+		"skills": "Choose three from Animal Handling, Athletics, Insight, Investigation, Nature, Perception, Stealth, and Survival"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) scale mail or (b) leather armor",
+			"(a) two shortswords or (b) two simple melee weapons",
+			"(a) a dungeoneer's pack or (b) an explorer's pack",
+			"A longbow and a quiver of 20 arrows"
+		]
+	},
+	{
 		"id": "Favored Enemy",
 		"name": "Favored Enemy",
 		"level": 1,

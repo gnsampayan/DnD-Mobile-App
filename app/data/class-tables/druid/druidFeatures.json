@@ -1,5 +1,38 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor", "Medium armor", "Shields"],
+		"armor_note": "Druids will not wear armor or use shields made of metal",
+		"weapons": [
+			"Clubs",
+			"Daggers",
+			"Darts",
+			"Javelins",
+			"Maces",
+			"Quarterstaffs",
+			"Scimitars",
+			"Sickles",
+			"Slings",
+			"Spears"
+		],
+		"tools": ["Herbalism kit"],
+		"saving_throws": ["Intelligence", "Wisdom"],
+		"skills": "Choose two from Arcana, Animal Handling, Insight, Medicine, Nature, Perception, Religion, and Survival"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a wooden shield or (b) any simple weapon",
+			"(a) a scimitar or (b) any simple melee weapon",
+			"Leather armor, an explorer's pack, and a druidic focus"
+		]
+	},
+	{
 		"id": "Druidic",
 		"name": "Druidic",
 		"level": 1,

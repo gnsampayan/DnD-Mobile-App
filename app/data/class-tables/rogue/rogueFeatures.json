@@ -1,5 +1,33 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor"],
+		"weapons": [
+			"Simple weapons",
+			"Hand crossbows",
+			"Longswords",
+			"Rapiers",
+			"Shortswords"
+		],
+		"tools": ["Thieves' tools"],
+		"saving_throws": ["Dexterity", "Intelligence"],
+		"skills": "Choose four from Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, and Stealth"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a rapier or (b) a shortsword",
+			"(a) a shortbow and quiver of 20 arrows or (b) a shortsword",
+			"(a) a burglar's pack, (b) dungeoneer's pack, or (c) an explorer's pack",
+			"Leather armor, two daggers, and thieves' tools"
+		]
+	},
+	{
 		"id": "Expertise",
 		"name": "Expertise",
 		"level": 1,

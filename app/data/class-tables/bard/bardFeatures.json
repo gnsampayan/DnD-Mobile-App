@@ -1,5 +1,33 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor"],
+		"weapons": [
+			"Simple weapons",
+			"Hand crossbows",
+			"Longswords",
+			"Rapiers",
+			"Shortswords"
+		],
+		"tools": ["Three musical instruments of your choice"],
+		"saving_throws": ["Dexterity", "Charisma"],
+		"skills": "choose any 3"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a rapier, (b) a longsword, or (c) any simple weapon",
+			"(a) a diplomat's pack or (b) an entertainer's pack",
+			"(a) a lute or (b) any other musical instrument",
+			"Leather armor and a dagger"
+		]
+	},
+	{
 		"id": "Spellcasting",
 		"name": "Spellcasting",
 		"level": 1,

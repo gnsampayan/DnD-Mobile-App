@@ -1,5 +1,27 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["All armor", "Shields"],
+		"weapons": ["Simple weapons", "Martial weapons"],
+		"tools": ["None"],
+		"saving_throws": ["Strength", "Constitution"],
+		"skills": "Choose two from Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Perception, and Survival"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) chain mail or (b) leather, longbow, and 20 arrows",
+			"(a) a martial weapon and a shield or (b) two martial weapons",
+			"(a) a light crossbow and 20 bolts or (b) two handaxes",
+			"(a) a dungeoneer's pack or (b) an explorer's pack"
+		]
+	},
+	{
 		"id": "Fighting Style",
 		"name": "Fighting Style",
 		"level": 1,

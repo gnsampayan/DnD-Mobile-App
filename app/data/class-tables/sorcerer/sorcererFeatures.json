@@ -1,5 +1,33 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["None"],
+		"weapons": [
+			"Daggers",
+			"Darts",
+			"Slings",
+			"Quarterstaffs",
+			"Light crossbows"
+		],
+		"tools": ["None"],
+		"saving_throws": ["Constitution", "Charisma"],
+		"skills": "Choose two from Arcana, Deception, Insight, Intimidation, Persuasion, and Religion"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a light crossbow and 20 bolts or (b) any simple weapon",
+			"(a) a component pouch or (b) an arcane focus",
+			"(a) a dungeoneer's pack or (b) an explorer's pack",
+			"Two daggers"
+		]
+	},
+	{
 		"id": "Spellcasting",
 		"name": "Spellcasting",
 		"level": 1,

@@ -338,6 +338,30 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             case 'druid':
                 setUnusedSkillPoints(2);
                 break;
+            case 'fighter':
+                setUnusedSkillPoints(2);
+                break;
+            case 'monk':
+                setUnusedSkillPoints(2);
+                break;
+            case 'paladin':
+                setUnusedSkillPoints(2);
+                break;
+            case 'ranger':
+                setUnusedSkillPoints(3);
+                break;
+            case 'rogue':
+                setUnusedSkillPoints(4);
+                break;
+            case 'sorcerer':
+                setUnusedSkillPoints(2);
+                break;
+            case 'warlock':
+                setUnusedSkillPoints(2);
+                break;
+            case 'wizard':
+                setUnusedSkillPoints(2);
+                break;
             default:
                 setUnusedSkillPoints(0);
                 break;

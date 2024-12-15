@@ -1,5 +1,28 @@
 [
 	{
+		"id": "Proficiencies",
+		"name": "Proficiencies",
+		"level": 1,
+		"armor": ["Light armor", "Medium armor", "Shields"],
+		"weapons": ["Simple weapons"],
+		"tools": ["None"],
+		"saving_throws": ["Wisdom", "Charisma"],
+		"skills": "Choose two from History, Insight, Medicine, Persuasion, and Religion"
+	},
+	{
+		"id": "Equipment",
+		"name": "Equipment",
+		"level": 1,
+		"description": "You start with the following equipment, in addition to the equipment granted by your background:",
+		"starting_items": [
+			"(a) a mace or (b) a warhammer (if proficient)",
+			"(a) scale mail, (b) leather armor, or (c) chain mail (if proficient)",
+			"(a) a light crossbow and 20 bolts or (b) any simple weapon",
+			"(a) a priest's pack or (b) an explorer's pack",
+			"A shield and a holy symbol"
+		]
+	},
+	{
 		"id": "Spellcasting",
 		"name": "Spellcasting",
 		"level": 1,
