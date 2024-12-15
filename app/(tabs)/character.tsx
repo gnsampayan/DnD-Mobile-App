@@ -310,8 +310,11 @@ export default function MeScreen() {
         resetEquipmentActionsContext,
         blessingsOfKnowledgeEnabled,
         setBlessingsOfKnowledgeEnabled,
-        blessingsOfKnowledgeSkillsLearned,
         setBlessingsOfKnowledgeSkillsLearned,
+        acolyteOfNatureEnabled,
+        setAcolyteOfNatureEnabled,
+        setAcolyteOfNatureCantripLearned,
+        setAcolyteOfNatureSkillLearned,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -372,6 +375,10 @@ export default function MeScreen() {
     const [blessingsOfKnowledgeOpen1, setBlessingsOfKnowledgeOpen1] = useState(false);
     const [blessingsOfKnowledgeValue2, setBlessingsOfKnowledgeValue2] = useState<string | null>(null);
     const [blessingsOfKnowledgeOpen2, setBlessingsOfKnowledgeOpen2] = useState(false);
+    const [acolyteOfNatureCantripValue, setAcolyteOfNatureCantripValue] = useState<string | null>(null);
+    const [acolyteOfNatureSkillValue, setAcolyteOfNatureSkillValue] = useState<string | null>(null);
+    const [acolyteOfNatureCantripOpen, setAcolyteOfNatureCantripOpen] = useState(false);
+    const [acolyteOfNatureSkillOpen, setAcolyteOfNatureSkillOpen] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -1057,7 +1064,8 @@ export default function MeScreen() {
                                         (!arcaneInitiateEnabled && subclass === 'arcana') ||
                                         (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') ||
                                         (!deathDomainEnabled && subclass === 'death') ||
-                                        (!blessingsOfKnowledgeEnabled && subclass === 'knowledge')
+                                        (!blessingsOfKnowledgeEnabled && subclass === 'knowledge') ||
+                                        (!acolyteOfNatureEnabled && subclass === 'nature')
                                         // add more cleric subclasses here
                                     )) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
@@ -1689,6 +1697,29 @@ export default function MeScreen() {
                         </View>
                     )
                 }
+                if (!acolyteOfNatureEnabled && subclass === 'nature') {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: acolyteOfNatureCantripValue === null ||
+                                acolyteOfNatureSkillValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={acolyteOfNatureCantripValue === null ||
+                                    acolyteOfNatureSkillValue === null}
+                            />
+                        </View>
+                    )
+                }
                 break;
             case "channel divinity":
                 if (!channelDivinityEnabled) {
@@ -1876,6 +1907,11 @@ export default function MeScreen() {
                 if (blessingsOfKnowledgeValue1 && blessingsOfKnowledgeValue2 && !blessingsOfKnowledgeEnabled && subclass === 'knowledge') {
                     setBlessingsOfKnowledgeEnabled(true);
                     setBlessingsOfKnowledgeSkillsLearned([blessingsOfKnowledgeValue1, blessingsOfKnowledgeValue2]);
+                }
+                if (acolyteOfNatureCantripValue && acolyteOfNatureSkillValue && !acolyteOfNatureEnabled && subclass === 'nature') {
+                    setAcolyteOfNatureEnabled(true);
+                    setAcolyteOfNatureCantripLearned(acolyteOfNatureCantripValue);
+                    setAcolyteOfNatureSkillLearned(acolyteOfNatureSkillValue);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -3156,6 +3192,68 @@ export default function MeScreen() {
         );
     };
 
+
+    const renderAcolyteOfNatureDropdown = () => {
+        const natureSkills = [
+            { label: 'Animal Handling', value: 'animal handling' },
+            { label: 'Nature', value: 'nature' },
+            { label: 'Survival', value: 'survival' }
+        ];
+        const druidCantrips = cantripsData
+            .filter((cantrip) => cantrip.classes && cantrip.classes.includes('Druid'))
+            .map((cantrip) => ({
+                label: cantrip.name,
+                value: cantrip.name
+            }));
+
+        return (
+            <View style={{ zIndex: 2000 }}>
+                <Text style={{ color: 'black', marginBottom: 5 }}>Acolyte of Nature</Text>
+                <DropDownPicker
+                    open={acolyteOfNatureCantripOpen}
+                    value={acolyteOfNatureCantripValue}
+                    items={druidCantrips}
+                    setOpen={setAcolyteOfNatureCantripOpen}
+                    setValue={setAcolyteOfNatureCantripValue}
+                    placeholder="Select a druid cantrip"
+                    style={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        marginBottom: 10
+                    }}
+                    textStyle={{
+                        color: 'white'
+                    }}
+                    dropDownContainerStyle={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    zIndex={2000}
+                />
+                <DropDownPicker
+                    open={acolyteOfNatureSkillOpen}
+                    value={acolyteOfNatureSkillValue}
+                    items={natureSkills}
+                    setOpen={setAcolyteOfNatureSkillOpen}
+                    setValue={setAcolyteOfNatureSkillValue}
+                    placeholder="Select a nature skill"
+                    style={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    textStyle={{
+                        color: 'white'
+                    }}
+                    dropDownContainerStyle={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    zIndex={1000}
+                />
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -3997,6 +4095,9 @@ export default function MeScreen() {
 
                                 {/* Blessings of Knowledge */}
                                 {subclass === 'knowledge' && !blessingsOfKnowledgeEnabled && renderBlessingsOfKnowledgeDropdown()}
+
+                                {/* Acolyte of Nature */}
+                                {subclass === 'nature' && !acolyteOfNatureEnabled && renderAcolyteOfNatureDropdown()}
 
                                 {/* Add more subclass features here following the same pattern:
                                 {subclass === '[subclass]' && (

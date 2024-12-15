@@ -260,7 +260,9 @@ export default function SpellbookScreen() {
         arcaneMasteryEnabled,
         arcaneMasterySpellsLearned,
         deathDomainEnabled,
-        reaperCantripLearned
+        reaperCantripLearned,
+        acolyteOfNatureCantripLearned,
+        acolyteOfNatureEnabled
     } = useContext(CharacterContext) as unknown as CharacterContextProps;
 
 
@@ -492,7 +494,8 @@ export default function SpellbookScreen() {
                 (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0 ? arcaneInitiateCantrips.length : 0) +
                 (deathDomainEnabled && reaperCantripLearned ? 1 : 0) +
                 (subclass === 'grave' ? 1 : 0) +
-                (subclass === 'light' ? 1 : 0);
+                (subclass === 'light' ? 1 : 0) +
+                (acolyteOfNatureEnabled && acolyteOfNatureCantripLearned ? 1 : 0);
 
             let initialSlots: (string | null)[] = Array(totalSlots).fill(null);
 
@@ -535,6 +538,14 @@ export default function SpellbookScreen() {
                 const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
                 if (nextEmptySlot !== -1) {
                     initialSlots[nextEmptySlot] = 'Light';
+                }
+            }
+
+            // Assign Acolyte of Nature cantrip for Nature domain subclass for cleric
+            if (subclass === 'nature' && !initialSlots.includes(acolyteOfNatureCantripLearned)) {
+                const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
+                if (nextEmptySlot !== -1) {
+                    initialSlots[nextEmptySlot] = acolyteOfNatureCantripLearned;
                 }
             }
 
@@ -1017,13 +1028,19 @@ export default function SpellbookScreen() {
             cantripsData.filter(cantrip => cantrip.name === 'Light') :
             [];
 
+        // Get Acolyte of Nature cantrip if subclass is nature
+        const acolyteOfNatureCantrip = subclass === 'nature' && acolyteOfNatureCantripLearned && acolyteOfNatureEnabled ?
+            cantripsData.filter(cantrip => cantrip.name === acolyteOfNatureCantripLearned) :
+            [];
+
         // Combine and remove duplicates
         const combinedCantrips = [
             ...classCantrips,
             ...arcaneInitiateCantripObjects,
             ...reaperCantripObject,
             ...graveCantrip,
-            ...lightCantrip
+            ...lightCantrip,
+            ...acolyteOfNatureCantrip
         ];
         const uniqueCantrips = combinedCantrips.filter((cantrip, index, self) =>
             index === self.findIndex(c => c.name === cantrip.name)

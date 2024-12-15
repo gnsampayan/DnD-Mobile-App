@@ -76,6 +76,9 @@ import keeperOfSoulsImage from '@actions/keeper-of-souls-image.png';
 import lifeDivineStrikeImage from '@actions/life-divine-strike-image.png';
 import wardingFlareImage from '@actions/warding-flare-image.png';
 import coronaOfLightImage from '@actions/corona-of-light-image.png';
+import dampenElementsImage from '@actions/dampen-elements-image.png';
+import natureDivineStrikeImage from '@actions/nature-divine-strike-image.png';
+import masterOfNatureImage from '@actions/master-of-nature-image.png';
 
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
@@ -1556,6 +1559,43 @@ export default function ActionsScreen() {
           source: 'class',
         } as ActionBlock);
       }
+      // Nature Domain
+      if (subclass?.toLowerCase() === 'nature' && statsData.level >= 6) {
+        // Add 'Dampen Elements' action
+        classActions.push({
+          id: 'class-dampen-elements',
+          name: 'Dampen Elements',
+          cost: { actions: 0, bonus: 0, reaction: 1 },
+          details: 'As a reaction, when you or a creature within 30 feet of you takes acid, cold, fire, lightning, or thunder damage, you can use your reaction to grant resistance to the creature against that instance of the damage.',
+          image: dampenElementsImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'nature' && statsData.level >= 8) {
+        // Add 'Divine Strike' action
+        classActions.push({
+          id: 'class-divine-strike',
+          name: 'Divine Strike',
+          cost: { actions: 0, bonus: 0 },
+          details: 'Optional: On hit, add 1d8 cold, fire, or lightning damage (your choice) to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
+          image: natureDivineStrikeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'nature' && statsData.level >= 17) {
+        // Add 'Master of Nature' action
+        classActions.push({
+          id: 'class-master-of-nature',
+          name: 'Master of Nature',
+          cost: { actions: 0, bonus: 1 },
+          details: 'Only usable if creature is charmed by your Channel Divinity: Charm Animal and Plants.\n\nUse a bonus action on your turn to verbally command what each of those creatures will do on its next turn.',
+          image: masterOfNatureImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
     }
 
     // Druid
@@ -2486,7 +2526,8 @@ export default function ActionsScreen() {
                 statsData.class?.toLowerCase() === 'cleric' &&
                 (subclass?.toLowerCase() === 'death' ||
                   subclass?.toLowerCase() === 'forge' ||
-                  subclass?.toLowerCase() === 'life') &&
+                  subclass?.toLowerCase() === 'life' ||
+                  subclass?.toLowerCase() === 'nature') &&
                 statsData.level >= 8
               ) {
                 setDevineStrikeUsed(false);

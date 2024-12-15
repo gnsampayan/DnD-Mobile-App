@@ -83,6 +83,12 @@ export interface CharacterContextProps {
     setBlessingsOfKnowledgeEnabled: (value: boolean) => void;
     blessingsOfKnowledgeSkillsLearned: string[];
     setBlessingsOfKnowledgeSkillsLearned: (value: string[]) => void;
+    acolyteOfNatureEnabled: boolean;
+    setAcolyteOfNatureEnabled: (value: boolean) => void;
+    acolyteOfNatureCantripLearned: string | null;
+    setAcolyteOfNatureCantripLearned: (value: string | null) => void;
+    acolyteOfNatureSkillLearned: string | null;
+    setAcolyteOfNatureSkillLearned: (value: string | null) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -130,6 +136,9 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [reaperCantripLearned, setReaperCantripLearned] = useState<string | null>(null);
     const [blessingsOfKnowledgeEnabled, setBlessingsOfKnowledgeEnabled] = useState<boolean>(false);
     const [blessingsOfKnowledgeSkillsLearned, setBlessingsOfKnowledgeSkillsLearned] = useState<string[]>([]);
+    const [acolyteOfNatureEnabled, setAcolyteOfNatureEnabled] = useState<boolean>(false);
+    const [acolyteOfNatureCantripLearned, setAcolyteOfNatureCantripLearned] = useState<string | null>(null);
+    const [acolyteOfNatureSkillLearned, setAcolyteOfNatureSkillLearned] = useState<string | null>(null);
 
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
@@ -163,6 +172,11 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const REAPER_CANTRIP_LEARNED_STORAGE_KEY = '@reaper_cantrip_learned';
     const BLESSINGS_OF_KNOWLEDGE_ENABLED_STORAGE_KEY = '@blessings_of_knowledge_enabled';
     const BLESSINGS_OF_KNOWLEDGE_SKILLS_LEARNED_STORAGE_KEY = '@blessings_of_knowledge_skills_learned';
+    const ACLOYTE_OF_NATURE_ENABLED_STORAGE_KEY = '@acolyte_of_nature_enabled';
+    const ACLOYTE_OF_NATURE_CANTTIP_LEARNED_STORAGE_KEY = '@acolyte_of_nature_cantrip_learned';
+    const ACLOYTE_OF_NATURE_SKILL_LEARNED_STORAGE_KEY = '@acolyte_of_nature_skill_learned';
+
+
 
     const loadDataFromStorage = async () => {
         try {
@@ -310,6 +324,21 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setter: setBlessingsOfKnowledgeSkillsLearned,
                     parser: JSON.parse
                 },
+                {
+                    key: ACLOYTE_OF_NATURE_ENABLED_STORAGE_KEY,
+                    setter: setAcolyteOfNatureEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: ACLOYTE_OF_NATURE_CANTTIP_LEARNED_STORAGE_KEY,
+                    setter: setAcolyteOfNatureCantripLearned,
+                    parser: (val: string) => val
+                },
+                {
+                    key: ACLOYTE_OF_NATURE_SKILL_LEARNED_STORAGE_KEY,
+                    setter: setAcolyteOfNatureSkillLearned,
+                    parser: (val: string) => val
+                },
             ];
 
             await Promise.all(
@@ -370,7 +399,52 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setReaperCantripLearned(null);
         setBlessingsOfKnowledgeEnabled(false);
         setBlessingsOfKnowledgeSkillsLearned([]);
+        setAcolyteOfNatureEnabled(false);
+        setAcolyteOfNatureCantripLearned(null);
+        setAcolyteOfNatureSkillLearned(null);
     };
+
+    // save acolyte of nature skill learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveAcolyteOfNatureSkillLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ACLOYTE_OF_NATURE_SKILL_LEARNED_STORAGE_KEY, JSON.stringify(acolyteOfNatureSkillLearned));
+                } catch (error) {
+                    console.error('Error saving acolyte of nature skill learned to AsyncStorage:', error);
+                }
+            }
+            saveAcolyteOfNatureSkillLearnedToStorage();
+        }
+    }, [acolyteOfNatureSkillLearned, isLoading]);
+
+    // save acolyte of nature cantrip learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveAcolyteOfNatureCantripLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ACLOYTE_OF_NATURE_CANTTIP_LEARNED_STORAGE_KEY, JSON.stringify(acolyteOfNatureCantripLearned));
+                } catch (error) {
+                    console.error('Error saving acolyte of nature cantrip learned to AsyncStorage:', error);
+                }
+            }
+            saveAcolyteOfNatureCantripLearnedToStorage();
+        }
+    }, [acolyteOfNatureCantripLearned, isLoading]);
+
+    // save acolyte of nature enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveAcolyteOfNatureEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ACLOYTE_OF_NATURE_ENABLED_STORAGE_KEY, acolyteOfNatureEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving acolyte of nature enabled to AsyncStorage:', error);
+                }
+            }
+            saveAcolyteOfNatureEnabledToStorage();
+        }
+    }, [acolyteOfNatureEnabled, isLoading]);
 
     // save blessings of knowledge skills learned to AsyncStorage whenever it changes
     useEffect(() => {
@@ -405,7 +479,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         if (!isLoading) {
             const saveReaperCantripLearnedToStorage = async () => {
                 try {
-                    await AsyncStorage.setItem(REAPER_CANTRIP_LEARNED_STORAGE_KEY, reaperCantripLearned ?? 'null');
+                    await AsyncStorage.setItem(REAPER_CANTRIP_LEARNED_STORAGE_KEY, JSON.stringify(reaperCantripLearned));
                 } catch (error) {
                     console.error('Error saving reaper cantrip learned to AsyncStorage:', error);
                 }
@@ -965,6 +1039,12 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setBlessingsOfKnowledgeEnabled,
                 blessingsOfKnowledgeSkillsLearned,
                 setBlessingsOfKnowledgeSkillsLearned,
+                acolyteOfNatureEnabled,
+                setAcolyteOfNatureEnabled,
+                acolyteOfNatureCantripLearned,
+                setAcolyteOfNatureCantripLearned,
+                acolyteOfNatureSkillLearned,
+                setAcolyteOfNatureSkillLearned,
             }}
         >
             {children}

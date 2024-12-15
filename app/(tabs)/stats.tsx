@@ -100,9 +100,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     }
 
     const {
-        primalKnowledgeEnabled,
         primalChampionEnabled,
-        blessingsOfKnowledgeSkillsLearned
+        blessingsOfKnowledgeSkillsLearned,
+        acolyteOfNatureSkillLearned
     } = useContext(CharacterContext) as CharacterContextProps;
 
     useEffect(() => {
@@ -527,12 +527,25 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         // Determine if the skill proficiency is gained from blessings of knowledge
         const blessingsOfKnowledgeProficiency = blessingsOfKnowledgeSkillsLearned?.includes(item.name.toLowerCase());
 
+        // Determine if the skill proficiency is gained from acolyte of nature
+        const acolyteOfNatureProficiency = acolyteOfNatureSkillLearned?.includes(item.name.toLowerCase());
+
         // Calculate the total skill modifier, if from blessings of knowledge, add proficiency bonus twice
         const skillModifier =
-            abilityModifier + (raceProficiency || gainedProficiency || blessingsOfKnowledgeProficiency ? proficiencyBonus : 0);
+            abilityModifier + (
+                raceProficiency ||
+                    gainedProficiency ||
+                    blessingsOfKnowledgeProficiency ||
+                    acolyteOfNatureProficiency ?
+                    proficiencyBonus : 0
+            );
 
         // Determine if the skill is proficient (either from race or gained)
-        const isProficient = raceProficiency || gainedProficiency || blessingsOfKnowledgeProficiency;
+        const isProficient =
+            raceProficiency ||
+            gainedProficiency ||
+            blessingsOfKnowledgeProficiency ||
+            acolyteOfNatureProficiency;
 
         // Define allowed skills per class
         const allowedSkillsByClass: { [key: string]: string[] } = {
