@@ -74,6 +74,8 @@ import eyesOfTheGraveImage from '@actions/eyes-of-the-grave-image.png';
 import sentinelAtDeathsDoorImage from '@actions/sentinel-at-deaths-door-image.png';
 import keeperOfSoulsImage from '@actions/keeper-of-souls-image.png';
 import lifeDivineStrikeImage from '@actions/life-divine-strike-image.png';
+import wardingFlareImage from '@actions/warding-flare-image.png';
+import coronaOfLightImage from '@actions/corona-of-light-image.png';
 
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
@@ -307,8 +309,10 @@ export default function ActionsScreen() {
   const { cantripSlotsData } = useContext(CantripSlotsContext);
   // Define state for combined actions
   const [combinedActions, setCombinedActions] = useState<ActionBlock[]>([]);
-  // Path to the actions.json file
-  const ACTIONS_FILE_PATH = `${FileSystem.documentDirectory}actions.json`;
+
+  // Define the key for actions in AsyncStorage
+  const ACTIONS_STORAGE_KEY = 'actions';
+
   // Use context for statsData
   const {
     statsData,
@@ -377,7 +381,7 @@ export default function ActionsScreen() {
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
-    { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1 }, image: defaultLongRestImage },
+    { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1, reaction: 1 }, image: defaultLongRestImage },
     { id: '1', name: 'Reaction', details: 'Instantly respond to a trigger', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
     { id: '2', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '3', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
@@ -412,7 +416,7 @@ export default function ActionsScreen() {
   const [eyesOfTheGravePoints, setEyesOfTheGravePoints] = useState<number>(0);
   const [sentinelAtDeathsDoorPoints, setSentinelAtDeathsDoorPoints] = useState<number>(0);
   const [keeperOfSoulsUsed, setKeeperOfSoulsUsed] = useState<boolean>(false);
-
+  const [wardingFlarePoints, setWardingFlarePoints] = useState<number>(0);
 
 
   useEffect(() => {
@@ -421,6 +425,8 @@ export default function ActionsScreen() {
     setEyesOfTheGravePoints(Math.max(1, wisdomModifier));
     // Initialize sentinelAtDeathsDoorPoints based on Wisdom modifier (minimum of 1)
     setSentinelAtDeathsDoorPoints(Math.max(1, wisdomModifier));
+    // Initialize wardingFlarePoints based on Wisdom modifier (minimum of 1)
+    setWardingFlarePoints(Math.max(1, wisdomModifier));
   }, [statsData.abilities]);
 
   // Initialize currentChannelDivinityPoints based on level
@@ -616,62 +622,47 @@ export default function ActionsScreen() {
   const [currentWisdomModifier, setCurrentWisdomModifier] = useState<number>(0);
 
 
-  // Function to load actions from file system
+  // Function to load actions from AsyncStorage
   const loadActions = async () => {
     try {
-      const fileInfo = await FileSystem.getInfoAsync(ACTIONS_FILE_PATH);
-      if (fileInfo.exists) {
-        const jsonString = await FileSystem.readAsStringAsync(ACTIONS_FILE_PATH);
+      const jsonString = await AsyncStorage.getItem(ACTIONS_STORAGE_KEY);
+      if (jsonString !== null) {
         let parsedActions: ActionBlock[] = JSON.parse(jsonString);
 
-        // Optional: Migrate cost from array to object if necessary
-        const needsMigration = parsedActions.some(action => Array.isArray(action.cost));
-        if (needsMigration) {
-          parsedActions = parsedActions.map(action => {
-            if (Array.isArray(action.cost)) {
-              return {
-                ...action,
-                cost: {
-                  actions: action.cost[0],
-                  bonus: action.cost[1],
-                },
-              };
-            }
-            return action;
-          });
-          await saveActions(parsedActions);
-        }
-
-
-        const isValid = parsedActions.every(action => {
-          return (
-            action.cost &&
-            typeof action.cost.actions === 'number' &&
-            typeof action.cost.bonus === 'number'
-          );
+        // Migration: Ensure all defaultActions are present and updated
+        defaultActions.forEach(defaultAction => {
+          const existingAction = parsedActions.find(action => action.id === defaultAction.id);
+          if (existingAction) {
+            // Merge any missing fields from defaultAction into existingAction
+            parsedActions = parsedActions.map(action => {
+              if (action.id === defaultAction.id) {
+                return { ...defaultAction, ...action };
+              }
+              return action;
+            });
+          } else {
+            // If the action doesn't exist, add it
+            parsedActions.push(defaultAction);
+          }
         });
 
+        // Optionally, remove actions that are no longer in defaultActions
+        parsedActions = parsedActions.filter(action => defaultActions.some(def => def.id === action.id));
 
-        if (isValid) {
-          setActions(parsedActions);
-          // Generate cantrip actions from cantripSlotsData
-          const cantripActions = generateCantripActions(cantripSlotsData);
-          // Combine actions and cantripActions
-          setCombinedActions([...parsedActions, ...cantripActions]);
-        } else {
-          // If invalid, reset to default actions
-          setActions(defaultActions);
-          saveActions(defaultActions);
-        }
+        // Save the migrated actions back to AsyncStorage
+        await saveActions(parsedActions);
+
+        setActions(parsedActions);
       } else {
         // If no actions in storage, initialize with default actions
         setActions(defaultActions);
-        saveActions(defaultActions);
+        await saveActions(defaultActions);
       }
     } catch (error) {
       console.error('Failed to load actions:', error);
       // In case of error, initialize with default actions
       setActions(defaultActions);
+      await saveActions(defaultActions);
     }
   };
 
@@ -795,11 +786,11 @@ export default function ActionsScreen() {
 
 
 
-  // Function to save actions to file system
+  // Function to save actions to async storage
   const saveActions = async (actionsToSave: ActionBlock[]) => {
     try {
       const jsonString = JSON.stringify(actionsToSave);
-      await FileSystem.writeAsStringAsync(ACTIONS_FILE_PATH, jsonString);
+      await AsyncStorage.setItem(ACTIONS_STORAGE_KEY, jsonString);
     } catch (error) {
       console.error('Failed to save actions:', error);
     }
@@ -810,29 +801,6 @@ export default function ActionsScreen() {
     setNumColumns((prevColumns) => (prevColumns % 3) + 2);
   };
 
-
-  // Function to reset custom actions
-  const resetActions = async () => {
-    try {
-      // Delete the actions.json file
-      await FileSystem.deleteAsync(ACTIONS_FILE_PATH, { idempotent: true });
-
-      // Delete any images associated with custom actions
-      const imageDeletionPromises = actions.map(action => {
-        if (!defaultActions.some(defaultAction => defaultAction.id === action.id) && action.image) {
-          return FileSystem.deleteAsync(action.image as string, { idempotent: true });
-        }
-        return Promise.resolve();
-      });
-      await Promise.all(imageDeletionPromises);
-
-      // Reset actions to default
-      setActions(defaultActions);
-      saveActions(defaultActions);
-    } catch (error) {
-      console.error('Failed to reset actions:', error);
-    }
-  };
 
 
   const handleTitleLongPress = () => {
@@ -1033,6 +1001,10 @@ export default function ActionsScreen() {
       // Check for keeper of souls
       if (item.name.toLowerCase() === 'keeper of souls') {
         affordable = affordable && keeperOfSoulsUsed === false;
+      }
+      // Check for warding flare
+      if (item.name.toLowerCase() === 'warding flare') {
+        affordable = affordable && wardingFlarePoints > 0;
       }
       // Check for wild shape
       if (statsData.class?.toLowerCase() === 'druid' && item.name.toLowerCase() === 'wild shape') {
@@ -1555,6 +1527,31 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 0 },
           details: 'Optional: On hit, add 1d8 radiant damage to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
           image: lifeDivineStrikeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      // Light Domain
+      if (subclass?.toLowerCase() === 'light') {
+        // Add 'Warding Flare' action
+        classActions.push({
+          id: 'class-warding-flare',
+          name: 'Warding Flare',
+          cost: { actions: 0, bonus: 0, reaction: 1 },
+          details: 'As a reaction, impose disadvantage on an attack roll made against you (can be used on others at level 6) by a creature within 30 feet that you can see. Blinded creatures are immune.\n\n(see Divine Domain feat for details)',
+          image: wardingFlareImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'light' && statsData.level >= 17) {
+        // Add 'Corona of Light' action
+        classActions.push({
+          id: 'class-corona-of-light',
+          name: 'Corona of Light',
+          cost: { actions: 1, bonus: 0 },
+          details: 'Starting at 17th level, you can use your action to activate an aura of sunlight that lasts for 1 minute or until you dismiss it using another action. You emit bright light in a 60-foot radius and dim light 30 feet beyond that. Your enemies in the bright light have disadvantage on saving throws against any spell that deals fire or radiant damage.',
+          image: coronaOfLightImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2164,6 +2161,28 @@ export default function ActionsScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Show if user class is cleric and subclass is light */}
+          {statsData.class?.toLowerCase() === 'cleric' && subclass?.toLowerCase() === 'light' && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                onPress={() => {
+                  Alert.alert('Warding Flare', 'As a reaction, impose disadvantage on an attack roll made against you by a creature within 30 feet that you can see. Blinded creatures are immune.\n\n(see Divine Domain feat for details)');
+                }}>
+                <MaterialCommunityIcons name="flare" size={20} color="white" style={{ opacity: wardingFlarePoints === 0 ? 0.2 : 1 }} />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    wardingFlarePoints === 0 && { color: 'black' }
+                  ]}>
+                    x{wardingFlarePoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
 
           {/* Show if user class is druid */}
           {statsData.class?.toLowerCase() === 'druid' && wildShapeEnabled && (
@@ -3197,6 +3216,10 @@ export default function ActionsScreen() {
                                   setSentinelAtDeathsDoorPoints(Math.max(1, wisdomModifier));
                                 }
                               }
+                              if (subclass?.toLowerCase() === 'light') {
+                                const wisdomModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Wisdom')?.value || 10);
+                                setWardingFlarePoints(Math.max(1, wisdomModifier));
+                              }
                               // add more conditions here
                               // add more conditions here
                               break;
@@ -3243,6 +3266,9 @@ export default function ActionsScreen() {
                               break;
                             case 'keeper of souls':
                               setKeeperOfSoulsUsed(true);
+                              break;
+                            case 'warding flare':
+                              setWardingFlarePoints(prev => Math.max(0, prev - 1));
                               break;
                           }
 

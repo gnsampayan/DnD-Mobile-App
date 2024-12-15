@@ -491,7 +491,8 @@ export default function SpellbookScreen() {
             let totalSlots = (cantripSlots !== null ? cantripSlots : 0) +
                 (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0 ? arcaneInitiateCantrips.length : 0) +
                 (deathDomainEnabled && reaperCantripLearned ? 1 : 0) +
-                (subclass === 'grave' ? 1 : 0);
+                (subclass === 'grave' ? 1 : 0) +
+                (subclass === 'light' ? 1 : 0);
 
             let initialSlots: (string | null)[] = Array(totalSlots).fill(null);
 
@@ -526,6 +527,14 @@ export default function SpellbookScreen() {
                 const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
                 if (nextEmptySlot !== -1) {
                     initialSlots[nextEmptySlot] = 'Spare the Dying';
+                }
+            }
+
+            // Assign Light cantrip for Light domain subclass for cleric
+            if (subclass === 'light' && !initialSlots.includes('Light')) {
+                const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
+                if (nextEmptySlot !== -1) {
+                    initialSlots[nextEmptySlot] = 'Light';
                 }
             }
 
@@ -1003,8 +1012,19 @@ export default function SpellbookScreen() {
             cantripsData.filter(cantrip => cantrip.name === 'Spare the Dying') :
             [];
 
+        // Get Light cantrip if subclass is light
+        const lightCantrip = subclass === 'light' ?
+            cantripsData.filter(cantrip => cantrip.name === 'Light') :
+            [];
+
         // Combine and remove duplicates
-        const combinedCantrips = [...classCantrips, ...arcaneInitiateCantripObjects, ...reaperCantripObject, ...graveCantrip];
+        const combinedCantrips = [
+            ...classCantrips,
+            ...arcaneInitiateCantripObjects,
+            ...reaperCantripObject,
+            ...graveCantrip,
+            ...lightCantrip
+        ];
         const uniqueCantrips = combinedCantrips.filter((cantrip, index, self) =>
             index === self.findIndex(c => c.name === cantrip.name)
         );
