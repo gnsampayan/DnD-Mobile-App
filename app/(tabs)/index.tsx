@@ -16,8 +16,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
-import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/actionsStyles';
 import raceBonuses from '../data/raceData.json';
 import { CharacterContext, DraconicAncestry } from '../../context/equipmentActionsContext';
@@ -79,6 +77,9 @@ import coronaOfLightImage from '@actions/corona-of-light-image.png';
 import dampenElementsImage from '@actions/dampen-elements-image.png';
 import natureDivineStrikeImage from '@actions/nature-divine-strike-image.png';
 import masterOfNatureImage from '@actions/master-of-nature-image.png';
+import voiceOfAuthorityImage from '@actions/voice-of-authority-image.png';
+import orderDivineStrikeImage from '@actions/order-divine-strike-image.png';
+import ordersWrathImage from '@actions/orders-wrath-image.png';
 
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
@@ -276,9 +277,6 @@ export default function ActionsScreen() {
   const [actions, setActions] = useState<ActionBlock[]>([]);
   const [actionModalVisible, setActionModalVisible] = useState(false);
   const [selectedAction, setSelectedAction] = useState<ActionBlock | null>(null);
-  const [newActionDetails, setNewActionDetails] = useState<string>(''); // State for the new action details
-  const [editedActionName, setEditedActionName] = useState<string>(''); // State for the edited action name
-  const [editingField, setEditingField] = useState<'title' | 'details' | null>(null); // Track which field is being edited
   const [hp, setHp] = useState(0);
   const [tempHp, setTempHp] = useState(0);
   const [maxHp, setMaxHp] = useState(0);
@@ -353,6 +351,7 @@ export default function ActionsScreen() {
     countercharmEnabled,
     channelDivinityEnabled,
     wildShapeEnabled,
+    orderDomainEnabled,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -374,6 +373,7 @@ export default function ActionsScreen() {
     countercharmEnabled: boolean;
     channelDivinityEnabled: boolean;
     wildShapeEnabled: boolean;
+    orderDomainEnabled: boolean;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -420,7 +420,8 @@ export default function ActionsScreen() {
   const [sentinelAtDeathsDoorPoints, setSentinelAtDeathsDoorPoints] = useState<number>(0);
   const [keeperOfSoulsUsed, setKeeperOfSoulsUsed] = useState<boolean>(false);
   const [wardingFlarePoints, setWardingFlarePoints] = useState<number>(0);
-
+  const [embodimentOfTheLawPoints, setEmbodimentOfTheLawPoints] = useState<number>(0);
+  const [ordersWrathUsed, setOrdersWrathUsed] = useState<boolean>(false);
 
   useEffect(() => {
     const wisdomModifier = calculateModifier(statsData.abilities.find(ability => ability.name.toLowerCase() === 'wisdom')?.value || 10);
@@ -430,6 +431,8 @@ export default function ActionsScreen() {
     setSentinelAtDeathsDoorPoints(Math.max(1, wisdomModifier));
     // Initialize wardingFlarePoints based on Wisdom modifier (minimum of 1)
     setWardingFlarePoints(Math.max(1, wisdomModifier));
+    // Initialize embodimentOfTheLawPoints based on Wisdom modifier (minimum of 1)
+    setEmbodimentOfTheLawPoints(Math.max(1, wisdomModifier));
   }, [statsData.abilities]);
 
   // Initialize currentChannelDivinityPoints based on level
@@ -591,6 +594,7 @@ export default function ActionsScreen() {
     actions,
     cantripSlotsData,
     statsData.race,
+    statsData.class,
     statsData.level,
     infernalLegacyEnabled,
     draconicAncestry,
@@ -598,9 +602,12 @@ export default function ActionsScreen() {
     magicalTinkeringEnabled,
     infuseItemEnabled,
     bardicInspirationEnabled,
+    fontOfInspirationEnabled,
     countercharmEnabled,
     channelDivinityEnabled,
-    subclass
+    subclass,
+    orderDomainEnabled,
+    wildShapeEnabled,
     // Add other dependencies as needed for new actions gained from class features
   ]);
 
@@ -806,99 +813,6 @@ export default function ActionsScreen() {
 
 
 
-  const handleTitleLongPress = () => {
-    if (selectedAction) {
-      if (isDefaultAction(selectedAction.id) || ('type' in selectedAction && selectedAction.type === 'cantrip')) {
-        Alert.alert('Information', 'You cannot edit the title of built-in actions');
-        return;
-      }
-
-      Alert.alert(
-        'Rename Action',
-        'Do you want to rename this action?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Rename',
-            onPress: () => {
-              setEditingField('title');
-              setEditedActionName(selectedAction.name);
-            },
-          },
-        ],
-        { cancelable: true }
-      );
-    }
-  };
-
-  const handleDetailsLongPress = () => {
-    if (selectedAction) {
-      if (isDefaultAction(selectedAction.id) || ('type' in selectedAction && selectedAction.type === 'cantrip')) {
-        Alert.alert('Information', 'You cannot edit the details of built-in actions');
-        return;
-      }
-
-      Alert.alert(
-        'Edit Details',
-        'Do you want to edit the details of this action?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Edit',
-            onPress: () => {
-              setEditingField('details');
-              setNewActionDetails(selectedAction.details || '');
-            },
-          },
-        ],
-        { cancelable: true }
-      );
-    }
-  };
-
-  const saveActionName = () => {
-    if (selectedAction) {
-      const updatedActions = actions.map(action => {
-        if (action.id === selectedAction.id) {
-          return { ...action, name: editedActionName }; // Update the action name
-        }
-        return action;
-      });
-      setActions(updatedActions);
-      saveActions(updatedActions); // Save the updated actions
-
-      // Update the selectedAction to reflect the new name
-      setSelectedAction(prev => (prev ? { ...prev, name: editedActionName } : null));
-
-      setEditingField(null); // Exit editing mode
-    }
-  };
-
-
-  const saveActionDetails = () => {
-    if (selectedAction) {
-      const updatedActions = actions.map(action => {
-        if (action.id === selectedAction.id) {
-          return { ...action, details: newActionDetails }; // Update the action details
-        }
-        return action;
-      });
-      setActions(updatedActions);
-      saveActions(updatedActions); // Save the updated actions
-
-      // Update the selectedAction to reflect the new details
-      setSelectedAction(prev => (prev ? { ...prev, details: newActionDetails } : null));
-      setEditingField(null); // Exit editing mode
-    }
-  };
-
-
   // Commit Action Function
   const commitAction = () => {
     if (selectedAction) {
@@ -1008,6 +922,10 @@ export default function ActionsScreen() {
       // Check for warding flare
       if (item.name.toLowerCase() === 'warding flare') {
         affordable = affordable && wardingFlarePoints > 0;
+      }
+      // Check for orders wrath
+      if (item.name.toLowerCase() === 'orders wrath') {
+        affordable = affordable && !ordersWrathUsed;
       }
       // Check for wild shape
       if (statsData.class?.toLowerCase() === 'druid' && item.name.toLowerCase() === 'wild shape') {
@@ -1592,6 +1510,43 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 1 },
           details: 'Only usable if creature is charmed by your Channel Divinity: Charm Animal and Plants.\n\nUse a bonus action on your turn to verbally command what each of those creatures will do on its next turn.',
           image: masterOfNatureImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      // Order Domain
+      if (subclass?.toLowerCase() === 'order' && orderDomainEnabled === true) {
+        // Add 'Voice of Authority' action
+        classActions.push({
+          id: 'class-voice-of-authority',
+          name: 'Voice of Authority',
+          cost: { actions: 0, bonus: 0 },
+          details: '(Passive)\n\nIf you cast a level 1 spell or higher, that targets an ally, that ally can use their reaction immediately after the spell to make one weapon attack against a creature of your choice that you can see.',
+          image: voiceOfAuthorityImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'order' && statsData.level >= 8) {
+        // Add 'Divine Strike' action
+        classActions.push({
+          id: 'class-divine-strike',
+          name: 'Divine Strike',
+          cost: { actions: 0, bonus: 0 },
+          details: 'Optional: On hit, add 1d8 psychic damage to one weapon attack per turn (2d8 at level 14). \n\n(see Divine Domain feat for details)',
+          image: orderDivineStrikeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (subclass?.toLowerCase() === 'order' && statsData.level >= 17) {
+        // Add 'Orders Wrath' action
+        classActions.push({
+          id: 'class-orders-wrath',
+          name: 'Orders Wrath',
+          cost: { actions: 0, bonus: 0 },
+          details: '(Passive)\n\nStarting at 17th level, enemies you designate for destruction wilt under the combined efforts of you and your allies. If you deal your Divine Strike damage to a creature on your turn, you can curse that creature until the start of your next turn. The next time one of your allies hits the cursed creature with an attack, the target also takes 2d8 psychic damage, and the curse ends. You can curse a creature in this way only once per turn.',
+          image: ordersWrathImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2223,6 +2178,40 @@ export default function ActionsScreen() {
             </View>
           )}
 
+          {/* Show if user class is cleric and subclass is order and level >= 6 */}
+          {statsData.class?.toLowerCase() === 'cleric' && subclass?.toLowerCase() === 'order' && statsData.level >= 6 && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                onPress={() => {
+                  Alert.alert(
+                    'Embodiment of the Law',
+                    'Use a bonus action instead of an action to cast a spell.\n\n(see Divine Domain: Embodiment of the Law feat for details)\n\nHOW TO USE:\n\n1. Click "Use" to expend an Embodyment of the Law Point.\n\n2. Manually commit a bonus action.\n\n3. Manually expend a spell slot of the casted spell\'s SpLv or higher if you want to upcast.\n\n4. DO NOT: cast the spell using the modal.',
+                    [
+                      { text: 'OK' },
+                      ...(embodimentOfTheLawPoints > 0 ? [{
+                        text: 'Use', onPress: () => {
+                          if (embodimentOfTheLawPoints > 0) {
+                            setEmbodimentOfTheLawPoints(embodimentOfTheLawPoints - 1);
+                          }
+                        }
+                      }] : [])
+                    ]
+                  );
+                }}>
+                <MaterialCommunityIcons name="police-badge" size={20} color="white" style={{ opacity: embodimentOfTheLawPoints === 0 ? 0.2 : 1 }} />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    embodimentOfTheLawPoints === 0 && { color: 'black' }
+                  ]}>
+                    x{embodimentOfTheLawPoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
 
           {/* Show if user class is druid */}
           {statsData.class?.toLowerCase() === 'druid' && wildShapeEnabled && (
@@ -2524,16 +2513,21 @@ export default function ActionsScreen() {
               }
               if (
                 statsData.class?.toLowerCase() === 'cleric' &&
-                (subclass?.toLowerCase() === 'death' ||
+                (
+                  subclass?.toLowerCase() === 'death' ||
                   subclass?.toLowerCase() === 'forge' ||
                   subclass?.toLowerCase() === 'life' ||
-                  subclass?.toLowerCase() === 'nature') &&
-                statsData.level >= 8
+                  subclass?.toLowerCase() === 'nature' ||
+                  subclass?.toLowerCase() === 'order'
+                ) && statsData.level >= 8
               ) {
                 setDevineStrikeUsed(false);
               }
               if (subclass?.toLowerCase() === 'grave' && statsData.level >= 17) {
                 setKeeperOfSoulsUsed(false);
+              }
+              if (subclass?.toLowerCase() === 'order' && statsData.level >= 17) {
+                setOrdersWrathUsed(false);
               }
               endTurn();
             }}
@@ -2578,25 +2572,12 @@ export default function ActionsScreen() {
                       </TouchableWithoutFeedback>
                       <View style={{ flex: 1 }}>
                         {/* Title Section */}
-                        {editingField === 'title' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
-                          <TextInput
-                            style={styles.modalInput}
-                            value={editedActionName}
-                            onChangeText={setEditedActionName}
-                            keyboardType="default"
-                            onBlur={saveActionName}
-                            onSubmitEditing={saveActionName}
-                            autoFocus={true}
-                          />
-                        ) : (
-                          <TouchableWithoutFeedback onLongPress={handleTitleLongPress}>
-                            <Text style={styles.modalTitle}>
-                              {selectedAction.name === 'Attack'
-                                ? (isArmed ? 'Armed ' : 'Unarmed ')
-                                : ''}{selectedAction?.name}
-                            </Text>
-                          </TouchableWithoutFeedback>
-                        )}
+
+                        <Text style={styles.modalTitle}>
+                          {selectedAction.name === 'Attack'
+                            ? (isArmed ? 'Armed ' : 'Unarmed ')
+                            : ''}{selectedAction?.name}
+                        </Text>
 
                         {/* Weapon Type Section */}
                         {['Attack', 'Ranged Attack', 'Offhand Attack'].map((actionType) => {
@@ -2703,26 +2684,10 @@ export default function ActionsScreen() {
                     </View>
 
                     {/* Details Section */}
-                    {editingField === 'details' && !defaultActions.find(action => action.id === selectedAction?.id) ? (
-                      <TextInput
-                        style={[styles.modalInput, styles.detailsInput]}
-                        value={newActionDetails}
-                        onChangeText={setNewActionDetails}
-                        keyboardType="default"
-                        onBlur={saveActionDetails}
-                        onSubmitEditing={saveActionDetails}
-                        multiline={true}
-                        textAlignVertical="top"
-                        autoFocus={true}
-                      />
-                    ) : (
-                      <TouchableWithoutFeedback onLongPress={handleDetailsLongPress}>
-                        <Text style={styles.modalDetails}>
-                          {selectedAction?.details || 'No details available.'}
-                        </Text>
-                      </TouchableWithoutFeedback>
-                    )}
 
+                    <Text style={styles.modalDetails}>
+                      {selectedAction?.details || 'No details available.'}
+                    </Text>
 
 
                     {/* Properties Section */}
@@ -3261,6 +3226,10 @@ export default function ActionsScreen() {
                                 const wisdomModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Wisdom')?.value || 10);
                                 setWardingFlarePoints(Math.max(1, wisdomModifier));
                               }
+                              if (orderDomainEnabled && statsData.level >= 6 && subclass?.toLowerCase() === 'order') {
+                                const wisdomModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Wisdom')?.value || 10);
+                                setEmbodimentOfTheLawPoints(Math.max(1, wisdomModifier));
+                              }
                               // add more conditions here
                               // add more conditions here
                               break;
@@ -3310,6 +3279,9 @@ export default function ActionsScreen() {
                               break;
                             case 'warding flare':
                               setWardingFlarePoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'orders wrath':
+                              setOrdersWrathUsed(true);
                               break;
                           }
 

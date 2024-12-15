@@ -89,6 +89,11 @@ export interface CharacterContextProps {
     setAcolyteOfNatureCantripLearned: (value: string | null) => void;
     acolyteOfNatureSkillLearned: string | null;
     setAcolyteOfNatureSkillLearned: (value: string | null) => void;
+    orderDomainEnabled: boolean;
+    setOrderDomainEnabled: (value: boolean) => void;
+    orderDomainSkillLearned: string | null;
+    setOrderDomainSkillLearned: (value: string | null) => void;
+
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -139,6 +144,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [acolyteOfNatureEnabled, setAcolyteOfNatureEnabled] = useState<boolean>(false);
     const [acolyteOfNatureCantripLearned, setAcolyteOfNatureCantripLearned] = useState<string | null>(null);
     const [acolyteOfNatureSkillLearned, setAcolyteOfNatureSkillLearned] = useState<string | null>(null);
+    const [orderDomainEnabled, setOrderDomainEnabled] = useState<boolean>(false);
+    const [orderDomainSkillLearned, setOrderDomainSkillLearned] = useState<string | null>(null);
 
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
@@ -175,6 +182,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const ACLOYTE_OF_NATURE_ENABLED_STORAGE_KEY = '@acolyte_of_nature_enabled';
     const ACLOYTE_OF_NATURE_CANTTIP_LEARNED_STORAGE_KEY = '@acolyte_of_nature_cantrip_learned';
     const ACLOYTE_OF_NATURE_SKILL_LEARNED_STORAGE_KEY = '@acolyte_of_nature_skill_learned';
+    const ORDER_DOMAIN_ENABLED_STORAGE_KEY = '@order_domain_enabled';
+    const ORDER_DOMAIN_SKILL_LEARNED_STORAGE_KEY = '@order_domain_skill_learned';
 
 
 
@@ -339,6 +348,16 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setter: setAcolyteOfNatureSkillLearned,
                     parser: (val: string) => val
                 },
+                {
+                    key: ORDER_DOMAIN_ENABLED_STORAGE_KEY,
+                    setter: setOrderDomainEnabled,
+                    parser: (val: string) => val === 'true'
+                },
+                {
+                    key: ORDER_DOMAIN_SKILL_LEARNED_STORAGE_KEY,
+                    setter: setOrderDomainSkillLearned,
+                    parser: (val: string) => val
+                },
             ];
 
             await Promise.all(
@@ -402,7 +421,37 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setAcolyteOfNatureEnabled(false);
         setAcolyteOfNatureCantripLearned(null);
         setAcolyteOfNatureSkillLearned(null);
+        setOrderDomainEnabled(false);
+        setOrderDomainSkillLearned(null);
     };
+
+    // save order domain skill learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveOrderDomainSkillLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ORDER_DOMAIN_SKILL_LEARNED_STORAGE_KEY, JSON.stringify(orderDomainSkillLearned));
+                } catch (error) {
+                    console.error('Error saving order domain skill learned to AsyncStorage:', error);
+                }
+            }
+            saveOrderDomainSkillLearnedToStorage();
+        }
+    }, [orderDomainSkillLearned, isLoading]);
+
+    // save order domain enabled to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveOrderDomainEnabledToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(ORDER_DOMAIN_ENABLED_STORAGE_KEY, orderDomainEnabled.toString());
+                } catch (error) {
+                    console.error('Error saving order domain enabled to AsyncStorage:', error);
+                }
+            }
+            saveOrderDomainEnabledToStorage();
+        }
+    }, [orderDomainEnabled, isLoading]);
 
     // save acolyte of nature skill learned to AsyncStorage whenever it changes
     useEffect(() => {
@@ -1045,6 +1094,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setAcolyteOfNatureCantripLearned,
                 acolyteOfNatureSkillLearned,
                 setAcolyteOfNatureSkillLearned,
+                orderDomainEnabled,
+                setOrderDomainEnabled,
+                orderDomainSkillLearned,
+                setOrderDomainSkillLearned,
             }}
         >
             {children}

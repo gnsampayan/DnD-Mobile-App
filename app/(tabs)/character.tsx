@@ -274,7 +274,6 @@ export default function MeScreen() {
         setMagicalTinkeringEnabled,
         infuseItemEnabled,
         setInfuseItemEnabled,
-        setInfuseItemSpent,
         infusionsLearned,
         setInfusionsLearned,
         primalKnowledgeEnabled,
@@ -315,6 +314,9 @@ export default function MeScreen() {
         setAcolyteOfNatureEnabled,
         setAcolyteOfNatureCantripLearned,
         setAcolyteOfNatureSkillLearned,
+        orderDomainEnabled,
+        setOrderDomainEnabled,
+        setOrderDomainSkillLearned,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -379,6 +381,8 @@ export default function MeScreen() {
     const [acolyteOfNatureSkillValue, setAcolyteOfNatureSkillValue] = useState<string | null>(null);
     const [acolyteOfNatureCantripOpen, setAcolyteOfNatureCantripOpen] = useState(false);
     const [acolyteOfNatureSkillOpen, setAcolyteOfNatureSkillOpen] = useState(false);
+    const [orderDomainSkillValue, setOrderDomainSkillValue] = useState<string | null>(null);
+    const [orderDomainSkillOpen, setOrderDomainSkillOpen] = useState(false);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -1065,7 +1069,8 @@ export default function MeScreen() {
                                         (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') ||
                                         (!deathDomainEnabled && subclass === 'death') ||
                                         (!blessingsOfKnowledgeEnabled && subclass === 'knowledge') ||
-                                        (!acolyteOfNatureEnabled && subclass === 'nature')
+                                        (!acolyteOfNatureEnabled && subclass === 'nature') ||
+                                        (!orderDomainEnabled && subclass === 'order')
                                         // add more cleric subclasses here
                                     )) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
@@ -1720,6 +1725,27 @@ export default function MeScreen() {
                         </View>
                     )
                 }
+                if (!orderDomainEnabled && subclass === 'order') {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: orderDomainSkillValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="cross-bolnisi" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={orderDomainSkillValue === null}
+                            />
+                        </View>
+                    )
+                }
                 break;
             case "channel divinity":
                 if (!channelDivinityEnabled) {
@@ -1912,6 +1938,10 @@ export default function MeScreen() {
                     setAcolyteOfNatureEnabled(true);
                     setAcolyteOfNatureCantripLearned(acolyteOfNatureCantripValue);
                     setAcolyteOfNatureSkillLearned(acolyteOfNatureSkillValue);
+                }
+                if (orderDomainSkillValue && !orderDomainEnabled && subclass === 'order') {
+                    setOrderDomainEnabled(true);
+                    setOrderDomainSkillLearned(orderDomainSkillValue);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -3254,6 +3284,39 @@ export default function MeScreen() {
         );
     };
 
+    const renderOrderDomainDropdown = () => {
+        const orderDomainSkills = [
+            { label: 'Intimidation', value: 'intimidation' },
+            { label: 'Persuasion', value: 'persuasion' }
+        ];
+
+        return (
+            <View style={{ zIndex: 2000 }}>
+                <Text style={{ color: 'black', marginBottom: 5 }}>Order Domain</Text>
+                <DropDownPicker
+                    open={orderDomainSkillOpen}
+                    value={orderDomainSkillValue}
+                    items={orderDomainSkills}
+                    setOpen={setOrderDomainSkillOpen}
+                    setValue={setOrderDomainSkillValue}
+                    placeholder="Select a skill"
+                    style={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    textStyle={{
+                        color: 'white'
+                    }}
+                    dropDownContainerStyle={{
+                        backgroundColor: 'black',
+                        borderColor: 'rgba(255,255,255,0.2)',
+                    }}
+                    zIndex={1000}
+                />
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -4098,6 +4161,9 @@ export default function MeScreen() {
 
                                 {/* Acolyte of Nature */}
                                 {subclass === 'nature' && !acolyteOfNatureEnabled && renderAcolyteOfNatureDropdown()}
+
+                                {/* Order Domain */}
+                                {subclass === 'order' && !orderDomainEnabled && renderOrderDomainDropdown()}
 
                                 {/* Add more subclass features here following the same pattern:
                                 {subclass === '[subclass]' && (
