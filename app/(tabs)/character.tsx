@@ -13,6 +13,7 @@ import {
     ImageSourcePropType,
     Button,
     ScrollView,
+    TextInput,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
@@ -399,6 +400,24 @@ export default function MeScreen() {
     const [acolyteOfNatureSkillOpen, setAcolyteOfNatureSkillOpen] = useState(false);
     const [orderDomainSkillValue, setOrderDomainSkillValue] = useState<string | null>(null);
     const [orderDomainSkillOpen, setOrderDomainSkillOpen] = useState(false);
+    const [playerName, setPlayerName] = useState<string | null>(null);
+    const [playerNameEditing, setPlayerNameEditing] = useState(false);
+
+    // Load player name from AsyncStorage
+    useEffect(() => {
+        AsyncStorage.getItem('playerName').then((value) => {
+            setPlayerName(value || null);
+        });
+    }, []);
+
+    // Save player name to AsyncStorage when it changes or goes to null
+    useEffect(() => {
+        if (playerName) {
+            AsyncStorage.setItem('playerName', playerName);
+        } else {
+            AsyncStorage.removeItem('playerName');
+        }
+    }, [playerName]);
 
     // Update weapons whenever items change
     useEffect(() => {
@@ -3372,33 +3391,58 @@ export default function MeScreen() {
 
 
                 {/* Section 3 */}
-                <TouchableOpacity
-                    style={{ borderWidth: 1, borderColor: 'white', borderStyle: 'solid', borderRadius: 8 }}
-                    onLongPress={handleImageLongPress}
-                    onPress={() => setCharacterModalVisible(true)}>
-                    <View style={[styles.imageContainer, { width: section3Width, overflow: 'hidden' }]}>
-                        {imageUri ? (
-                            <Image
-                                source={{ uri: imageUri }}
-                                style={styles.image}
-                                resizeMode="cover"
-                            />
-                        ) : (
-                            <View style={styles.emptyImageContainer}>
-                                {!statsData.race && !statsData.class ?
-                                    <>
-                                        <Ionicons name="body" size={24} color="gold" />
-                                        <Text style={{ color: 'gold', marginBottom: 40, marginTop: 10, fontSize: 16, textAlign: 'center' }}>
-                                            Tap to create your{'\n'}character
-                                        </Text>
-                                    </>
-                                    : null}
-                                <Ionicons name="image" size={24} color="white" />
-                                <Text style={{ color: 'white', fontSize: 12, marginTop: 10 }}>Long press to add an image</Text>
-                            </View>
-                        )}
-                    </View>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'column', gap: 5 }}>
+                    <TouchableOpacity onPress={() => setPlayerNameEditing(true)}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Name:</Text>
+                            {playerNameEditing ? (
+                                <TextInput
+                                    style={{
+                                        color: 'white',
+                                        fontSize: 16,
+                                        borderBottomWidth: 1,
+                                        borderBottomColor: 'white',
+                                        padding: 0,
+                                        flex: 1
+                                    }}
+                                    value={playerName ?? ''}
+                                    onChangeText={setPlayerName}
+                                    onBlur={() => setPlayerNameEditing(false)}
+                                    autoFocus
+                                />
+                            ) : (
+                                <Text style={{ color: 'white', fontSize: 16 }}>{playerName || 'Unnamed'}</Text>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{ borderWidth: 1, borderColor: 'white', borderStyle: 'solid', borderRadius: 8, flex: 1 }}
+                        onLongPress={handleImageLongPress}
+                        onPress={() => setCharacterModalVisible(true)}>
+                        <View style={[styles.imageContainer, { width: section3Width, overflow: 'hidden', height: 'auto' }]}>
+                            {imageUri ? (
+                                <Image
+                                    source={{ uri: imageUri }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            ) : (
+                                <View style={styles.emptyImageContainer}>
+                                    {!statsData.race && !statsData.class ?
+                                        <>
+                                            <Ionicons name="body" size={24} color="gold" />
+                                            <Text style={{ color: 'gold', marginBottom: 40, marginTop: 10, fontSize: 16, textAlign: 'center' }}>
+                                                Tap to create your{'\n'}character
+                                            </Text>
+                                        </>
+                                        : null}
+                                    <Ionicons name="image" size={24} color="white" />
+                                    <Text style={{ color: 'white', fontSize: 12, marginTop: 10 }}>Long press to add an image</Text>
+                                </View>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                </View>
 
 
 
