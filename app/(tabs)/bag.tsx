@@ -198,7 +198,6 @@ export default function BagScreen() {
   const [numColumns, setNumColumns] = useState(4);
   const [foodUnits, setFoodUnits] = useState(0);
   const [money, setMoney] = useState(0);
-  const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [resetModalVisible, setResetModalVisible] = useState(false);
   const [newItem, setNewItem] = useState<{
@@ -220,11 +219,8 @@ export default function BagScreen() {
   });
   const [openItemType, setOpenItemType] = useState(false);
   const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
-  const { saveItems, setWeaponsProficientIn } = useItemEquipment();
-  // Load items from local storage when the component mounts
-  useEffect(() => {
-    loadItems();
-  }, []);
+  const { saveItems, setWeaponsProficientIn, items } = useItemEquipment();
+
   const [openWeaponType, setOpenWeaponType] = useState(false);
   const [weaponTypeValue, setWeaponTypeValue] = useState<string | null>(null);
   const [weaponTypesOptionsFiltered, setWeaponTypesOptionsFiltered] = useState<{ label: string; value: string; parent?: string; selectable?: boolean }[]>([]);
@@ -370,24 +366,6 @@ export default function BagScreen() {
     }
   }, [itemTypeValue, isProficientInMartialWeapons, classSpecificWeapons, statsData.race, statsData.class]);
 
-  // Function to load items from AsyncStorage
-  const loadItems = async () => {
-    try {
-      const jsonString = await AsyncStorage.getItem('items');
-      if (jsonString) {
-        const parsedItems: Item[] = JSON.parse(jsonString);
-        setItems(parsedItems);
-      } else {
-        // If no items in storage, initialize with default items
-        setItems(defaultItems);
-        saveItems(defaultItems);
-      }
-    } catch (error) {
-      console.error('Failed to load items:', error);
-      // In case of error, initialize with default items
-      setItems(defaultItems);
-    }
-  };
 
   // Function to clear items and reset to default
   const resetItems = async () => {
@@ -415,7 +393,6 @@ export default function BagScreen() {
         }
       }
 
-      setItems(defaultItems);
       saveItems(defaultItems);
       setResetModalVisible(false);
     } catch (error) {
@@ -457,7 +434,6 @@ export default function BagScreen() {
           }
           return item;
         });
-        setItems(updatedItems);
         saveItems(updatedItems); // Save updated items
         setSelectedItem((prev) => (prev ? { ...prev, image: base64Image } : null));
       }
@@ -507,7 +483,6 @@ export default function BagScreen() {
       };
 
       const updatedItems = [...items, newItemToAdd];
-      setItems(updatedItems);
       saveItems(updatedItems);
       setNewItem({
         name: '',
@@ -529,7 +504,6 @@ export default function BagScreen() {
   // Function to delete an item from the items array
   const deleteItem = async (itemId: string) => {
     const updatedItems = items.filter((item) => item.id !== itemId);
-    setItems(updatedItems);
     await saveItems(updatedItems);
 
     // Remove the item's image from AsyncStorage if it exists
@@ -661,9 +635,9 @@ export default function BagScreen() {
       }
       return item;
     });
-    setItems(updatedItems);
     saveItems(updatedItems);
   };
+
 
 
   // Increment quantity by specified number
@@ -738,7 +712,6 @@ export default function BagScreen() {
                 }
                 return item;
               });
-              setItems(updatedItems);
               saveItems(updatedItems);
               setSelectedItem({ ...selectedItem, image: undefined });
             } else {
@@ -807,36 +780,6 @@ export default function BagScreen() {
   };
 
 
-  // Function to handle long press on item details
-  const handleDetailsLongPress = () => {
-    if (selectedItem) {
-      if (isDefaultItem(selectedItem.id)) {
-        Alert.alert('Information', 'You cannot edit the details of default items.');
-        return;
-      }
-
-      Alert.alert(
-        'Edit Details',
-        'Do you want to edit the details of this item?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Edit',
-            onPress: () => {
-              setEditingField('details');
-              setEditedDetails(selectedItem.details || '');
-            },
-          },
-        ],
-        { cancelable: true }
-      );
-    }
-  };
-
-
   const updateItemName = (itemId: string, newName: string) => {
     const updatedItems = items.map((item) => {
       if (item.id === itemId) {
@@ -844,23 +787,8 @@ export default function BagScreen() {
       }
       return item;
     });
-    setItems(updatedItems);
     saveItems(updatedItems); // Save the updated items to the file system
   };
-
-
-  const updateItemDetails = (itemId: string, newDetails: string) => {
-    const updatedItems = items.map((item) => {
-      if (item.id === itemId) {
-        return { ...item, details: newDetails }; // Update the details
-      }
-      return item;
-    });
-    setItems(updatedItems);
-    saveItems(updatedItems); // Save the updated items to the file system
-  };
-
-
 
 
   const saveItemName = () => {
@@ -872,14 +800,6 @@ export default function BagScreen() {
     }
   };
 
-
-  const saveItemDetails = () => {
-    if (selectedItem) {
-      updateItemDetails(selectedItem.id, editedDetails);
-      setSelectedItem((prev) => (prev ? { ...prev, details: editedDetails } : null));
-      setEditingField(null);
-    }
-  };
 
   const renderModifyWeapon = () => {
     return (

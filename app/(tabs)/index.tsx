@@ -271,6 +271,23 @@ type ActionBlock = DefaultActionBlock | CustomActionBlock;
 const isTwoWeaponFightingProficient = false;
 const isUnarmedStrikeProficient = false;
 
+// Define the shape of our Item
+interface Item {
+  id: string;
+  name: string;
+  quantity: number;
+  image?: string;
+  details?: string;
+  type?: string;
+  properties?: string[];
+  damage?: string;
+  attackBonus?: string;
+  weaponType?: string;
+  skill_modifiers?: string[];
+  savingThrow?: string;
+  dc?: number;
+}
+
 
 export default function ActionsScreen() {
   const [numColumns, setNumColumns] = useState(4);
@@ -306,7 +323,7 @@ export default function ActionsScreen() {
     extraAttackSpent,
     setExtraAttackSpent
   } = useActions();
-  const { weaponsProficientIn, equippedArmor, equippedShield } = useItemEquipment();
+  const { weaponsProficientIn, equippedArmor, equippedShield, items, saveItems } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
   // Define state for combined actions
   const [combinedActions, setCombinedActions] = useState<ActionBlock[]>([]);
@@ -422,6 +439,8 @@ export default function ActionsScreen() {
   const [wardingFlarePoints, setWardingFlarePoints] = useState<number>(0);
   const [embodimentOfTheLawPoints, setEmbodimentOfTheLawPoints] = useState<number>(0);
   const [ordersWrathUsed, setOrdersWrathUsed] = useState<boolean>(false);
+  const [throwableItemValue, setThrowableItemValue] = useState<string | null>(null);
+  const [throwableItemsOpen, setThrowableItemsOpen] = useState(false);
 
   useEffect(() => {
     const wisdomModifier = calculateModifier(statsData.abilities.find(ability => ability.name.toLowerCase() === 'wisdom')?.value || 10);
@@ -1840,6 +1859,222 @@ export default function ActionsScreen() {
     setCurrentChannelDivinityPoints(points);
   }
 
+  function renderThrowDropdown() {
+    // Get all items from bag
+    const allItemsInBag = items;
+
+    // Filter items to only include weapons with "thrown" property
+    const throwableItems = allItemsInBag.filter(item => {
+      if (item.type?.toLowerCase() === 'weapon' && item.weaponType) {
+        // Find weapon details from weapons data
+        const weaponDetails = weapons.weapons
+          .flatMap((category): WeaponItem[] => category.items as WeaponItem[])
+          .find((weapon: WeaponItem) => weapon.name.toLowerCase() === item.weaponType?.toLowerCase());
+
+        // Check if weapon has "thrown" property
+        return weaponDetails?.properties?.some(prop => prop.toLowerCase() === 'thrown');
+      }
+      return false; // Not a weapon or no weaponType
+    });
+
+    // Add improvised weapon and non-weapon object options
+    const allOptions = [
+      ...throwableItems.map(item => ({
+        label: item.name,
+        value: item.name
+      })),
+      {
+        label: "Improvised Weapon",
+        value: "improvised_weapon"
+      },
+      {
+        label: "Non-weapon Object",
+        value: "non_weapon_object"
+      }
+    ];
+
+    // Find the selected item based on throwableItemValue
+    const selectedItem = throwableItems.find(item => item.name === throwableItemValue);
+
+    // Get weapon details if the selected item is a weapon
+    let selectedWeapon: WeaponItem | null = null;
+    if (selectedItem) {
+      // Find the weapon details from the weapons data
+      selectedWeapon = weapons.weapons
+        .flatMap((category): WeaponItem[] => category.items as WeaponItem[])
+        .find((weapon: WeaponItem) => weapon.name.toLowerCase() === selectedItem.weaponType?.toLowerCase()) || null;
+
+      // If the weapon is not found in data, use the selectedItem as is, assuming it has the required properties
+      if (!selectedWeapon) {
+        selectedWeapon = selectedItem as unknown as WeaponItem; // Type casting to WeaponItem
+      }
+    }
+
+    return (
+      <View style={{ zIndex: 2000, flexDirection: 'column', gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', gap: 10 }}>
+          <DropDownPicker
+            items={allOptions}
+            value={throwableItemValue}
+            setValue={setThrowableItemValue}
+            open={throwableItemsOpen}
+            setOpen={setThrowableItemsOpen}
+            placeholder="Select a thrown weapon"
+            containerStyle={{ zIndex: 2000, flex: 1 }}
+          />
+        </View>
+
+        {(throwableItemValue === "improvised_weapon" || throwableItemValue === "non_weapon_object") ? (
+          <>
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <MaterialCommunityIcons name="sword" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', gap: 5 }}>
+                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                  <Text>+ (Str = large) or (Dex = small)</Text>
+                </View>
+              </View>
+            </View>
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <Text>1d4 + (Str = large) or (Dex = small)</Text>
+              </View>
+            </View>
+          </>
+        ) : throwableItemValue && selectedWeapon && (
+          <>
+            {/* Weapon Attack Bonus */}
+            <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
+              <MaterialCommunityIcons name="sword" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', gap: 5 }}>
+                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                  {getWeaponAttackBonus(selectedWeapon) && (
+                    <Text>
+                      +{getWeaponAttackBonus(selectedWeapon)}
+                    </Text>
+                  )}
+                  <Text>
+                    +({getWeaponSkillModifiers(selectedWeapon).includes('Strength') && `${currentStrengthModifier} Str`})
+                  </Text>
+                  {getWeaponSkillModifiers(selectedWeapon).includes('Strength') &&
+                    getWeaponSkillModifiers(selectedWeapon).includes('Dexterity') &&
+                    <Text> or </Text>}
+                  {getWeaponSkillModifiers(selectedWeapon).includes('Dexterity') && <Text>+({currentDexModifier} Dex)</Text>}
+                </View>
+                {weaponsProficientIn.includes(selectedWeapon?.weaponType?.toLowerCase() || '') && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                    <Text>+{proficiencyBonus}</Text>
+                    <Ionicons name="ribbon" size={16} color="black" />
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Weapon Damage */}
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <Text>
+                  {getWeaponDamage(selectedWeapon)}
+                </Text>
+                <View style={{ flexDirection: 'row' }}>
+                  {getWeaponSkillModifiers(selectedWeapon).includes('Strength') && <Text>+({currentStrengthModifier} Str)</Text>}
+                  {getWeaponSkillModifiers(selectedWeapon).includes('Strength') &&
+                    getWeaponSkillModifiers(selectedWeapon).includes('Dexterity') &&
+                    <Text> or </Text>}
+                  {getWeaponSkillModifiers(selectedWeapon).includes('Dexterity') && <Text>+({currentDexModifier} Dex)</Text>}
+                </View>
+                {statsData.class?.toLowerCase() === 'barbarian' && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                    <Text>{getRageDamageBonus()} if</Text>
+                    <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Damage Type */}
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <Text>Type: </Text>
+              <Text style={{ textTransform: 'capitalize' }}>
+                {selectedWeapon.damageType || '—'}
+              </Text>
+            </View>
+
+            {/* Weapon Range */}
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <Text>Range: </Text>
+              <Text>
+                {selectedWeapon.range || '—'}
+              </Text>
+            </View>
+
+            {/* Throw Range */}
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <Text>Throw Range: </Text>
+              <Text>
+                {selectedWeapon.throwRange || '—'}
+              </Text>
+            </View>
+
+            {/* Weapon Properties */}
+            <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+              <Text>Properties: </Text>
+              <Text>
+                {selectedWeapon.properties ? selectedWeapon.properties.join(', ') : '—'}
+              </Text>
+            </View>
+
+            {/* Versatile Damage */}
+            {selectedWeapon.versatileDamage && (
+              <View style={[styles.modalWeaponProperty, { padding: 0 }]}>
+                <Text>Versatile: </Text>
+                <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                  <Text>{selectedWeapon.versatileDamage}</Text>
+                  <MaterialIcons name="sign-language" size={20} color="black" />
+                </View>
+              </View>
+            )}
+          </>
+        )}
+
+        {/* Display a message if no item is selected */}
+        {!throwableItemValue && (
+          <Text>Select a thrown weapon from your inventory</Text>
+        )}
+      </View>
+    );
+  }
+
+  const handleThrowAction = () => {
+    if (!throwableItemValue) return;
+
+    // Find the index of the selected item
+    const itemIndex = items.findIndex(item => item.name === throwableItemValue);
+    if (itemIndex === -1) return;
+
+    const selectedItem = items[itemIndex];
+
+    // Decrement the quantity
+    const newQuantity = selectedItem.quantity - 1;
+
+    if (newQuantity <= 0) {
+      // Remove the item from the items array
+      const updatedItems = [...items.slice(0, itemIndex), ...items.slice(itemIndex + 1)];
+      // Save the updated items
+      saveItems(updatedItems);
+    } else {
+      // Update the item's quantity
+      const updatedItem = { ...selectedItem, quantity: newQuantity };
+      const updatedItems = [...items];
+      updatedItems[itemIndex] = updatedItem;
+      // Save the updated items
+      saveItems(updatedItems);
+    }
+  };
+
   // Main Contents
   return (
     <View style={styles.container}>
@@ -2549,6 +2784,7 @@ export default function ActionsScreen() {
         <TouchableWithoutFeedback onPress={() => {
           setActionModalVisible(false);
           setKnownInfusionValue('');
+          setThrowableItemValue(null);
         }}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -3091,6 +3327,11 @@ export default function ActionsScreen() {
                       renderChannelDivinityDropdown()
                     )}
 
+                    {/* Throw Action Dropdown for which item to throw */}
+                    {selectedAction.name.toLowerCase() === 'throw' && (
+                      renderThrowDropdown()
+                    )}
+
 
 
                     {/* Modal Buttons */}
@@ -3158,7 +3399,8 @@ export default function ActionsScreen() {
                               (selectedAction.name.toLowerCase() === 'rage' && currentRages < 1) ||
                               (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent) ||
                               (selectedAction.name.toLowerCase() === 'bardic inspiration' && currentBardicInspirationPoints < 1) ||
-                              (selectedAction.name.toLowerCase() === 'channel divinity' && (currentChannelDivinityPoints < 1 || knownChannelDivinityValue === ''))
+                              (selectedAction.name.toLowerCase() === 'channel divinity' && (currentChannelDivinityPoints < 1 || knownChannelDivinityValue === '')) ||
+                              (selectedAction.name.toLowerCase() === 'throw' && !throwableItemValue)
                               // add more conditions here
                             )
                             && { opacity: 0.2 }
@@ -3283,6 +3525,10 @@ export default function ActionsScreen() {
                             case 'orders wrath':
                               setOrdersWrathUsed(true);
                               break;
+
+                            case 'throw':
+                              handleThrowAction();
+                              break;
                           }
 
                           // Default commit action
@@ -3301,7 +3547,8 @@ export default function ActionsScreen() {
                             (selectedAction.name.toLowerCase() === 'rage' && currentRages < 1) ||
                             (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent) ||
                             (selectedAction.name.toLowerCase() === 'bardic inspiration' && currentBardicInspirationPoints < 1) ||
-                            (selectedAction.name.toLowerCase() === 'channel divinity' && currentChannelDivinityPoints < 1)
+                            (selectedAction.name.toLowerCase() === 'channel divinity' && currentChannelDivinityPoints < 1) ||
+                            (selectedAction.name.toLowerCase() === 'throw' && !throwableItemValue)
                             // add more conditions here
                           )
                         }
