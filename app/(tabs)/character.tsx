@@ -1008,7 +1008,7 @@ export default function MeScreen() {
                         }}
                     >
                         <Text style={styles.featLabel}>{displayKey}</Text>
-                        <Text>{String(value)}</Text>
+                        <Text style={{ flex: 1 }}>{String(value)}</Text>
                     </View>
                 );
             });
@@ -3410,7 +3410,18 @@ export default function MeScreen() {
                                     autoFocus
                                 />
                             ) : (
-                                <Text style={{ color: 'white', fontSize: 16 }}>{playerName || 'Unnamed'}</Text>
+                                <Text
+                                    style={{
+                                        color: 'white',
+                                        fontSize: 16,
+                                        flex: 1,
+                                        flexWrap: 'wrap'
+                                    }}
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
+                                >
+                                    {playerName || 'Unnamed'}
+                                </Text>
                             )}
                         </View>
                     </TouchableOpacity>
