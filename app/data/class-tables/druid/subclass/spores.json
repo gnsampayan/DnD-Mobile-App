@@ -1,0 +1,79 @@
+{
+	"name": "Circle of Spores",
+	"circleSpells": {
+		"level2": ["Chill Touch"],
+		"level3": ["Blindness/Deafness", "Gentle Repose"],
+		"level5": ["Animate Dead", "Gaseous Form"],
+		"level7": ["Blight", "Confusion"],
+		"level9": ["Cloudkill", "Contagion"]
+	},
+	"haloOfSpores": {
+		"level": 2,
+		"description": "You are surrounded by invisible, necrotic spores that are harmless until you unleash them on a creature nearby.",
+		"range": "10 feet",
+		"damage": {
+			"level2": "1d4",
+			"level6": "1d6",
+			"level10": "1d8",
+			"level14": "1d10"
+		},
+		"damageType": "necrotic",
+		"trigger": "When a creature you can see moves into range or starts its turn there",
+		"save": "Constitution saving throw against spell save DC",
+		"action": "reaction"
+	},
+	"symbioticEntity": {
+		"level": 2,
+		"description": "Channel magic into your spores instead of Wild Shape",
+		"tempHP": "4 per druid level",
+		"duration": "10 minutes",
+		"benefits": [
+			"Halo of Spores damage is rolled twice and added together",
+			"Melee weapon attacks deal extra 1d6 necrotic damage"
+		],
+		"endConditions": [
+			"Duration expires",
+			"Temporary hit points are depleted",
+			"Wild Shape is used again"
+		]
+	},
+	"fungalInfestation": {
+		"level": 6,
+		"description": "Animate a recently deceased creature as a zombie",
+		"trigger": "When a Small or Medium beast or humanoid dies within 10 feet",
+		"action": "reaction",
+		"creatureStats": {
+			"hitPoints": 1,
+			"duration": "1 hour",
+			"restrictions": "Can only take Attack action with one melee attack",
+			"initiative": "Immediately after your turn"
+		},
+		"uses": "Wisdom modifier (minimum 1) per long rest"
+	},
+	"spreadingSpores": {
+		"level": 10,
+		"description": "Create a cube of deadly spores while Symbiotic Entity is active",
+		"action": "bonus action",
+		"range": "30 feet",
+		"area": "10-foot cube",
+		"duration": "1 minute",
+		"damage": "Halo of Spores damage",
+		"save": "Constitution saving throw against spell save DC",
+		"restrictions": [
+			"Creature can take damage only once per turn",
+			"Cannot use Halo of Spores reaction while cube persists"
+		],
+		"endConditions": [
+			"Duration expires",
+			"Feature used again",
+			"Dismissed as bonus action",
+			"Symbiotic Entity ends"
+		]
+	},
+	"fungalBody": {
+		"level": 14,
+		"description": "Your body is altered by fungal spores",
+		"immunities": ["blinded", "deafened", "frightened", "poisoned"],
+		"benefits": ["Critical hits count as normal hits unless incapacitated"]
+	}
+}

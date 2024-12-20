@@ -1,0 +1,100 @@
+{
+	"name": "Circle of Wildfire",
+	"circle spells": {
+		"level": 2,
+		"description": "When you join this circle at 2nd level, you have formed a bond with a wildfire spirit, a primal being of creation and destruction. Your link with this spirit grants you access to some spells when you reach certain levels in this class, as shown on the Circle of Wildfire Spells table. Once you gain access to one of these spells, you always have it prepared, and it doesn't count against the number of spells you can prepare each day. If you gain access to a spell that doesn't appear on the Druid Spell List, the spell is nonetheless a druid spell for you.",
+		"spells by level": {
+			"2": ["Burning Hands", "Cure Wounds"],
+			"3": ["Flaming Sphere", "Scorching Ray"],
+			"5": ["Plant Growth", "Revivify"],
+			"7": ["Aura of Life", "Fire Shield"],
+			"9": ["Flame Strike", "Mass Cure Wounds"]
+		}
+	},
+	"summon wildfire spirit": {
+		"level": 2,
+		"description": "You can summon the primal spirit bound to your soul. As an action, you can expend one use of your Wild Shape feature to summon your wildfire spirit, rather than assuming a beast form.",
+		"effects": [
+			"The spirit appears in an unoccupied space of your choice that you can see within 30 feet of you",
+			"Each creature within 10 feet of the spirit (other than you) when it appears must succeed on a Dexterity saving throw against your spell save DC or take 2d6 fire damage",
+			"The spirit is friendly to you and your companions and obeys your commands",
+			"In combat, the spirit shares your initiative count, but takes its turn immediately after yours",
+			"The spirit only takes the Dodge action unless commanded with a bonus action",
+			"If you are incapacitated, the spirit can take any action of its choice"
+		],
+		"duration": "1 hour, until 0 HP, until resummoned, or until you die",
+		"spirit stats": {
+			"size": "Small elemental",
+			"armor class": "13 (natural armor)",
+			"hit points": "5 + five times your druid level",
+			"speed": {
+				"walk": "30 ft.",
+				"fly": "30 ft. (hover)"
+			},
+			"abilities": {
+				"STR": "10 (+0)",
+				"DEX": "14 (+2)",
+				"CON": "14 (+2)",
+				"INT": "13 (+1)",
+				"WIS": "15 (+2)",
+				"CHA": "11 (+0)"
+			},
+			"immunities": {
+				"damage": ["fire"],
+				"conditions": [
+					"charmed",
+					"frightened",
+					"grappled",
+					"prone",
+					"restrained"
+				]
+			},
+			"senses": {
+				"darkvision": "60 ft.",
+				"passive perception": 12
+			},
+			"languages": "understands the languages you speak",
+			"actions": {
+				"flame seed": {
+					"type": "Ranged Weapon Attack",
+					"range": "60 ft.",
+					"hit": "1d6 + PB fire damage",
+					"attack bonus": "your spell attack modifier"
+				},
+				"fiery teleportation": {
+					"effect": "The spirit and each willing creature of your choice within 5 feet of it teleport up to 15 feet to unoccupied spaces you can see",
+					"damage": "Each creature within 5 feet of the space that the spirit left must succeed on a Dexterity saving throw against your spell save DC or take 1d6 + PB fire damage"
+				}
+			}
+		}
+	},
+	"enhanced bond": {
+		"level": 6,
+		"description": "The bond with your wildfire spirit enhances your destructive and restorative spells.",
+		"benefits": [
+			"When you cast a spell that deals fire damage or restores hit points while your wildfire spirit is summoned, roll a d8 and add it to one damage or healing roll of the spell",
+			"When you cast a spell with a range other than self, the spell can originate from you or your wildfire spirit"
+		]
+	},
+	"cauterizing flames": {
+		"level": 10,
+		"description": "You gain the ability to turn death into magical flames that can heal or incinerate.",
+		"trigger": "When a Small or larger creature dies within 30 feet of you or your wildfire spirit",
+		"effect": {
+			"initial": "Harmless spectral flame appears in dead creature's space for 1 minute",
+			"reaction": "When a creature enters the space, extinguish flame to heal or deal fire damage",
+			"amount": "2d10 + Wisdom modifier"
+		},
+		"uses": "Proficiency bonus per long rest"
+	},
+	"blazing revival": {
+		"level": 14,
+		"description": "The bond with your wildfire spirit can save you from death.",
+		"trigger": "When reduced to 0 hit points while spirit is within 120 feet",
+		"effect": {
+			"spirit": "Drops to 0 hit points",
+			"you": ["Regain half your hit points", "Immediately rise to your feet"]
+		},
+		"uses": "Once per long rest"
+	}
+}

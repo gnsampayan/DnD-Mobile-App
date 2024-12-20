@@ -1,0 +1,79 @@
+{
+	"name": "Circle of Stars",
+	"starMap": {
+		"level": 2,
+		"description": "You've created a star chart as part of your heavenly studies. It is a Tiny object and can serve as a spellcasting focus for your druid spells.",
+		"benefits": [
+			"You know the Guidance cantrip",
+			"You have the Guiding Bolt spell prepared (counts as druid spell, doesn't count against prepared spells)",
+			"Can cast Guiding Bolt without spell slot proficiency bonus times per long rest"
+		],
+		"replacement": "1-hour ceremony during short/long rest",
+		"forms": {
+			"1": "A scroll covered with depictions of constellations",
+			"2": "A stone tablet with fine holes drilled through it",
+			"3": "A speckled owlbear hide, tooled with raised marks",
+			"4": "A collection of maps bound in an ebony cover",
+			"5": "A crystal that projects starry patterns when placed before a light",
+			"6": "Glass disks that depict constellations"
+		}
+	},
+	"starryForm": {
+		"level": 2,
+		"description": "Harness constellations' power to alter your form",
+		"activation": "bonus action using Wild Shape",
+		"effects": {
+			"appearance": "Luminous body with glimmering joints connected by glowing lines",
+			"light": "Bright light 10 feet, dim light additional 10 feet",
+			"duration": "10 minutes"
+		},
+		"constellations": {
+			"archer": {
+				"attack": "Ranged spell attack, 60 feet",
+				"damage": "1d8 + Wisdom modifier radiant",
+				"action": "Bonus action"
+			},
+			"chalice": {
+				"trigger": "Cast healing spell with spell slot",
+				"effect": "Additional healing 1d8 + Wisdom modifier",
+				"range": "30 feet"
+			},
+			"dragon": {
+				"effect": "Treat 9 or lower as 10 on Intelligence/Wisdom checks and concentration saves"
+			}
+		}
+	},
+	"cosmicOmen": {
+		"level": 6,
+		"description": "Divine will of cosmos using Star Map after long rest",
+		"uses": "Proficiency bonus per long rest",
+		"omens": {
+			"weal": {
+				"trigger": "Even roll",
+				"effect": "Add d6 to attack roll, saving throw, or ability check",
+				"range": "30 feet",
+				"action": "Reaction"
+			},
+			"woe": {
+				"trigger": "Odd roll",
+				"effect": "Subtract d6 from attack roll, saving throw, or ability check",
+				"range": "30 feet",
+				"action": "Reaction"
+			}
+		}
+	},
+	"twinklingConstellations": {
+		"level": 10,
+		"improvements": {
+			"archer": "2d8 + Wisdom modifier damage",
+			"chalice": "2d8 + Wisdom modifier healing",
+			"dragon": "20 feet flying speed and hover"
+		},
+		"benefit": "Can change constellation at start of turn"
+	},
+	"fullOfStars": {
+		"level": 14,
+		"description": "Become partially incorporeal in Starry Form",
+		"resistance": ["bludgeoning", "piercing", "slashing"]
+	}
+}

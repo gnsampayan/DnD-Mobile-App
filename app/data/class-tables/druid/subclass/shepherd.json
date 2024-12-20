@@ -1,0 +1,67 @@
+{
+	"name": "Shepherd",
+	"speechOfTheWoods": {
+		"level": 2,
+		"description": "You gain the ability to converse with beasts and many fey.",
+		"benefits": [
+			"You learn to speak, read, and write Sylvan",
+			"Beasts can understand your speech",
+			"You gain the ability to decipher their noises and motions"
+		],
+		"additionalNote": "Most beasts lack the intelligence to convey or understand sophisticated concepts, but a friendly beast could relay what it has seen or heard in the recent past. This ability doesn't grant you any special friendship with beasts, though you can combine this ability with gifts to curry favor with them as you would with any nonplayer character."
+	},
+	"spiritTotem": {
+		"level": 2,
+		"description": "You gain the ability to call forth nature spirits and use them to influence the world around you.",
+		"usage": {
+			"action": "bonus action",
+			"range": "60 feet",
+			"auraRadius": "30 feet",
+			"duration": "1 minute",
+			"recharge": "short or long rest"
+		},
+		"spirits": {
+			"bearSpirit": {
+				"effects": [
+					"Creatures of your choice gain temporary hit points equal to 5 + your druid level",
+					"You and your allies gain advantage on Strength checks and Strength saving throws while in the aura"
+				]
+			},
+			"hawkSpirit": {
+				"effects": [
+					"Can use reaction to grant advantage to attack rolls against targets in the aura",
+					"You and your allies have advantage on Wisdom (Perception) checks while in the aura"
+				]
+			},
+			"unicornSpirit": {
+				"effects": [
+					"You and your allies gain advantage on ability checks to detect creatures in the aura",
+					"When you cast a healing spell, each chosen creature in the aura regains hit points equal to your druid level"
+				]
+			}
+		}
+	},
+	"mightySummoner": {
+		"level": 6,
+		"description": "Beasts and fey that you conjure are more resilient than normal.",
+		"benefits": [
+			"Summoned creatures gain 2 extra hit points per Hit Die",
+			"Damage from natural weapons counts as magical for overcoming resistance and immunity"
+		]
+	},
+	"guardianSpirit": {
+		"level": 10,
+		"description": "When a beast or fey that you summoned or created with a spell ends its turn in your Spirit Totem aura, that creature regains a number of hit points equal to half your druid level."
+	},
+	"faithfulSummons": {
+		"level": 14,
+		"description": "If you are reduced to 0 hit points or are incapacitated against your will, you can immediately gain the benefits of Conjure Animals as if it were cast with a 9th-level spell slot.",
+		"effects": [
+			"Summons four beasts of CR 2 or lower",
+			"Beasts appear within 20 feet",
+			"Beasts protect you and attack foes if no commands given",
+			"Spell lasts 1 hour with no concentration"
+		],
+		"recharge": "long rest"
+	}
+}

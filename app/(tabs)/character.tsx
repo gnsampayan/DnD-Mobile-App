@@ -78,6 +78,14 @@ import rogueFeatures from '../data/class-tables/rogue/rogueFeatures.json';
 import sorcererFeatures from '../data/class-tables/sorcerer/sorcererFeatures.json';
 import warlockFeatures from '../data/class-tables/warlock/warlockFeatures.json';
 import wizardFeatures from '../data/class-tables/wizard/wizardFeatures.json';
+import druidCircleData from '../data/class-tables/druid/druid-circle.json';
+import dreamsData from '../data/class-tables/druid/subclass/dreams.json';
+import landData from '../data/class-tables/druid/subclass/land.json';
+import moonData from '../data/class-tables/druid/subclass/moon.json';
+import shepherdData from '../data/class-tables/druid/subclass/shepherd.json';
+import sporesData from '../data/class-tables/druid/subclass/spores.json';
+import starsData from '../data/class-tables/druid/subclass/stars.json';
+import wildfireData from '../data/class-tables/druid/subclass/wildfire.json';
 
 
 // Import default images
@@ -402,6 +410,8 @@ export default function MeScreen() {
     const [orderDomainSkillOpen, setOrderDomainSkillOpen] = useState(false);
     const [playerName, setPlayerName] = useState<string | null>(null);
     const [playerNameEditing, setPlayerNameEditing] = useState(false);
+    const [druidCircleOpen, setDruidCircleOpen] = useState(false);
+    const [druidCircleValue, setDruidCircleValue] = useState<string | null>(null);
 
     // Load player name from AsyncStorage
     useEffect(() => {
@@ -1109,7 +1119,8 @@ export default function MeScreen() {
                                         // add more cleric subclasses here
                                     )) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
-                                    (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled)
+                                    (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled) ||
+                                    (feature.name.toLowerCase() === 'druid circle' && !subclass)
 
                                     // add more here
                                 ) && (
@@ -1829,6 +1840,29 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            case "druid circle":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: druidCircleValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="paw" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={druidCircleValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -1989,6 +2023,13 @@ export default function MeScreen() {
             // Druid
             case "wild shape":
                 setWildShapeEnabled(true);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            case "druid circle":
+                if (druidCircleValue) {
+                    setSubclass(druidCircleValue);
+                }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
                 break;
@@ -2173,6 +2214,15 @@ export default function MeScreen() {
                 <View>
                     <Text>Subclass: {subclass}</Text>
                     {subclass && renderClericSubclassFeatures(subclass)}
+                </View>
+            );
+        }
+        // druid subclass
+        if (subClassButtonName.toLowerCase() === 'druid circle') {
+            return (
+                <View>
+                    <Text>Subclass: {subclass}</Text>
+                    {subclass && renderDruidSubclassFeatures(subclass)}
                 </View>
             );
         }
@@ -3352,6 +3402,106 @@ export default function MeScreen() {
         );
     };
 
+    const renderDruidCircleDropdown = () => {
+        return (
+            <DropDownPicker
+                open={druidCircleOpen}
+                value={druidCircleValue}
+                items={druidCircleData}
+                setOpen={setDruidCircleOpen}
+                setValue={setDruidCircleValue}
+                placeholder="Select a druid circle"
+            />
+        );
+    };
+
+    const renderDruidCircleDescription = () => {
+        const circle = druidCircleData.find(circle => circle.value === druidCircleValue);
+        return (
+            <Text>{circle?.description}</Text>
+        );
+    };
+
+    const renderDruidSubclassFeatures = (subclassId: string) => {
+        // Get the appropriate data based on subclass
+        const getSubclassData = (id: string) => {
+            switch (id) {
+                case 'dreams':
+                    return dreamsData;
+                case 'land':
+                    return landData;
+                case 'moon':
+                    return moonData;
+                case 'shepherd':
+                    return shepherdData;
+                case 'spores':
+                    return sporesData;
+                case 'stars':
+                    return starsData;
+                case 'wildfire':
+                    return wildfireData;
+                // Add other druid circles here
+                default:
+                    return null;
+            }
+        };
+
+        const subclassData = getSubclassData(subclassId);
+        const subclassInfo = druidCircleData.find(circle => circle.value === subclassId);
+
+        if (!subclassData || !subclassInfo) return null;
+
+        const renderNestedObject = (obj: any, depth: number = 0) => {
+            return Object.entries(obj).map(([key, value]) => {
+                if (typeof value === 'string' || typeof value === 'number') {
+                    return (
+                        <Text key={key} style={{ marginLeft: depth * 10, marginTop: 5 }}>
+                            {depth > 0 && '• '}{key !== 'description' && `${key}: `}{value}
+                        </Text>
+                    );
+                } else if (Array.isArray(value)) {
+                    return (
+                        <View key={key} style={{ marginLeft: depth * 10 }}>
+                            <Text style={{ fontWeight: 'bold', marginTop: 5 }}>{key}:</Text>
+                            {value.map((item, index) => (
+                                <Text key={index} style={{ marginTop: 5, marginLeft: 10 }}>
+                                    • {item}
+                                </Text>
+                            ))}
+                        </View>
+                    );
+                } else if (typeof value === 'object' && value !== null) {
+                    return (
+                        <View key={key} style={{ marginLeft: depth * 10, marginTop: 5 }}>
+                            <Text style={{ fontWeight: 'bold' }}>{key}:</Text>
+                            {renderNestedObject(value, depth + 1)}
+                        </View>
+                    );
+                }
+                return null;
+            });
+        };
+
+        return (
+            <View>
+                <Text style={{ textTransform: 'capitalize' }}>{subclassId.replace('-', ' ')}</Text>
+                <Text style={{ marginVertical: 10 }}>{subclassInfo.description}</Text>
+                {Object.entries(subclassData).map(([key, value]) => {
+                    if (key === 'name') return null;
+                    if (typeof value === 'object' && 'level' in value && statsData.level >= value.level) {
+                        return (
+                            <View key={key} style={{ marginVertical: 10 }}>
+                                <Text style={{ fontWeight: 'bold' }}>{key}</Text>
+                                {renderNestedObject(value)}
+                            </View>
+                        );
+                    }
+                    return null;
+                })}
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -4243,6 +4393,14 @@ export default function MeScreen() {
                                 */}
                             </>
                         )}
+                        {/* Druid - Druid Circle subclass dropdown */}
+                        {statsData.class === 'druid' && selectedFeat?.toLowerCase() === 'druid circle' && (
+                            subclass === null ? (
+                                renderDruidCircleDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
                         <ScrollView style={{ flex: 1, marginBottom: 60 }}>
 
                             {/* Render Specific Class Feature */}
@@ -4262,6 +4420,10 @@ export default function MeScreen() {
                             {/* Divine Domain Dropdown Value chosen --- description */}
                             {selectedFeat?.toLowerCase() === 'divine domain' && subclass === null && (
                                 renderDivineDomainDescription()
+                            )}
+                            {/* Druid Circle Dropdown Value chosen --- description */}
+                            {selectedFeat?.toLowerCase() === 'druid circle' && subclass === null && (
+                                renderDruidCircleDescription()
                             )}
                         </ScrollView>
                     </View>
