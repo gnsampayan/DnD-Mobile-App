@@ -1,0 +1,55 @@
+{
+	"name": "Samurai",
+	"bonus proficiency": {
+		"level": 3,
+		"choice": {
+			"skills": ["History", "Insight", "Performance", "Persuasion"],
+			"or": "one language of your choice"
+		}
+	},
+	"fighting spirit": {
+		"level": 3,
+		"action": "bonus action",
+		"effects": [
+			"advantage on all weapon attack rolls until end of current turn",
+			"gain temporary hit points"
+		],
+		"temporary hp": {
+			"3": 5,
+			"10": 10,
+			"15": 15
+		},
+		"uses": "3 per long rest"
+	},
+	"elegant courtier": {
+		"level": 7,
+		"effects": [
+			"add Wisdom modifier to Charisma (Persuasion) checks",
+			"gain proficiency in Wisdom saving throws",
+			"if already proficient in Wisdom saves, gain proficiency in Intelligence or Charisma saves (your choice)"
+		]
+	},
+	"tireless spirit": {
+		"level": 10,
+		"trigger": "rolling initiative with no Fighting Spirit uses remaining",
+		"effect": "regain one use of Fighting Spirit"
+	},
+	"rapid strike": {
+		"level": 15,
+		"trigger": "having advantage on attack roll during Attack action",
+		"effect": "can forgo advantage to make additional weapon attack against same target",
+		"frequency": "once per turn"
+	},
+	"strength before death": {
+		"level": 18,
+		"trigger": "taking damage that reduces you to 0 hit points",
+		"action": "reaction",
+		"effects": [
+			"delay falling unconscious",
+			"take immediate extra turn",
+			"damage at 0 HP causes death saves as normal",
+			"fall unconscious after extra turn if still at 0 HP"
+		],
+		"recharge": "long rest"
+	}
+}

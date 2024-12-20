@@ -1,0 +1,217 @@
+[
+	{
+		"userLevel": 3,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 3,
+		"spellSlotSquares": {
+			"SpLv1": 2
+		}
+	},
+	{
+		"userLevel": 4,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 4,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 5,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 4,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 6,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 4,
+		"spellSlotSquares": {
+			"SpLv1": 3
+		}
+	},
+	{
+		"userLevel": 7,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 5,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 8,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 6,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 9,
+		"cantripsKnown": {
+			"3": 2
+		},
+		"spellsKnown": 6,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 2
+		}
+	},
+	{
+		"userLevel": 10,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 7,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 11,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 8,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 12,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 8,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3
+		}
+	},
+	{
+		"userLevel": 13,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 9,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 14,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 10,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 15,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 10,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 2
+		}
+	},
+	{
+		"userLevel": 16,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 17,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 18,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 11,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3
+		}
+	},
+	{
+		"userLevel": 19,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 12,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	},
+	{
+		"userLevel": 20,
+		"cantripsKnown": {
+			"3": 2,
+			"10": 3
+		},
+		"spellsKnown": 13,
+		"spellSlotSquares": {
+			"SpLv1": 4,
+			"SpLv2": 3,
+			"SpLv3": 3,
+			"SpLv4": 1
+		}
+	}
+]

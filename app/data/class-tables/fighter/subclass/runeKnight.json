@@ -1,0 +1,155 @@
+{
+	"name": "Rune Knight",
+	"bonus proficiencies": {
+		"level": 3,
+		"proficiencies": ["smith's tools"],
+		"languages": ["Giant"]
+	},
+	"rune carver": {
+		"level": 3,
+		"description": "You can use magic runes to enhance your gear.",
+		"runes known": {
+			"3": 2,
+			"7": 3,
+			"10": 4,
+			"15": 5
+		},
+		"usage": {
+			"frequency": "long rest",
+			"objects": "number equal to runes known",
+			"restrictions": [
+				"weapon",
+				"armor",
+				"shield",
+				"jewelry",
+				"wearable/holdable item"
+			],
+			"duration": "until next long rest",
+			"limit": "one rune per object"
+		},
+		"save dc": "8 + proficiency bonus + Constitution modifier",
+		"runes": {
+			"cloud rune": {
+				"passive": {
+					"advantages": [
+						"Dexterity (Sleight of Hand) checks",
+						"Charisma (Deception) checks"
+					]
+				},
+				"active": {
+					"trigger": "when you or visible creature within 30 feet is hit by attack",
+					"action": "reaction",
+					"effect": "redirect attack to different creature within 30 feet",
+					"recharge": "short/long rest"
+				}
+			},
+			"fire rune": {
+				"passive": {
+					"effect": "double proficiency bonus for tool ability checks"
+				},
+				"active": {
+					"trigger": "hit with weapon attack",
+					"effects": [
+						"extra 2d6 fire damage",
+						"target must make Strength save or be restrained for 1 minute",
+						"while restrained, 2d6 fire damage at start of turn",
+						"can repeat save at end of turn"
+					],
+					"recharge": "short/long rest"
+				}
+			},
+			"frost rune": {
+				"passive": {
+					"advantages": [
+						"Wisdom (Animal Handling) checks",
+						"Charisma (Intimidation) checks"
+					]
+				},
+				"active": {
+					"action": "bonus action",
+					"duration": "10 minutes",
+					"effect": "+2 to Strength and Constitution ability checks and saves",
+					"recharge": "short/long rest"
+				}
+			},
+			"stone rune": {
+				"passive": {
+					"advantages": ["Wisdom (Insight) checks"],
+					"darkvision": "120 feet"
+				},
+				"active": {
+					"trigger": "creature ends turn within 30 feet",
+					"action": "reaction",
+					"effect": "Wisdom save or charmed, speed 0, incapacitated",
+					"duration": "1 minute",
+					"save": "repeat at end of turn",
+					"recharge": "short/long rest"
+				}
+			},
+			"hill rune": {
+				"level": 7,
+				"passive": {
+					"advantages": ["saving throws against poison"],
+					"resistance": ["poison damage"]
+				},
+				"active": {
+					"action": "bonus action",
+					"duration": "1 minute",
+					"effect": "resistance to bludgeoning, piercing, and slashing damage",
+					"recharge": "short/long rest"
+				}
+			},
+			"storm rune": {
+				"level": 7,
+				"passive": {
+					"advantages": ["Intelligence (Arcana) checks"],
+					"effect": "can't be surprised while not incapacitated"
+				},
+				"active": {
+					"action": "bonus action",
+					"duration": "1 minute",
+					"effect": "use reaction to give advantage/disadvantage on attack rolls, saves, and ability checks within 60 feet",
+					"recharge": "short/long rest"
+				}
+			}
+		}
+	},
+	"giant's might": {
+		"level": 3,
+		"action": "bonus action",
+		"duration": "1 minute",
+		"effects": [
+			"become Large size",
+			"advantage on Strength checks and saves",
+			"one attack per turn deals extra 1d6 damage"
+		],
+		"uses": "proficiency bonus per long rest"
+	},
+	"runic shield": {
+		"level": 7,
+		"trigger": "ally within 60 feet is hit by attack",
+		"action": "reaction",
+		"effect": "force attacker to reroll d20",
+		"uses": "proficiency bonus per long rest"
+	},
+	"great stature": {
+		"level": 10,
+		"effects": [
+			"height increases by 3d4 inches",
+			"Giant's Might damage increases to 1d8"
+		]
+	},
+	"master of runes": {
+		"level": 15,
+		"effect": "can invoke each rune twice before rest",
+		"recharge": "short/long rest"
+	},
+	"runic juggernaut": {
+		"level": 18,
+		"effects": [
+			"Giant's Might damage increases to 1d10",
+			"can become Huge size",
+			"reach increases by 5 feet while Huge"
+		]
+	}
+}

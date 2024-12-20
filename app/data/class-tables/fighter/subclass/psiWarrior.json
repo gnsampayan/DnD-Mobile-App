@@ -1,0 +1,79 @@
+{
+	"name": "Psi Warrior",
+	"psionic power": {
+		"level": 3,
+		"description": "You harbor a wellspring of psionic energy within yourself. This energy is represented by your Psionic Energy dice, which are each a d6.",
+		"psionic energy dice": {
+			"number": "twice your proficiency bonus",
+			"die progression": {
+				"3": "d6",
+				"5": "d8",
+				"11": "d10",
+				"17": "d12"
+			},
+			"recovery": [
+				"Regain all expended dice on a long rest",
+				"Can regain one die as a bonus action, once per short/long rest"
+			]
+		},
+		"powers": {
+			"protective field": {
+				"trigger": "When you or another creature within 30 feet takes damage",
+				"action": "reaction",
+				"effect": "Reduce damage by Psionic Energy die roll + Intelligence modifier (minimum 1)",
+				"cost": "1 Psionic Energy die"
+			},
+			"psionic strike": {
+				"frequency": "Once per turn",
+				"trigger": "After hitting with weapon attack within 30 feet",
+				"effect": "Deal additional force damage equal to Psionic Energy die roll + Intelligence modifier",
+				"cost": "1 Psionic Energy die"
+			},
+			"telekinetic movement": {
+				"action": "action",
+				"target": "One loose Large or smaller object or willing creature",
+				"range": "30 feet",
+				"effect": "Move target up to 30 feet to unoccupied space you can see",
+				"tiny objects": "Can move to or from your hand",
+				"recharge": "Short/long rest or expend Psionic Energy die"
+			}
+		}
+	},
+	"telekinetic adept": {
+		"level": 7,
+		"powers": {
+			"psi-powered leap": {
+				"action": "bonus action",
+				"effect": "Gain flying speed equal to twice walking speed until end of turn",
+				"recharge": "Short/long rest or expend Psionic Energy die"
+			},
+			"telekinetic thrust": {
+				"trigger": "When dealing damage with Psionic Strike",
+				"save": "Strength save vs DC 8 + proficiency + Intelligence modifier",
+				"effect": "On failed save, knock prone or move 10 feet horizontally"
+			}
+		}
+	},
+	"guarded mind": {
+		"level": 10,
+		"effects": [
+			"Resistance to psychic damage",
+			"Can expend Psionic Energy die to end charmed or frightened conditions on self at start of turn"
+		]
+	},
+	"bulwark of force": {
+		"level": 15,
+		"action": "bonus action",
+		"targets": "Number of creatures equal to Intelligence modifier (minimum 1) within 30 feet",
+		"effect": "Grant half cover for 1 minute or until incapacitated",
+		"recharge": "Long rest or expend Psionic Energy die"
+	},
+	"telekinetic master": {
+		"level": 18,
+		"effects": [
+			"Cast Telekinesis spell without components using Intelligence",
+			"Can make one weapon attack as bonus action while concentrating",
+			"Recharge on long rest or expend Psionic Energy die"
+		]
+	}
+}

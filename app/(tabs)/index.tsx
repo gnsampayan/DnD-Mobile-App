@@ -84,6 +84,12 @@ import ordersWrathImage from '@actions/orders-wrath-image.png';
 // Druid
 import wildShapeImage from '@actions/wild-shape-image.png';
 
+// Fighter
+import fighterFeaturesData from '../data/class-tables/fighter/fighterFeatures.json';
+import secondWindImage from '@actions/second-wind-image.png';
+import fightingStyleImage from '@actions/fighting-style-image.png';
+import actionSurgeImage from '@actions/action-surge-image.png';
+
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
 import bladeWardImage from '@images/cantrips/blade-ward.png';
@@ -369,6 +375,9 @@ export default function ActionsScreen() {
     channelDivinityEnabled,
     wildShapeEnabled,
     orderDomainEnabled,
+    fightingStyleLearned,
+    secondWindUsed,
+    setSecondWindUsed,
   } = useContext(CharacterContext) as unknown as CharacterContextType & {
     luckyPoints: number | null;
     setLuckyPoints: (points: number) => void;
@@ -391,6 +400,9 @@ export default function ActionsScreen() {
     channelDivinityEnabled: boolean;
     wildShapeEnabled: boolean;
     orderDomainEnabled: boolean;
+    fightingStyleLearned: string | null;
+    secondWindUsed: boolean;
+    setSecondWindUsed: (value: boolean) => void;
   };
   const [isArmed, setIsArmed] = useState(false);
 
@@ -441,6 +453,12 @@ export default function ActionsScreen() {
   const [ordersWrathUsed, setOrdersWrathUsed] = useState<boolean>(false);
   const [throwableItemValue, setThrowableItemValue] = useState<string | null>(null);
   const [throwableItemsOpen, setThrowableItemsOpen] = useState(false);
+  const [actionSurgePoints, setActionSurgePoints] = useState<number>(1);
+
+  // Initialize actionSurgePoints based on level, level 2-16 is 1 point, level 17-20 is 2 points
+  useEffect(() => {
+    setActionSurgePoints(statsData.level >= 2 && statsData.level <= 16 ? 1 : 2);
+  }, [statsData.level]);
 
   useEffect(() => {
     const wisdomModifier = calculateModifier(statsData.abilities.find(ability => ability.name.toLowerCase() === 'wisdom')?.value || 10);
@@ -627,6 +645,7 @@ export default function ActionsScreen() {
     subclass,
     orderDomainEnabled,
     wildShapeEnabled,
+    fightingStyleLearned,
     // Add other dependencies as needed for new actions gained from class features
   ]);
 
@@ -955,6 +974,14 @@ export default function ActionsScreen() {
           affordable = affordable && currentWildShapeUses > 0;
         }
       }
+      // Check for second wind
+      if (statsData.class?.toLowerCase() === 'fighter' && item.name.toLowerCase() === 'second wind') {
+        affordable = affordable && !secondWindUsed;
+      }
+      // Check for action surge
+      if (statsData.class?.toLowerCase() === 'fighter' && item.name.toLowerCase() === 'action surge') {
+        affordable = affordable && actionSurgePoints > 0 && currentActionsAvailable === 0;
+      }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
@@ -1004,9 +1031,6 @@ export default function ActionsScreen() {
     }
   };
 
-  const isDefaultAction = (actionId: string) => {
-    return defaultActions.some(action => action.id === actionId);
-  };
 
   // HP-Related Functions
   const handleHpChange = (operation: 'replenish' | 'subtract' | 'add') => {
@@ -1582,6 +1606,52 @@ export default function ActionsScreen() {
           cost: { actions: 1, bonus: 0 },
           details: 'Magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest.',
           image: wildShapeImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+    }
+
+    // Fighter
+    if (statsData.class?.toLowerCase() === 'fighter') {
+      // Add 'Second Wind' action
+      classActions.push({
+        id: 'class-second-wind',
+        name: 'Second Wind',
+        cost: { actions: 0, bonus: 1 },
+        details: 'Regain (1d10 + your level) hit points. Once you use this feature, you must finish a short or long rest before you can use it again.',
+        image: secondWindImage as ImageSourcePropType,
+        type: 'feature',
+        source: 'class',
+      } as ActionBlock);
+      if (fightingStyleLearned) {
+        // Find the fighting style details
+        const fightingStyleFeature = fighterFeaturesData.find((feat: { id: string }) => feat.id === 'Fighting Style');
+        const fightingStyle = fightingStyleFeature?.styles?.find(style =>
+          Object.keys(style)[0].toLowerCase() === fightingStyleLearned?.toLowerCase()
+        );
+        const styleKey = fightingStyle ? Object.keys(fightingStyle)[0] : '';
+        const fightingStyleDetails = styleKey ? (fightingStyle as unknown as Record<string, string>)[styleKey] : '';
+
+        // Add 'Fighting Style' action
+        classActions.push({
+          id: 'class-fighting-style',
+          name: 'Fighting Style',
+          cost: { actions: 0, bonus: 0 },
+          details: '(Passive)\n\n' + fightingStyleDetails,
+          image: fightingStyleImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 2) {
+        // Add 'Action Surge' action
+        classActions.push({
+          id: 'class-action-surge',
+          name: 'Action Surge',
+          cost: { actions: 0, bonus: 0 },
+          details: 'You can take one additional action on your turn.',
+          image: actionSurgeImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -3360,6 +3430,15 @@ export default function ActionsScreen() {
                             if (statsData.class?.toLowerCase() === 'druid') {
                               setCurrentWildShapeUses(2);
                             }
+                            if (statsData.class?.toLowerCase() === 'fighter') {
+                              setSecondWindUsed(false);
+                              if (statsData.level >= 2 && statsData.level <= 16) {
+                                setActionSurgePoints(1);
+                              }
+                              if (statsData.level >= 17) {
+                                setActionSurgePoints(2);
+                              }
+                            }
                             // add more conditions here
                           }}>
                           <MaterialCommunityIcons name="sleep" size={16} color="black" />
@@ -3472,6 +3551,15 @@ export default function ActionsScreen() {
                                 const wisdomModifier = calculateModifier(statsData.abilities.find(a => a.name === 'Wisdom')?.value || 10);
                                 setEmbodimentOfTheLawPoints(Math.max(1, wisdomModifier));
                               }
+                              if (statsData.class?.toLowerCase() === 'fighter') {
+                                setSecondWindUsed(false);
+                                if (statsData.level >= 2 && statsData.level <= 16) {
+                                  setActionSurgePoints(1);
+                                }
+                                if (statsData.level >= 17) {
+                                  setActionSurgePoints(2);
+                                }
+                              }
                               // add more conditions here
                               // add more conditions here
                               break;
@@ -3525,9 +3613,15 @@ export default function ActionsScreen() {
                             case 'orders wrath':
                               setOrdersWrathUsed(true);
                               break;
-
                             case 'throw':
                               handleThrowAction();
+                              break;
+                            case 'second wind':
+                              setSecondWindUsed(true);
+                              break;
+                            case 'action surge':
+                              setCurrentActionsAvailable(prev => Math.max(0, prev + 1));
+                              setActionSurgePoints(prev => Math.max(0, prev - 1));
                               break;
                           }
 

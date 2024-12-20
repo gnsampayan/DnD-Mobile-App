@@ -86,6 +86,17 @@ import shepherdData from '../data/class-tables/druid/subclass/shepherd.json';
 import sporesData from '../data/class-tables/druid/subclass/spores.json';
 import starsData from '../data/class-tables/druid/subclass/stars.json';
 import wildfireData from '../data/class-tables/druid/subclass/wildfire.json';
+import martialArchetypeData from '../data/class-tables/fighter/martialArchetype.json';
+import arcaneArcherData from '../data/class-tables/fighter/subclass/arcaneArcher.json';
+import banneretData from '../data/class-tables/fighter/subclass/banneret.json';
+import battleMasterData from '../data/class-tables/fighter/subclass/battleMaster.json';
+import cavalierData from '../data/class-tables/fighter/subclass/cavalier.json';
+import championData from '../data/class-tables/fighter/subclass/champion.json';
+import echoKnightData from '../data/class-tables/fighter/subclass/echoKnight.json';
+import eldritchKnightData from '../data/class-tables/fighter/subclass/eldritchKnight.json';
+import psiWarriorData from '../data/class-tables/fighter/subclass/psiWarrior.json';
+import runeKnightData from '../data/class-tables/fighter/subclass/runeKnight.json';
+import samuraiData from '../data/class-tables/fighter/subclass/samurai.json';
 
 
 // Import default images
@@ -342,6 +353,8 @@ export default function MeScreen() {
         orderDomainEnabled,
         setOrderDomainEnabled,
         setOrderDomainSkillLearned,
+        fightingStyleLearned,
+        setFightingStyleLearned,
     } = useContext(CharacterContext) as CharacterContextProps;
     const {
         items,
@@ -412,6 +425,10 @@ export default function MeScreen() {
     const [playerNameEditing, setPlayerNameEditing] = useState(false);
     const [druidCircleOpen, setDruidCircleOpen] = useState(false);
     const [druidCircleValue, setDruidCircleValue] = useState<string | null>(null);
+    const [fightingStyleOpen, setFightingStyleOpen] = useState(false);
+    const [fightingStyleValue, setFightingStyleValue] = useState<string | null>(null);
+    const [martialArchetypeOpen, setMartialArchetypeOpen] = useState(false);
+    const [martialArchetypeValue, setMartialArchetypeValue] = useState<string | null>(null);
 
     // Load player name from AsyncStorage
     useEffect(() => {
@@ -1120,7 +1137,9 @@ export default function MeScreen() {
                                     )) ||
                                     (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
                                     (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled) ||
-                                    (feature.name.toLowerCase() === 'druid circle' && !subclass)
+                                    (feature.name.toLowerCase() === 'druid circle' && !subclass) ||
+                                    (feature.name.toLowerCase() === 'fighting style' && !fightingStyleLearned) ||
+                                    (feature.name.toLowerCase() === 'martial archetype' && !subclass)
 
                                     // add more here
                                 ) && (
@@ -1863,6 +1882,53 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            // Fighter
+            case "fighting style":
+                if (!fightingStyleLearned) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: fightingStyleValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="sword-cross" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={fightingStyleValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
+            case "martial archetype":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: martialArchetypeValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="sword-cross" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={martialArchetypeValue === null}
+                            />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -2029,6 +2095,19 @@ export default function MeScreen() {
             case "druid circle":
                 if (druidCircleValue) {
                     setSubclass(druidCircleValue);
+                }
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            // Fighter
+            case "fighting style":
+                setFightingStyleLearned(fightingStyleValue as string);
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            case "martial archetype":
+                if (martialArchetypeValue) {
+                    setSubclass(martialArchetypeValue);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -2223,6 +2302,15 @@ export default function MeScreen() {
                 <View>
                     <Text>Subclass: {subclass}</Text>
                     {subclass && renderDruidSubclassFeatures(subclass)}
+                </View>
+            );
+        }
+        // fighter subclass
+        if (subClassButtonName.toLowerCase() === 'martial archetype') {
+            return (
+                <View>
+                    <Text>Subclass: {subclass}</Text>
+                    {subclass && renderFighterSubclassFeatures(subclass)}
                 </View>
             );
         }
@@ -3502,6 +3590,196 @@ export default function MeScreen() {
         );
     };
 
+    const renderFightingStyleDropdown = () => {
+        // Get fighting styles from fighterFeatures.json
+        const fightingStyles = fighterFeatures.find(feature => feature.id === 'Fighting Style')?.styles || [];
+        const formattedStyles = fightingStyles.map(style => {
+            const [name, description] = Object.entries(style)[0];
+            return {
+                label: name,
+                value: name.toLowerCase(),
+                description: description
+            };
+        });
+
+        return (
+            <View>
+                <DropDownPicker
+                    open={fightingStyleOpen}
+                    value={fightingStyleValue}
+                    items={formattedStyles}
+                    setOpen={setFightingStyleOpen}
+                    setValue={setFightingStyleValue}
+                    placeholder="Select a fighting style"
+                />
+                {fightingStyleValue && (
+                    <Text style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                        {formattedStyles.find(style => style.value === fightingStyleValue)?.description}
+                    </Text>
+                )}
+            </View>
+        );
+    };
+
+    const renderMartialArchetypeDropdown = () => {
+        // Format martial archetype data from JSON
+        const formattedArchetypes = martialArchetypeData.map(archetype => ({
+            label: archetype.name,
+            value: archetype.value,
+            description: archetype.description
+        }));
+
+        return (
+            <View>
+                <DropDownPicker
+                    open={martialArchetypeOpen}
+                    value={martialArchetypeValue}
+                    items={formattedArchetypes}
+                    setOpen={setMartialArchetypeOpen}
+                    setValue={setMartialArchetypeValue}
+                    placeholder="Select a martial archetype"
+                />
+                {martialArchetypeValue && (
+                    <Text style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                        {formattedArchetypes.find(archetype => archetype.value === martialArchetypeValue)?.description}
+                    </Text>
+                )}
+            </View>
+        );
+    };
+
+    const renderFighterSubclassFeatures = (subclassId: string) => {
+        // Get the appropriate data based on subclass
+        const getSubclassData = (id: string) => {
+            switch (id) {
+                case 'arcane archer':
+                    return arcaneArcherData;
+                case 'banneret':
+                    return banneretData;
+                case 'battle master':
+                    return battleMasterData;
+                case 'cavalier':
+                    return cavalierData;
+                case 'champion':
+                    return championData;
+                case 'echo knight':
+                    return echoKnightData;
+                case 'eldritch knight':
+                    return eldritchKnightData;
+                case 'psi warrior':
+                    return psiWarriorData;
+                case 'rune knight':
+                    return runeKnightData;
+                case 'samurai':
+                    return samuraiData;
+                default:
+                    return null;
+            }
+        };
+
+        const subclassData = getSubclassData(subclassId);
+        const subclassInfo = martialArchetypeData.find(archetype => archetype.value === subclassId);
+
+        if (!subclassData || !subclassInfo) return null;
+
+        const renderNestedContent = (obj: any, depth: number = 0) => {
+            if (typeof obj === 'string' || typeof obj === 'number') {
+                return (
+                    <Text
+                        style={{
+                            paddingLeft: depth * 8,
+                            paddingRight: 8,
+                            flexShrink: 1,
+                            flexWrap: 'wrap'
+                        }}
+                        numberOfLines={0}
+                    >
+                        {obj}
+                    </Text>
+                );
+            }
+
+            if (Array.isArray(obj)) {
+                return (
+                    <View style={{ paddingLeft: depth * 8 }}>
+                        {obj.map((item, index) => (
+                            <View key={index} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 2 }}>
+                                <Text style={{ marginRight: 4 }}>•</Text>
+                                {renderNestedContent(item, depth + 1)}
+                            </View>
+                        ))}
+                    </View>
+                );
+            }
+
+            if (typeof obj === 'object' && obj !== null) {
+                return (
+                    <View style={{ paddingLeft: depth * 8 }}>
+                        {Object.entries(obj).map(([key, value]) => {
+                            const isValueObject = typeof value === 'object' && value !== null;
+
+                            return (
+                                <View key={key} style={{ marginVertical: 4 }}>
+                                    {/* Show all keys except numeric indices */}
+                                    {isNaN(Number(key)) && (
+                                        <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                                            {key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                        </Text>
+                                    )}
+                                    {renderNestedContent(value, isValueObject ? depth + 1 : depth)}
+                                </View>
+                            );
+                        })}
+                    </View>
+                );
+            }
+
+            return null;
+        };
+
+        return (
+            <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={{ padding: 16 }}
+            >
+                <Text style={{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    marginBottom: 8,
+                    textTransform: 'capitalize'
+                }}>
+                    {subclassId.replace(/-/g, ' ')}
+                </Text>
+
+                <Text style={{ marginBottom: 16 }}>
+                    {subclassInfo.description}
+                </Text>
+
+                {Object.entries(subclassData)
+                    .filter(([key, value]) => {
+                        if (typeof value === 'object' && 'level' in value) {
+                            return statsData.level >= value.level;
+                        }
+                        return true;
+                    })
+                    .map(([key, value]) => (
+                        <View key={key} style={{ marginBottom: 16 }}>
+                            <Text style={{
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                                marginBottom: 4,
+                                textTransform: 'capitalize'
+                            }}>
+                                {key.replace(/-/g, ' ')}
+                            </Text>
+                            {renderNestedContent(value)}
+                        </View>
+                    ))
+                }
+            </ScrollView>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -4397,6 +4675,22 @@ export default function MeScreen() {
                         {statsData.class === 'druid' && selectedFeat?.toLowerCase() === 'druid circle' && (
                             subclass === null ? (
                                 renderDruidCircleDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
+                        {/* Fighter - Fighting Style Dropdown */}
+                        {statsData.class === 'fighter' && selectedFeat?.toLowerCase() === 'fighting style' && (
+                            fightingStyleLearned === null ? (
+                                renderFightingStyleDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Fighting Style: {fightingStyleLearned}</Text>
+                            )
+                        )}
+                        {/* Fighter - Martial Archetype - subclass Dropdown */}
+                        {statsData.class === 'fighter' && selectedFeat?.toLowerCase() === 'martial archetype' && (
+                            subclass === null ? (
+                                renderMartialArchetypeDropdown()
                             ) : (
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )

@@ -1,0 +1,94 @@
+{
+	"name": "Cavalier",
+	"bonus-proficiency": {
+		"level": 3,
+		"description": "You gain proficiency in one of the following skills of your choice: Animal Handling, History, Insight, Performance, or Persuasion. Alternatively, you learn one language of your choice.",
+		"choices": [
+			{
+				"type": "skill",
+				"options": [
+					"Animal Handling",
+					"History",
+					"Insight",
+					"Performance",
+					"Persuasion"
+				]
+			},
+			{
+				"type": "language",
+				"options": ["Any"]
+			}
+		]
+	},
+	"born-to-the-saddle": {
+		"level": 3,
+		"description": "Your mastery as a rider becomes apparent.",
+		"benefits": [
+			"You have advantage on saving throws made to avoid falling off your mount",
+			"If you fall off your mount and descend no more than 10 feet, you can land on your feet if you're not incapacitated",
+			"Mounting or dismounting a creature costs you only 5 feet of movement, rather than half your speed"
+		]
+	},
+	"unwavering-mark": {
+		"level": 3,
+		"description": "You can menace your foes, foiling their attacks and punishing them for harming others.",
+		"marking": {
+			"trigger": "When you hit a creature with a melee weapon attack",
+			"duration": "Until the end of your next turn",
+			"early-end-conditions": [
+				"You are incapacitated",
+				"You die",
+				"Someone else marks the creature"
+			],
+			"effect": "While it is within 5 feet of you, a creature marked by you has disadvantage on any attack roll that doesn't target you"
+		},
+		"special-attack": {
+			"trigger": "If a creature marked by you deals damage to anyone other than you",
+			"action": "Bonus action on your next turn",
+			"benefits": [
+				"Advantage on the attack roll",
+				"Extra damage equal to half your fighter level"
+			],
+			"uses": "Strength modifier (minimum of 1)",
+			"recharge": "long rest"
+		}
+	},
+	"warding-maneuver": {
+		"level": 7,
+		"description": "You learn to fend off strikes directed at you, your mount, or other creatures nearby.",
+		"trigger": "If you or a creature you can see within 5 feet of you is hit by an attack",
+		"requirements": "You must be wielding a melee weapon or a shield",
+		"effect": [
+			"Roll 1d8 as a reaction",
+			"Add the number rolled to the target's AC against that attack",
+			"If the attack still hits, the target has resistance against the attack's damage"
+		],
+		"uses": "Constitution modifier (minimum of 1)",
+		"recharge": "long rest"
+	},
+	"hold-the-line": {
+		"level": 10,
+		"description": "You become a master of locking down your enemies.",
+		"effects": [
+			"Creatures provoke an opportunity attack from you when they move 5 feet or more while within your reach",
+			"If you hit a creature with an opportunity attack, the target's speed is reduced to 0 until the end of the current turn"
+		]
+	},
+	"ferocious-charger": {
+		"level": 15,
+		"description": "You can run down your foes, whether you're mounted or not.",
+		"trigger": "If you move at least 10 feet in a straight line right before attacking a creature and you hit it with the attack",
+		"effect": "Target must succeed on a Strength saving throw or be knocked prone",
+		"save-dc": "8 + proficiency bonus + Strength modifier",
+		"limitation": "Once per turn"
+	},
+	"vigilant-defender": {
+		"level": 18,
+		"description": "You respond to danger with extraordinary vigilance.",
+		"effect": "In combat, you get a special reaction that you can take once on every creature's turn, except your turn",
+		"limitations": [
+			"Can only be used to make an opportunity attack",
+			"Can't be used on the same turn that you take your normal reaction"
+		]
+	}
+}

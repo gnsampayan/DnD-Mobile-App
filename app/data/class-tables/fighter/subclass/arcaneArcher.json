@@ -1,0 +1,97 @@
+{
+	"name": "Arcane Archer",
+	"arcane-archer-lore": {
+		"level": 3,
+		"description": "You learn magical theory or some of the secrets of nature – typical for practitioners of of this elven martial tradition.",
+		"choices": [
+			{
+				"type": "skill",
+				"options": ["Arcana", "Nature"]
+			},
+			{
+				"type": "cantrip",
+				"options": ["Prestidigitation", "Druidcraft"]
+			}
+		]
+	},
+	"arcane-shot": {
+		"level": 3,
+		"description": "You learn to unleash special magical effects with some of your shots. When you gain this feature, you learn two Arcane Shot options of your choice.",
+		"uses": 2,
+		"recharge": "short rest",
+		"details": [
+			"Once per turn when you fire an arrow from a shortbow or longbow as part of the Attack action",
+			"You decide to use the option when the arrow hits, unless the option doesn't involve an attack roll",
+			"Additional options gained at levels 7, 10, 15, and 18",
+			"Options improve at level 18"
+		]
+	},
+	"magic-arrow": {
+		"level": 7,
+		"description": "You gain the ability to infuse arrows with magic. Whenever you fire a nonmagical arrow from a shortbow or longbow, you can make it magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage. The magic fades from the arrow immediately after it hits or misses its target."
+	},
+	"curving-shot": {
+		"level": 7,
+		"description": "When you make an attack roll with a magic arrow and miss, you can use a bonus action to reroll the attack roll against a different target within 60 feet of the original target."
+	},
+	"ever-ready-shot": {
+		"level": 15,
+		"description": "If you roll initiative and have no uses of Arcane Shot remaining, you regain one use of it."
+	},
+	"arcane-shot-options": {
+		"save-dc": "8 + proficiency bonus + Intelligence modifier",
+		"options": {
+			"banishing-arrow": {
+				"school": "abjuration",
+				"effect": "Target must make Charisma save or be banished. While banished, speed is 0 and is incapacitated. Returns at end of next turn.",
+				"level-18": "Additional 2d6 force damage"
+			},
+			"beguiling-arrow": {
+				"school": "enchantment",
+				"damage": "2d6 psychic",
+				"effect": "Target must make Wisdom save or be charmed by chosen ally within 30ft until start of next turn",
+				"level-18": "Damage increases to 4d6 psychic"
+			},
+			"bursting-arrow": {
+				"school": "evocation",
+				"damage": "2d6 force",
+				"effect": "Damages target and all creatures within 10 feet",
+				"level-18": "Damage increases to 4d6 force"
+			},
+			"enfeebling-arrow": {
+				"school": "necromancy",
+				"damage": "2d6 necrotic",
+				"effect": "Target must make Constitution save or weapon attack damage is halved until start of next turn",
+				"level-18": "Damage increases to 4d6 necrotic"
+			},
+			"grasping-arrow": {
+				"school": "conjuration",
+				"damage": {
+					"initial": "2d6 poison",
+					"movement": "2d6 slashing"
+				},
+				"effect": "Speed reduced by 10ft, takes slashing damage on movement, can be removed with Athletics check",
+				"duration": "1 minute",
+				"level-18": "Both damage types increase to 4d6"
+			},
+			"piercing-arrow": {
+				"school": "transmutation",
+				"effect": "30ft line, 1ft wide, ignores cover and objects, Dexterity save for half damage",
+				"extra-damage": "1d6 piercing",
+				"level-18": "Extra damage increases to 2d6 piercing"
+			},
+			"seeking-arrow": {
+				"school": "divination",
+				"effect": "No attack roll, targets creature seen in past minute, ignores cover, Dexterity save for half damage",
+				"extra-damage": "1d6 force",
+				"level-18": "Extra damage increases to 2d6 force"
+			},
+			"shadow-arrow": {
+				"school": "illusion",
+				"damage": "2d6 psychic",
+				"effect": "Target must make Wisdom save or can't see beyond 5ft until start of next turn",
+				"level-18": "Damage increases to 4d6 psychic"
+			}
+		}
+	}
+}

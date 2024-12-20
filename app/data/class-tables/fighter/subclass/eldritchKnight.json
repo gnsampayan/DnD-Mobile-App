@@ -1,0 +1,77 @@
+{
+	"name": "Eldritch Knight",
+	"spellcasting": {
+		"level": 3,
+		"description": "You augment your martial prowess with the ability to cast spells.",
+		"cantrips": {
+			"initial": {
+				"count": 2,
+				"source": "wizard spell list"
+			},
+			"additional": {
+				"10": 1
+			}
+		},
+		"spell-slots": {
+			"description": "The Eldritch Knight Spellcasting table shows how many spell slots you have to cast your wizard spells of 1st level and higher. To cast one of these spells, you must expend a slot of the spell's level or higher. You regain all expended spell slots when you finish a long rest.",
+			"example": "If you know the 1st-level spell Shield and have a 1st-level and a 2nd-level spell slot available, you can cast Shield using either slot."
+		},
+		"spells-known": {
+			"initial": {
+				"count": 3,
+				"level": "1st",
+				"restriction": "two must be from abjuration and evocation schools"
+			},
+			"learning": {
+				"description": "Each spell must be an abjuration or evocation spell, and must be of a level for which you have spell slots",
+				"exceptions": {
+					"levels": [8, 14, 20],
+					"detail": "Spells learned at these levels can come from any school of magic"
+				}
+			},
+			"replacing": {
+				"trigger": "gaining a level",
+				"restriction": "Must be abjuration or evocation unless replacing spells gained at 3rd, 8th, 14th, or 20th level"
+			}
+		},
+		"spellcasting-ability": {
+			"ability": "Intelligence",
+			"save-dc": "8 + proficiency bonus + Intelligence modifier",
+			"attack-modifier": "proficiency bonus + Intelligence modifier"
+		}
+	},
+	"weapon-bond": {
+		"level": 3,
+		"description": "You learn a ritual that creates a magical bond between yourself and one weapon.",
+		"ritual": {
+			"duration": "1 hour",
+			"can-be-done": "during a short rest",
+			"requirements": "weapon must be within reach throughout"
+		},
+		"benefits": [
+			"Can't be disarmed unless incapacitated",
+			"Can summon bonded weapon as bonus action if on same plane"
+		],
+		"limitations": {
+			"max-bonds": 2,
+			"summon-limit": "one at a time",
+			"new-bond": "must break one existing bond if attempting to bond third weapon"
+		}
+	},
+	"war-magic": {
+		"level": 7,
+		"description": "When you use your action to cast a cantrip, you can make one weapon attack as a bonus action."
+	},
+	"eldritch-strike": {
+		"level": 10,
+		"description": "When you hit a creature with a weapon attack, that creature has disadvantage on the next saving throw it makes against a spell you cast before the end of your next turn."
+	},
+	"arcane-charge": {
+		"level": 15,
+		"description": "You gain the ability to teleport up to 30 feet to an unoccupied space you can see when you use your Action Surge. You can teleport before or after the additional action."
+	},
+	"improved-war-magic": {
+		"level": 18,
+		"description": "When you use your action to cast a spell, you can make one weapon attack as a bonus action."
+	}
+}

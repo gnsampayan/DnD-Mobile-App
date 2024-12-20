@@ -1,0 +1,58 @@
+{
+	"name": "Battle Master",
+	"combat-superiority": {
+		"level": 3,
+		"description": "You learn maneuvers that are fueled by special dice called superiority dice.",
+		"maneuvers": {
+			"description": "You learn three maneuvers of your choice. Many maneuvers enhance an attack in some way. You can use only one maneuver per attack.",
+			"additional-maneuvers": {
+				"7": 2,
+				"10": 2,
+				"15": 2
+			},
+			"details": "Each time you learn new maneuvers, you can also replace one maneuver you know with a different one."
+		},
+		"superiority-dice": {
+			"initial": {
+				"dice": 4,
+				"size": "d8"
+			},
+			"additional-dice": {
+				"7": 1,
+				"15": 1
+			},
+			"recharge": "short or long rest",
+			"improvements": {
+				"10": "d10",
+				"18": "d12"
+			}
+		},
+		"save-dc": "8 + proficiency bonus + Strength or Dexterity modifier (your choice)"
+	},
+	"student-of-war": {
+		"level": 3,
+		"description": "You gain proficiency with one type of artisan's tools of your choice."
+	},
+	"know-your-enemy": {
+		"level": 7,
+		"description": "If you spend at least 1 minute observing or interacting with another creature outside combat, you can learn certain information about its capabilities compared to your own.",
+		"details": "The DM tells you if the creature is your equal, superior, or inferior in regard to two of the following characteristics of your choice:",
+		"characteristics": [
+			"Strength score",
+			"Dexterity score",
+			"Constitution score",
+			"Armor Class",
+			"Current hit points",
+			"Total class levels, if any",
+			"Fighter class levels, if any"
+		]
+	},
+	"improved-combat-superiority": {
+		"level": 10,
+		"description": "Your superiority dice turn into d10s. At 18th level, they turn into d12s."
+	},
+	"relentless": {
+		"level": 15,
+		"description": "When you roll initiative and have no superiority dice remaining, you regain 1 superiority die."
+	}
+}

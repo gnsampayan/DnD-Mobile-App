@@ -93,7 +93,10 @@ export interface CharacterContextProps {
     setOrderDomainEnabled: (value: boolean) => void;
     orderDomainSkillLearned: string | null;
     setOrderDomainSkillLearned: (value: string | null) => void;
-
+    fightingStyleLearned: string | null;
+    setFightingStyleLearned: (value: string | null) => void;
+    secondWindUsed: boolean;
+    setSecondWindUsed: (value: boolean) => void;
 }
 
 export const CharacterContext = createContext<CharacterContextProps | undefined>(undefined);
@@ -146,6 +149,8 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const [acolyteOfNatureSkillLearned, setAcolyteOfNatureSkillLearned] = useState<string | null>(null);
     const [orderDomainEnabled, setOrderDomainEnabled] = useState<boolean>(false);
     const [orderDomainSkillLearned, setOrderDomainSkillLearned] = useState<string | null>(null);
+    const [fightingStyleLearned, setFightingStyleLearned] = useState<string | null>(null);
+    const [secondWindUsed, setSecondWindUsed] = useState<boolean>(false);
 
 
     const WEAPONS_STORAGE_KEY = '@equipped_weapons';
@@ -184,7 +189,9 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     const ACLOYTE_OF_NATURE_SKILL_LEARNED_STORAGE_KEY = '@acolyte_of_nature_skill_learned';
     const ORDER_DOMAIN_ENABLED_STORAGE_KEY = '@order_domain_enabled';
     const ORDER_DOMAIN_SKILL_LEARNED_STORAGE_KEY = '@order_domain_skill_learned';
-
+    const FIGHTING_STYLE_LEARNED_STORAGE_KEY = '@fighting_style_learned';
+    const SECOND_WIND_USED_STORAGE_KEY = '@second_wind_used';
+    const ACTION_SURGE_POINTS_STORAGE_KEY = '@action_surge_points';
 
 
     const loadDataFromStorage = async () => {
@@ -358,6 +365,16 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                     setter: setOrderDomainSkillLearned,
                     parser: (val: string) => val
                 },
+                {
+                    key: FIGHTING_STYLE_LEARNED_STORAGE_KEY,
+                    setter: setFightingStyleLearned,
+                    parser: (val: string) => val
+                },
+                {
+                    key: SECOND_WIND_USED_STORAGE_KEY,
+                    setter: setSecondWindUsed,
+                    parser: (val: string) => val === 'true'
+                },
             ];
 
             await Promise.all(
@@ -423,7 +440,39 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setAcolyteOfNatureSkillLearned(null);
         setOrderDomainEnabled(false);
         setOrderDomainSkillLearned(null);
+        setFightingStyleLearned(null);
+        setSecondWindUsed(false);
     };
+
+
+
+    // save second wind used to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveSecondWindUsedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(SECOND_WIND_USED_STORAGE_KEY, secondWindUsed.toString());
+                } catch (error) {
+                    console.error('Error saving second wind used to AsyncStorage:', error);
+                }
+            }
+            saveSecondWindUsedToStorage();
+        }
+    }, [secondWindUsed, isLoading]);
+
+    // save fighting style learned to AsyncStorage whenever it changes
+    useEffect(() => {
+        if (!isLoading) {
+            const saveFightingStyleLearnedToStorage = async () => {
+                try {
+                    await AsyncStorage.setItem(FIGHTING_STYLE_LEARNED_STORAGE_KEY, fightingStyleLearned || '');
+                } catch (error) {
+                    console.error('Error saving fighting style learned to AsyncStorage:', error);
+                }
+            }
+            saveFightingStyleLearnedToStorage();
+        }
+    }, [fightingStyleLearned, isLoading]);
 
     // save order domain skill learned to AsyncStorage whenever it changes
     useEffect(() => {
@@ -1098,6 +1147,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
                 setOrderDomainEnabled,
                 orderDomainSkillLearned,
                 setOrderDomainSkillLearned,
+                fightingStyleLearned,
+                setFightingStyleLearned,
+                secondWindUsed,
+                setSecondWindUsed,
             }}
         >
             {children}
