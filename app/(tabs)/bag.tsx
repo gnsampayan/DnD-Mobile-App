@@ -240,8 +240,6 @@ export default function BagScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState<string>('');
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editingField, setEditingField] = useState<'details' | null>(null);
-  const [editedDetails, setEditedDetails] = useState<string>('');
   const [selectedWeapon, setSelectedWeapon] = useState<any>(null);
   const [openArmorType, setOpenArmorType] = useState(false);
   const [armorTypeValue, setArmorTypeValue] = useState<string | null>(null);
@@ -257,12 +255,16 @@ export default function BagScreen() {
   const { deathDomainEnabled } = useContext(CharacterContext) as CharacterContextProps;
 
 
-
   useEffect(() => {
     const campingSupplies = items.find(item => item.id === '1');
     const coinPouch = items.find(item => item.id === '2');
     setFoodUnits(campingSupplies ? campingSupplies.quantity : 0);
     setMoney(coinPouch ? coinPouch.quantity : 0);
+
+    // Initialize items with default items if items are empty
+    if (!items || items.length === 0) {
+      saveItems(defaultItems);
+    }
   }, [items]);
 
   useEffect(() => {

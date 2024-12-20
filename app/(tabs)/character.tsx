@@ -987,10 +987,11 @@ export default function MeScreen() {
                                 gap: 5,
                                 borderRadius: 8,
                                 marginBottom: 5,
+                                flexWrap: isNumericKey ? 'wrap' : 'nowrap'
                             }}
                         >
                             <Text style={styles.featLabel}>{displayKey}</Text>
-                            <View style={{ flexDirection: 'column', flexWrap: 'wrap', flex: 1 }}>
+                            <View style={{ flexDirection: 'column', flex: isNumericKey ? 1 : 0 }}>
                                 {renderObject(value)}
                             </View>
                         </View>
