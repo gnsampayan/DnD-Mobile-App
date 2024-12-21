@@ -4100,7 +4100,7 @@ export default function MeScreen() {
                         style={[
                             styles.weapon,
                             offHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {},
-                            { opacity: equippedShield !== null ? 0.5 : 1 }
+                            { opacity: equippedShield !== null ? 0.2 : 1 }
                         ]}
                         onPress={() => setOffHandModalVisible(true)}
                         disabled={equippedShield !== null}
