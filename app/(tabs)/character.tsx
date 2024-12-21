@@ -571,6 +571,14 @@ export default function MeScreen() {
         setClassValue(statsData.class || null);
     }, []);
 
+    // unequip offhand if shield is equipped
+    useEffect(() => {
+        if (equippedShield) {
+            equipWeapon('offHand', null);
+            setOffHandValue('none');
+        }
+    }, [equippedShield]);
+
     const handleImageLongPress = () => {
         if (imageUri) {
             Alert.alert('Image Options', 'What would you like to do?', [
@@ -4091,9 +4099,11 @@ export default function MeScreen() {
                     <TouchableOpacity
                         style={[
                             styles.weapon,
-                            offHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {}
+                            offHandWeapon?.properties?.includes("Two-handed") ? styles.twoHandedWeapon : {},
+                            { opacity: equippedShield !== null ? 0.5 : 1 }
                         ]}
                         onPress={() => setOffHandModalVisible(true)}
+                        disabled={equippedShield !== null}
                     >
                         {offHandWeapon?.name && offHandWeapon?.name !== 'none' ? (
                             (() => {
@@ -4291,36 +4301,45 @@ export default function MeScreen() {
                     setOpenMainHandPicker(false);
                 }}>
                     <View style={styles.modalOverlay}>
-                        <View style={styles.modalContainer} >
-                            <Text>Select Main Hand Weapon</Text>
-                            <DropDownPicker
-                                open={openMainHandPicker}
-                                value={mainHandValue}
-                                items={filterEquipableMeleeWeapons()}
-                                setOpen={setOpenMainHandPicker}
-                                setValue={setMainHandValue}
-                                placeholder="Select a weapon"
-                                containerStyle={{ height: 40, width: '100%' }}
-                                style={{ backgroundColor: '#fafafa' }}
-                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                            />
-                            <TouchableOpacity
-                                style={{
-                                    padding: 10,
-                                    backgroundColor: 'lightblue',
-                                    borderRadius: 8,
-                                    marginTop: 10,
-                                    alignSelf: 'center',
-                                    // Start of Selection
-                                }}
-                                onPress={() => {
-                                    handleEquipWeapon('mainHand', mainHandValue);
-                                    setMainHandModalVisible(false);
-                                }}
-                            >
-                                <Text>Save</Text>
-                            </TouchableOpacity>
-                            <Button title="Close" onPress={() => setMainHandModalVisible(false)} />
+                        <View style={[styles.modalContainer, { flexDirection: 'column', justifyContent: 'space-between' }]} >
+                            <View>
+                                <Text>Select Main Hand Weapon</Text>
+                                <DropDownPicker
+                                    open={openMainHandPicker}
+                                    value={mainHandValue}
+                                    items={filterEquipableMeleeWeapons()}
+                                    setOpen={setOpenMainHandPicker}
+                                    setValue={setMainHandValue}
+                                    placeholder={mainHandValue === undefined ? 'Select a weapon' : mainHandValue}
+                                    containerStyle={{ height: 40, width: '100%' }}
+                                    style={{ backgroundColor: '#fafafa' }}
+                                    dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                />
+                            </View>
+                            <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-around',
+                                alignItems: 'center',
+                                marginBottom: 40
+                            }}>
+                                <Button title="Close" onPress={() => setMainHandModalVisible(false)} />
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 10,
+                                        backgroundColor: 'lightblue',
+                                        borderRadius: 8,
+                                        marginTop: 10,
+                                        paddingHorizontal: 20,
+                                        alignSelf: 'center',
+                                    }}
+                                    onPress={() => {
+                                        handleEquipWeapon('mainHand', mainHandValue);
+                                        setMainHandModalVisible(false);
+                                    }}
+                                >
+                                    <Text>Equip</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
@@ -4334,35 +4353,40 @@ export default function MeScreen() {
                     setOpenOffHandPicker(false);
                 }}>
                     <View style={styles.modalOverlay}>
-                        <View style={styles.modalContainer}>
-                            <Text>Select Offhand Weapon</Text>
-                            <DropDownPicker
-                                open={openOffHandPicker}
-                                value={offHandValue}
-                                items={filterEquipableOffhandWeapons()}
-                                setOpen={setOpenOffHandPicker}
-                                setValue={setOffHandValue}
-                                placeholder="Select a weapon"
-                                containerStyle={{ height: 40, width: '100%' }}
-                                style={{ backgroundColor: '#fafafa' }}
-                                dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
-                            />
-                            <TouchableOpacity
-                                style={{
-                                    padding: 10,
-                                    backgroundColor: 'lightblue',
-                                    borderRadius: 8,
-                                    marginTop: 10,
-                                    alignSelf: 'center',
-                                }}
-                                onPress={() => {
-                                    handleEquipWeapon('offHand', offHandValue);
-                                    setOffHandModalVisible(false);
-                                }}
-                            >
-                                <Text>Equip Weapon</Text>
-                            </TouchableOpacity>
-                            <Button title="Close" onPress={() => setOffHandModalVisible(false)} />
+                        <View style={[styles.modalContainer, { flexDirection: 'column', justifyContent: 'space-between' }]}>
+                            <View>
+                                <Text>Select Offhand Weapon</Text>
+                                <DropDownPicker
+                                    open={openOffHandPicker}
+                                    value={offHandValue}
+                                    items={filterEquipableOffhandWeapons()}
+                                    setOpen={setOpenOffHandPicker}
+                                    setValue={setOffHandValue}
+                                    placeholder={offHandValue === undefined ? 'Select a weapon' : offHandValue}
+                                    containerStyle={{ height: 40, width: '100%' }}
+                                    style={{ backgroundColor: '#fafafa' }}
+                                    dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
+                                />
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginBottom: 40 }}>
+                                <Button title="Close" onPress={() => setOffHandModalVisible(false)} />
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 10,
+                                        backgroundColor: 'lightblue',
+                                        borderRadius: 8,
+                                        marginTop: 10,
+                                        paddingHorizontal: 20,
+                                        alignSelf: 'center',
+                                    }}
+                                    onPress={() => {
+                                        handleEquipWeapon('offHand', offHandValue);
+                                        setOffHandModalVisible(false);
+                                    }}
+                                >
+                                    <Text>Equip</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </TouchableWithoutFeedback>
@@ -4378,15 +4402,14 @@ export default function MeScreen() {
                         items={filterEquipableRangedWeapons()}
                         setOpen={setOpenRangedHandPicker}
                         setValue={setRangedHandValue}
-                        placeholder="Select a weapon"
+                        placeholder={rangedHandValue === undefined ? 'Select a weapon' : rangedHandValue}
                         containerStyle={{ height: 40, width: '100%' }}
                         style={{ backgroundColor: '#fafafa' }}
                         dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
                     />
-                    <View style={styles.modalButtons}>
+                    <View style={[styles.modalButtons, { marginLeft: 20 }]}>
                         <Button
                             title="Close"
-                            color="black"
                             onPress={() => {
                                 setRangedHandModalVisible(false);
                                 setRangedHandValue('none');
@@ -4394,24 +4417,40 @@ export default function MeScreen() {
                             }}
                         />
                         {rangedHandValue.toLowerCase() !== rangedHandWeapon?.name.toLowerCase() ? (
-                            <Button
-                                title="Equip"
-                                color="blue"
+                            <TouchableOpacity
+                                style={{
+                                    padding: 10,
+                                    backgroundColor: 'lightblue',
+                                    borderRadius: 8,
+                                    marginTop: 10,
+                                    paddingHorizontal: 20,
+                                    alignSelf: 'center',
+                                }}
                                 onPress={() => {
                                     handleEquipWeapon('rangedHand', rangedHandValue);
                                     setRangedHandModalVisible(false);
                                 }}
                                 disabled={rangedHandValue === 'none'}
-                            />
+                            >
+                                <Text>Equip</Text>
+                            </TouchableOpacity>
                         ) : (
-                            <Button
-                                title="Unequip"
-                                color="blue"
+                            <TouchableOpacity
+                                style={{
+                                    padding: 10,
+                                    backgroundColor: 'black',
+                                    borderRadius: 8,
+                                    marginTop: 10,
+                                    paddingHorizontal: 20,
+                                    alignSelf: 'center',
+                                }}
                                 onPress={() => {
                                     handleEquipWeapon('rangedHand', 'none');
                                     setRangedHandModalVisible(false);
                                 }}
-                            />
+                            >
+                                <Text style={{ color: 'white' }}>Unequip</Text>
+                            </TouchableOpacity>
                         )}
                     </View>
                 </View>
@@ -4541,6 +4580,7 @@ export default function MeScreen() {
                                 title="Equip"
                                 onPress={() => {
                                     setEquippedShield(shieldValue);
+                                    setShieldModalVisible(false);
                                 }}
                                 disabled={!shieldValue || (shieldValue === equippedShield)}
                             />
