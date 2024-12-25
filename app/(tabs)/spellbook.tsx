@@ -680,8 +680,7 @@ export default function SpellbookScreen() {
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <Text style={{ color: 'white' }}>+</Text>
-                                    <MaterialCommunityIcons name="auto-fix" size={20} color="white" />
+                                    <Text style={{ color: 'gold' }}>add spell</Text>
                                 </View>
                             </>
                         )}
@@ -799,8 +798,7 @@ export default function SpellbookScreen() {
                             </Text>
                         ) : (
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                                <Text style={{ color: 'white' }}>+</Text>
-                                <MaterialCommunityIcons name="shimmer" size={20} color="white" />
+                                <Text style={{ color: 'gold' }}>add cantrip</Text>
                             </View>
                         )}
                     </View>
@@ -932,8 +930,7 @@ export default function SpellbookScreen() {
                                     borderRadius: 8
                                 }}
                             >
-                                <Text style={{ color: 'white' }}>+</Text>
-                                <MaterialCommunityIcons name="book-education" size={20} color="white" />
+                                <Text style={{ color: 'gold' }}>add spell</Text>
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={{ paddingHorizontal: 10, flex: 1 }}>
@@ -2141,6 +2138,7 @@ export default function SpellbookScreen() {
                                 paddingBottom: 10,
                                 opacity: slotInfo.remaining > 0 ? 1 : 0.5
                             }}
+                            disabled={slotInfo.total === 0}
                         >
                             <Text style={{ marginBottom: 5, color: 'white', alignSelf: 'center' }}>
                                 {romanNumeral}

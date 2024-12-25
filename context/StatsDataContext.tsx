@@ -322,51 +322,57 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, [statsData.class, statsDataLoaded]);
 
     useEffect(() => {
-        switch (statsData.class?.toLowerCase()) {
-            case 'artificer':
-                setUnusedSkillPoints(2);
-                break;
-            case 'barbarian':
-                setUnusedSkillPoints(2);
-                break;
-            case 'bard':
-                setUnusedSkillPoints(3);
-                break;
-            case 'cleric':
-                setUnusedSkillPoints(2);
-                break;
-            case 'druid':
-                setUnusedSkillPoints(2);
-                break;
-            case 'fighter':
-                setUnusedSkillPoints(2);
-                break;
-            case 'monk':
-                setUnusedSkillPoints(2);
-                break;
-            case 'paladin':
-                setUnusedSkillPoints(2);
-                break;
-            case 'ranger':
-                setUnusedSkillPoints(3);
-                break;
-            case 'rogue':
-                setUnusedSkillPoints(4);
-                break;
-            case 'sorcerer':
-                setUnusedSkillPoints(2);
-                break;
-            case 'warlock':
-                setUnusedSkillPoints(2);
-                break;
-            case 'wizard':
-                setUnusedSkillPoints(2);
-                break;
-            default:
-                setUnusedSkillPoints(0);
-                break;
+        if (!statsDataLoaded) {
+            return;
         }
-    }, [statsData.class]);
+        if (prevClassRef.current && statsData.class && prevClassRef.current !== statsData.class) {
+            switch (statsData.class?.toLowerCase()) {
+                case 'artificer':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'barbarian':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'bard':
+                    setUnusedSkillPoints(3);
+                    break;
+                case 'cleric':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'druid':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'fighter':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'monk':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'paladin':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'ranger':
+                    setUnusedSkillPoints(3);
+                    break;
+                case 'rogue':
+                    setUnusedSkillPoints(4);
+                    break;
+                case 'sorcerer':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'warlock':
+                    setUnusedSkillPoints(2);
+                    break;
+                case 'wizard':
+                    setUnusedSkillPoints(2);
+                    break;
+                default:
+                    setUnusedSkillPoints(0);
+                    break;
+            }
+        }
+        prevClassRef.current = statsData.class || null;
+    }, [statsData.class, statsDataLoaded]);
 
 
     // Save subclass to AsyncStorage when it changes

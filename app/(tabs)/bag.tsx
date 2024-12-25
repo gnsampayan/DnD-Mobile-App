@@ -217,7 +217,6 @@ export default function BagScreen() {
     attackBonus: '',
     weaponType: '',
   });
-  const [openItemType, setOpenItemType] = useState(false);
   const [itemTypeValue, setItemTypeValue] = useState<string | null>(null);
   const { saveItems, setWeaponsProficientIn, items } = useItemEquipment();
 
@@ -1037,24 +1036,52 @@ export default function BagScreen() {
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
                 <Text style={styles.modalTitle}>Add New Item</Text>
-                <Text>Item Type</Text>
-                <DropDownPicker
-                  open={openItemType}
-                  value={itemTypeValue}
-                  items={itemTypes}
-                  setOpen={setOpenItemType}
-                  setValue={setItemTypeValue}
-                  placeholder="Select an item type"
-                  style={{ marginBottom: 10 }}
-                  zIndex={2000}
-                  onChangeValue={(value) => {
-                    setItemTypeValue(value);
-                    if (value?.toLowerCase() !== 'weapon') {
-                      setWeaponTypeValue(null);
-                    }
-                    setNewItem({ ...newItem, name: '', details: '' });
-                  }}
-                />
+
+                <View style={styles.itemTypeCreationContainer}>
+                  {itemTypes.slice(0, 6).map((item) => (
+                    <TouchableOpacity
+                      key={item.value}
+                      style={[
+                        styles.itemTypeCreationSquare,
+                        {
+                          width: itemWidth,
+                          height: itemWidth,
+                          marginHorizontal: 5,
+                          marginVertical: 5,
+                        },
+                        itemTypeValue === item.value && {
+                          backgroundColor: '#007AFF',
+                          borderWidth: 2,
+                          borderColor: 'white',
+                        },
+                      ]}
+                      onPress={() => {
+                        setItemTypeValue(item.value);
+                        setNewItem({
+                          ...newItem,
+                          name: '',
+                          details: '',
+                          weaponType: ''
+                        });
+                        setArmorTypeValue(null);
+                        setPotionTypeValue(null);
+                        setScrollTypeValue(null);
+                        setWeaponTypeValue(null);
+                      }}
+                    >
+                      <Text style={[
+                        styles.itemTypeCreationText,
+                        itemTypeValue === item.value && {
+                          color: 'white'
+                        }
+                      ]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+
                 {(itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') && (
                   <>
                     <Text>Weapon Type</Text>
@@ -1229,7 +1256,7 @@ export default function BagScreen() {
                         value={newItem.name}
                       />
 
-                      <Text>Details</Text>
+                      <Text>Details (optional)</Text>
                       <TextInput
                         style={[styles.modalInput, styles.detailsInput]}
                         placeholder="Item Details"
@@ -1247,7 +1274,7 @@ export default function BagScreen() {
 
 
                 {/* Show properties of weapon selected in dropdown */}
-                {weaponTypeValue && (
+                {weaponTypeValue && (itemTypeValue?.toLowerCase() === 'weapon') && (
                   <View style={{ marginBottom: 20 }}>
                     <Text>Properties:</Text>
                     {weapons.weapons.flatMap((category: any) => category.items).map((item: any) => {
@@ -1265,8 +1292,11 @@ export default function BagScreen() {
                 {/* Add Item Button */}
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={styles.modalButtonAdd}
+                    style={[styles.modalButtonAdd, {
+                      opacity: itemTypeValue === null || newItem.name === '' ? 0.2 : 1,
+                    }]}
                     onPress={addItem}
+                    disabled={itemTypeValue === null || newItem.name === ''}
                   >
                     <Text style={styles.modalButtonText}>Add</Text>
                   </TouchableOpacity>
@@ -1325,135 +1355,138 @@ export default function BagScreen() {
         transparent={true}
         visible={itemModalVisible}
       >
-        <View style={styles.itemModalContainer}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
+
+          <View style={styles.itemModalContainer}>
+
+
+            <TouchableOpacity onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
+              {isEditing && editingItemId === selectedItem?.id ? (
+                <TextInput
+                  style={styles.modalInput}
+                  value={editedName}
+                  onChangeText={setEditedName}
+                  onBlur={saveItemName}
+                  onSubmitEditing={saveItemName}
+                  autoFocus={true}
+                />
+              ) : (
+                <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
+              )}
+            </TouchableOpacity>
 
 
 
-          {/* Quantity Row */}
-          <>
-            <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={{ fontSize: 14, fontStyle: 'italic', color: 'gray' }}>Quantity</Text>
-            </View>
-            <View style={styles.quantityRow}>
-              <TouchableOpacity
-                onPress={() => decrementQuantity(1)}
-                style={styles.quantityButton}
-              >
-                <Ionicons name="remove" size={24} color="white" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
-                <Text>-10</Text>
-              </TouchableOpacity>
-              <TextInput
-                style={styles.quantityInput}
-                keyboardType="number-pad"
-                onChangeText={handleQuantityChange}
-                onEndEditing={handleQuantityEndEditing}
-                value={modalQuantityInput}
-              />
-              <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
-                <Text>+10</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => incrementQuantity(1)}
-                style={styles.quantityButton}
-              >
-                <Ionicons name="add" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-          </>
+            {selectedItem && (
+              <View style={{ flex: 1 }}>
 
-
-
-          <TouchableOpacity onLongPress={() => handleTitleLongPress(selectedItem?.id || '')}>
-            {isEditing && editingItemId === selectedItem?.id ? (
-              <TextInput
-                style={styles.modalInput}
-                value={editedName}
-                onChangeText={setEditedName}
-                onBlur={saveItemName}
-                onSubmitEditing={saveItemName}
-                autoFocus={true}
-              />
-            ) : (
-              <Text style={styles.itemModalTitle}>{selectedItem?.name}</Text>
-            )}
-          </TouchableOpacity>
-
-
-
-          {selectedItem && (
-            <View style={{ flex: 1 }}>
-              {/* Wrap the image in a TouchableWithoutFeedback */}
-
-
-              {/* Image */}
-
-              {selectedItem.type?.toLowerCase() !== 'scroll' && (
-                <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
-                  {selectedItem.image ? (
-                    <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                      <ImageBackground
-                        source={
-                          typeof selectedItem.image === 'number'
-                            ? selectedItem.image
-                            : { uri: selectedItem.image }
-                        }
-                        style={styles.itemModalImage}
-                      />
-                    </View>
-                  ) : (
-                    selectedItem.type?.toLowerCase() === 'weapon' ? (
-                      <View style={{ borderRadius: 8, overflow: 'hidden' }}>
-                        <ImageBackground source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
+                {/* Image */}
+                {selectedItem.type?.toLowerCase() !== 'scroll' && (
+                  <>
+                    {selectedItem.image ? (
+                      <View style={{ borderRadius: 8, overflow: 'hidden', width: 100, height: 100, }}>
+                        <ImageBackground
+                          source={
+                            typeof selectedItem.image === 'number'
+                              ? selectedItem.image
+                              : { uri: selectedItem.image }
+                          }
+                          style={[styles.itemModalImage, { backgroundColor: 'orange' }]}
+                        />
                       </View>
                     ) : (
-                      <View style={[styles.itemModalNoImage]}>
-                        <Text>No Image Available</Text>
-                      </View>
-                    )
-                  )}
-                </TouchableWithoutFeedback>
-              )}
+                      selectedItem.type?.toLowerCase() === 'weapon' ? (
+                        <View style={{ borderRadius: 8, overflow: 'hidden', width: 100, height: 100, }}>
+                          <ImageBackground source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
+                        </View>
+                      ) : (
+                        <TouchableWithoutFeedback onLongPress={handleImageLongPress}>
+                          <View style={[styles.itemModalNoImage, { width: 100, height: 100 }]}>
+                            <Text>No Image Available</Text>
+                          </View>
+                        </TouchableWithoutFeedback>
+                      )
+                    )}
+                  </>
+                )}
+
+
+                {/* Quantity Row */}
+                <>
+                  <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 14, fontStyle: 'italic', color: 'gray' }}>Quantity</Text>
+                  </View>
+                  <View style={styles.quantityRow}>
+                    <TouchableOpacity
+                      onPress={() => decrementQuantity(1)}
+                      style={styles.quantityButton}
+                    >
+                      <Ionicons name="remove" size={24} color="white" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.decrementByTen} onPress={() => decrementQuantity(10)}>
+                      <Text>-10</Text>
+                    </TouchableOpacity>
+                    <TextInput
+                      style={styles.quantityInput}
+                      keyboardType="number-pad"
+                      onChangeText={handleQuantityChange}
+                      onEndEditing={handleQuantityEndEditing}
+                      value={modalQuantityInput}
+                    />
+                    <TouchableOpacity style={styles.incrementByTen} onPress={() => incrementQuantity(10)}>
+                      <Text>+10</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => incrementQuantity(1)}
+                      style={styles.quantityButton}
+                    >
+                      <Ionicons name="add" size={24} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                </>
 
 
 
-              {/* Details Section */}
-              <View style={{ flex: 1 }}>
-                <ScrollView style={{ flex: 1, marginBottom: 60 }}>
-                  <Text style={styles.itemModalDetails}>
-                    {selectedItem.details ||
-                      (() => {
-                        // Attempt to fetch spell details
-                        const spell = findSpellByName(selectedItem.name);
-                        if (spell && typeof spell !== 'string') {
-                          let details = spell.description || '';
-                          if (spell.features) {
-                            details += '\n\nFeatures:\n';
-                            details += Object.entries(spell.features)
-                              .map(([key, value]) => `• ${key}: ${value}`)
-                              .join('\n');
+                {/* Details Section */}
+                <View style={{ flex: 1 }}>
+                  <ScrollView style={{ flex: 1, marginBottom: 60 }}>
+                    <Text style={styles.itemModalDetails}>
+                      {selectedItem.details ||
+                        (() => {
+                          // Attempt to fetch spell details
+                          const spell = findSpellByName(selectedItem.name);
+                          if (spell && typeof spell !== 'string') {
+                            let details = spell.description || '';
+                            if (spell.features) {
+                              details += '\n\nFeatures:\n';
+                              details += Object.entries(spell.features)
+                                .map(([key, value]) => `• ${key}: ${value}`)
+                                .join('\n');
+                            }
+                            return details;
+                          } else {
+                            return 'No details available.';
                           }
-                          return details;
-                        } else {
-                          return 'No details available.';
-                        }
-                      })()}
-                  </Text>
-                </ScrollView>
+                        })()}
+                    </Text>
+                  </ScrollView>
+                </View>
+
+
+
               </View>
+            )}
 
-
-
+            <View style={styles.closeButtonContainer}>
+              <Button
+                title="Close"
+                onPress={() => setItemModalVisible(false)}
+              />
             </View>
-          )}
-          <View style={styles.closeButtonContainer}>
-            <Button
-              title="Close"
-              onPress={() => setItemModalVisible(false)}
-            />
           </View>
-        </View>
+
+        </TouchableWithoutFeedback>
 
       </Modal>
 

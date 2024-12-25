@@ -195,9 +195,9 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
     },
     itemModalImage: {
-      maxWidth: '100%',
-      aspectRatio: 1,
       resizeMode: 'contain',
+      width: 100,
+      height: 100,
     },
     itemModalNoImage: {
       width: '100%',
@@ -311,6 +311,25 @@ const styles = StyleSheet.create({
     borderRadius8: {
       borderRadius: 8,
     },
+
+    // Item Type Creation
+itemTypeCreationContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+},
+
+itemTypeCreationSquare: {
+  backgroundColor: '#f0f0f0',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: 8,
+},
+
+itemTypeCreationText: {
+  fontSize: 16,
+  fontWeight: '500',
+},
 
   });
 
