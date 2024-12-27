@@ -3744,12 +3744,9 @@ export default function MeScreen() {
 
                             return (
                                 <View key={key} style={{ marginVertical: 4 }}>
-                                    {/* Show all keys except numeric indices */}
-                                    {isNaN(Number(key)) && (
-                                        <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
-                                            {key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
-                                        </Text>
-                                    )}
+                                    <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                                        {key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                    </Text>
                                     {renderNestedContent(value, isValueObject ? depth + 1 : depth)}
                                 </View>
                             );

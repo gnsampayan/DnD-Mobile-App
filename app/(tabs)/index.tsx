@@ -327,7 +327,9 @@ export default function ActionsScreen() {
     consultTheSpiritsSpent,
     setConsultTheSpiritsSpent,
     extraAttackSpent,
-    setExtraAttackSpent
+    setExtraAttackSpent,
+    extraAttackPoints,
+    setExtraAttackPoints
   } = useActions();
   const { weaponsProficientIn, equippedArmor, equippedShield, items, saveItems } = useItemEquipment();
   const { cantripSlotsData } = useContext(CantripSlotsContext);
@@ -411,6 +413,10 @@ export default function ActionsScreen() {
     setIsArmed(mainHandWeapon !== null);
   }, [mainHandWeapon]);
 
+  const calculateModifier = (score: number): number => {
+    return Math.floor((score - 10) / 2);
+  };
+
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
     { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1, reaction: 1 }, image: defaultLongRestImage },
@@ -418,7 +424,11 @@ export default function ActionsScreen() {
     { id: '2', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '3', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
     { id: '4', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
-    { id: '5', name: 'Jump', details: 'Leap over obstacles', cost: { actions: 0, bonus: 1 }, image: defaultJumpImage },
+    {
+      id: '5', name: 'Jump', details: `Leap over obstacles with or without a running start.`,
+      cost: { actions: 0, bonus: 1 },
+      image: defaultJumpImage
+    },
     {
       id: '6',
       name: 'Shove',
@@ -460,6 +470,23 @@ export default function ActionsScreen() {
   const [throwableItemValue, setThrowableItemValue] = useState<string | null>(null);
   const [throwableItemsOpen, setThrowableItemsOpen] = useState(false);
   const [actionSurgePoints, setActionSurgePoints] = useState<number>(1);
+
+
+  useEffect(() => {
+    if (statsData.class?.toLowerCase() === 'fighter') {
+      let attackPoints = 0;
+      if (statsData.level >= 20) {
+        attackPoints = 3;
+      } else if (statsData.level >= 11) {
+        attackPoints = 2;
+      } else if (statsData.level >= 5) {
+        attackPoints = 1;
+      }
+      setExtraAttackPoints(attackPoints);
+    } else {
+      setExtraAttackPoints(0);
+    }
+  }, [statsData.class, statsData.level]);
 
   // Initialize actionSurgePoints based on level, level 2-16 is 1 point, level 17-20 is 2 points
   useEffect(() => {
@@ -550,11 +577,6 @@ export default function ActionsScreen() {
       return { uri: 'https://via.placeholder.com/150?text=&bg=EEEEEE' };
     }
   }
-
-
-  const calculateModifier = (score: number): number => {
-    return Math.floor((score - 10) / 2);
-  };
 
   const getCantripImage = (cantripName: string): ImageSourcePropType => {
     const image = cantripImages[cantripName as keyof typeof cantripImages];
@@ -866,6 +888,7 @@ export default function ActionsScreen() {
       const isAttack = selectedAction.name.toLowerCase() === 'attack';
       const isBarbarianClass = statsData.class?.toLowerCase() === 'barbarian';
       const isBarbarianLevel5Plus = isBarbarianClass && statsData.level >= 5;
+      const isFighterClass = statsData.class?.toLowerCase() === 'fighter';
 
       if (
         currentActionsAvailable >= costActions &&
@@ -879,15 +902,23 @@ export default function ActionsScreen() {
           setCurrentReactionsAvailable(prev => prev - costReaction);
         }
 
-        // Set extra attack to false if attack or reckless attack, but only for barbarians level 5+
+        // Special handling for Barabarian's extra attack mechanic
         if (isBarbarianLevel5Plus && (isAttack || selectedAction.name.toLowerCase() === 'reckless attack')) {
           setExtraAttackSpent(false);
+        }
+
+        // Disable fighter's extra attack points if action is not attack
+        if (isFighterClass && !isAttack && costActions > 0) {
+          setExtraAttackPoints(0);
         }
 
         setActionModalVisible(false);
       } else if (isBarbarianLevel5Plus && isAttack) {
         // Allow attack without cost if insufficient resources, but only for barbarians level 5+
         setExtraAttackSpent(true);
+        setActionModalVisible(false);
+      } else if (isFighterClass && isAttack && extraAttackPoints > 0) {
+        setExtraAttackPoints(prev => prev - 1);
         setActionModalVisible(false);
       } else {
         Alert.alert('Insufficient Resources', 'You do not have enough actions or bonus actions for this.');
@@ -901,6 +932,21 @@ export default function ActionsScreen() {
     setCurrentBonusActionsAvailable(1);
     setCurrentReactionsAvailable(1);
     setExtraAttackSpent(true);
+
+    // Reset extra attack points for Fighter
+    if (statsData.class?.toLowerCase() === 'fighter') {
+      let attackPoints = 0;
+      if (statsData.level >= 20) {
+        attackPoints = 3;
+      } else if (statsData.level >= 11) {
+        attackPoints = 2;
+      } else if (statsData.level >= 5) {
+        attackPoints = 1;
+      }
+      setExtraAttackPoints(attackPoints);
+    } else {
+      setExtraAttackPoints(0);
+    }
   };
 
   const windowWidth = Dimensions.get('window').width;
@@ -938,7 +984,8 @@ export default function ActionsScreen() {
         affordable = affordable && !consultTheSpiritsSpent;
       }
       // Check for extra attack, if not spent, make attack action free and affordable
-      if (item.name.toLowerCase() === 'attack' && !extraAttackSpent) {
+      // for Barbarian and Fighter
+      if (item.name.toLowerCase() === 'attack' && (!extraAttackSpent || extraAttackPoints > 0)) {
         affordable = true;
       }
       // Check for bardic inspiration
@@ -2153,6 +2200,7 @@ export default function ActionsScreen() {
     }
   };
 
+
   // Main Contents
   return (
     <View style={styles.container}>
@@ -2545,6 +2593,40 @@ export default function ActionsScreen() {
                 </View>
               </TouchableOpacity>
             </View>
+          )}
+
+          {/* Show if user class is Fighter */}
+          {statsData.class?.toLowerCase() === 'fighter' && (
+            <>
+              {/* Show extra attack icon if statsData.level >= 5 */}
+              {statsData.level >= 5 && (
+                <View style={styles.headerTextContainer}>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                    onPress={() => {
+                      Alert.alert('Extra Attack', `You can attack ${extraAttackPoints + 1} times, instead of once, when you take the Attack action on your turn.`);
+                    }}>
+                    <MaterialCommunityIcons
+                      name="sword"
+                      size={20}
+                      color="white"
+                      style={{
+                        opacity: (
+                          extraAttackPoints > 0) ? 1 : 0.2
+                      }}
+                    />
+                    <View style={styles.headerTextBox}>
+                      <Text style={[
+                        styles.headerText,
+                        extraAttackPoints === 0 && { color: 'black' }
+                      ]}>
+                        x{extraAttackPoints}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
           )}
 
 
@@ -3153,7 +3235,7 @@ export default function ActionsScreen() {
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
                           <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                             <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
-                            <Text>+({calculateModifier(statsData.abilities.find(a => a.name === 'Strength')?.value || 10)} Athle)</Text>
+                            <Text>+(Athle)</Text>
                           </View>
                           <Text style={{ fontSize: 24 }}>{'>'}</Text>
                           <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -3254,12 +3336,21 @@ export default function ActionsScreen() {
                       </>
                     )}
 
+                    {/* Jump Details */}
+                    {(selectedAction.name === 'Jump') && (
+                      <View>
+                        <Text>Running jump: {3 + currentStrengthModifier}ft</Text>
+                        <Text>Standing jump: {Math.floor((3 + currentStrengthModifier) / 2)}ft</Text>
+                      </View>
+                    )}
+
                     {/* Shove Details */}
                     {(selectedAction.name === 'Shove') && (
                       <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                           <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
-                          <Text>+({calculateModifier(statsData.abilities.find(a => a.name === 'Strength')?.value || 10)} Athle)</Text>
+                          {/* TODO: add athletics modifier accounting for proficiency bonus  or not */}
+                          <Text>+(Athle)</Text>
                         </View>
                         <Text style={{ fontSize: 24 }}>{'>'}</Text>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -3493,7 +3584,7 @@ export default function ActionsScreen() {
                         style={[
                           styles.modalButtonCommit,
                           selectedAction &&
-                          (selectedAction.name.toLowerCase() === 'attack' && !extraAttackSpent ?
+                          (selectedAction.name.toLowerCase() === 'attack' && (!extraAttackSpent || extraAttackPoints > 0) ?
                             { opacity: 1 } :
                             (currentActionsAvailable < selectedAction.cost.actions ||
                               currentBonusActionsAvailable < selectedAction.cost.bonus ||
@@ -3657,7 +3748,8 @@ export default function ActionsScreen() {
                         }}
                         disabled={
                           !selectedAction ||
-                          (selectedAction.name.toLowerCase() !== 'attack' || extraAttackSpent) && (
+                          (selectedAction.name.toLowerCase() === 'attack' && extraAttackSpent && extraAttackPoints === 0 && currentActionsAvailable === 0) ||
+                          (selectedAction.name.toLowerCase() !== 'attack' && (
                             currentActionsAvailable < selectedAction.cost.actions ||
                             currentBonusActionsAvailable < selectedAction.cost.bonus ||
                             (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
@@ -3671,7 +3763,7 @@ export default function ActionsScreen() {
                             (selectedAction.name.toLowerCase() === 'channel divinity' && currentChannelDivinityPoints < 1) ||
                             (selectedAction.name.toLowerCase() === 'throw' && !throwableItemValue)
                             // add more conditions here
-                          )
+                          ))
                         }
                       >
                         <View style={styles.modalButtonTextContainer}>
