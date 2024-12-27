@@ -14,6 +14,7 @@ import {
     Button,
     ScrollView,
     TextInput,
+    FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../styles/meStyles';
@@ -98,6 +99,11 @@ import psiWarriorData from '../data/class-tables/fighter/subclass/psiWarrior.jso
 import runeKnightData from '../data/class-tables/fighter/subclass/runeKnight.json';
 import samuraiData from '../data/class-tables/fighter/subclass/samurai.json';
 
+
+import defaultItemsData from '../data/defaultItems.json';
+import bedrollImage from '@items/default-item-bedroll.png';
+import campingSuppliesImage from '@items/default-item-camping-supplies.png';
+import coinPouchImage from '@items/default-item-coin-pouch.png';
 
 // Import default images
 import defaultChestArmorImage from '@equipment/default-armor.png';
@@ -233,6 +239,19 @@ interface DraconicAncestry {
     typicalAlignment: string;
 }
 
+// Map images to item names
+const itemImages: { [key: string]: any } = {
+    'bedrollImage': bedrollImage,
+    'campingSuppliesImage': campingSuppliesImage,
+    'coinPouchImage': coinPouchImage
+};
+
+// Map the imported JSON to items with images
+const defaultItems: Item[] = defaultItemsData.map(item => ({
+    ...item,
+    image: itemImages[item.image]
+}));
+
 // Define a function to clear AsyncStorage
 const clearAsyncStorage = async () => {
     try {
@@ -363,6 +382,7 @@ export default function MeScreen() {
         setEquippedArmor,
         equippedShield,
         setEquippedShield,
+        saveItems,
     } = useItemEquipment();
     const [weapons, setWeapons] = useState<{ label: string; value: string; image: string }[]>([]);
     // Local state variables for DropDownPicker values
@@ -374,7 +394,6 @@ export default function MeScreen() {
         setCurrentActionsAvailable(1);
         setCurrentBonusActionsAvailable(1);
     };
-    const [featuresModalVisible, setFeaturesModalVisible] = useState(false);
     const [armorModalVisible, setArmorModalVisible] = useState(false);
     const [openArmorPicker, setOpenArmorPicker] = useState(false);
     const [armorValue, setArmorValue] = useState<string | null>(null);
@@ -383,7 +402,6 @@ export default function MeScreen() {
     const [shieldValue, setShieldValue] = useState<string | null>(null);
     const [featDescriptionModalVisible, setFeatDescriptionModalVisible] = useState(false);
     const [selectedFeat, setSelectedFeat] = useState<string | null>(null);
-    const [settingsModalVisible, setSettingsModalVisible] = useState(false);
     const [draconicAncestryValue, setDraconicAncestryValue] = useState<string | null>(null);
     const [draconicAncestryModalVisible, setDraconicAncestryModalVisible] = useState(false);
     const [classFeatDescriptionModalVisible, setClassFeatDescriptionModalVisible] = useState(false);
@@ -524,9 +542,6 @@ export default function MeScreen() {
     // State to track if race and class have been confirmed
     const [isRaceConfirmed, setIsRaceConfirmed] = useState<boolean>(!!statsData.race);
     const [isClassConfirmed, setIsClassConfirmed] = useState<boolean>(!!statsData.class);
-
-
-
 
     useEffect(() => {
         // Load custom images for equipment items
@@ -715,8 +730,8 @@ export default function MeScreen() {
         });
         // Clear AsyncStorage
         clearAsyncStorage();
+
         clearCantripSlots();
-        setSettingsModalVisible(false);
         setLuckyPoints(-1);
         setArcaneMasteryValue1(null);
         setArcaneMasteryValue2(null);
@@ -726,6 +741,8 @@ export default function MeScreen() {
         // Reset equipment actions context
         resetEquipmentActionsContext();
 
+        // Reset items to default
+        saveItems(defaultItems);
     };
 
     const clearCantripSlots = async () => {
@@ -3027,7 +3044,6 @@ export default function MeScreen() {
                         }}
                         onPress={() => {
                             setArcaneInitiateEnabled(true);
-                            setFeaturesModalVisible(false);
                         }}
                     >
                         <Text style={{ color: 'white', fontWeight: 'bold' }}>Confirm Cantrips</Text>
@@ -3788,6 +3804,54 @@ export default function MeScreen() {
         );
     };
 
+    const getArmorDetails = (armorType: string) => {
+        // Find the armor category (Light, Medium, Heavy)
+        const armorCategory = armorTypes.find(type => {
+            const versions = Object.keys(type.versions);
+            return versions.some(version => version.toLowerCase() === armorType.toLowerCase());
+        });
+
+        if (!armorCategory) return null;
+        // Find the specific armor version
+        const versionKey = Object.keys(armorCategory.versions).find(
+            version => version.toLowerCase() === armorType.toLowerCase()
+        );
+
+        if (!versionKey) return null;
+
+        const armorVersion = armorCategory.versions[versionKey as keyof typeof armorCategory.versions];
+
+        if (!armorVersion) return null;
+
+        const strengthAbility = statsData.abilities.find(
+            (ability) => ability.name.toLowerCase() === 'strength'
+        );
+
+        // Build details string
+        return (
+            <View style={{ marginTop: 20, gap: 5 }}>
+                <Text>AC: {armorVersion.ac}</Text>
+                {armorVersion.dexModApplied && (
+                    <Text>
+                        DEX Modifier Applied
+                        {armorVersion.maxDexBonus ? ` (max +${armorVersion.maxDexBonus})` : ''}
+                    </Text>
+                )}
+                {!armorVersion.dexModApplied && <Text>No DEX Modifier</Text>}
+                {armorVersion.stealthDisadvantage && (
+                    <Text>Disadvantage on Stealth</Text>
+                )}
+                <Text>Weight: {armorVersion.weight} lbs</Text>
+                {armorVersion.strengthRequirement && (
+                    <Text style={{ color: strengthAbility && strengthAbility.value < armorVersion.strengthRequirement ? 'red' : 'black' }}>
+                        Requires STR {armorVersion.strengthRequirement}
+                    </Text>
+                )}
+                <Text>Cost: {armorVersion.cost} gp</Text>
+            </View>
+        );
+    };
+
     // Calculate half of the screen width
     const screenWidth = Dimensions.get('window').width;
     const section3Width = (1 / 2) * screenWidth;
@@ -3795,38 +3859,12 @@ export default function MeScreen() {
 
     // Main Render
     return (
-        <View style={styles.container}>
-            {/* Section 1: Header */}
-            <View style={styles.header}>
-                <View style={{ flexDirection: 'row', gap: 10, marginLeft: 10, flex: 1 }}>
-                    <ImageBackground
-                        source={featuresImage as ImageSourcePropType}
-                        style={{
-                            flexDirection: 'row',
-                            flex: 1,
-                            gap: 5,
-                        }}
-                        resizeMode="cover"
-                    >
-                        <TouchableOpacity style={styles.topButton} onPress={() => setFeaturesModalVisible(true)}>
-                            <MaterialIcons name="insights" size={24} color="white" />
-                            <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Features</Text>
-                        </TouchableOpacity>
-                    </ImageBackground>
-                </View>
-                <View style={styles.headerButtons}>
-                    <TouchableOpacity style={styles.userAccountButton} onPress={() => setSettingsModalVisible(true)}>
-                        <Ionicons name="settings" size={24} color="white" />
-                    </TouchableOpacity>
-                </View>
-            </View>
+        <View style={[styles.container, { paddingTop: 60 }]}>
 
-            {/* Section 2, 3, and 4: Main Content */}
+            {/* Character and Feats Section - Main Content */}
             <View style={styles.mainContent}>
 
-
-
-                {/* Section 3 */}
+                {/* Character Section */}
                 <View style={{ flexDirection: 'column', gap: 5 }}>
                     <TouchableOpacity onPress={() => setPlayerNameEditing(true)}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -3893,9 +3931,8 @@ export default function MeScreen() {
 
 
 
-                {/* Section 2 */}
+                {/* Feats Section */}
                 <View style={styles.section2}>
-
 
 
                     {/* Feats */}
@@ -3981,14 +4018,11 @@ export default function MeScreen() {
 
 
 
-
+                    {/* Armor and Shield Section */}
                     <View style={{
                         flexDirection: 'row',
                         gap: 10,
                     }}>
-
-
-
                         {equipmentItems
                             .filter((item) => item.section === 2)
                             .map((item) => (
@@ -4009,7 +4043,6 @@ export default function MeScreen() {
                                     />
                                 </TouchableOpacity>
                             ))}
-
                         {equipmentItems
                             .filter((item) => item.section === 4)
                             .map((item) => (
@@ -4032,10 +4065,7 @@ export default function MeScreen() {
                                     </ImageBackground>
                                 </TouchableOpacity>
                             ))}
-
-
                     </View>
-
                 </View>
 
 
@@ -4224,10 +4254,16 @@ export default function MeScreen() {
                             <View style={styles.modalContainer}>
                                 {statsData.class && statsData.race && (
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <View style={{ flexDirection: 'row' }}>
+                                        <View style={{ flexDirection: 'column' }}>
                                             {isRaceConfirmed && <Text style={styles.modalLabel}>{statsData.race}</Text>}
-                                            {isRaceConfirmed && isClassConfirmed && <Text style={styles.modalLabel}>,</Text>}
-                                            {isClassConfirmed && <Text style={[styles.modalLabel, { textTransform: 'capitalize', marginLeft: 5 }]}>{statsData.class}</Text>}
+                                            {isClassConfirmed && <Text style={[styles.modalLabel, { textTransform: 'capitalize' }]}>{statsData.class}</Text>}
+                                            <Text>Delete Character</Text>
+                                            <Ionicons name="trash-bin" size={24} color="red" onPress={() => {
+                                                Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
+                                                    { text: 'Cancel', style: 'cancel' },
+                                                    { text: 'Delete', style: 'destructive', onPress: async () => handleDeleteCharacter() }
+                                                ]);
+                                            }} />
                                         </View>
                                     </View>
                                 )}
@@ -4456,30 +4492,6 @@ export default function MeScreen() {
                 </View>
             </Modal>
 
-            {/* Features Modal */}
-            <Modal animationType="fade" transparent={true} visible={featuresModalVisible}>
-                <View style={styles.modalContainer}>
-                    <ScrollView style={{ flexDirection: 'column', gap: 10, flex: 1, marginBottom: 60 }}>
-                        <Text style={styles.modalTitle}>Features</Text>
-                        <View style={{ flexDirection: 'column', gap: 5 }}>
-                            <Text style={styles.label}>Race Features:</Text>
-                            {statsData.race && renderRaceFeatures()}
-                        </View>
-                        <View style={{ flexDirection: 'column', gap: 5 }}>
-                            <Text style={styles.label}>Class Features:</Text>
-                            {statsData.class && renderClassFeatures()}
-                        </View>
-                    </ScrollView>
-                    <View style={styles.modalButtons}>
-                        <Button
-                            title="Close"
-                            color="black"
-                            onPress={() => setFeaturesModalVisible(false)}
-                        />
-                    </View>
-                </View>
-            </Modal>
-
 
             {/* Armor Modal */}
             <Modal animationType="fade" transparent={true} visible={armorModalVisible}>
@@ -4510,8 +4522,7 @@ export default function MeScreen() {
                             style={{ backgroundColor: '#fafafa' }}
                             dropDownContainerStyle={{ backgroundColor: '#fafafa' }}
                         />
-
-
+                        {armorValue && getArmorDetails(armorValue)}
 
                         <View style={styles.modalButtons}>
                             <Button
@@ -4767,27 +4778,6 @@ export default function MeScreen() {
                             setSelectedFeat(null);
                         }} />
                         {renderCustomFeatButton()}
-                    </View>
-                </View>
-            </Modal>
-
-
-
-            {/* Settings Modal */}
-            <Modal animationType="fade" transparent={true} visible={settingsModalVisible}>
-                <View style={styles.modalContainer}>
-                    <Text>Settings</Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text>Delete Character</Text>
-                        <Ionicons name="trash-bin" size={24} color="red" onPress={() => {
-                            Alert.alert('Are you sure you want to delete this character?', 'This action cannot be undone.', [
-                                { text: 'Cancel', style: 'cancel' },
-                                { text: 'Delete', style: 'destructive', onPress: async () => handleDeleteCharacter() }
-                            ]);
-                        }} />
-                        <Button
-                            title="Close"
-                            onPress={() => setSettingsModalVisible(false)} />
                     </View>
                 </View>
             </Modal>

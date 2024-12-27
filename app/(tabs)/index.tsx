@@ -427,7 +427,13 @@ export default function ActionsScreen() {
       image: defaultPushImage
     },
     { id: '7', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
-    { id: '8', name: 'Attack', details: 'Make a melee attack', cost: { actions: 1, bonus: 0 }, image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage },
+    {
+      id: '8',
+      name: 'Attack',
+      details: 'Make a melee attack, or a grapple attack.',
+      cost: { actions: 1, bonus: 0 },
+      image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage
+    },
     { id: '9', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
     { id: '10', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
   ];
@@ -2605,8 +2611,8 @@ export default function ActionsScreen() {
                     {/* AC */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                       <Text style={[styles.hpText, tempAc > 0 && { color: 'cyan' }]}>
-                        {statsData.class?.toLowerCase() === 'monk' && !equippedArmor ? 
-                          ac + tempAc + currentWisdomModifier : 
+                        {statsData.class?.toLowerCase() === 'monk' && !equippedArmor && !equippedShield ?
+                          ac + tempAc + currentWisdomModifier :
                           ac + tempAc}
                       </Text>
                       <View style={styles.subheaderSideBySide}>
@@ -3006,6 +3012,7 @@ export default function ActionsScreen() {
                     {/* Melee Weapon Properties Section */}
                     {(selectedAction.name === 'Attack') &&
                       <>
+                        <Text style={{ fontWeight: 'bold' }}>Melee:</Text>
                         {mainHandWeapon && mainHandWeapon.name !== 'none' ? (
                           <>
                             {/* Attack Roll Row */}
@@ -3142,6 +3149,20 @@ export default function ActionsScreen() {
                           </View>
 
                         )}
+                        <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Grapple:</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                            <Text>+({calculateModifier(statsData.abilities.find(a => a.name === 'Strength')?.value || 10)} Athle)</Text>
+                          </View>
+                          <Text style={{ fontSize: 24 }}>{'>'}</Text>
+                          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                            <View style={styles.enemyDiceContainer}>
+                              <MaterialCommunityIcons name="dice-d20" size={20} color="red" />
+                            </View>
+                            <Text>+(Athle) or +(Acrob)</Text>
+                          </View>
+                        </View>
                       </>
                     }
 

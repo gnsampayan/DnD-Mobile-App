@@ -1,0 +1,23 @@
+[
+	{
+		"id": "0",
+		"name": "Bed Roll",
+		"quantity": 1,
+		"image": "bedrollImage",
+		"details": "A simple bed roll used for long rests."
+	},
+	{
+		"id": "1",
+		"name": "Camping Supplies",
+		"quantity": 1,
+		"image": "campingSuppliesImage",
+		"details": "Food and other supplies needed for camping in the wilderness."
+	},
+	{
+		"id": "2",
+		"name": "Coin Pouch",
+		"quantity": 1,
+		"image": "coinPouchImage",
+		"details": "A small pouch containing coins and other valuables."
+	}
+]

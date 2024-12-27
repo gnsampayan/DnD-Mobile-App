@@ -521,13 +521,18 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         ]}>
                             {item.name}
                         </Text>
-                        <View style={styles.abilityValueContainer}>
-                            <Text style={styles.abilityValue}>{item.value}</Text>
+                        <View style={styles.abilityModifierContainer}>
+                            <Text style={styles.abilityModifier}>
+                                {modifier >= 0 ? `+${modifier}` : modifier}
+                            </Text>
                         </View>
                         <View style={styles.abilityModifierFooter}>
-                            <View style={styles.abilityModifierContainer}>
-                                <Text style={styles.abilityModifier}>
-                                    {modifier >= 0 ? `+${modifier}` : modifier}
+                            <View style={[
+                                styles.abilityValueContainer,
+                                selectedAbility && selectedAbility.id === item.id ? { backgroundColor: 'gold' } : {}
+                            ]}>
+                                <Text style={styles.abilityValue}>
+                                    {item.value}
                                 </Text>
                             </View>
                         </View>

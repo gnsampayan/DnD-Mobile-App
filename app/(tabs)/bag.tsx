@@ -30,6 +30,8 @@ import armorTypes from '../data/armorTypes.json';
 import potionTypes from '../data/potionTypes.json';
 import spellsData from '../data/spells.json';
 import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
+// Import default items data
+import defaultItemsData from '../data/defaultItems.json';
 
 
 import bedrollImage from '@items/default-item-bedroll.png';
@@ -165,30 +167,20 @@ interface Misc extends BaseItem {
 // Create a union type for Item
 type Item = Food | Weapon | Equipment | MagicItem | Special | Misc;
 
-// **Default starting items with details**
-const defaultItems: Item[] = [
-  {
-    id: '0',
-    name: 'Bed Roll',
-    quantity: 1,
-    image: bedrollImage,
-    details: 'A simple bed roll used for long rests.',
-  },
-  {
-    id: '1',
-    name: 'Camping Supplies',
-    quantity: 1,
-    image: campingSuppliesImage,
-    details: 'Food and other supplies needed for camping in the wilderness.',
-  },
-  {
-    id: '2',
-    name: 'Coin Pouch',
-    quantity: 1,
-    image: coinPouchImage,
-    details: 'A small pouch containing coins and other valuables.',
-  },
-];
+
+
+// Map images to item names
+const itemImages: { [key: string]: any } = {
+  'bedrollImage': bedrollImage,
+  'campingSuppliesImage': campingSuppliesImage,
+  'coinPouchImage': coinPouchImage
+};
+
+// Map the imported JSON to items with images
+const defaultItems: Item[] = defaultItemsData.map(item => ({
+  ...item,
+  image: itemImages[item.image]
+}));
 
 // Money and Carrying Capacity -- Move to a different file later
 const carryingCapacity = 50;
@@ -959,6 +951,38 @@ export default function BagScreen() {
     }
   };
 
+  const getArmorDetails = (armorType: string) => {
+    // Find the armor category (Light, Medium, Heavy)
+    const armorCategory = armorTypes.find(type => {
+      const versions = Object.keys(type.versions);
+      return versions.some(version => version.toLowerCase() === armorType.toLowerCase());
+    });
+
+    if (!armorCategory) return '';
+    // Find the specific armor version
+    const versionKey = Object.keys(armorCategory.versions).find(
+      version => version.toLowerCase() === armorType.toLowerCase()
+    );
+
+    if (!versionKey) return '';
+
+    const armorVersion = armorCategory.versions[versionKey as keyof typeof armorCategory.versions];
+
+    if (!armorVersion) return '';
+
+    // Build details string
+    const details = [
+      `AC: ${armorVersion.ac}`,
+      armorVersion.dexModApplied ? `DEX Modifier Applied${armorVersion.maxDexBonus ? ` (max +${armorVersion.maxDexBonus})` : ''}` : 'No DEX Modifier',
+      armorVersion.stealthDisadvantage ? 'Disadvantage on Stealth' : '',
+      `Weight: ${armorVersion.weight} lbs`,
+      armorVersion.strengthRequirement ? `Requires STR ${armorVersion.strengthRequirement}` : '',
+      `Cost: ${armorVersion.cost} gp`
+    ].filter(Boolean).join('\n');
+
+    return details;
+  };
+
   // Main Content
   return (
     <View style={styles.container}>
@@ -1165,11 +1189,12 @@ export default function BagScreen() {
                           setNewItem({
                             ...newItem,
                             name: value,
-                            // details: getArmorDetails(value)
+                            details: getArmorDetails(value)
                           });
                         }
                       }}
                     />
+                    <Text>{newItem.details}</Text>
                   </>
                 )}
 
@@ -1449,7 +1474,18 @@ export default function BagScreen() {
                           // Attempt to fetch spell details
                           const spell = findSpellByName(selectedItem.name);
                           if (spell && typeof spell !== 'string') {
-                            let details = spell.description || '';
+                            let details = '';
+
+                            // Add casting info
+                            details += `Casting Time: ${spell.castingTime || 'N/A'}\n`;
+                            details += `Range: ${spell.range || 'N/A'}\n`;
+                            details += `Components: ${spell.components || 'N/A'}\n`;
+                            details += `Duration: ${spell.duration || 'N/A'}\n\n`;
+
+                            // Add description
+                            details += spell.description || '';
+
+                            // Add features if they exist
                             if (spell.features) {
                               details += '\n\nFeatures:\n';
                               details += Object.entries(spell.features)
