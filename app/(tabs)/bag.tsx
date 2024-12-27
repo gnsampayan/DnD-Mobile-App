@@ -1384,7 +1384,7 @@ export default function BagScreen() {
                               ? selectedItem.image
                               : { uri: selectedItem.image }
                           }
-                          style={[styles.itemModalImage, { backgroundColor: 'orange' }]}
+                          style={styles.itemModalImage}
                         />
                       </View>
                     ) : (

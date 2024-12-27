@@ -743,6 +743,8 @@ export default function ActionsScreen() {
             // Normal unarmored
             setAc(10 + dexModifier + (equippedShield ? 2 : 0));
           }
+          // Set stealth disadvantage to false when no armor
+          setArmorStealthDisadvantage(false);
           return;
         }
 
@@ -2332,7 +2334,7 @@ export default function ActionsScreen() {
               <TouchableOpacity onPress={() => {
                 Alert.alert('Stealth Disadvantage', 'Your equipped armor imposes disadvantage on Dexterity (Stealth) checks.');
               }}>
-                <MaterialCommunityIcons name="incognito-off" size={24} color="white" />
+                <MaterialCommunityIcons name="motion-sensor" size={24} color="white" />
               </TouchableOpacity>
             </View>
           )}
@@ -2602,7 +2604,11 @@ export default function ActionsScreen() {
 
                     {/* AC */}
                     <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                      <Text style={[styles.hpText, tempAc > 0 && { color: 'cyan' }]}>{ac + tempAc}</Text>
+                      <Text style={[styles.hpText, tempAc > 0 && { color: 'cyan' }]}>
+                        {statsData.class?.toLowerCase() === 'monk' && !equippedArmor ? 
+                          ac + tempAc + currentWisdomModifier : 
+                          ac + tempAc}
+                      </Text>
                       <View style={styles.subheaderSideBySide}>
                         <TouchableOpacity
                           onPress={() => Alert.alert(
