@@ -647,6 +647,26 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         );
                     }
                 }}
+                onLongPress={() => {
+                    if (!isProficient) {
+                        Alert.alert(
+                            "Force Skill Proficiency",
+                            `Do you want to force proficiency in ${item.name}? This will bypass class restrictions and skill point costs. Ask a DM before doing this.`,
+                            [
+                                {
+                                    text: "Cancel",
+                                    style: "cancel"
+                                },
+                                {
+                                    text: "Force Proficiency",
+                                    onPress: () => {
+                                        setSkillProficiency([...skillProficiency, item.name.toLowerCase()]);
+                                    }
+                                }
+                            ]
+                        );
+                    }
+                }}
                 disabled={isProficient || (unusedSkillPoints > 0 && !isSkillAllowedForClass())}
             >
                 <Text style={[styles.skillValue, isProficient ? { color: 'black' } : {}]}>

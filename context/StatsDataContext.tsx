@@ -325,7 +325,7 @@ export const StatsDataProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (!statsDataLoaded) {
             return;
         }
-        if (prevClassRef.current && statsData.class && prevClassRef.current !== statsData.class) {
+        if (statsData.class) {
             switch (statsData.class?.toLowerCase()) {
                 case 'artificer':
                     setUnusedSkillPoints(2);

@@ -253,7 +253,6 @@ export default function BagScreen() {
 
   const { deathDomainEnabled } = useContext(CharacterContext) as CharacterContextProps;
 
-
   useEffect(() => {
     const campingSupplies = items.find(item => item.id === '1');
     const coinPouch = items.find(item => item.id === '2');
@@ -805,7 +804,7 @@ export default function BagScreen() {
   const renderModifyWeapon = () => {
     return (
       <>
-        <Text>Modify Weapon</Text>
+        <Text>Modify Weapon: {selectedWeapon.name}</Text>
         <Text>Name</Text>
         <TextInput
           style={styles.modalInput}
@@ -838,18 +837,6 @@ export default function BagScreen() {
             setNewItem({ ...newItem, attackBonus: text }); // Update the newItem as well
           }}
           value={selectedWeapon.attackBonus || ''}
-        />
-        <Text>Properties:</Text>
-        <TextInput
-          style={styles.modalInput}
-          placeholder="Properties"
-          placeholderTextColor="gray"
-          onChangeText={(text) => {
-            const propertiesArray = text.split(',').map(prop => prop.trim());
-            setSelectedWeapon({ ...selectedWeapon, properties: propertiesArray });
-            setNewItem({ ...newItem, details: text }); // Update the newItem as well
-          }}
-          value={selectedWeapon.properties ? selectedWeapon.properties.join(', ') : ''}
         />
       </>
     );
@@ -1031,80 +1018,86 @@ export default function BagScreen() {
           onPress={() => {
             setModalVisible(false);
             setItemTypeValue(null);
+            setCustomWeapon(false);
           }}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Add New Item</Text>
 
-                <View style={styles.itemTypeCreationContainer}>
-                  {itemTypes.slice(0, 6).map((item) => (
-                    <TouchableOpacity
-                      key={item.value}
-                      style={[
-                        styles.itemTypeCreationSquare,
-                        {
-                          width: itemWidth,
-                          height: itemWidth,
-                          marginHorizontal: 5,
-                          marginVertical: 5,
-                        },
-                        itemTypeValue === item.value && {
-                          backgroundColor: '#007AFF',
-                          borderWidth: 2,
-                          borderColor: 'white',
-                        },
-                      ]}
-                      onPress={() => {
-                        setItemTypeValue(item.value);
-                        setNewItem({
-                          ...newItem,
-                          name: '',
-                          details: '',
-                          weaponType: ''
-                        });
-                        setArmorTypeValue(null);
-                        setPotionTypeValue(null);
-                        setScrollTypeValue(null);
-                        setWeaponTypeValue(null);
-                      }}
-                    >
-                      <Text style={[
-                        styles.itemTypeCreationText,
-                        itemTypeValue === item.value && {
-                          color: 'white'
-                        }
-                      ]}>
-                        {item.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                {!customWeapon && (
+                  <View style={styles.itemTypeCreationContainer}>
+                    {itemTypes.slice(0, 6).map((item) => (
+                      <TouchableOpacity
+                        key={item.value}
+                        style={[
+                          styles.itemTypeCreationSquare,
+                          {
+                            width: itemWidth,
+                            height: itemWidth / 2,
+                            marginHorizontal: 5,
+                            marginVertical: 5,
+                          },
+                          itemTypeValue === item.value && {
+                            backgroundColor: '#007AFF',
+                            borderWidth: 2,
+                            borderColor: 'white',
+                          },
+                        ]}
+                        onPress={() => {
+                          setItemTypeValue(item.value);
+                          setNewItem({
+                            ...newItem,
+                            name: '',
+                            details: '',
+                            weaponType: ''
+                          });
+                          setArmorTypeValue(null);
+                          setPotionTypeValue(null);
+                          setScrollTypeValue(null);
+                          setWeaponTypeValue(null);
+                        }}
+                      >
+                        <Text style={[
+                          styles.itemTypeCreationText,
+                          itemTypeValue === item.value && {
+                            color: 'white'
+                          }
+                        ]}>
+                          {item.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
 
 
                 {(itemTypeValue && itemTypeValue.toLowerCase() === 'weapon') && (
                   <>
-                    <Text>Weapon Type</Text>
-                    <DropDownPicker
-                      open={openWeaponType}
-                      value={weaponTypeValue}
-                      items={weaponTypesOptionsFiltered}
-                      setOpen={setOpenWeaponType}
-                      setValue={setWeaponTypeValue}
-                      placeholder="Select a weapon type"
-                      style={{ marginBottom: 10 }}
-                      textStyle={{ textTransform: 'capitalize' }}
-                      zIndex={1000}
-                      listMode="SCROLLVIEW"
-                      scrollViewProps={{
-                        nestedScrollEnabled: true,
-                      }}
-                      onChangeValue={(value) => {
-                        if (value) {
-                          handleWeaponTypeChange(value);
-                        }
-                      }}
-                    />
+                    {!customWeapon && (
+                      <>
+                        <Text>Weapon Type</Text>
+                        <DropDownPicker
+                          open={openWeaponType}
+                          value={weaponTypeValue}
+                          items={weaponTypesOptionsFiltered}
+                          setOpen={setOpenWeaponType}
+                          setValue={setWeaponTypeValue}
+                          placeholder="Select a weapon type"
+                          style={{ marginBottom: 10 }}
+                          textStyle={{ textTransform: 'capitalize' }}
+                          zIndex={1000}
+                          listMode="SCROLLVIEW"
+                          scrollViewProps={{
+                            nestedScrollEnabled: true,
+                          }}
+                          onChangeValue={(value) => {
+                            if (value) {
+                              handleWeaponTypeChange(value);
+                            }
+                          }}
+                        />
+                      </>
+                    )}
                     {/* Create Custom Weapon */}
                     {itemTypeValue?.toLowerCase() === 'weapon'
                       && weaponTypeValue !== null
@@ -1114,7 +1107,7 @@ export default function BagScreen() {
                         <>
                           {!customWeapon ? (
                             <Button
-                              title="Set to GM Mode"
+                              title="Set to DM Mode"
                               onPress={() => {
                                 setCustomWeapon(true);
                               }}
@@ -1122,7 +1115,7 @@ export default function BagScreen() {
                           ) : (
                             <>
                               <Button
-                                title="Revert to Normal Mode"
+                                title="Cancel and Go Back"
                                 onPress={() => {
                                   setCustomWeapon(false);
                                   // Reset the selectedWeapon to default values
@@ -1304,7 +1297,6 @@ export default function BagScreen() {
 
 
 
-
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -1396,7 +1388,7 @@ export default function BagScreen() {
                         />
                       </View>
                     ) : (
-                      selectedItem.type?.toLowerCase() === 'weapon' ? (
+                      selectedItem.type?.toLowerCase() === 'weapon' && getWeaponImage(selectedItem.name.toLowerCase()) ? (
                         <View style={{ borderRadius: 8, overflow: 'hidden', width: 100, height: 100, }}>
                           <ImageBackground source={getWeaponImage(selectedItem.name.toLowerCase()) as ImageSourcePropType} style={styles.itemModalImage} />
                         </View>
