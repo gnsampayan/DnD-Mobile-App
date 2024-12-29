@@ -94,6 +94,7 @@ import actionSurgeImage from '@actions/action-surge-image.png';
 // Monk
 import monkTable from '../data/class-tables/monk/monkTable.json';
 import unarmedStrikeImage from '@actions/unarmed-strike-image.png';
+import flurryOfBlowsImage from '@actions/flurry-of-blows-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -482,6 +483,50 @@ export default function ActionsScreen() {
   const [throwableItemsOpen, setThrowableItemsOpen] = useState(false);
   const [actionSurgePoints, setActionSurgePoints] = useState<number>(1);
   const [hasAttackedThisTurn, setHasAttackedThisTurn] = useState<boolean>(false);
+  const [currentKiPoints, setCurrentKiPoints] = useState<number>(0);
+  const [maxKiPoints, setMaxKiPoints] = useState<number>(0);
+
+  useEffect(() => {
+    if (statsData.class?.toLowerCase() === 'monk') {
+      // Get monk table data for current level
+      const monkLevelData = monkTable.find(data => data.userLevel === statsData.level);
+      setMaxKiPoints(monkLevelData?.kiPoints ?? 0);
+    }
+  }, [statsData.class, statsData.level]);
+
+  // Set currentKiPoints to maxKiPoints when the component mounts
+  useEffect(() => {
+    setCurrentKiPoints(maxKiPoints);
+  }, []);
+
+  // Load ki points from storage on mount
+  useEffect(() => {
+    const loadKiPoints = async () => {
+      try {
+        const savedKiPoints = await AsyncStorage.getItem('@current_ki_points');
+        if (savedKiPoints !== null) {
+          setCurrentKiPoints(parseInt(savedKiPoints));
+        }
+      } catch (error) {
+        console.error('Error loading ki points:', error);
+      }
+    };
+
+    loadKiPoints();
+  }, []);
+
+  // Save ki points to storage whenever it changes
+  useEffect(() => {
+    const saveKiPoints = async () => {
+      try {
+        await AsyncStorage.setItem('@current_ki_points', currentKiPoints.toString());
+      } catch (error) {
+        console.error('Error saving ki points:', error);
+      }
+    };
+
+    saveKiPoints();
+  }, [currentKiPoints]);
 
 
   useEffect(() => {
@@ -944,7 +989,7 @@ export default function ActionsScreen() {
   };
 
 
-  const endTurn = () => {
+  const beginTurn = () => {
     setCurrentActionsAvailable(1);
     setCurrentBonusActionsAvailable(1);
     setCurrentReactionsAvailable(1);
@@ -1055,10 +1100,13 @@ export default function ActionsScreen() {
       if (statsData.class?.toLowerCase() === 'fighter' && item.name.toLowerCase() === 'action surge') {
         affordable = affordable && actionSurgePoints > 0 && currentActionsAvailable === 0;
       }
-
       // Check for unarmed strike
       if (item.name.toLowerCase() === 'unarmed strike') {
         affordable = affordable && hasAttackedThisTurn;
+      }
+      // Check for flurry of blows
+      if (item.name.toLowerCase() === 'flurry of blows') {
+        affordable = affordable && hasAttackedThisTurn && currentKiPoints > 0;
       }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
@@ -1747,6 +1795,18 @@ export default function ActionsScreen() {
         type: 'feature',
         source: 'class',
       } as ActionBlock);
+      if (statsData.level >= 2) {
+        // Add Flurry of Blows action
+        classActions.push({
+          id: 'class-flurry-of-blows',
+          name: 'Flurry of Blows',
+          cost: { actions: 0, bonus: 1 },
+          details: 'Make two unarmed strikes as a bonus action after you take the Attack action on your turn.',
+          image: flurryOfBlowsImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
     }
 
     // Paladin
@@ -2677,6 +2737,26 @@ export default function ActionsScreen() {
             </>
           )}
 
+          {/* Show Ki Points for Monk */}
+          {statsData.class?.toLowerCase() === 'monk' && statsData.level >= 2 && (
+            <View style={styles.headerTextContainer}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                onPress={() => {
+                  Alert.alert('Ki Points', 'You can use your Ki Points to fuel your Ki Powers.');
+                }}>
+                <MaterialCommunityIcons name="yin-yang" size={20} color="white" style={{ opacity: currentKiPoints === 0 ? 0.2 : 1 }} />
+                <View style={styles.headerTextBox}>
+                  <Text style={[
+                    styles.headerText,
+                    currentKiPoints === 0 && { color: 'black' }
+                  ]}>
+                    x{currentKiPoints}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
 
         </View>
 
@@ -2976,11 +3056,10 @@ export default function ActionsScreen() {
               if (subclass?.toLowerCase() === 'order' && statsData.level >= 17) {
                 setOrdersWrathUsed(false);
               }
-              endTurn();
+              beginTurn();
             }}
           >
-            <Ionicons name="arrow-redo" size={22} color="white" style={{ marginRight: 5 }} />
-            <Text style={styles.footerButtonText}>Next Turn</Text>
+            <Text style={styles.footerButtonText}>Begin Turn</Text>
           </TouchableOpacity>
         </ImageBackground>
 
@@ -3104,6 +3183,15 @@ export default function ActionsScreen() {
                               <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
                             </View>
                           )}
+                          {/* If Flurry of Blows is selected, show this text */}
+                          {selectedAction.name.toLowerCase() === 'flurry of blows' && (
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text style={{ fontStyle: 'italic', color: 'black' }}>
+                                , 1
+                              </Text>
+                              <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
+                            </View>
+                          )}
 
                         </View>
 
@@ -3139,6 +3227,8 @@ export default function ActionsScreen() {
                             (Conditional)
                           </Text>
                         )}
+
+
 
                       </View>
                     </View>
@@ -3649,6 +3739,60 @@ export default function ActionsScreen() {
                       </View>
                     )}
 
+                    {/* Monk Flurry of Blows */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'flurry of blows' && (
+                      <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
+                        <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                          <MaterialCommunityIcons name="sword" size={20} color="black" />
+                          {/* Attack Roll Row */}
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                            <Text>+ ({currentDexModifier} Dex)</Text>
+                            {isUnarmedStrikeProficient &&
+                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                <Text>+{proficiencyBonus}</Text>
+                                <Ionicons name="ribbon" size={16} color="black" />
+                              </View>
+                            }
+                          </View>
+                        </View>
+                        {/* Damage Row */}
+                        <View style={styles.modalWeaponProperty}>
+                          <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <Text>
+                              {monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + ({currentDexModifier} Dex)
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                          <MaterialCommunityIcons name="sword" size={20} color="black" />
+                          {/* Attack Roll Row */}
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                            <Text>+ ({currentDexModifier} Dex)</Text>
+                            {isUnarmedStrikeProficient &&
+                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                <Text>+{proficiencyBonus}</Text>
+                                <Ionicons name="ribbon" size={16} color="black" />
+                              </View>
+                            }
+                          </View>
+                        </View>
+                        {/* Damage Row */}
+                        <View style={styles.modalWeaponProperty}>
+                          <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <Text>
+                              {monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + ({currentDexModifier} Dex)
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+
+                    )}
+
+
 
 
                     {/* Modal Buttons */}
@@ -3685,6 +3829,9 @@ export default function ActionsScreen() {
                               if (statsData.level >= 17) {
                                 setActionSurgePoints(2);
                               }
+                            }
+                            if (statsData.class?.toLowerCase() === 'monk') {
+                              setCurrentKiPoints(maxKiPoints);
                             }
                             // add more conditions here
                           }}>
@@ -3807,6 +3954,9 @@ export default function ActionsScreen() {
                                   setActionSurgePoints(2);
                                 }
                               }
+                              if (statsData.class?.toLowerCase() === 'monk') {
+                                setCurrentKiPoints(maxKiPoints);
+                              }
                               // add more conditions here
                               // add more conditions here
                               break;
@@ -3869,6 +4019,9 @@ export default function ActionsScreen() {
                             case 'action surge':
                               setCurrentActionsAvailable(prev => Math.max(0, prev + 1));
                               setActionSurgePoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'flurry of blows':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 1));
                               break;
                           }
 
