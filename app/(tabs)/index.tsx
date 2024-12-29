@@ -90,6 +90,9 @@ import secondWindImage from '@actions/second-wind-image.png';
 import fightingStyleImage from '@actions/fighting-style-image.png';
 import actionSurgeImage from '@actions/action-surge-image.png';
 
+// Monk
+import monkTable from '../data/class-tables/monk/monkTable.json';
+
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
 import bladeWardImage from '@images/cantrips/blade-ward.png';
@@ -1713,6 +1716,20 @@ export default function ActionsScreen() {
       }
     }
 
+    // Monk
+
+    // Paladin
+
+    // Ranger
+
+    // Rogue
+
+    // Sorcerer
+
+    // Warlock
+
+    // Wizard
+
     // Other classes
     return classActions;
   }
@@ -3108,13 +3125,22 @@ export default function ActionsScreen() {
                                       +{getWeaponAttackBonus(mainHandWeapon)}
                                     </Text>
                                   )}
-                                  <Text>
-                                    +({getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`})
-                                  </Text>
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
-                                    getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
-                                    <Text> or </Text>}
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                  {statsData.class?.toLowerCase() === 'monk' ?
+                                    <Text>
+                                      + ({currentDexModifier} Dex)
+                                    </Text>
+                                    :
+                                    <>
+                                      <Text>
+                                        +({getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`})
+                                      </Text>
+                                      {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                                        getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                                        <Text> or </Text>}
+                                      {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+
+                                    </>}
+
                                 </View>
                                 {weaponsProficientIn.includes(mainHandWeapon?.weaponType?.toLowerCase() || '') && (
                                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
@@ -3131,20 +3157,29 @@ export default function ActionsScreen() {
                                 <Text>
                                   {getWeaponDamage(mainHandWeapon)}
                                 </Text>
-                                <View style={{ flexDirection: 'row' }}>
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
-                                    getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
-                                    <Text> or </Text>}
-                                  {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
-                                </View>
-                                {statsData.class?.toLowerCase() === 'barbarian' && (
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
-                                    <Text>{getRageDamageBonus()} if</Text>
-                                    <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
-                                  </View>
-                                )}
+                                <Text>
+                                  {
+                                    statsData.class?.toLowerCase() === 'monk' ?
+                                      `+ (${currentDexModifier} Dex)` :
+                                      <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                        <View style={{ flexDirection: 'row' }}>
+                                          {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                                          {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                                            getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                                            <Text> or </Text>}
+                                          {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                                        </View>
+                                        {statsData.class?.toLowerCase() === 'barbarian' && (
+                                          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                            <Text>{getRageDamageBonus()} if</Text>
+                                            <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                                          </View>
+                                        )}
+                                      </View>
+                                  }
+                                </Text>
                               </View>
+
                             </View>
                             <View style={styles.modalWeaponProperty}>
                               <Text>Type: </Text>
@@ -3219,7 +3254,13 @@ export default function ActionsScreen() {
                             <View style={styles.modalWeaponProperty}>
                               <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <Text>1+({currentStrengthModifier} Str)</Text>
+                                <Text>
+                                  {
+                                    statsData.class?.toLowerCase() === 'monk' ?
+                                      `${monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + (${currentDexModifier} Dex)` :
+                                      `1+ (${currentStrengthModifier} Str)`
+                                  }
+                                </Text>
                                 {statsData.class?.toLowerCase() === 'barbarian' && (
                                   <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
                                     <Text>{getRageDamageBonus()} if</Text>

@@ -1289,17 +1289,24 @@ export default function BagScreen() {
                   )}
 
 
-
-
-                {/* Show properties of weapon selected in dropdown */}
+                {/* Show all weapon details when selected in dropdown */}
                 {weaponTypeValue && (itemTypeValue?.toLowerCase() === 'weapon') && (
                   <View style={{ marginBottom: 20 }}>
-                    <Text>Properties:</Text>
                     {weapons.weapons.flatMap((category: any) => category.items).map((item: any) => {
                       if (item?.name?.toLowerCase() === weaponTypeValue?.toLowerCase()) {
-                        return item?.properties?.map((property: string, index: number) => (
-                          <Text key={index}>{property}</Text>
-                        ));
+                        return (
+                          <View key={item.name}>
+                            <Text>Cost: {item.cost}</Text>
+                            <Text>Damage: {item.damage}</Text>
+                            <Text>Damage Type: {item.damageType}</Text>
+                            <Text>Weight: {item.weight}</Text>
+                            <Text>Properties: {item.properties?.join(', ') || 'None'}</Text>
+                            {item.throwRange && <Text>Throw Range: {item.throwRange}</Text>}
+                            {item.range && <Text>Range: {item.range}</Text>}
+                            {item.versatileDamage && <Text>Versatile Damage: {item.versatileDamage}</Text>}
+                            <Text>Skill Modifiers: {item.skill_modifiers?.join(', ') || 'None'}</Text>
+                          </View>
+                        );
                       }
                       return null;
                     })}
@@ -1498,6 +1505,30 @@ export default function BagScreen() {
                           }
                         })()}
                     </Text>
+                    <View>
+                      {selectedItem?.type?.toLowerCase() === 'weapon' && (
+                        <View style={{ marginBottom: 20 }}>
+                          {weapons.weapons.flatMap((category: any) => category.items).map((item: any) => {
+                            if (item?.name?.toLowerCase() === selectedItem?.name?.toLowerCase()) {
+                              return (
+                                <View key={item.name}>
+                                  <Text>Cost: {item.cost}</Text>
+                                  <Text>Damage: {item.damage}</Text>
+                                  <Text>Damage Type: {item.damageType}</Text>
+                                  <Text>Weight: {item.weight}</Text>
+                                  <Text>Properties: {item.properties?.join(', ') || 'None'}</Text>
+                                  {item.throwRange && <Text>Throw Range: {item.throwRange}</Text>}
+                                  {item.range && <Text>Range: {item.range}</Text>}
+                                  {item.versatileDamage && <Text>Versatile Damage: {item.versatileDamage}</Text>}
+                                  <Text>Skill Modifiers: {item.skill_modifiers?.join(', ') || 'None'}</Text>
+                                </View>
+                              );
+                            }
+                            return null;
+                          })}
+                        </View>
+                      )}
+                    </View>
                   </ScrollView>
                 </View>
 
