@@ -52,7 +52,7 @@
 		"id": "Ki",
 		"name": "Ki",
 		"level": 2,
-		"description": "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.\n\nYou can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.\n\nWhen you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.\n\nSome of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:\n\nKi save DC = 8 + your proficiency bonus + your Wisdom modifier\n\nFlurry of Blows. Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action.\nPatient Defense. You can spend 1 ki point to take the Dodge action as a bonus action on your turn.\nStep of the Wind. You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn.",
+		"description": "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.\n\nYou can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.\n\nWhen you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.\n\nSome of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:\n\nKi save DC = 8 + your proficiency bonus + your Wisdom modifier\n\nFlurry of Blows. Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action.\nPatient Defense. You can spend 1 ki point to take the Dodge action as a bonus action on your turn.\nStep of the Wind. You can spend 1 ki point to take the Disengage or Sprint(Dash) action as a bonus action on your turn, and your jump distance is doubled for the turn.",
 		"mechanics": {
 			"ki_points": "Monk level",
 			"reset": "short or long rest",
@@ -72,7 +72,7 @@
 				{
 					"name": "Step of the Wind",
 					"cost": "1 ki point",
-					"effect": "Disengage or Dash as bonus action, double jump distance"
+					"effect": "Disengage or Sprint(Dash) as bonus action, double jump distance"
 				}
 			]
 		}

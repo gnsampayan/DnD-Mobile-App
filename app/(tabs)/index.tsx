@@ -95,6 +95,8 @@ import actionSurgeImage from '@actions/action-surge-image.png';
 import monkTable from '../data/class-tables/monk/monkTable.json';
 import unarmedStrikeImage from '@actions/unarmed-strike-image.png';
 import flurryOfBlowsImage from '@actions/flurry-of-blows-image.png';
+import patientDefenseImage from '@actions/patient-defense-image.png';
+import stepOfTheWindImage from '@actions/step-of-the-wind-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -428,7 +430,7 @@ export default function ActionsScreen() {
     { id: '1', name: 'Dodge', details: 'Focus on avoiding attacks. All attacks against you have disadvantage until your next turn.', cost: { actions: 1, bonus: 0, reaction: 0 }, image: defaultDodgeImage },
     { id: '2', name: 'Reaction', details: 'Instantly respond to a trigger. You can use this to make opportunity attacks or spells that cost a reaction.', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
     { id: '3', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
-    { id: '4', name: 'Disengage', details: 'Move away from danger. Enemies can not use a reaction attack against you this turn.', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
+    { id: '4', name: 'Disengage', details: 'Move without provoking opportunity attacks from creatures that have melee reach of you.', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
     {
       id: '5', name: 'Hide',
       details: 'Attempt to conceal yourself. Roll a Stealth check if an enemy attempts to notice you or search your space. You can only hide if you are not being observed. You will always be seen if you are in line of sight and not magically hidden or invisible.',
@@ -1107,6 +1109,10 @@ export default function ActionsScreen() {
       // Check for flurry of blows
       if (item.name.toLowerCase() === 'flurry of blows') {
         affordable = affordable && hasAttackedThisTurn && currentKiPoints > 0;
+      }
+      // Check for patient defense and step of the wind
+      if (item.name.toLowerCase() === 'patient defense' || item.name.toLowerCase() === 'step of the wind') {
+        affordable = affordable && currentKiPoints > 0;
       }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
@@ -1803,6 +1809,26 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 1 },
           details: 'Make two unarmed strikes as a bonus action after you take the Attack action on your turn.',
           image: flurryOfBlowsImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+        // Add Patient Defense action
+        classActions.push({
+          id: 'class-patient-defense',
+          name: 'Patient Defense',
+          cost: { actions: 0, bonus: 1 },
+          details: 'Make a dodge action as a bonus action.\n\nDodge:\nFocus on avoiding attacks. All attacks against you have disadvantage until your next turn.',
+          image: patientDefenseImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+        // Add Step of the Wind action
+        classActions.push({
+          id: 'class-step-of-the-wind',
+          name: 'Step of the Wind',
+          cost: { actions: 0, bonus: 1 },
+          details: 'Disengage or Sprint as a bonus action. Your jump distance is also doubled.',
+          image: stepOfTheWindImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -3175,6 +3201,7 @@ export default function ActionsScreen() {
                               <Text style={{ color: 'black' }}>{selectedAction.cost.castingTimeText}</Text>
                             </View>
                           )}
+                          {/* If Rage is selected, show this text */}
                           {selectedAction.name.toLowerCase() === 'rage' && (
                             <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                               <Text>
@@ -3184,14 +3211,18 @@ export default function ActionsScreen() {
                             </View>
                           )}
                           {/* If Flurry of Blows is selected, show this text */}
-                          {selectedAction.name.toLowerCase() === 'flurry of blows' && (
-                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                              <Text style={{ fontStyle: 'italic', color: 'black' }}>
-                                , 1
-                              </Text>
-                              <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
-                            </View>
-                          )}
+                          {/* If Patient Defense is selected, show this text */}
+                          {/* If Step of the Wind is selected, show this text */}
+                          {(selectedAction.name.toLowerCase() === 'flurry of blows' ||
+                            selectedAction.name.toLowerCase() === 'patient defense' ||
+                            selectedAction.name.toLowerCase() === 'step of the wind') && (
+                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                <Text style={{ fontStyle: 'italic', color: 'black' }}>
+                                  , 1
+                                </Text>
+                                <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
+                              </View>
+                            )}
 
                         </View>
 
@@ -3789,10 +3820,16 @@ export default function ActionsScreen() {
                           </View>
                         </View>
                       </View>
-
                     )}
 
-
+                    {/* Monk Step of the Wind */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'step of the wind' && (
+                      <View>
+                        <Text style={{ fontWeight: 'bold' }}>Jump:</Text>
+                        <Text>Running: {(3 + currentStrengthModifier) * 2}ft vertical, {(statsData.abilities.find(a => a.name === 'Strength')?.value || 10) * 2}ft horizontal</Text>
+                        <Text>Standing: {(Math.floor((3 + currentStrengthModifier) / 2) * 2)}ft vertical, {(Math.floor((statsData.abilities.find(a => a.name === 'Strength')?.value || 10) / 2) * 2)}ft horizontal</Text>
+                      </View>
+                    )}
 
 
                     {/* Modal Buttons */}
@@ -4021,6 +4058,12 @@ export default function ActionsScreen() {
                               setActionSurgePoints(prev => Math.max(0, prev - 1));
                               break;
                             case 'flurry of blows':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'patient defense':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'step of the wind':
                               setCurrentKiPoints(prev => Math.max(0, prev - 1));
                               break;
                           }
