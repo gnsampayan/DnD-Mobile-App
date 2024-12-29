@@ -92,6 +92,7 @@ import actionSurgeImage from '@actions/action-surge-image.png';
 
 // Monk
 import monkTable from '../data/class-tables/monk/monkTable.json';
+import unarmedStrikeImage from '@actions/unarmed-strike-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -278,7 +279,6 @@ type ActionBlock = DefaultActionBlock | CustomActionBlock;
 
 // Change later to check if character has the Two-Weapon Fighting class feature
 const isTwoWeaponFightingProficient = false;
-const isUnarmedStrikeProficient = false;
 
 // Define the shape of our Item
 interface Item {
@@ -422,11 +422,15 @@ export default function ActionsScreen() {
 
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
-    { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots', cost: { actions: 1, bonus: 1, reaction: 1 }, image: defaultLongRestImage },
-    { id: '1', name: 'Reaction', details: 'Instantly respond to a trigger', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
+    { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots.\nShort: 1 hour\nLong: 8 hours', cost: { actions: 1, bonus: 1, reaction: 1 }, image: defaultLongRestImage },
+    { id: '1', name: 'Reaction', details: 'Instantly respond to a trigger.', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
     { id: '2', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
-    { id: '3', name: 'Disengage', details: 'Move away from danger', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
-    { id: '4', name: 'Hide', details: 'Attempt to conceal yourself', cost: { actions: 1, bonus: 0 }, image: defaultHideImage },
+    { id: '3', name: 'Disengage', details: 'Move away from danger. Enemies can not use a reaction attack against you this turn.', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
+    {
+      id: '4', name: 'Hide',
+      details: 'Attempt to conceal yourself. Roll a Stealth check if an enemy attempts to notice you or search your space. You can only hide if you are not being observed. You will always be seen if you are in line of sight and not magically hidden or invisible.',
+      cost: { actions: 1, bonus: 0 }, image: defaultHideImage
+    },
     {
       id: '5', name: 'Jump', details: `Leap over obstacles with or without a running start.`,
       cost: { actions: 0, bonus: 1 },
@@ -451,6 +455,8 @@ export default function ActionsScreen() {
     { id: '10', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
   ];
 
+  const isUnarmedStrikeProficient = statsData.class?.toLowerCase() === 'monk';
+
   const [armorStealthDisadvantage, setArmorStealthDisadvantage] = useState<boolean>(false);
   const [knownInfusionsOpen, setKnownInfusionsOpen] = useState<boolean>(false);
   const [knownInfusionValue, setKnownInfusionValue] = useState<string>('');
@@ -473,6 +479,7 @@ export default function ActionsScreen() {
   const [throwableItemValue, setThrowableItemValue] = useState<string | null>(null);
   const [throwableItemsOpen, setThrowableItemsOpen] = useState(false);
   const [actionSurgePoints, setActionSurgePoints] = useState<number>(1);
+  const [hasAttackedThisTurn, setHasAttackedThisTurn] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -893,11 +900,12 @@ export default function ActionsScreen() {
       const isBarbarianLevel5Plus = isBarbarianClass && statsData.level >= 5;
       const isFighterClass = statsData.class?.toLowerCase() === 'fighter';
 
-      if (
+      const canAffordAction =
         currentActionsAvailable >= costActions &&
         currentBonusActionsAvailable >= costBonus &&
-        (costReaction !== undefined ? currentReactionsAvailable >= costReaction : true)
-      ) {
+        (costReaction !== undefined ? currentReactionsAvailable >= costReaction : true);
+
+      if (canAffordAction) {
         // Subtract the cost from available actions
         setCurrentActionsAvailable(prev => prev - costActions);
         setCurrentBonusActionsAvailable(prev => prev - costBonus);
@@ -913,6 +921,10 @@ export default function ActionsScreen() {
         // Disable fighter's extra attack points if action is not attack
         if (isFighterClass && !isAttack && costActions > 0) {
           setExtraAttackPoints(0);
+        }
+
+        if (isAttack) {
+          setHasAttackedThisTurn(true);
         }
 
         setActionModalVisible(false);
@@ -935,6 +947,7 @@ export default function ActionsScreen() {
     setCurrentBonusActionsAvailable(1);
     setCurrentReactionsAvailable(1);
     setExtraAttackSpent(true);
+    setHasAttackedThisTurn(false);
 
     // Reset extra attack points for Fighter
     if (statsData.class?.toLowerCase() === 'fighter') {
@@ -1039,6 +1052,11 @@ export default function ActionsScreen() {
       // Check for action surge
       if (statsData.class?.toLowerCase() === 'fighter' && item.name.toLowerCase() === 'action surge') {
         affordable = affordable && actionSurgePoints > 0 && currentActionsAvailable === 0;
+      }
+
+      // Check for unarmed strike
+      if (item.name.toLowerCase() === 'unarmed strike') {
+        affordable = affordable && hasAttackedThisTurn;
       }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
@@ -1717,6 +1735,17 @@ export default function ActionsScreen() {
     }
 
     // Monk
+    if (statsData.class?.toLowerCase() === 'monk') {
+      classActions.push({
+        id: 'class-unarmed-strike',
+        name: 'Unarmed Strike',
+        cost: { actions: 0, bonus: 1 },
+        details: 'You can use your unarmed strike as a bonus action after an unarmed attack or an armed attack using a monk weapon that is not two-handed or heavy.',
+        image: unarmedStrikeImage as ImageSourcePropType,
+        type: 'feature',
+        source: 'class',
+      } as ActionBlock);
+    }
 
     // Paladin
 
@@ -3024,7 +3053,12 @@ export default function ActionsScreen() {
                               <View style={{ flexDirection: 'row' }}>
                                 <Text>Weapon Type: </Text>
                                 <Text style={{ textTransform: 'capitalize' }}>
-                                  {weaponType}{weaponsProficientIn.map(w => w.toLowerCase()).includes(weaponType.toLowerCase()) ? '' : ' (Inept)'}
+                                  {weaponType}{
+                                    !weaponType ||
+                                      weaponType === '?' ? ' (unarmed)' :
+                                      weaponsProficientIn.map(w => w.toLowerCase()).includes(weaponType.toLowerCase()) ?
+                                        '' : ' (Inept)'
+                                  }
                                 </Text>
                               </View>
                             </View>
@@ -3096,6 +3130,13 @@ export default function ActionsScreen() {
                               )}
                             </View>
                           )}
+
+                        {/* if Reaction is selected, show this text */}
+                        {selectedAction.name === 'Reaction' && (
+                          <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
+                            (Conditional)
+                          </Text>
+                        )}
 
                       </View>
                     </View>
@@ -3377,11 +3418,28 @@ export default function ActionsScreen() {
                       </>
                     )}
 
+                    {/* Hide Details */}
+                    {(selectedAction.name === 'Hide') && (
+                      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                          <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                          <Text>+(Steal)</Text>
+                        </View>
+                        <Text style={{ fontSize: 24 }}>{'>'}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                          <View style={styles.enemyDiceContainer}>
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="red" />
+                          </View>
+                          <Text>+(Perce) or +(Inves)</Text>
+                        </View>
+                      </View>
+                    )}
+
                     {/* Jump Details */}
                     {(selectedAction.name === 'Jump') && (
                       <View>
-                        <Text>Running jump: {3 + currentStrengthModifier}ft</Text>
-                        <Text>Standing jump: {Math.floor((3 + currentStrengthModifier) / 2)}ft</Text>
+                        <Text>Running: {3 + currentStrengthModifier}ft vertical, {statsData.abilities.find(a => a.name === 'Strength')?.value || 10}ft horizontal</Text>
+                        <Text>Standing: {Math.floor((3 + currentStrengthModifier) / 2)}ft vertical, {Math.floor((statsData.abilities.find(a => a.name === 'Strength')?.value || 10) / 2)}ft horizontal</Text>
                       </View>
                     )}
 
@@ -3390,7 +3448,6 @@ export default function ActionsScreen() {
                       <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                           <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
-                          {/* TODO: add athletics modifier accounting for proficiency bonus  or not */}
                           <Text>+(Athle)</Text>
                         </View>
                         <Text style={{ fontSize: 24 }}>{'>'}</Text>
@@ -3559,6 +3616,35 @@ export default function ActionsScreen() {
                     {/* Throw Action Dropdown for which item to throw */}
                     {selectedAction.name.toLowerCase() === 'throw' && (
                       renderThrowDropdown()
+                    )}
+
+                    {/* Monk Unarmed Strike */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'unarmed strike' && (
+                      <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
+                        <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                          <MaterialCommunityIcons name="sword" size={20} color="black" />
+                          {/* Attack Roll Row */}
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                            <Text>+ ({currentDexModifier} Dex)</Text>
+                            {isUnarmedStrikeProficient &&
+                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                                <Text>+{proficiencyBonus}</Text>
+                                <Ionicons name="ribbon" size={16} color="black" />
+                              </View>
+                            }
+                          </View>
+                        </View>
+                        {/* Damage Row */}
+                        <View style={styles.modalWeaponProperty}>
+                          <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <Text>
+                              {monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + ({currentDexModifier} Dex)
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
                     )}
 
 
