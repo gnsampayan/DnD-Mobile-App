@@ -97,6 +97,7 @@ import unarmedStrikeImage from '@actions/unarmed-strike-image.png';
 import flurryOfBlowsImage from '@actions/flurry-of-blows-image.png';
 import patientDefenseImage from '@actions/patient-defense-image.png';
 import stepOfTheWindImage from '@actions/step-of-the-wind-image.png';
+import unarmoredMovementImage from '@actions/unarmored-movement-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -616,6 +617,15 @@ export default function ActionsScreen() {
       // Only add speed bonus if not wearing heavy armor
       if (!isWearingHeavyArmor) {
         return baseSpeed + 10;
+      }
+    }
+
+    // Add Unarmored Movement bonus for Monks if not wearing armor or shield
+    if (statsData.class?.toLowerCase() === 'monk' && !equippedArmor && !equippedShield) {
+      const monkLevelData = monkTable.find(level => level.userLevel === statsData.level);
+      if (monkLevelData?.unarmoredMovement) {
+        const speedBonus = parseInt(monkLevelData.unarmoredMovement);
+        return baseSpeed + speedBonus;
       }
     }
 
@@ -1829,6 +1839,18 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 1 },
           details: 'Disengage or Sprint as a bonus action. Your jump distance is also doubled.',
           image: stepOfTheWindImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 9) {
+        // Add Unarmored Movement passive
+        classActions.push({
+          id: 'class-unarmored-movement',
+          name: 'Unarmored Movement',
+          cost: { actions: 0, bonus: 0 },
+          details: '(Passive)\n\nWhile you are not wearing any armor and not wielding a shield, you gain the ability to move along vertical surfaces and across liquids.',
+          image: unarmoredMovementImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -3217,7 +3239,7 @@ export default function ActionsScreen() {
                             selectedAction.name.toLowerCase() === 'patient defense' ||
                             selectedAction.name.toLowerCase() === 'step of the wind') && (
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <Text style={{ fontStyle: 'italic', color: 'black' }}>
+                                <Text style={{ color: 'black' }}>
                                   , 1
                                 </Text>
                                 <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
