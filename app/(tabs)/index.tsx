@@ -25,6 +25,7 @@ import cantripsData from '../data/cantrips.json';
 import spellsData from '../data/spells.json';
 import reactionImage from '@actions/reaction-image.png';
 import defaultLongRestImage from '@actions/rest-image.png';
+import defaultDodgeImage from '@actions/dodge-image.png';
 import defaultOffhandAttackImage from '@actions/default-offhand-attack-image.png';
 import defaultDisengageImage from '@actions/default-disengage-image.png';
 import defaultRangedAttackImage from '@actions/default-ranged-attack-image.png';
@@ -423,36 +424,37 @@ export default function ActionsScreen() {
   // Default actions that cannot be deleted
   const defaultActions: ActionBlock[] = [
     { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots.\nShort: 1 hour\nLong: 8 hours', cost: { actions: 1, bonus: 1, reaction: 1 }, image: defaultLongRestImage },
-    { id: '1', name: 'Reaction', details: 'Instantly respond to a trigger.', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
-    { id: '2', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
-    { id: '3', name: 'Disengage', details: 'Move away from danger. Enemies can not use a reaction attack against you this turn.', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
+    { id: '1', name: 'Dodge', details: 'Focus on avoiding attacks. All attacks against you have disadvantage until your next turn.', cost: { actions: 1, bonus: 0, reaction: 0 }, image: defaultDodgeImage },
+    { id: '2', name: 'Reaction', details: 'Instantly respond to a trigger. You can use this to make opportunity attacks or spells that cost a reaction.', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
+    { id: '3', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
+    { id: '4', name: 'Disengage', details: 'Move away from danger. Enemies can not use a reaction attack against you this turn.', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
     {
-      id: '4', name: 'Hide',
+      id: '5', name: 'Hide',
       details: 'Attempt to conceal yourself. Roll a Stealth check if an enemy attempts to notice you or search your space. You can only hide if you are not being observed. You will always be seen if you are in line of sight and not magically hidden or invisible.',
       cost: { actions: 1, bonus: 0 }, image: defaultHideImage
     },
     {
-      id: '5', name: 'Jump', details: `Leap over obstacles with or without a running start.`,
+      id: '6', name: 'Jump', details: `Leap over obstacles with or without a running start.`,
       cost: { actions: 0, bonus: 1 },
       image: defaultJumpImage
     },
     {
-      id: '6',
+      id: '7',
       name: 'Shove',
       details: 'Push a creature forward 5m or knock it prone. You can only shove creatures up to one size larger than you. Your roll must be greater than the target\'s roll.',
       cost: { actions: 0, bonus: 1 },
       image: defaultPushImage
     },
-    { id: '7', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
+    { id: '8', name: 'Throw', details: 'Hurl an object or creature at a target', cost: { actions: 1, bonus: 0 }, image: defaultThrowImage },
     {
-      id: '8',
+      id: '9',
       name: 'Attack',
       details: 'Make a melee attack, or a grapple attack.',
       cost: { actions: 1, bonus: 0 },
       image: isArmed ? defaultAttackImage : defaultUnarmedAttackImage
     },
-    { id: '9', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
-    { id: '10', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
+    { id: '10', name: 'Offhand Attack', details: 'Make an offhand attack', cost: { actions: 0, bonus: 1 }, image: defaultOffhandAttackImage },
+    { id: '11', name: 'Ranged Attack', details: 'Make a ranged attack', cost: { actions: 1, bonus: 0 }, image: defaultRangedAttackImage },
   ];
 
   const isUnarmedStrikeProficient = statsData.class?.toLowerCase() === 'monk';

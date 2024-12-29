@@ -1492,16 +1492,24 @@ export default function SpellbookScreen() {
 
         return (
             <View style={[styles.headerTextContainer, { paddingHorizontal: 10 }]}>
-                <View style={[styles.headerTextBox, {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 5,
-                    paddingVertical: 0,
-                    backgroundColor: 'transparent'
-                }]}>
-                    <Text style={[styles.headerText, { fontSize: 16 }]}>{8 + proficiencyBonus + spellcastingModifier}</Text>
-                    <MaterialCommunityIcons name="skull-scan" size={16} color="lightgrey" />
-                </View>
+                <TouchableOpacity onPress={() => {
+                    Alert.alert(
+                        'Spell Save DC',
+                        'This is your Spell Save Difficulty Class (DC). When you cast a spell that requires a saving throw, the target must roll higher than this number to avoid or reduce the spell\'s effects. It equals 8 + your proficiency bonus + your spellcasting ability modifier.',
+                        [{ text: 'OK', style: 'default' }]
+                    );
+                }}>
+                    <View style={[styles.headerTextBox, {
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 5,
+                        paddingVertical: 0,
+                        backgroundColor: 'transparent'
+                    }]}>
+                        <Text style={[styles.headerText, { fontSize: 16 }]}>{8 + proficiencyBonus + spellcastingModifier}</Text>
+                        <MaterialCommunityIcons name="skull-scan" size={16} color="lightgrey" />
+                    </View>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -2514,6 +2522,9 @@ export default function SpellbookScreen() {
                                 </Text>
                             </View>
                         </TouchableOpacity>
+                    </View>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        {renderSpellSaveDC()}
                     </View>
                 </View>
 
