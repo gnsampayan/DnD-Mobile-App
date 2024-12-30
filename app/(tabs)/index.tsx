@@ -3340,7 +3340,7 @@ export default function ActionsScreen() {
               beginTurn();
             }}
           >
-            <Text style={styles.footerButtonText}>Begin Turn</Text>
+            <Text style={styles.footerButtonText}>Start Turn</Text>
           </TouchableOpacity>
         </ImageBackground>
 

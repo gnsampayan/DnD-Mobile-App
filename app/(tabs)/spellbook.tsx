@@ -2102,7 +2102,7 @@ export default function SpellbookScreen() {
                             onPress={() => {
                                 Alert.alert(
                                     `SpLv${spellLevelNum}`,
-                                    `Do you want to expend or gain a SpLv${spellLevelNum} spell slot?\n\nOnly use when upcasting spells and with DM approval.\n\nPlease confirm with your DM before modifying spell slots.`,
+                                    `Expend or Gain a SpLv${spellLevelNum} spell slot?\n\nThis is a Custom action.`,
                                     [
                                         {
                                             text: 'Cancel',
@@ -2529,16 +2529,17 @@ export default function SpellbookScreen() {
                 </View>
 
 
-                {/* Subheader */}
-                <View style={styles.subheader}>
-                    {renderSpellPoints()}
-                </View>
+
 
 
                 <View style={{ flex: 1 }}>
                     <View style={{ flex: 1 }}>
                         {/* For Cantrips */}
                         {renderCantripBlocks()}
+                        {/* Subheader */}
+                        <View style={styles.subheader}>
+                            {renderSpellPoints()}
+                        </View>
                         {/* For Cleric Domain Spells */}
                         {renderDomainSpells()}
                         {/* For Prepared Spells */}
@@ -2735,8 +2736,8 @@ export default function SpellbookScreen() {
                             </View>
                             {spellPressedIndex !== null && preparedSpellSlotsData[spellPressedIndex]?.spellName && (
                                 <Button
-                                    title="Clear"
-                                    color="#3770ff"
+                                    title="Unprepare"
+                                    color="orange"
                                     onPress={() => {
                                         if (spellPressedIndex !== null) {
                                             const updatedSlots = preparedSpellSlotsData.map(slot =>
