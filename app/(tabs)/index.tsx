@@ -98,6 +98,7 @@ import flurryOfBlowsImage from '@actions/flurry-of-blows-image.png';
 import patientDefenseImage from '@actions/patient-defense-image.png';
 import stepOfTheWindImage from '@actions/step-of-the-wind-image.png';
 import unarmoredMovementImage from '@actions/unarmored-movement-image.png';
+import deflectMissilesImage from '@actions/deflect-missiles-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -429,7 +430,7 @@ export default function ActionsScreen() {
   const defaultActions: ActionBlock[] = [
     { id: '0', name: 'Rest', details: 'Recover hit points and regain spell slots.\nShort: 1 hour\nLong: 8 hours', cost: { actions: 1, bonus: 1, reaction: 1 }, image: defaultLongRestImage },
     { id: '1', name: 'Dodge', details: 'Focus on avoiding attacks. All attacks against you have disadvantage until your next turn.', cost: { actions: 1, bonus: 0, reaction: 0 }, image: defaultDodgeImage },
-    { id: '2', name: 'Reaction', details: 'Instantly respond to a trigger. You can use this to make opportunity attacks or spells that cost a reaction.', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
+    { id: '2', name: 'Reaction', details: 'Instantly respond to a trigger. You can use this to make opportunity attacks.', cost: { actions: 0, bonus: 0, reaction: 1 }, image: reactionImage },
     { id: '3', name: 'Sprint', details: 'Double your movement speed', cost: { actions: 1, bonus: 1 }, image: defaultSprintImage },
     { id: '4', name: 'Disengage', details: 'Move without provoking opportunity attacks from creatures that have melee reach of you.', cost: { actions: 1, bonus: 0 }, image: defaultDisengageImage },
     {
@@ -1839,6 +1840,18 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 1 },
           details: 'Disengage or Sprint as a bonus action. Your jump distance is also doubled.',
           image: stepOfTheWindImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 3) {
+        // Add Deflect Missiles action
+        classActions.push({
+          id: 'class-deflect-missiles',
+          name: 'Deflect Missiles',
+          cost: { actions: 0, bonus: 0, reaction: 1 },
+          details: 'When you are hit by a ranged weapon attack, you can use your reaction to deflect it. When you do so, reduce the incoming damage. If damage is reduced to 0, and the missile is small enough to fit in your hand, you catch it. If caught, you can decide to throw it by spending 1 ki point.',
+          image: deflectMissilesImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -3256,6 +3269,15 @@ export default function ActionsScreen() {
                             </View>
                           )}
 
+                          {/* If Deflect Missiles is selected, show this text */}
+                          {selectedAction.name.toLowerCase() === 'deflect missiles' && (
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text>, (conditional: 1</Text>
+                              <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
+                              <Text>)</Text>
+                            </View>
+                          )}
+
                         </View>
 
 
@@ -3284,8 +3306,8 @@ export default function ActionsScreen() {
                             </View>
                           )}
 
-                        {/* if Reaction is selected, show this text */}
-                        {selectedAction.name === 'Reaction' && (
+                        {/* if Reaction or Deflect Missiles is selected, show this text */}
+                        {(selectedAction.name === 'Reaction' || selectedAction.name === 'Deflect Missiles') && (
                           <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
                             (Conditional)
                           </Text>
@@ -3813,9 +3835,9 @@ export default function ActionsScreen() {
                     {/* Monk Flurry of Blows */}
                     {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'flurry of blows' && (
                       <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
+                        {/* Attack Roll Row */}
                         <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
                           <MaterialCommunityIcons name="sword" size={20} color="black" />
-                          {/* Attack Roll Row */}
                           <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                             <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
                             <Text>+ ({currentDexModifier} Dex)</Text>
@@ -3873,6 +3895,43 @@ export default function ActionsScreen() {
                       </View>
                     )}
 
+                    {/* Monk Deflect Missiles */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'deflect missiles' && (
+                      <View>
+                        <Text style={{ fontWeight: 'bold' }}>Dmg Reduction:</Text>
+                        <Text>1d10 + ({currentDexModifier} Dex) + ({statsData.level} Lvl)</Text>
+                        <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Throw Attack:</Text>
+                        {/* Attack Roll Row */}
+                        <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                          <MaterialCommunityIcons name="sword" size={20} color="black" />
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                            <Text>+ ({currentDexModifier} Dex)</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                              <Text>+{proficiencyBonus}</Text>
+                              <Ionicons name="ribbon" size={16} color="black" />
+                            </View>
+                          </View>
+                        </View>
+                        {/* Damage Row */}
+                        <View style={styles.modalWeaponProperty}>
+                          <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <Text>
+                              {monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + ({currentDexModifier} Dex)
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.modalWeaponProperty}>
+                          <Text>Range:</Text>
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <Text>
+                              20/60ft
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
 
                     {/* Modal Buttons */}
                     <View style={[styles.modalButtons, { flexDirection: 'row', gap: 10 }]}>
@@ -3931,6 +3990,23 @@ export default function ActionsScreen() {
                           }}
                         >
                           <Text>End Rage</Text>
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Throw Attack Button --- Deflect Missiles Monk Action */}
+                      {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'deflect missiles' && (
+                        <TouchableOpacity
+                          style={[styles.modalButtonCommit, { flexDirection: 'row', gap: 5, justifyContent: 'center', alignItems: 'center', opacity: currentKiPoints === 0 ? 0.2 : 1 }]}
+                          onPress={() => {
+                            if (currentKiPoints > 0) {
+                              setCurrentKiPoints(prev => Math.max(0, prev - 1));
+                            }
+                            setActionModalVisible(false);
+                          }}
+                          disabled={currentKiPoints === 0}
+                        >
+                          <Text>Def & Thr</Text>
+                          <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
                         </TouchableOpacity>
                       )}
 
