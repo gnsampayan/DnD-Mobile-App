@@ -98,6 +98,17 @@ import eldritchKnightData from '../data/class-tables/fighter/subclass/eldritchKn
 import psiWarriorData from '../data/class-tables/fighter/subclass/psiWarrior.json';
 import runeKnightData from '../data/class-tables/fighter/subclass/runeKnight.json';
 import samuraiData from '../data/class-tables/fighter/subclass/samurai.json';
+import monasticTraditionData from '../data/class-tables/monk/monasticTradition.json';
+import astralSelfData from '../data/class-tables/monk/subclass/astralSelf.json';
+import ascendantDragonData from '../data/class-tables/monk/subclass/ascendantDragon.json';
+import drunkenMasterData from '../data/class-tables/monk/subclass/drunkenMaster.json';
+import fourElementsData from '../data/class-tables/monk/subclass/fourElements.json';
+import kenseiData from '../data/class-tables/monk/subclass/kensei.json';
+import longDeathData from '../data/class-tables/monk/subclass/longDeath.json';
+import mercyData from '../data/class-tables/monk/subclass/mercy.json';
+import openHandData from '../data/class-tables/monk/subclass/openHand.json';
+import shadowData from '../data/class-tables/monk/subclass/shadow.json';
+import sunSoulData from '../data/class-tables/monk/subclass/sunSoul.json';
 
 
 import defaultItemsData from '../data/defaultItems.json';
@@ -116,7 +127,6 @@ import raceBonuses from '../data/raceData.json';
 import { Item, useItemEquipment } from '../../context/ItemEquipmentContext';
 import { CharacterContext, WeaponSlot, CharacterContextProps } from '../../context/equipmentActionsContext';
 import { useActions } from '../../context/actionsSpellsContext';
-import featuresImage from '@images/features-image.png';
 import armorTypes from '../data/armorTypes.json';
 
 
@@ -447,6 +457,8 @@ export default function MeScreen() {
     const [fightingStyleValue, setFightingStyleValue] = useState<string | null>(null);
     const [martialArchetypeOpen, setMartialArchetypeOpen] = useState(false);
     const [martialArchetypeValue, setMartialArchetypeValue] = useState<string | null>(null);
+    const [monasticTraditionOpen, setMonasticTraditionOpen] = useState(false);
+    const [monasticTraditionValue, setMonasticTraditionValue] = useState<string | null>(null);
 
     // Load player name from AsyncStorage
     useEffect(() => {
@@ -1164,9 +1176,10 @@ export default function MeScreen() {
                                     (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled) ||
                                     (feature.name.toLowerCase() === 'druid circle' && !subclass) ||
                                     (feature.name.toLowerCase() === 'fighting style' && !fightingStyleLearned) ||
-                                    (feature.name.toLowerCase() === 'martial archetype' && !subclass)
+                                    (feature.name.toLowerCase() === 'martial archetype' && !subclass) ||
+                                    (feature.name.toLowerCase() === 'monastic tradition' && !subclass)
 
-                                    // add more here
+                                    // add more feats for all classes here
                                 ) && (
                                         <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
                                     )}
@@ -1954,6 +1967,29 @@ export default function MeScreen() {
                     )
                 }
                 break;
+            // Monk
+            case "monastic tradition":
+                if (!subclass) {
+                    return (
+                        <View style={{
+                            paddingHorizontal: 10,
+                            backgroundColor: 'rgba(0,0,0,1)',
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            opacity: monasticTraditionValue === null ? 0.2 : 1
+                        }}>
+                            <MaterialCommunityIcons name="meditation" size={20} color="gold" />
+                            <Button
+                                title="Activate"
+                                color="gold"
+                                onPress={() => activateFeat(selectedFeat as string)}
+                                disabled={monasticTraditionValue === null} />
+                        </View>
+                    )
+                }
+                break;
         }
         return null;
     }
@@ -2133,6 +2169,14 @@ export default function MeScreen() {
             case "martial archetype":
                 if (martialArchetypeValue) {
                     setSubclass(martialArchetypeValue);
+                }
+                setClassFeatDescriptionModalVisible(false);
+                setSelectedFeat(null);
+                break;
+            // Monk
+            case "monastic tradition":
+                if (monasticTraditionValue) {
+                    setSubclass(monasticTraditionValue);
                 }
                 setClassFeatDescriptionModalVisible(false);
                 setSelectedFeat(null);
@@ -2336,6 +2380,15 @@ export default function MeScreen() {
                 <View>
                     <Text>Subclass: {subclass}</Text>
                     {subclass && renderFighterSubclassFeatures(subclass)}
+                </View>
+            );
+        }
+        // monk subclass
+        if (subClassButtonName.toLowerCase() === 'monastic tradition') {
+            return (
+                <View>
+                    <Text>Subclass: {subclass}</Text>
+                    {subclass && renderMonkSubclassFeatures(subclass)}
                 </View>
             );
         }
@@ -3672,6 +3725,55 @@ export default function MeScreen() {
         );
     };
 
+    const renderNestedContent = (obj: any, depth: number = 0) => {
+        if (typeof obj === 'string' || typeof obj === 'number') {
+            return (
+                <Text
+                    style={{
+                        paddingLeft: depth * 8,
+                        paddingRight: 8,
+                        flexShrink: 1,
+                        flexWrap: 'wrap'
+                    }}
+                    numberOfLines={0}
+                >
+                    {obj}
+                </Text>
+            );
+        }
+        if (Array.isArray(obj)) {
+            return (
+                <View style={{ paddingLeft: depth * 8 }}>
+                    {obj.map((item, index) => (
+                        <View key={index} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 2 }}>
+                            <Text style={{ marginRight: 4 }}>•</Text>
+                            {renderNestedContent(item, depth + 1)}
+                        </View>
+                    ))}
+                </View>
+            );
+        }
+        if (typeof obj === 'object' && obj !== null) {
+            return (
+                <View style={{ paddingLeft: depth * 8 }}>
+                    {Object.entries(obj).map(([key, value]) => {
+                        const isValueObject = typeof value === 'object' && value !== null;
+
+                        return (
+                            <View key={key} style={{ marginVertical: 4 }}>
+                                <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                                    {key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                                </Text>
+                                {renderNestedContent(value, isValueObject ? depth + 1 : depth)}
+                            </View>
+                        );
+                    })}
+                </View>
+            );
+        }
+        return null;
+    };
+
     const renderFighterSubclassFeatures = (subclassId: string) => {
         // Get the appropriate data based on subclass
         const getSubclassData = (id: string) => {
@@ -3705,58 +3807,6 @@ export default function MeScreen() {
         const subclassInfo = martialArchetypeData.find(archetype => archetype.value === subclassId);
 
         if (!subclassData || !subclassInfo) return null;
-
-        const renderNestedContent = (obj: any, depth: number = 0) => {
-            if (typeof obj === 'string' || typeof obj === 'number') {
-                return (
-                    <Text
-                        style={{
-                            paddingLeft: depth * 8,
-                            paddingRight: 8,
-                            flexShrink: 1,
-                            flexWrap: 'wrap'
-                        }}
-                        numberOfLines={0}
-                    >
-                        {obj}
-                    </Text>
-                );
-            }
-
-            if (Array.isArray(obj)) {
-                return (
-                    <View style={{ paddingLeft: depth * 8 }}>
-                        {obj.map((item, index) => (
-                            <View key={index} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 2 }}>
-                                <Text style={{ marginRight: 4 }}>•</Text>
-                                {renderNestedContent(item, depth + 1)}
-                            </View>
-                        ))}
-                    </View>
-                );
-            }
-
-            if (typeof obj === 'object' && obj !== null) {
-                return (
-                    <View style={{ paddingLeft: depth * 8 }}>
-                        {Object.entries(obj).map(([key, value]) => {
-                            const isValueObject = typeof value === 'object' && value !== null;
-
-                            return (
-                                <View key={key} style={{ marginVertical: 4 }}>
-                                    <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
-                                        {key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
-                                    </Text>
-                                    {renderNestedContent(value, isValueObject ? depth + 1 : depth)}
-                                </View>
-                            );
-                        })}
-                    </View>
-                );
-            }
-
-            return null;
-        };
 
         return (
             <ScrollView
@@ -3846,6 +3896,110 @@ export default function MeScreen() {
                 )}
                 <Text>Cost: {armorVersion.cost} gp</Text>
             </View>
+        );
+    };
+
+    const renderMonasticTraditionDropdown = () => {
+        // Format monastic tradition data from JSON
+        const formattedTraditions = monasticTraditionData.map(tradition => ({
+            label: tradition.name,
+            value: tradition.value,
+            description: tradition.description
+        }));
+
+        return (
+            <View>
+                <DropDownPicker
+                    open={monasticTraditionOpen}
+                    value={monasticTraditionValue}
+                    items={formattedTraditions}
+                    setOpen={setMonasticTraditionOpen}
+                    setValue={setMonasticTraditionValue}
+                    placeholder="Select a monastic tradition"
+                />
+                {monasticTraditionValue && (
+                    <Text style={{ marginTop: 10, paddingHorizontal: 10 }}>
+                        {formattedTraditions.find(tradition => tradition.value === monasticTraditionValue)?.description}
+                    </Text>
+                )}
+            </View>
+        );
+    };
+
+    const renderMonkSubclassFeatures = (subclassId: string) => {
+        // Get the appropriate data based on subclass
+        const getSubclassData = (id: string) => {
+            switch (id) {
+                case 'astral self':
+                    return astralSelfData;
+                case 'ascendant dragon':
+                    return ascendantDragonData;
+                case 'drunken master':
+                    return drunkenMasterData;
+                case 'four elements':
+                    return fourElementsData;
+                case 'kensei':
+                    return kenseiData;
+                case 'long death':
+                    return longDeathData;
+                case 'mercy':
+                    return mercyData;
+                case 'open hand':
+                    return openHandData;
+                case 'shadow':
+                    return shadowData;
+                case 'sun soul':
+                    return sunSoulData;
+                default:
+                    return null;
+            }
+        };
+
+        const subclassData = getSubclassData(subclassId);
+        const subclassInfo = monasticTraditionData.find(tradition => tradition.value === subclassId);
+
+        if (!subclassData || !subclassInfo) return null;
+
+        return (
+            <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={{ padding: 16 }}
+            >
+                <Text style={{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    marginBottom: 8,
+                    textTransform: 'capitalize'
+                }}>
+                    {subclassId.replace(/-/g, ' ')}
+                </Text>
+
+                <Text style={{ marginBottom: 16 }}>
+                    {subclassInfo.description}
+                </Text>
+
+                {Object.entries(subclassData)
+                    .filter(([key, value]) => {
+                        if (typeof value === 'object' && 'level' in value) {
+                            return statsData.level >= value.level;
+                        }
+                        return true;
+                    })
+                    .map(([key, value]) => (
+                        <View key={key} style={{ marginBottom: 16 }}>
+                            <Text style={{
+                                fontSize: 16,
+                                fontWeight: 'bold',
+                                marginBottom: 4,
+                                textTransform: 'capitalize'
+                            }}>
+                                {key.replace(/-/g, ' ')}
+                            </Text>
+                            {renderNestedContent(value)}
+                        </View>
+                    ))
+                }
+            </ScrollView>
         );
     };
 
@@ -4739,6 +4893,14 @@ export default function MeScreen() {
                         {statsData.class === 'fighter' && selectedFeat?.toLowerCase() === 'martial archetype' && (
                             subclass === null ? (
                                 renderMartialArchetypeDropdown()
+                            ) : (
+                                <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
+                            )
+                        )}
+                        {/* Monk - Monastic Tradition Dropdown */}
+                        {statsData.class === 'monk' && selectedFeat?.toLowerCase() === 'monastic tradition' && (
+                            subclass === null ? (
+                                renderMonasticTraditionDropdown()
                             ) : (
                                 <Text style={{ textTransform: 'capitalize' }}>Subclass: {subclass}</Text>
                             )

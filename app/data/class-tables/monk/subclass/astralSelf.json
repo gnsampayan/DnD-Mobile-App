@@ -1,0 +1,38 @@
+{
+	"arms-of-the-astral-self": {
+		"level": 3,
+		"description": "Your mastery of your ki allows you to summon a portion of your astral self. As a bonus action, you can spend 1 ki point to summon the arms of your astral self. When you do so, each creature of your choice that you can see within 10 feet of you must succeed on a Dexterity saving throw or take force damage equal to two rolls of your Martial Arts die.",
+		"duration": "10 minutes",
+		"benefits": [
+			"You can use your Wisdom modifier in place of your Strength modifier when making Strength checks and Strength saving throws",
+			"You can use the spectral arms to make unarmed strikes",
+			"When you make an unarmed strike with the arms on your turn, your reach for it is 5 feet greater than normal",
+			"The unarmed strikes you make with the arms can use your Wisdom modifier in place of your Strength or Dexterity modifier for the attack and damage rolls, and their damage type is force"
+		]
+	},
+	"visage-of-the-astral-self": {
+		"level": 6,
+		"description": "You can summon the visage of your astral self. As a bonus action, or as part of the bonus action you take to activate Arms of the Astral Self, you can spend 1 ki point to summon this visage for 10 minutes.",
+		"benefits": {
+			"astral-sight": "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet",
+			"wisdom-of-the-spirit": "You have advantage on Wisdom (Insight) and Charisma (Intimidation) checks",
+			"word-of-the-spirit": "When you speak, you can direct your words to a creature of your choice that you can see within 60 feet of you, making it so only that creature can hear you. Alternatively, you can amplify your voice so that all creatures within 600 feet can hear you"
+		}
+	},
+	"body-of-the-astral-self": {
+		"level": 11,
+		"description": "When you have both your astral arms and visage summoned, you can cause the body of your astral self to appear (no action required). This spectral body covers your physical form like a suit of armor, connecting with the arms and visage.",
+		"benefits": {
+			"deflect-energy": "When you take acid, cold, fire, force, lightning, or thunder damage, you can use your reaction to deflect it. When you do so, the damage you take is reduced by 1d10 + your Wisdom modifier (minimum reduction of 1)",
+			"empowered-arms": "Once on each of your turns when you hit a target with the Arms of the Astral Self, you can deal extra damage to the target equal to your Martial Arts die"
+		}
+	},
+	"awakened-astral-self": {
+		"level": 17,
+		"description": "Your connection to your astral self is complete, allowing you to unleash its full potential. As a bonus action, you can spend 5 ki points to summon the arms, visage, and body of your astral self and awaken it for 10 minutes.",
+		"benefits": {
+			"armor-of-the-spirit": "You gain a +2 bonus to Armor Class",
+			"astral-barrage": "Whenever you use the Extra Attack feature to attack twice, you can instead attack three times if all the attacks are made with your astral arms"
+		}
+	}
+}

@@ -439,7 +439,7 @@ export default function ActionsScreen() {
     },
     {
       id: '6', name: 'Jump', details: `Leap over obstacles with or without a running start.`,
-      cost: { actions: 0, bonus: 1 },
+      cost: { actions: 0, bonus: 0 },
       image: defaultJumpImage
     },
     {
@@ -3246,6 +3246,16 @@ export default function ActionsScreen() {
                               </View>
                             )}
 
+                          {/* if Jump is selected, show this text */}
+                          {selectedAction.name.toLowerCase() === 'jump' && (
+                            <View style={{ flexDirection: 'row', gap: 5 }}>
+                              <Text>
+                                1ft horizontal = 1
+                              </Text>
+                              <Ionicons name="footsteps" size={16} color="black" />
+                            </View>
+                          )}
+
                         </View>
 
 
@@ -3278,6 +3288,14 @@ export default function ActionsScreen() {
                         {selectedAction.name === 'Reaction' && (
                           <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
                             (Conditional)
+                          </Text>
+                        )}
+
+                        {/* Passive Actions Group */}
+                        {/* If Jump is selected, show this text */}
+                        {selectedAction.name.toLowerCase() === 'jump' && (
+                          <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
+                            (Passive)
                           </Text>
                         )}
 
@@ -3847,6 +3865,8 @@ export default function ActionsScreen() {
                     {/* Monk Step of the Wind */}
                     {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'step of the wind' && (
                       <View>
+                        <Text style={{ fontWeight: 'bold' }}>Bonus Action:</Text>
+                        <Text>Disengage or Sprint</Text>
                         <Text style={{ fontWeight: 'bold' }}>Jump:</Text>
                         <Text>Running: {(3 + currentStrengthModifier) * 2}ft vertical, {(statsData.abilities.find(a => a.name === 'Strength')?.value || 10) * 2}ft horizontal</Text>
                         <Text>Standing: {(Math.floor((3 + currentStrengthModifier) / 2) * 2)}ft vertical, {(Math.floor((statsData.abilities.find(a => a.name === 'Strength')?.value || 10) / 2) * 2)}ft horizontal</Text>
