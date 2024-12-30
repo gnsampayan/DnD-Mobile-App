@@ -36,20 +36,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Actions',
+          title: 'Character',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'run-fast' : 'run'} color={color} family="MaterialCommunityIcons" />
-          ),
-        }}
-      />
-      {/* Conditionally hide the Spellbook tab button */}
-      <Tabs.Screen
-        name="spellbook"
-        options={{
-          title: 'Spells',
-          href: showSpellbook ? undefined : null,
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'star-shooting' : 'star-shooting-outline'} color={color} family="MaterialCommunityIcons" />
+            <TabBarIcon name={focused ? 'body' : 'body-outline'} color={color} />
           ),
         }}
       />
@@ -71,12 +60,23 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Conditionally hide the Spellbook tab button */}
       <Tabs.Screen
-        name="character"
+        name="spellbook"
         options={{
-          title: 'Character',
+          title: 'Spells',
+          href: showSpellbook ? undefined : null,
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'body' : 'body-outline'} color={color} />
+            <TabBarIcon name={focused ? 'star-shooting' : 'star-shooting-outline'} color={color} family="MaterialCommunityIcons" />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="actions"
+        options={{
+          title: 'Actions',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'run-fast' : 'run'} color={color} family="MaterialCommunityIcons" />
           ),
         }}
       />
