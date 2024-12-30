@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from 'react';
+import { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -99,6 +99,7 @@ import patientDefenseImage from '@actions/patient-defense-image.png';
 import stepOfTheWindImage from '@actions/step-of-the-wind-image.png';
 import unarmoredMovementImage from '@actions/unarmored-movement-image.png';
 import deflectMissilesImage from '@actions/deflect-missiles-image.png';
+import kiFueledAttackImage from '@actions/ki-fueled-attack-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -487,8 +488,19 @@ export default function ActionsScreen() {
   const [throwableItemsOpen, setThrowableItemsOpen] = useState(false);
   const [actionSurgePoints, setActionSurgePoints] = useState<number>(1);
   const [hasAttackedThisTurn, setHasAttackedThisTurn] = useState<boolean>(false);
-  const [currentKiPoints, setCurrentKiPoints] = useState<number>(0);
   const [maxKiPoints, setMaxKiPoints] = useState<number>(0);
+  const [currentKiPoints, setCurrentKiPoints] = useState<number>(0);
+  const [hasUsedKiThisTurn, setHasUsedKiThisTurn] = useState<boolean>(false);
+  const prevKiPointsRef = useRef<number>(currentKiPoints);
+
+  // Set hasUsedKiThisTurn to true when currentKiPoints decreases
+  useEffect(() => {
+    if (currentKiPoints < prevKiPointsRef.current) {
+      setHasUsedKiThisTurn(true);
+    }
+    prevKiPointsRef.current = currentKiPoints;
+  }, [currentKiPoints]);
+
 
   useEffect(() => {
     if (statsData.class?.toLowerCase() === 'monk') {
@@ -1008,6 +1020,7 @@ export default function ActionsScreen() {
     setCurrentReactionsAvailable(1);
     setExtraAttackSpent(true);
     setHasAttackedThisTurn(false);
+    setHasUsedKiThisTurn(false);
 
     // Reset extra attack points for Fighter
     if (statsData.class?.toLowerCase() === 'fighter') {
@@ -1115,7 +1128,13 @@ export default function ActionsScreen() {
       }
       // Check for unarmed strike
       if (item.name.toLowerCase() === 'unarmed strike') {
-        affordable = affordable && hasAttackedThisTurn;
+        // ki-fueled unarmed strike passive
+        if (statsData.level >= 3) {
+          affordable = affordable && (hasAttackedThisTurn || hasUsedKiThisTurn);
+        } else {
+          // unarmed strike default requirement
+          affordable = affordable && hasAttackedThisTurn;
+        }
       }
       // Check for flurry of blows
       if (item.name.toLowerCase() === 'flurry of blows') {
@@ -1124,6 +1143,10 @@ export default function ActionsScreen() {
       // Check for patient defense and step of the wind
       if (item.name.toLowerCase() === 'patient defense' || item.name.toLowerCase() === 'step of the wind') {
         affordable = affordable && currentKiPoints > 0;
+      }
+      // Check for ki-fueled attack
+      if (item.name.toLowerCase() === 'ki-fueled attack') {
+        affordable = affordable && hasUsedKiThisTurn;
       }
 
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
@@ -1803,6 +1826,7 @@ export default function ActionsScreen() {
 
     // Monk
     if (statsData.class?.toLowerCase() === 'monk') {
+      // Unarmed Strike action
       classActions.push({
         id: 'class-unarmed-strike',
         name: 'Unarmed Strike',
@@ -1852,6 +1876,16 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 0, reaction: 1 },
           details: 'When you are hit by a ranged weapon attack, you can use your reaction to deflect it. When you do so, reduce the incoming damage. If damage is reduced to 0, and the missile is small enough to fit in your hand, you catch it. If caught, you can decide to throw it by spending 1 ki point.',
           image: deflectMissilesImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+        // Add Ki-Fueled Attack action
+        classActions.push({
+          id: 'class-ki-fueled-attack',
+          name: 'Ki-Fueled Attack',
+          cost: { actions: 0, bonus: 1 },
+          details: 'If you\'ve spent atleast 1 ki point in your turn, you can make an attack as a bonus action.',
+          image: kiFueledAttackImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2369,6 +2403,192 @@ export default function ActionsScreen() {
     }
   };
 
+  const renderAttackActionDetails = () => {
+    if (!selectedAction) return null;
+    return (
+      <>
+        <Text style={{ fontWeight: 'bold' }}>Melee:</Text>
+        {mainHandWeapon && mainHandWeapon.name !== 'none' ? (
+          <>
+            {/* Attack Roll Row */}
+            <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
+              <MaterialCommunityIcons name="sword" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', gap: 5 }}>
+                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                  {getWeaponAttackBonus(mainHandWeapon) && (
+                    <Text>
+                      +{getWeaponAttackBonus(mainHandWeapon)}
+                    </Text>
+                  )}
+                  {statsData.class?.toLowerCase() === 'monk' ?
+                    <Text>
+                      + ({currentDexModifier} Dex)
+                    </Text>
+                    :
+                    <>
+                      <Text>
+                        +({getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`})
+                      </Text>
+                      {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                        getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                        <Text> or </Text>}
+                      {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+
+                    </>}
+
+                </View>
+                {weaponsProficientIn.includes(mainHandWeapon?.weaponType?.toLowerCase() || '') && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                    <Text>+{proficiencyBonus}</Text>
+                    <Ionicons name="ribbon" size={16} color="black" />
+                  </View>
+                )}
+              </View>
+            </View>
+            {/* Damage Row */}
+            <View style={styles.modalWeaponProperty}>
+              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <Text>
+                  {getWeaponDamage(mainHandWeapon)}
+                </Text>
+                <Text>
+                  {
+                    statsData.class?.toLowerCase() === 'monk' ?
+                      `+ (${currentDexModifier} Dex)` :
+                      <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row' }}>
+                          {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
+                          {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
+                            getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
+                            <Text> or </Text>}
+                          {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
+                        </View>
+                        {statsData.class?.toLowerCase() === 'barbarian' && (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                            <Text>{getRageDamageBonus()} if</Text>
+                            <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                          </View>
+                        )}
+                      </View>
+                  }
+                </Text>
+              </View>
+
+            </View>
+            <View style={styles.modalWeaponProperty}>
+              <Text>Type: </Text>
+              <Text style={{ textTransform: 'capitalize' }}>
+                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
+                  ? weapons.weapons.find(
+                    w => w.items.find(
+                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
+                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase())?.damageType || '—'
+                  : (!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '—')}
+              </Text>
+            </View>
+            <View style={styles.modalWeaponProperty}>
+              <Text>Range: </Text>
+              <Text>
+                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
+                  ? (weapons.weapons.find(
+                    w => w.items.find(
+                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
+                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()) as WeaponItem)?.range || '—'
+                  : '—'}
+              </Text>
+            </View>
+            <View style={styles.modalWeaponProperty}>
+              <Text>Throw Range: </Text>
+              <Text>
+                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
+                  ? weapons.weapons.find(
+                    w => w.items.find(
+                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
+                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase())?.throwRange || '—'
+                  : '—'}
+              </Text>
+            </View>
+            <View style={styles.modalWeaponProperty}>
+              <Text>Properties: </Text>
+              <Text>
+                {mainHandWeapon && mainHandWeapon.name !== 'none'
+                  ? getWeaponProperties(mainHandWeapon).join(', ') || '—'
+                  : '—'}
+                {/* put custom properties here */}
+              </Text>
+            </View>
+            {mainHandWeapon.versatileDamage &&
+              <View style={styles.modalWeaponProperty}>
+                <Text>Versatile: </Text>
+                <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                  <Text>{mainHandWeapon.versatileDamage}</Text>
+                  <MaterialIcons name="sign-language" size={20} color="black" />
+                </View>
+              </View>
+            }
+          </>
+        ) : (
+          // Unarmed Attack
+          <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
+            <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+              <MaterialCommunityIcons name="sword" size={20} color="black" />
+              {/* Attack Roll Row */}
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                <Text>+({currentStrengthModifier} Str) or +({currentDexModifier} Dex)</Text>
+                {isUnarmedStrikeProficient &&
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                    <Text>+{proficiencyBonus}</Text>
+                    <Ionicons name="ribbon" size={16} color="black" />
+                  </View>
+                }
+              </View>
+            </View>
+            {/* Damage Row */}
+            <View style={styles.modalWeaponProperty}>
+              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <Text>
+                  {
+                    statsData.class?.toLowerCase() === 'monk' ?
+                      `${monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + (${currentDexModifier} Dex)` :
+                      `1+ (${currentStrengthModifier} Str)`
+                  }
+                </Text>
+                {statsData.class?.toLowerCase() === 'barbarian' && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                    <Text>{getRageDamageBonus()} if</Text>
+                    <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+
+        )}
+        {selectedAction.name.toLowerCase() === 'attack' && (
+          <>
+            <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Grapple:</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
+                <Text>+(Athle)</Text>
+              </View>
+              <Text style={{ fontSize: 24 }}>{'>'}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+                <View style={styles.enemyDiceContainer}>
+                  <MaterialCommunityIcons name="dice-d20" size={20} color="red" />
+                </View>
+                <Text>+(Athle) or +(Acrob)</Text>
+              </View>
+            </View>
+          </>
+        )}
+      </>
+    );
+  };
 
   // Main Contents
   return (
@@ -3335,185 +3555,9 @@ export default function ActionsScreen() {
 
                     {/* Properties Section */}
                     {/* Melee Weapon Properties Section */}
-                    {(selectedAction.name === 'Attack') &&
-                      <>
-                        <Text style={{ fontWeight: 'bold' }}>Melee:</Text>
-                        {mainHandWeapon && mainHandWeapon.name !== 'none' ? (
-                          <>
-                            {/* Attack Roll Row */}
-                            <View style={[styles.modalWeaponProperty, { padding: 0, paddingHorizontal: 5 }]}>
-                              <MaterialCommunityIcons name="sword" size={20} color="black" />
-                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <View style={{ flexDirection: 'row', gap: 5 }}>
-                                  <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
-                                  {getWeaponAttackBonus(mainHandWeapon) && (
-                                    <Text>
-                                      +{getWeaponAttackBonus(mainHandWeapon)}
-                                    </Text>
-                                  )}
-                                  {statsData.class?.toLowerCase() === 'monk' ?
-                                    <Text>
-                                      + ({currentDexModifier} Dex)
-                                    </Text>
-                                    :
-                                    <>
-                                      <Text>
-                                        +({getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && `${currentStrengthModifier} Str`})
-                                      </Text>
-                                      {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
-                                        getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
-                                        <Text> or </Text>}
-                                      {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
-
-                                    </>}
-
-                                </View>
-                                {weaponsProficientIn.includes(mainHandWeapon?.weaponType?.toLowerCase() || '') && (
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
-                                    <Text>+{proficiencyBonus}</Text>
-                                    <Ionicons name="ribbon" size={16} color="black" />
-                                  </View>
-                                )}
-                              </View>
-                            </View>
-                            {/* Damage Row */}
-                            <View style={styles.modalWeaponProperty}>
-                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
-                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <Text>
-                                  {getWeaponDamage(mainHandWeapon)}
-                                </Text>
-                                <Text>
-                                  {
-                                    statsData.class?.toLowerCase() === 'monk' ?
-                                      `+ (${currentDexModifier} Dex)` :
-                                      <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                        <View style={{ flexDirection: 'row' }}>
-                                          {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") && <Text>+({currentStrengthModifier} Str)</Text>}
-                                          {getWeaponSkillModifiers(mainHandWeapon).includes("Strength") &&
-                                            getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") &&
-                                            <Text> or </Text>}
-                                          {getWeaponSkillModifiers(mainHandWeapon).includes("Dexterity") && <Text>+({currentDexModifier} Dex)</Text>}
-                                        </View>
-                                        {statsData.class?.toLowerCase() === 'barbarian' && (
-                                          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
-                                            <Text>{getRageDamageBonus()} if</Text>
-                                            <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
-                                          </View>
-                                        )}
-                                      </View>
-                                  }
-                                </Text>
-                              </View>
-
-                            </View>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Type: </Text>
-                              <Text style={{ textTransform: 'capitalize' }}>
-                                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
-                                  ? weapons.weapons.find(
-                                    w => w.items.find(
-                                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
-                                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase())?.damageType || '—'
-                                  : (!isArmed && selectedAction.name === 'Attack' ? 'Bludgeoning' : '—')}
-                              </Text>
-                            </View>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Range: </Text>
-                              <Text>
-                                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
-                                  ? (weapons.weapons.find(
-                                    w => w.items.find(
-                                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
-                                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()) as WeaponItem)?.range || '—'
-                                  : '—'}
-                              </Text>
-                            </View>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Throw Range: </Text>
-                              <Text>
-                                {mainHandWeapon && mainHandWeapon.weaponType !== 'none'
-                                  ? weapons.weapons.find(
-                                    w => w.items.find(
-                                      i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase()
-                                    ))?.items.find(i => i.weaponType?.toLowerCase() === mainHandWeapon.weaponType?.toLowerCase())?.throwRange || '—'
-                                  : '—'}
-                              </Text>
-                            </View>
-                            <View style={styles.modalWeaponProperty}>
-                              <Text>Properties: </Text>
-                              <Text>
-                                {mainHandWeapon && mainHandWeapon.name !== 'none'
-                                  ? getWeaponProperties(mainHandWeapon).join(', ') || '—'
-                                  : '—'}
-                                {/* put custom properties here */}
-                              </Text>
-                            </View>
-                            {mainHandWeapon.versatileDamage &&
-                              <View style={styles.modalWeaponProperty}>
-                                <Text>Versatile: </Text>
-                                <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                  <Text>{mainHandWeapon.versatileDamage}</Text>
-                                  <MaterialIcons name="sign-language" size={20} color="black" />
-                                </View>
-                              </View>
-                            }
-                          </>
-                        ) : (
-                          // Unarmed Attack
-                          <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
-                            <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
-                              <MaterialCommunityIcons name="sword" size={20} color="black" />
-                              {/* Attack Roll Row */}
-                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
-                                <Text>+({currentStrengthModifier} Str) or +({currentDexModifier} Dex)</Text>
-                                {isUnarmedStrikeProficient &&
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
-                                    <Text>+{proficiencyBonus}</Text>
-                                    <Ionicons name="ribbon" size={16} color="black" />
-                                  </View>
-                                }
-                              </View>
-                            </View>
-                            {/* Damage Row */}
-                            <View style={styles.modalWeaponProperty}>
-                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
-                              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                                <Text>
-                                  {
-                                    statsData.class?.toLowerCase() === 'monk' ?
-                                      `${monkTable.find(level => level.userLevel === statsData.level)?.martialArts} + (${currentDexModifier} Dex)` :
-                                      `1+ (${currentStrengthModifier} Str)`
-                                  }
-                                </Text>
-                                {statsData.class?.toLowerCase() === 'barbarian' && (
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
-                                    <Text>{getRageDamageBonus()} if</Text>
-                                    <MaterialCommunityIcons name="emoticon-angry" size={16} color="black" />
-                                  </View>
-                                )}
-                              </View>
-                            </View>
-                          </View>
-
-                        )}
-                        <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Grapple:</Text>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
-                          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <MaterialCommunityIcons name="dice-d20" size={20} color="black" />
-                            <Text>+(Athle)</Text>
-                          </View>
-                          <Text style={{ fontSize: 24 }}>{'>'}</Text>
-                          <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <View style={styles.enemyDiceContainer}>
-                              <MaterialCommunityIcons name="dice-d20" size={20} color="red" />
-                            </View>
-                            <Text>+(Athle) or +(Acrob)</Text>
-                          </View>
-                        </View>
-                      </>
-                    }
+                    {selectedAction.name === 'Attack' && (
+                      renderAttackActionDetails()
+                    )}
 
                     {/* Ranged Weapon Properties Section */}
                     {(selectedAction.name === 'Ranged Attack') && (
@@ -3806,6 +3850,10 @@ export default function ActionsScreen() {
                     {/* Monk Unarmed Strike */}
                     {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'unarmed strike' && (
                       <View style={{ flexDirection: 'column', gap: 0, padding: 0 }}>
+                        {/* Ki-fueled unarmed strike passive */}
+                        {statsData.level >= 3 && (
+                          <Text style={{ marginBottom: 10 }}>If you've spent atleast 1 ki point in your turn, you can make an unarmed strike as a bonus action (Ki-fueled attack passive).</Text>
+                        )}
                         <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
                           <MaterialCommunityIcons name="sword" size={20} color="black" />
                           {/* Attack Roll Row */}
@@ -3931,6 +3979,11 @@ export default function ActionsScreen() {
                           </View>
                         </View>
                       </View>
+                    )}
+
+                    {/* Monk Ki-Fueled Attack */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'ki-fueled attack' && (
+                      renderAttackActionDetails()
                     )}
 
                     {/* Modal Buttons */}
