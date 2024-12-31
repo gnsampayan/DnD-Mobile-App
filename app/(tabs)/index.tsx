@@ -100,6 +100,8 @@ import stepOfTheWindImage from '@actions/step-of-the-wind-image.png';
 import unarmoredMovementImage from '@actions/unarmored-movement-image.png';
 import deflectMissilesImage from '@actions/deflect-missiles-image.png';
 import kiFueledAttackImage from '@actions/ki-fueled-attack-image.png';
+import slowFallImage from '@actions/slow-fall-image.png';
+import quickenedHealingImage from '@actions/quickened-healing-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -556,6 +558,8 @@ export default function ActionsScreen() {
         attackPoints = 1;
       }
       setExtraAttackPoints(attackPoints);
+    } else if (statsData.class?.toLowerCase() === 'monk' && statsData.level >= 5) {
+      setExtraAttackPoints(1);
     } else {
       setExtraAttackPoints(0);
     }
@@ -971,6 +975,8 @@ export default function ActionsScreen() {
       const isBarbarianClass = statsData.class?.toLowerCase() === 'barbarian';
       const isBarbarianLevel5Plus = isBarbarianClass && statsData.level >= 5;
       const isFighterClass = statsData.class?.toLowerCase() === 'fighter';
+      const isMonkClass = statsData.class?.toLowerCase() === 'monk';
+      const isMonkLevel5Plus = isMonkClass && statsData.level >= 5;
 
       const canAffordAction =
         currentActionsAvailable >= costActions &&
@@ -991,7 +997,7 @@ export default function ActionsScreen() {
         }
 
         // Disable fighter's extra attack points if action is not attack
-        if (isFighterClass && !isAttack && costActions > 0) {
+        if ((isFighterClass || isMonkLevel5Plus) && !isAttack && costActions > 0) {
           setExtraAttackPoints(0);
         }
 
@@ -1004,7 +1010,7 @@ export default function ActionsScreen() {
         // Allow attack without cost if insufficient resources, but only for barbarians level 5+
         setExtraAttackSpent(true);
         setActionModalVisible(false);
-      } else if (isFighterClass && isAttack && extraAttackPoints > 0) {
+      } else if ((isFighterClass || isMonkLevel5Plus) && isAttack && extraAttackPoints > 0) {
         setExtraAttackPoints(prev => prev - 1);
         setActionModalVisible(false);
       } else {
@@ -1022,7 +1028,7 @@ export default function ActionsScreen() {
     setHasAttackedThisTurn(false);
     setHasUsedKiThisTurn(false);
 
-    // Reset extra attack points for Fighter
+    // Reset extra attack points for Fighter and Monk
     if (statsData.class?.toLowerCase() === 'fighter') {
       let attackPoints = 0;
       if (statsData.level >= 20) {
@@ -1033,6 +1039,8 @@ export default function ActionsScreen() {
         attackPoints = 1;
       }
       setExtraAttackPoints(attackPoints);
+    } else if (statsData.class?.toLowerCase() === 'monk' && statsData.level >= 5) {
+      setExtraAttackPoints(1);
     } else {
       setExtraAttackPoints(0);
     }
@@ -1903,6 +1911,28 @@ export default function ActionsScreen() {
           source: 'class',
         } as ActionBlock);
       }
+      if (statsData.level >= 4) {
+        // Add Slow Fall action
+        classActions.push({
+          id: 'class-slow-fall',
+          name: 'Slow Fall',
+          cost: { actions: 0, bonus: 0, reaction: 1 },
+          details: 'You can use your reaction to fall slowly, taking reduced damage from falling.',
+          image: slowFallImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+        // Add Quickened Healing action
+        classActions.push({
+          id: 'class-quickened-healing',
+          name: 'Quickened Healing',
+          cost: { actions: 1, bonus: 0 },
+          details: 'Harness your ki to heal yourself.',
+          image: quickenedHealingImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
       if (statsData.level >= 9) {
         // Add Unarmored Movement passive
         classActions.push({
@@ -2699,6 +2729,19 @@ export default function ActionsScreen() {
     }
   };
 
+  const kiCost = (action: string) => {
+    switch (action.toLowerCase()) {
+      case 'quickened healing':
+        return 2;
+      case 'flurry of blows':
+      case 'patient defense':
+      case 'step of the wind':
+        return 1;
+      default:
+        return 0;
+    }
+  };
+
   // Main Contents
   return (
     <View style={styles.container}>
@@ -3093,8 +3136,8 @@ export default function ActionsScreen() {
             </View>
           )}
 
-          {/* Show if user class is Fighter */}
-          {statsData.class?.toLowerCase() === 'fighter' && (
+          {/* Show if user class is Fighter or Monk and level >= 5 */}
+          {(statsData.class?.toLowerCase() === 'fighter' || statsData.class?.toLowerCase() === 'monk') && (
             <>
               {/* Show extra attack icon if statsData.level >= 5 */}
               {statsData.level >= 5 && (
@@ -3590,10 +3633,11 @@ export default function ActionsScreen() {
                           {/* If Step of the Wind is selected, show this text */}
                           {(selectedAction.name.toLowerCase() === 'flurry of blows' ||
                             selectedAction.name.toLowerCase() === 'patient defense' ||
-                            selectedAction.name.toLowerCase() === 'step of the wind') && (
+                            selectedAction.name.toLowerCase() === 'step of the wind' ||
+                            selectedAction.name.toLowerCase() === 'quickened healing') && (
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text style={{ color: 'black' }}>
-                                  , 1
+                                  , {kiCost(selectedAction.name)}
                                 </Text>
                                 <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
                               </View>
@@ -4116,6 +4160,41 @@ export default function ActionsScreen() {
                     {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'ki-fueled attack' && (
                       renderAttackActionDetails()
                     )}
+
+                    {/* Monk Slow Fall */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'slow fall' && (
+                      <>
+                        <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                          <View style={{ flexDirection: 'row', width: 20 }}>
+                            <View style={{ width: 10, overflow: 'hidden' }}>
+                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="black" />
+                            </View>
+                            <View style={{ width: 10, overflow: 'hidden', transform: [{ scaleX: -1 }] }}>
+                              <MaterialCommunityIcons name="skull-crossbones" size={20} color="rgba(0,0,0,0.2)" />
+                            </View>
+                          </View>
+                          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                            <Text>{statsData.level * 5} fall dmg reduction</Text>
+                          </View>
+                        </View>
+                      </>
+                    )}
+
+                    {/* Monk Quickened Healing */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'quickened healing' && (
+                      <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10 }]}>
+                        <MaterialCommunityIcons name="heart-plus" size={20} color="black" />
+                        <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                          <Text>{monkTable.find(level => level.userLevel === statsData.level)?.martialArts}</Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.1)', padding: 5, borderRadius: 5 }}>
+                            <Text>+{proficiencyBonus}</Text>
+                            <Ionicons name="ribbon" size={16} color="black" />
+                          </View>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Add MORE ACTIONS HERE */}
 
                     {/* Modal Buttons */}
                     <View style={[styles.modalButtons, { flexDirection: 'row', gap: 10 }]}>
