@@ -102,6 +102,7 @@ import deflectMissilesImage from '@actions/deflect-missiles-image.png';
 import kiFueledAttackImage from '@actions/ki-fueled-attack-image.png';
 import slowFallImage from '@actions/slow-fall-image.png';
 import quickenedHealingImage from '@actions/quickened-healing-image.png';
+import stunningStrikeImage from '@actions/stunning-strike-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -1049,9 +1050,12 @@ export default function ActionsScreen() {
   const windowWidth = Dimensions.get('window').width;
   const itemWidth = (windowWidth - (30 + (numColumns - 1) * 10)) / numColumns; // 20 for horizontal padding, 10 for gap between items
 
-  // Render Action Blocks
-  const renderActionBlocks = ({ item }: { item: ActionBlock | null }) => {
+  const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
+  const offHandWeaponEquipped = offHandWeapon && offHandWeapon.name.toLowerCase() !== 'none';
+
+  const checkIfActionIsAffordable = (item: ActionBlock) => {
     if (item) {
+
       let affordable = currentActionsAvailable >= item.cost.actions &&
         currentBonusActionsAvailable >= item.cost.bonus &&
         (item.cost.reaction !== undefined ? currentReactionsAvailable >= item.cost.reaction : true);
@@ -1148,19 +1152,41 @@ export default function ActionsScreen() {
       if (item.name.toLowerCase() === 'flurry of blows') {
         affordable = affordable && hasAttackedThisTurn && currentKiPoints > 0;
       }
-      // Check for patient defense and step of the wind
-      if (item.name.toLowerCase() === 'patient defense' || item.name.toLowerCase() === 'step of the wind') {
+      // Check for patient defense and step of the wind and stunning strike
+      if (
+        item.name.toLowerCase() === 'patient defense' ||
+        item.name.toLowerCase() === 'step of the wind' ||
+        item.name.toLowerCase() === 'stunning strike'
+      ) {
         affordable = affordable && currentKiPoints > 0;
       }
       // Check for ki-fueled attack
       if (item.name.toLowerCase() === 'ki-fueled attack') {
         affordable = affordable && hasUsedKiThisTurn;
       }
+      // Check for Quickened Healing
+      if (item.name.toLowerCase() === 'quickened healing') {
+        affordable = affordable && currentKiPoints > 1;
+      }
+      // Check for Offhand Attack
+      if (item.name.toLowerCase() === 'offhand attack') {
+        affordable = affordable && offHandWeaponEquipped !== null && offHandWeaponEquipped !== undefined;
+      }
+      // Check for Ranged Attack
+      if (item.name.toLowerCase() === 'ranged attack') {
+        affordable = affordable && rangedHandWeaponEquipped !== null && rangedHandWeaponEquipped !== undefined;
+      }
+      return affordable;
+    }
+    return false;
+  };
 
+  // Render Action Blocks
+  const renderActionBlocks = ({ item }: { item: ActionBlock | null }) => {
+    if (item) {
+      const affordable = checkIfActionIsAffordable(item);
       const isRangedAttack = item.name.toLowerCase().includes('ranged');
       const isOffhandAttack = item.name.toLowerCase().includes('offhand');
-      const rangedHandWeaponEquipped = rangedHandWeapon && rangedHandWeapon.name.toLowerCase() !== 'none';
-      const offHandWeaponEquipped = offHandWeapon && offHandWeapon.name.toLowerCase() !== 'none';
 
       return (
         <ImageBackground
@@ -1190,7 +1216,7 @@ export default function ActionsScreen() {
               setSelectedAction(item);
               setActionModalVisible(true);
             }}
-            disabled={!affordable || (isRangedAttack && !rangedHandWeaponEquipped) || (isOffhandAttack && !offHandWeaponEquipped)}
+          // disabled={!affordable || (isRangedAttack && !rangedHandWeaponEquipped) || (isOffhandAttack && !offHandWeaponEquipped)}
           >
             <View style={{
               flex: 1,
@@ -1929,6 +1955,18 @@ export default function ActionsScreen() {
           cost: { actions: 1, bonus: 0 },
           details: 'Harness your ki to heal yourself.',
           image: quickenedHealingImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 5) {
+        // Add Stunning Strike action
+        classActions.push({
+          id: 'class-stunning-strike',
+          name: 'Stunning Strike',
+          cost: { actions: 0, bonus: 0 },
+          details: 'Starting at 5th level, you can interfere with the flow of ki in an opponent\'s body. When you hit another creature with a melee attack, you can spend 1 ki point to attempt a stunning strike. The target must succeed on a Constitution saving throw or be stunned until the end of your next turn.',
+          image: stunningStrikeImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2736,10 +2774,36 @@ export default function ActionsScreen() {
       case 'flurry of blows':
       case 'patient defense':
       case 'step of the wind':
+      case 'stunning strike':
         return 1;
       default:
         return 0;
     }
+  };
+
+  const handleNewTurn = () => {
+    if (counterEnabled) {
+      setTurnsDone(turnsDone + 1);
+    }
+    if (
+      statsData.class?.toLowerCase() === 'cleric' &&
+      (
+        subclass?.toLowerCase() === 'death' ||
+        subclass?.toLowerCase() === 'forge' ||
+        subclass?.toLowerCase() === 'life' ||
+        subclass?.toLowerCase() === 'nature' ||
+        subclass?.toLowerCase() === 'order'
+      ) && statsData.level >= 8
+    ) {
+      setDevineStrikeUsed(false);
+    }
+    if (subclass?.toLowerCase() === 'grave' && statsData.level >= 17) {
+      setKeeperOfSoulsUsed(false);
+    }
+    if (subclass?.toLowerCase() === 'order' && statsData.level >= 17) {
+      setOrdersWrathUsed(false);
+    }
+    beginTurn();
   };
 
   // Main Contents
@@ -3176,7 +3240,25 @@ export default function ActionsScreen() {
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                 onPress={() => {
-                  Alert.alert('Ki Points', 'You can use your Ki Points to fuel your Ki Powers.');
+                  // Focused Aim Feature
+                  if (statsData.level >= 5) {
+                    Alert.alert(
+                      'Ki Points',
+                      'You can use your Ki Points to fuel your Ki Powers.\n\nFocused Aim:\nWhen you miss an attack roll, you can spend key points (up to 3) to increase your attack roll by 2 per Ki point used.',
+                      [
+                        {
+                          text: '-1 Ki',
+                          onPress: () => setCurrentKiPoints(prev => Math.max(0, prev - 1))
+                        },
+                        {
+                          text: 'Cancel',
+                          style: 'cancel'
+                        }
+                      ]
+                    );
+                  } else {
+                    Alert.alert('Ki Points', 'You can use your Ki Points to fuel your Ki Powers.');
+                  }
                 }}>
                 <MaterialCommunityIcons name="yin-yang" size={20} color="white" style={{ opacity: currentKiPoints === 0 ? 0.2 : 1 }} />
                 <View style={styles.headerTextBox}>
@@ -3468,28 +3550,7 @@ export default function ActionsScreen() {
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
           <TouchableOpacity style={styles.footerButton}
             onPress={() => {
-              if (counterEnabled) {
-                setTurnsDone(turnsDone + 1);
-              }
-              if (
-                statsData.class?.toLowerCase() === 'cleric' &&
-                (
-                  subclass?.toLowerCase() === 'death' ||
-                  subclass?.toLowerCase() === 'forge' ||
-                  subclass?.toLowerCase() === 'life' ||
-                  subclass?.toLowerCase() === 'nature' ||
-                  subclass?.toLowerCase() === 'order'
-                ) && statsData.level >= 8
-              ) {
-                setDevineStrikeUsed(false);
-              }
-              if (subclass?.toLowerCase() === 'grave' && statsData.level >= 17) {
-                setKeeperOfSoulsUsed(false);
-              }
-              if (subclass?.toLowerCase() === 'order' && statsData.level >= 17) {
-                setOrdersWrathUsed(false);
-              }
-              beginTurn();
+              handleNewTurn();
             }}
           >
             <Text style={styles.footerButtonText}>New Turn</Text>
@@ -3631,13 +3692,16 @@ export default function ActionsScreen() {
                           {/* If Flurry of Blows is selected, show this text */}
                           {/* If Patient Defense is selected, show this text */}
                           {/* If Step of the Wind is selected, show this text */}
-                          {(selectedAction.name.toLowerCase() === 'flurry of blows' ||
+                          {(
+                            selectedAction.name.toLowerCase() === 'flurry of blows' ||
                             selectedAction.name.toLowerCase() === 'patient defense' ||
                             selectedAction.name.toLowerCase() === 'step of the wind' ||
-                            selectedAction.name.toLowerCase() === 'quickened healing') && (
+                            selectedAction.name.toLowerCase() === 'quickened healing' ||
+                            selectedAction.name.toLowerCase() === 'stunning strike'
+                          ) && (
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text style={{ color: 'black' }}>
-                                  , {kiCost(selectedAction.name)}
+                                  {selectedAction.name.toLowerCase() !== 'stunning strike' ? ',' : ''} {kiCost(selectedAction.name)}
                                 </Text>
                                 <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
                               </View>
@@ -3687,7 +3751,8 @@ export default function ActionsScreen() {
                         {(
                           selectedAction.name === 'Reaction' ||
                           selectedAction.name === 'Deflect Missiles' ||
-                          selectedAction.name === 'Hellish Rebuke'
+                          selectedAction.name === 'Hellish Rebuke' ||
+                          selectedAction.name === 'Stunning Strike'
                         ) && (
                             <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
                               (Conditional)
@@ -4194,14 +4259,36 @@ export default function ActionsScreen() {
                       </View>
                     )}
 
-                    {/* Add MORE ACTIONS HERE */}
+                    {/* Monk Stunning Strike */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'stunning strike' && (
+                      <View style={[styles.modalWeaponProperty, { padding: 0, margin: 0, marginLeft: 5, paddingRight: 10, justifyContent: 'center', alignItems: 'center', gap: 5 }]}>
+                        <Text>DC {8 + proficiencyBonus + currentWisdomModifier}</Text>
+                        <MaterialCommunityIcons name="skull-scan" size={20} color="black" />
+                        <Text style={{ fontSize: 24 }}>{'>'}</Text>
+                        <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                          <MaterialCommunityIcons name="dice-d20" size={20} color="red" style={{ borderWidth: 1, borderColor: 'red', borderRadius: 20, padding: 1 }} />
+                          <Text>+(Con)</Text>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* ADD MORE HERE */}
 
                     {/* Modal Buttons */}
                     <View style={[styles.modalButtons, { flexDirection: 'row', gap: 10 }]}>
                       {/* short rest button -- only show if action is rest */}
                       {selectedAction.name.toLowerCase() === 'rest' && (
                         <TouchableOpacity
-                          style={[styles.modalButtonCommit, { flexDirection: 'row', gap: 5, justifyContent: 'center', alignItems: 'center' }]}
+                          style={[
+                            styles.modalButtonCommit,
+                            {
+                              flexDirection: 'row',
+                              gap: 5,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              opacity: checkIfActionIsAffordable(selectedAction) ? 1 : 0.2
+                            }
+                          ]}
                           onPress={() => {
                             Alert.alert('Short Rest', `Roll 1d${hitDice} + (${calculateModifier(statsData.abilities.find(a => a.name === 'Constitution')?.value || 10)} Con) and add the result to your hit points.`);
                             setActionModalVisible(false);
@@ -4235,7 +4322,9 @@ export default function ActionsScreen() {
                               setCurrentKiPoints(maxKiPoints);
                             }
                             // add more conditions here
-                          }}>
+                          }}
+                          disabled={!checkIfActionIsAffordable(selectedAction)}
+                        >
                           <MaterialCommunityIcons name="sleep" size={16} color="black" />
                           <Text>Short Rest</Text>
                         </TouchableOpacity>
@@ -4259,7 +4348,13 @@ export default function ActionsScreen() {
                       {/* Throw Attack Button --- Deflect Missiles Monk Action */}
                       {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'deflect missiles' && (
                         <TouchableOpacity
-                          style={[styles.modalButtonCommit, { flexDirection: 'row', gap: 5, justifyContent: 'center', alignItems: 'center', opacity: currentKiPoints === 0 ? 0.2 : 1 }]}
+                          style={[styles.modalButtonCommit, {
+                            flexDirection: 'row',
+                            gap: 5,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            opacity: (checkIfActionIsAffordable(selectedAction) && currentKiPoints > 0) ? 1 : 0.2
+                          }]}
                           onPress={() => {
                             if (currentKiPoints > 0) {
                               setCurrentKiPoints(prev => Math.max(0, prev - 1));
@@ -4267,7 +4362,7 @@ export default function ActionsScreen() {
                             }
                             setActionModalVisible(false);
                           }}
-                          disabled={currentKiPoints === 0}
+                          disabled={!checkIfActionIsAffordable(selectedAction) || currentKiPoints === 0}
                         >
                           <Text>Def & Thr</Text>
                           <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
@@ -4278,25 +4373,9 @@ export default function ActionsScreen() {
                       <TouchableOpacity
                         style={[
                           styles.modalButtonCommit,
-                          selectedAction &&
-                          (selectedAction.name.toLowerCase() === 'attack' && (!extraAttackSpent || extraAttackPoints > 0) ?
-                            { opacity: 1 } :
-                            (currentActionsAvailable < selectedAction.cost.actions ||
-                              currentBonusActionsAvailable < selectedAction.cost.bonus ||
-                              selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction ||
-                              (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
-                              (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
-                              (selectedAction.name.toLowerCase() === 'breath weapon' && breathWeaponSpent) ||
-                              (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
-                              (selectedAction.name.toLowerCase() === 'rage' && currentRages < 1) ||
-                              (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent) ||
-                              (selectedAction.name.toLowerCase() === 'bardic inspiration' && currentBardicInspirationPoints < 1) ||
-                              (selectedAction.name.toLowerCase() === 'channel divinity' && (currentChannelDivinityPoints < 1 || knownChannelDivinityValue === '')) ||
-                              (selectedAction.name.toLowerCase() === 'throw' && !throwableItemValue)
-                              // add more conditions here
-                            )
-                            && { opacity: 0.2 }
-                          )
+                          selectedAction && {
+                            opacity: checkIfActionIsAffordable(selectedAction) ? 1 : 0.2
+                          }
                         ]}
                         onPress={() => {
                           switch (selectedAction.name.toLowerCase()) {
@@ -4376,8 +4455,6 @@ export default function ActionsScreen() {
                               if (statsData.class?.toLowerCase() === 'monk') {
                                 setCurrentKiPoints(maxKiPoints);
                               }
-                              // add more conditions here
-                              // add more conditions here
                               break;
                             // end of rest case -- visual guide
 
@@ -4448,30 +4525,18 @@ export default function ActionsScreen() {
                             case 'step of the wind':
                               setCurrentKiPoints(prev => Math.max(0, prev - 1));
                               break;
+                            case 'quickened healing':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 2));
+                              break;
+                            case 'stunning strike':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 1));
+                              break;
                           }
 
                           // Default commit action
                           commitAction();
                         }}
-                        disabled={
-                          !selectedAction ||
-                          (selectedAction.name.toLowerCase() === 'attack' && extraAttackSpent && extraAttackPoints === 0 && currentActionsAvailable === 0) ||
-                          (selectedAction.name.toLowerCase() !== 'attack' && (
-                            currentActionsAvailable < selectedAction.cost.actions ||
-                            currentBonusActionsAvailable < selectedAction.cost.bonus ||
-                            (selectedAction.cost.reaction !== undefined && currentReactionsAvailable < selectedAction.cost.reaction) ||
-                            (selectedAction.name.toLowerCase() === 'hellish rebuke' && hellishRebukeSpent) ||
-                            (selectedAction.name.toLowerCase() === 'darkness' && darknessSpent) ||
-                            (selectedAction.name.toLowerCase() === 'breath weapon' && breathWeaponSpent) ||
-                            (selectedAction.name.toLowerCase() === 'infuse item' && infuseItemSpent) ||
-                            (selectedAction.name.toLowerCase() === 'rage' && currentRages < 1) ||
-                            (selectedAction.name.toLowerCase() === 'consult the spirits' && consultTheSpiritsSpent) ||
-                            (selectedAction.name.toLowerCase() === 'bardic inspiration' && currentBardicInspirationPoints < 1) ||
-                            (selectedAction.name.toLowerCase() === 'channel divinity' && currentChannelDivinityPoints < 1) ||
-                            (selectedAction.name.toLowerCase() === 'throw' && !throwableItemValue)
-                            // add more conditions here
-                          ))
-                        }
+                        disabled={!selectedAction || !checkIfActionIsAffordable(selectedAction)}
                       >
                         <View style={styles.modalButtonTextContainer}>
 
