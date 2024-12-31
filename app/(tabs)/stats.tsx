@@ -696,6 +696,145 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         setAbilityAllocationsSaveVisible(false);
     }
 
+    const renderLevelModal = () => {
+        // Find the next level that needs HP input
+        const nextLevelToFill = Array.from({ length: statsData.level - 1 }, (_, i) => i + 2)
+            .find(lvl => hpIncreases[lvl] === undefined);
+
+        if (!nextLevelToFill) {
+            return (
+                <>
+                    <View style={[styles.modalHeader, { flexDirection: 'column', alignItems: 'center', gap: 10, marginTop: 20 }]}>
+                        <Text style={styles.modalTitle}>PC Level: {level}</Text>
+                        <Text>All levels have HP values assigned</Text>
+                    </View>
+                    <View style={{ position: 'absolute', bottom: 60, width: '100%', marginLeft: 20 }}>
+                        <Button
+                            title="Close"
+                            color='black'
+                            onPress={() => setLevelModalVisible(false)}
+                        />
+                    </View>
+                </>
+            );
+        }
+
+        return (
+            <>
+                <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>PC Level: {level}</Text>
+                </View>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                    }}
+                >
+                    <View
+                        key={nextLevelToFill}
+                        style={{ flexDirection: 'column', justifyContent: 'flex-start' }}
+                    >
+                        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                            <View style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
+                                <Text style={styles.modalInputLabel}>Enter Rolled Hit Dice for Level {nextLevelToFill}:</Text>
+                                <TextInput
+                                    style={[styles.modalInput, {
+                                        width: 150,
+                                        height: 80,
+                                        textAlign: 'center',
+                                        justifyContent: 'flex-end',
+                                        alignItems: 'center',
+                                        fontSize: 40
+                                    }]}
+                                    placeholder="1"
+                                    keyboardType="number-pad"
+                                    placeholderTextColor="gray"
+                                    onChangeText={(text) => {
+                                        const number = parseInt(text);
+                                        if (
+                                            !isNaN(number) &&
+                                            number >= 1 &&
+                                            number <= hitDice
+                                        ) {
+                                            setInputValues((prev) => ({ ...prev, [nextLevelToFill]: text }));
+                                        } else if (text === '') {
+                                            setInputValues((prev) => ({ ...prev, [nextLevelToFill]: '' }));
+                                        } else {
+                                            Alert.alert(
+                                                'Invalid input',
+                                                `Please enter a number between 1 and ${hitDice}.`
+                                            );
+                                        }
+                                    }}
+                                    value={inputValues[nextLevelToFill] || ''}
+                                />
+                                <View style={{ flexDirection: 'column' }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                                        <Text>Hit Dice:</Text>
+                                        <Text style={{ fontSize: 20 }}>{hitDice}</Text>
+                                        <Ionicons name="dice" size={20} color="black" />
+                                    </View>
+                                    <Text style={styles.modalInputLabel}>
+                                        Bonus HP: + {constitutionModifier} (Con)
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                        {inputValues[nextLevelToFill] &&
+                            <TouchableOpacity
+                                style={[styles.saveButton, {
+                                    marginTop: 20,
+                                    flexDirection: 'row',
+                                    gap: 10,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                    borderRadius: 4,
+                                    backgroundColor: 'gold',
+                                    borderWidth: 1,
+                                    borderColor: 'black',
+                                }]}
+                                onPress={() => {
+                                    const number = parseInt(inputValues[nextLevelToFill]);
+                                    if (
+                                        !isNaN(number) &&
+                                        number >= 1 &&
+                                        number <= hitDice
+                                    ) {
+                                        const totalIncrease = number + constitutionModifier;
+                                        updateStatsData({
+                                            ...statsData,
+                                            hpIncreases: {
+                                                ...(hpIncreases || {}),
+                                                [nextLevelToFill]: totalIncrease,
+                                            },
+                                        });
+                                        setInputValues((prev) => ({ ...prev, [nextLevelToFill]: '' }));
+                                    } else {
+                                        Alert.alert(
+                                            'Invalid input',
+                                            `Please enter a number between 1 and ${hitDice}.`
+                                        );
+                                    }
+                                }}
+                            >
+                                <Ionicons name="save" color="black" size={20} />
+                                <Text style={[styles.saveButtonText, { color: 'black' }]}>Save</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                </View>
+                <View style={{ position: 'absolute', bottom: 60, width: '100%', marginLeft: 20 }}>
+                    <Button
+                        title="Close"
+                        color='black'
+                        onPress={() => setLevelModalVisible(false)}
+                    />
+                </View>
+            </>
+        );
+    }
+
 
     return (
         <View style={styles.container}>
@@ -944,107 +1083,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={styles.modalContainer}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Level: {level}</Text>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: 'column',
-                                justifyContent: 'flex-start',
-                            }}
-                        >
-                            {Array.from({ length: statsData.level - 1 }, (_, index) => {
-                                const lvl = index + 2;
-                                const hasIncrease = hpIncreases[lvl] !== undefined;
-                                return (
-                                    <View
-                                        key={lvl}
-                                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}
-                                    >
-                                        <Text style={styles.modalInputLabel}>Level {lvl} Increase:</Text>
-                                        {!hasIncrease ? (
-                                            <>
-                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                                    <TextInput
-                                                        style={[styles.modalInput, { width: 50 }]}
-                                                        placeholder="1"
-                                                        keyboardType="number-pad"
-                                                        placeholderTextColor="gray"
-                                                        onChangeText={(text) => {
-                                                            const number = parseInt(text);
-                                                            if (
-                                                                !isNaN(number) &&
-                                                                number >= 1 &&
-                                                                number <= hitDice
-                                                            ) {
-                                                                setInputValues((prev) => ({ ...prev, [lvl]: text }));
-                                                            } else if (text === '') {
-                                                                setInputValues((prev) => ({ ...prev, [lvl]: '' }));
-                                                            } else {
-                                                                Alert.alert(
-                                                                    'Invalid input',
-                                                                    `Please enter a number between 1 and ${hitDice}.`
-                                                                );
-                                                            }
-                                                        }}
-                                                        value={inputValues[lvl] || ''}
-                                                    />
-                                                    <Text style={styles.modalInputLabel}>
-                                                        {' '}
-                                                        + {constitutionModifier} (Con)
-                                                    </Text>
-                                                </View>
-
-                                                <TouchableOpacity
-                                                    style={styles.saveButton}
-                                                    onPress={() => {
-                                                        const number = parseInt(inputValues[lvl]);
-                                                        if (
-                                                            !isNaN(number) &&
-                                                            number >= 1 &&
-                                                            number <= hitDice
-                                                        ) {
-                                                            const totalIncrease = number + constitutionModifier;
-                                                            updateStatsData({
-                                                                ...statsData,
-                                                                hpIncreases: {
-                                                                    ...(hpIncreases || {}),
-                                                                    [lvl]: totalIncrease,
-                                                                },
-                                                            });
-                                                            setInputValues((prev) => ({ ...prev, [lvl]: '' }));
-                                                        } else {
-                                                            Alert.alert(
-                                                                'Invalid input',
-                                                                `Please enter a number between 1 and ${hitDice}.`
-                                                            );
-                                                        }
-                                                    }}
-                                                >
-                                                    <Text style={styles.saveButtonText}>Save</Text>
-                                                </TouchableOpacity>
-                                            </>
-                                        ) : (
-                                            <Text style={[styles.modalText, { color: 'black' }]}>
-                                                {hpIncreases[lvl]} (including +{constitutionModifier} Con)
-                                            </Text>
-                                        )}
-                                        {hasIncrease && (
-                                            <Text style={styles.modalInputLabel}>
-                                                Total HP Added: {hpIncreases[lvl]}
-                                            </Text>
-                                        )}
-                                    </View>
-                                );
-                            })}
-                        </View>
-                        <View>
-                            <Button
-                                title="Close"
-                                color='black'
-                                onPress={() => setLevelModalVisible(false)}
-                            />
-                        </View>
+                        {renderLevelModal()}
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
