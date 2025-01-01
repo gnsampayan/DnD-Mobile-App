@@ -30,6 +30,7 @@ import warlockTable from '../data/class-tables/warlock/warlockTable.json';
 import wizardTable from '../data/class-tables/wizard/wizardTable.json';
 
 import { CharacterContext, CharacterContextProps } from '../../context/equipmentActionsContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface CharacterStatsScreenProps {
     onBack: () => void;
@@ -339,11 +340,9 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         const currentLevelAllocations = allocationsPerLevel[level];
         const hasAllocationsForCurrentLevel = currentLevelAllocations && Object.keys(currentLevelAllocations).length > 0;
 
-        // Only show save button if points were allocated this level and now at 0
+        // Only show save button if points were allocated this level, available points are 0, and abilityEditFinished is false
         if (availablePoints === 0 && hasAllocationsForCurrentLevel) {
             setAbilityAllocationsSaveVisible(true);
-        } else {
-            setAbilityAllocationsSaveVisible(false);
         }
     }, [statsData.level, statsData.abilities, allocationsPerLevel, level]);
 
@@ -379,7 +378,10 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
         // Check if ability points available is less than point cost
         if (availableAbilityPoints < pointCost) {
-            Alert.alert('Not Enough Ability Points', 'Gain XP to level up and get more ability points.');
+            Alert.alert(
+                'Not Enough Ability Points',
+                `You need ${pointCost} point${pointCost > 1 ? 's' : ''} to increase ${selectedAbility.name} from ${currentAbility.value} to ${currentAbility.value + 1}. You currently have ${availableAbilityPoints} point${availableAbilityPoints !== 1 ? 's' : ''}.`
+            );
             return;
         }
 
@@ -962,7 +964,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                                 saveAbilityAllocations()
                                 setAbilityModalVisible(false)
                                 setSelectedAbility(null)
-
                             }}
                             style={styles.abilitySaveButton}>
                             <Ionicons name="save" size={20} color="white" />
