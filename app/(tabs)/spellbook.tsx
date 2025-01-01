@@ -506,12 +506,17 @@ export default function SpellbookScreen() {
                 });
             }
 
-            // Assign Arcane Initiate cantrips to specific slots without duplication
+            // Handle Arcane Initiate cantrips
             if (arcaneInitiateEnabled && arcaneInitiateCantrips?.length > 0) {
-                for (let i = 0; i < arcaneInitiateCantrips.length; i++) {
-                    // Assign to the beginning slots
-                    if (!initialSlots[i]) {
-                        initialSlots[i] = arcaneInitiateCantrips[i];
+                for (const cantrip of arcaneInitiateCantrips) {
+                    if (!initialSlots.includes(cantrip)) {
+                        // If cantrip is new, add it to first empty slot or append
+                        const nextEmptySlot = initialSlots.findIndex(slot => slot === null);
+                        if (nextEmptySlot !== -1) {
+                            initialSlots[nextEmptySlot] = cantrip;
+                        } else {
+                            initialSlots.push(cantrip);
+                        }
                     }
                 }
             }

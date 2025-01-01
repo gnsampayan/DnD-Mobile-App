@@ -12,7 +12,7 @@ export default function TabLayout() {
   // Use context for statsData
   const { isSpellCaster, statsData } = useContext(StatsDataContext) as {
     isSpellCaster: boolean;
-    statsData: { class?: string; level?: number };
+    statsData: { class?: string; level?: number; };
   };
 
   // Check if user is a paladin or ranger below level 2

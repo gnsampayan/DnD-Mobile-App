@@ -3484,7 +3484,7 @@ export default function ActionsScreen() {
           </View>
           :
           <View style={[styles.subheader, { padding: 10, borderColor: 'rgba(255, 255, 255, 0.1)' }]}>
-            <Text style={[styles.subheaderText, { color: 'white', textAlign: 'center' }]}>Please create a character</Text>
+            <Text style={[styles.subheaderText, { color: 'white', textAlign: 'center' }]}>Please Create a Character</Text>
           </View>
         }
 
@@ -3548,12 +3548,14 @@ export default function ActionsScreen() {
         </View>
         {/* Next Turn Button */}
         <ImageBackground source={endActionImageTyped} style={styles.footerButtonContainer} resizeMode="cover" >
-          <TouchableOpacity style={styles.footerButton}
+          <TouchableOpacity
+            style={[styles.footerButton, { gap: 5 }]}
             onPress={() => {
               handleNewTurn();
             }}
           >
-            <Text style={styles.footerButtonText}>New Turn</Text>
+            <MaterialCommunityIcons name='arrow-right-bold-circle-outline' size={22} color={'white'} />
+            <Text style={styles.footerButtonText}>Next Turn</Text>
           </TouchableOpacity>
         </ImageBackground>
 

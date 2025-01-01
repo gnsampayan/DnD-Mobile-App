@@ -109,7 +109,7 @@ import mercyData from '../data/class-tables/monk/subclass/mercy.json';
 import openHandData from '../data/class-tables/monk/subclass/openHand.json';
 import shadowData from '../data/class-tables/monk/subclass/shadow.json';
 import sunSoulData from '../data/class-tables/monk/subclass/sunSoul.json';
-
+import featuresImage from '@images/features-image.png';
 
 import defaultItemsData from '../data/defaultItems.json';
 import bedrollImage from '@items/default-item-bedroll.png';
@@ -190,6 +190,7 @@ import flailImage from '@weapons/flail.png';
 import netImage from '@weapons/net.png';
 import battleaxeImage from '@weapons/battleaxe.png';
 import blowgunImage from '@weapons/blowgun.png';
+import CantripSlotsContext from '@/context/cantripSlotsContext';
 
 const weaponImages = {
   "spear": spearImage,
@@ -482,6 +483,56 @@ export default function MeScreen() {
   const [martialArchetypeValue, setMartialArchetypeValue] = useState<string | null>(null);
   const [monasticTraditionOpen, setMonasticTraditionOpen] = useState(false);
   const [monasticTraditionValue, setMonasticTraditionValue] = useState<string | null>(null);
+  const [allFeatsModalVisible, setAllFeatsModalVisible] = useState(false);
+  const [expandedFeat, setExpandedFeat] = useState<string | null>(null);
+  const [pinnedFeats, setPinnedFeats] = useState<string[]>([]);
+  const PINNED_FEATS_SLOT_KEY = '@pinned_feats_slot';
+  const NEW_CHARACTER_CREATED_KEY = '@new_character_created';
+  const [newCharacterCreated, setNewCharacterCreated] = useState(false);
+
+  const { cantripSlotsData } = useContext(CantripSlotsContext);
+
+  // save new character created to AsyncStorage
+  useEffect(() => {
+    const saveNewCharacterCreated = async () => {
+      try {
+        await AsyncStorage.setItem(NEW_CHARACTER_CREATED_KEY, newCharacterCreated.toString());
+      } catch (error) {
+        console.error('Failed to save new character created status:', error);
+      }
+    };
+    saveNewCharacterCreated();
+  }, [newCharacterCreated]);
+
+  // Load pinned feats from AsyncStorage
+  useEffect(() => {
+    AsyncStorage.getItem(PINNED_FEATS_SLOT_KEY).then((value) => {
+      if (value && !newCharacterCreated) {
+        setPinnedFeats(JSON.parse(value));
+      } else {
+        // By default, pin all race and class features
+        const allFeats = [
+          ...raceBonuses.flatMap(race => Object.keys(race.features)),
+          ...Object.values(classFeaturesMap).flatMap(classFeatures =>
+            classFeatures.map((feature: any) => feature.name)
+          )
+        ];
+        setPinnedFeats(allFeats);
+      }
+    });
+  }, [newCharacterCreated]);
+
+  // Save pinned feats to AsyncStorage when they change
+  useEffect(() => {
+    const savePinnedFeats = async () => {
+      try {
+        await AsyncStorage.setItem(PINNED_FEATS_SLOT_KEY, JSON.stringify(pinnedFeats));
+      } catch (error) {
+        console.error('Failed to save pinned feats:', error);
+      }
+    };
+    savePinnedFeats();
+  }, [pinnedFeats]);
 
   // Load player name from AsyncStorage
   useEffect(() => {
@@ -732,6 +783,7 @@ export default function MeScreen() {
     setArcaneMasteryValue2(null);
     setArcaneMasteryValue3(null);
     setArcaneMasteryValue4(null);
+    setUnusedSkillPoints(0);
 
     // Reset equipment actions context
     resetEquipmentActionsContext();
@@ -1005,7 +1057,12 @@ export default function MeScreen() {
     );
   };
 
-  const renderClassFeatures = (isList?: boolean, specificFeature?: string) => {
+  const renderClassFeatures = (
+    isList?: boolean,
+    specificFeature?: string | null,
+    textColor?: string,
+    insideModal?: boolean
+  ) => {
     if (!statsData.class) {
       return <Text style={{ color: 'lightgrey' }}>—⁠</Text>;
     }
@@ -1116,70 +1173,136 @@ export default function MeScreen() {
       <View style={{ marginBottom: 20, gap: 10 }}>
         {featuresToRender.map((feature: any) => {
           if (isList) {
-            return (
-              <TouchableOpacity
-                key={feature.name && feature.name.toLowerCase()}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
-                  padding: 5,
-                  borderRadius: 8,
-                }}
-                onPress={() => {
-                  setClassFeatDescriptionModalVisible(true);
-                  setSelectedFeat(feature.name);
-                }}
-              >
-                {/* Show Icon for specific class features */}
-                {(
-                  (feature.name.toLowerCase() === 'magical tinkering' && !magicalTinkeringEnabled) ||
-                  (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled) ||
-                  (feature.name.toLowerCase() === 'artificer specialist' && !subclass) ||
-                  (feature.name.toLowerCase() === 'primal path' && !subclass) ||
-                  (feature.name.toLowerCase() === 'primal knowledge' && (!primalKnowledgeEnabled ||
-                    (!primalKnowledgeEnabledAgain && statsData.level >= 10))) ||
-                  (feature.name.toLowerCase() === 'primal champion' && !primalChampionEnabled) ||
-                  (feature.name.toLowerCase() === 'bard college' && !subclass) ||
-                  (feature.name.toLowerCase() === 'expertise' && (!expertiseEnabled ||
-                    (!expertiseEnabledAgain && statsData.level >= 10))) ||
-                  (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
-                  (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
-                  (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
-                  (feature.name.toLowerCase() === 'divine domain' && (!subclass ||
-                    (!arcaneInitiateEnabled && subclass === 'arcana') ||
-                    (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') ||
-                    (!deathDomainEnabled && subclass === 'death') ||
-                    (!blessingsOfKnowledgeEnabled && subclass === 'knowledge') ||
-                    (!acolyteOfNatureEnabled && subclass === 'nature') ||
-                    (!orderDomainEnabled && subclass === 'order')
-                    // add more cleric subclasses here
-                  )) ||
-                  (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
-                  (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled) ||
-                  (feature.name.toLowerCase() === 'druid circle' && !subclass) ||
-                  (feature.name.toLowerCase() === 'fighting style' && !fightingStyleLearned) ||
-                  (feature.name.toLowerCase() === 'martial archetype' && !subclass) ||
-                  (feature.name.toLowerCase() === 'monastic tradition' && !subclass)
+            // Only render if inside modal OR if feature is pinned
+            if (!insideModal && !pinnedFeats.includes(feature.name)) {
+              return null;
+            }
 
-                  // add more feats for all classes here
-                ) && (
-                    <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
+            return (
+              <View key={feature.name && feature.name.toLowerCase()}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 5,
+                    padding: 5,
+                    borderRadius: 8,
+                  }}
+                  onPress={() => {
+                    if (insideModal) {
+                      setExpandedFeat(expandedFeat === feature.name ? null : feature.name);
+                    } else {
+                      setClassFeatDescriptionModalVisible(true);
+                      setSelectedFeat(feature.name);
+                    }
+                  }}
+                  onLongPress={() => {
+                    if (!pinnedFeats.includes(feature.name)) {
+                      Alert.alert(
+                        'Pin Feature',
+                        'Would you like to pin this feature?',
+                        [
+                          {
+                            text: 'Cancel',
+                            style: 'cancel'
+                          },
+                          {
+                            text: 'Pin',
+                            onPress: () => {
+                              setPinnedFeats([...pinnedFeats, feature.name]);
+                            }
+                          }
+                        ]
+                      );
+                    }
+                    else {
+                      Alert.alert(
+                        'Unpin Feature',
+                        'Would you like to unpin this feature?',
+                        [
+                          {
+                            text: 'Cancel',
+                            style: 'cancel'
+                          },
+                          {
+                            text: 'Unpin',
+                            onPress: () => {
+                              setPinnedFeats(pinnedFeats.filter(feat => feat !== feature.name));
+                            }
+                          }
+                        ]
+                      );
+                    }
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    {/* Show Icon for specific class features */}
+                    {(
+                      (feature.name.toLowerCase() === 'magical tinkering' && !magicalTinkeringEnabled) ||
+                      (feature.name.toLowerCase() === 'infuse item' && !infuseItemEnabled) ||
+                      (feature.name.toLowerCase() === 'artificer specialist' && !subclass) ||
+                      (feature.name.toLowerCase() === 'primal path' && !subclass) ||
+                      (feature.name.toLowerCase() === 'primal knowledge' && (!primalKnowledgeEnabled ||
+                        (!primalKnowledgeEnabledAgain && statsData.level >= 10))) ||
+                      (feature.name.toLowerCase() === 'primal champion' && !primalChampionEnabled) ||
+                      (feature.name.toLowerCase() === 'bard college' && !subclass) ||
+                      (feature.name.toLowerCase() === 'expertise' && (!expertiseEnabled ||
+                        (!expertiseEnabledAgain && statsData.level >= 10))) ||
+                      (feature.name.toLowerCase() === 'bardic inspiration' && !bardicInspirationEnabled) ||
+                      (feature.name.toLowerCase() === 'font of inspiration' && !fontOfInspirationEnabled) ||
+                      (feature.name.toLowerCase() === 'countercharm' && !countercharmEnabled) ||
+                      (feature.name.toLowerCase() === 'divine domain' && (!subclass ||
+                        (!arcaneInitiateEnabled && subclass === 'arcana') ||
+                        (!arcaneMasteryEnabled && statsData.level >= 17 && subclass === 'arcana') ||
+                        (!deathDomainEnabled && subclass === 'death') ||
+                        (!blessingsOfKnowledgeEnabled && subclass === 'knowledge') ||
+                        (!acolyteOfNatureEnabled && subclass === 'nature') ||
+                        (!orderDomainEnabled && subclass === 'order')
+                      )) ||
+                      (feature.name.toLowerCase() === 'channel divinity' && !channelDivinityEnabled) ||
+                      (feature.name.toLowerCase() === 'wild shape' && !wildShapeEnabled) ||
+                      (feature.name.toLowerCase() === 'druid circle' && !subclass) ||
+                      (feature.name.toLowerCase() === 'fighting style' && !fightingStyleLearned) ||
+                      (feature.name.toLowerCase() === 'martial archetype' && !subclass) ||
+                      (feature.name.toLowerCase() === 'monastic tradition' && !subclass)
+                    ) && (
+                        <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
+                      )}
+                    {insideModal && pinnedFeats.includes(feature.name) && (
+                      <MaterialCommunityIcons name="pin" size={20} color="black" />
+                    )}
+                    <Text style={[
+                      styles.featLabel,
+                      {
+                        color: textColor || 'white',
+                        borderWidth: 1,
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        paddingVertical: 2,
+                        paddingHorizontal: 5,
+                        borderRadius: 4,
+                      }
+                    ]}>
+                      {feature.name}
+                    </Text>
+                  </View>
+                  {insideModal && (
+                    <MaterialCommunityIcons
+                      name={expandedFeat === feature.name ? 'chevron-up' : 'chevron-down'}
+                      size={20}
+                      color={textColor || 'white'}
+                    />
                   )}
-                <Text style={[
-                  styles.featLabel,
-                  {
-                    color: 'white',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255,255,255,0.2)',
-                    paddingVertical: 2,
-                    paddingHorizontal: 5,
-                    borderRadius: 4,
-                  }
-                ]}>
-                  {feature.name}
-                </Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
+                {insideModal && expandedFeat === feature.name && (
+                  <View style={{
+                    marginTop: 5,
+                    borderRadius: 5
+                  }}>
+                    {renderFeature(feature)}
+                  </View>
+                )}
+              </View>
             );
           }
 
@@ -2999,7 +3122,10 @@ export default function MeScreen() {
 
             <DropDownPicker
               items={wizardCantrips
-                .filter((item) => !arcaneInitiateCantrips.includes(item.name))
+                .filter((item) =>
+                  !arcaneInitiateCantrips.includes(item.name) &&
+                  !cantripSlotsData.includes(item.name)
+                )
                 .map((item) => ({
                   label: item.name,
                   value: item.name
@@ -4069,6 +4195,105 @@ export default function MeScreen() {
     );
   };
 
+  const renderInteractiveFeatList = () => {
+    return (
+      <View style={{ gap: 20 }}>
+        {/* Race Features */}
+        <View style={{ gap: 5 }}>
+          <Text style={[styles.label, { color: 'grey' }]}>{statsData.race || 'Race'} Feats:</Text>
+          {(!statsData.race || raceBonuses.length === 0) && <Text style={{ color: 'black' }}>—</Text>}
+          {raceBonuses.map((race) => (
+            race.race === statsData.race && Object.entries(race.features).map(([key]) => (
+              <View key={`feature-${key}`}>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 5,
+                    padding: 5,
+                  }}
+                  onPress={() => {
+                    setExpandedFeat(expandedFeat === key ? null : key);
+                  }}
+                  onLongPress={() => {
+                    if (!pinnedFeats.includes(key)) {
+                      Alert.alert(
+                        'Pin Feature',
+                        'Would you like to pin this feature?',
+                        [
+                          {
+                            text: 'Cancel',
+                            style: 'cancel'
+                          },
+                          {
+                            text: 'Pin',
+                            onPress: () => {
+                              setPinnedFeats([...pinnedFeats, key]);
+                            }
+                          }
+                        ]
+                      );
+                    } else {
+                      Alert.alert(
+                        'Unpin Feature',
+                        'Would you like to unpin this feature?',
+                        [
+                          {
+                            text: 'Cancel',
+                            style: 'cancel'
+                          },
+                          {
+                            text: 'Unpin',
+                            onPress: () => {
+                              setPinnedFeats(pinnedFeats.filter(feat => feat !== key));
+                            }
+                          }
+                        ]
+                      );
+                    }
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    {pinnedFeats.includes(key) && (
+                      <MaterialCommunityIcons name="pin" size={20} color="black" />
+                    )}
+                    <Text style={[styles.featLabel, { color: 'black' }]}>
+                      {key.charAt(0).toUpperCase() + key.slice(1)}
+                    </Text>
+                  </View>
+                  <MaterialCommunityIcons
+                    name={expandedFeat === key ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color="black"
+                  />
+                </TouchableOpacity>
+                {expandedFeat === key && (
+                  <View style={{
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                    padding: 10,
+                    marginTop: 5,
+                    borderRadius: 5
+                  }}>
+                    {renderRaceFeatures(key)}
+                  </View>
+                )}
+              </View>
+            ))
+          ))}
+        </View>
+
+        {/* Class Features */}
+        <View style={{ gap: 5 }}>
+          <Text style={[styles.label, { color: 'grey', textTransform: 'capitalize' }]}>
+            {statsData.class || 'Class'} Feats:
+          </Text>
+          {renderClassFeatures(true, null, 'black', true)}
+        </View>
+      </View>
+    );
+  };
+
   // Calculate half of the screen width
   const screenWidth = Dimensions.get('window').width;
   const section3Width = (1 / 2) * screenWidth;
@@ -4077,6 +4302,28 @@ export default function MeScreen() {
   // Main Render
   return (
     <View style={[styles.container, { paddingTop: 60 }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => setAllFeatsModalVisible(true)}
+          style={{ overflow: 'hidden', borderRadius: 8, flex: 1, borderWidth: 1, borderColor: 'white' }}
+        >
+          <ImageBackground
+            source={featuresImage as ImageSourcePropType}
+            style={{
+              padding: 10,
+              justifyContent: 'center',
+              alignItems: 'center',
+              flexDirection: 'row',
+              gap: 5
+            }}
+            resizeMode="cover"
+          >
+            <MaterialCommunityIcons name='feather' size={20} color={'white'} />
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>All Feats</Text>
+          </ImageBackground>
+        </TouchableOpacity>
+      </View>
 
       {/* Character and Feats Section - Main Content */}
       <View style={styles.mainContent}>
@@ -4150,8 +4397,10 @@ export default function MeScreen() {
 
         {/* Feats Section */}
         <View style={styles.section2}>
-
-
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <MaterialCommunityIcons name='pin' size={20} color={'lightgrey'} />
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Pinned Feats</Text>
+          </View>
           {/* Feats */}
           <ScrollView style={{
             flexDirection: 'column',
@@ -4170,58 +4419,76 @@ export default function MeScreen() {
               {(!statsData.race || raceBonuses.length === 0) && <Text style={{ color: 'lightgrey' }}>—</Text>}
               {raceBonuses.map((race) => (
                 race.race === statsData.race && Object.entries(race.features).map(([key]) => (
-                  <View
-                    key={`race-feature-${key}`}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 5, }}>
-                    {(
-                      (key.toLowerCase() === 'lucky' && !luckyPointsEnabled) ||
-                      (key.toLowerCase() === 'skill versatility' && !raceSkillProfGained) ||
-                      (key.toLowerCase() === 'relentless endurance' && !relentlessEnduranceGained) ||
-                      (key.toLowerCase() === 'infernal legacy' && !infernalLegacyEnabled) ||
-                      (key.toLowerCase() === 'draconic ancestry' && !draconicAncestry) ||
-                      (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled && draconicAncestry) ||
-                      (key.toLowerCase() === 'artificer specialist' && !subclass)
-                    ) && (
-                        <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
-                      )}
-                    <TouchableOpacity
-                      key={`feature-${key}`}
-                      style={{
-                        flexDirection: 'column',
-                        gap: 5,
-                        padding: 5,
-                        flexShrink: 1,
-                      }}
-                      onPress={() => {
-                        setFeatDescriptionModalVisible(true);
-                        setSelectedFeat(key);
-                      }}
-                      disabled={key.toLowerCase() === 'breath weapon' && !draconicAncestry}
-                    >
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
-
-                        {/* Race Feats Highlighting */}
-                        <Text
-                          key={`label-${key}`}
-                          style={[
-                            styles.featLabel,
-                            {
-                              flexShrink: 1,
-                              flexWrap: 'wrap',
-                              color: 'white',
-                              borderWidth: 1,
-                              borderColor: 'rgba(255,255,255,0.2)',
-                              paddingVertical: 2,
-                              paddingHorizontal: 5,
-                              borderRadius: 4,
-                            }
-                          ]}
-                        >
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
+                  pinnedFeats.includes(key) && (
+                    <View
+                      key={`race-feature-${key}`}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, }}>
+                      {(
+                        (key.toLowerCase() === 'lucky' && !luckyPointsEnabled) ||
+                        (key.toLowerCase() === 'skill versatility' && !raceSkillProfGained) ||
+                        (key.toLowerCase() === 'relentless endurance' && !relentlessEnduranceGained) ||
+                        (key.toLowerCase() === 'infernal legacy' && !infernalLegacyEnabled) ||
+                        (key.toLowerCase() === 'draconic ancestry' && !draconicAncestry) ||
+                        (key.toLowerCase() === 'breath weapon' && !breathWeaponEnabled && draconicAncestry) ||
+                        (key.toLowerCase() === 'artificer specialist' && !subclass)
+                      ) && (
+                          <MaterialCommunityIcons name="alert-circle" size={16} color="gold" />
+                        )}
+                      <TouchableOpacity
+                        key={`feature-${key}`}
+                        style={{
+                          flexDirection: 'column',
+                          gap: 5,
+                          padding: 5,
+                          flexShrink: 1,
+                        }}
+                        onPress={() => {
+                          setFeatDescriptionModalVisible(true);
+                          setSelectedFeat(key);
+                        }}
+                        onLongPress={() => {
+                          Alert.alert(
+                            'Unpin Feature',
+                            'Would you like to unpin this feature?',
+                            [
+                              {
+                                text: 'Cancel',
+                                style: 'cancel'
+                              },
+                              {
+                                text: 'Unpin',
+                                onPress: () => {
+                                  setPinnedFeats(pinnedFeats.filter(feat => feat !== key));
+                                }
+                              }
+                            ]
+                          );
+                        }}
+                        disabled={key.toLowerCase() === 'breath weapon' && !draconicAncestry}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                          <Text
+                            key={`label-${key}`}
+                            style={[
+                              styles.featLabel,
+                              {
+                                flexShrink: 1,
+                                flexWrap: 'wrap',
+                                color: 'white',
+                                borderWidth: 1,
+                                borderColor: 'rgba(255,255,255,0.2)',
+                                paddingVertical: 2,
+                                paddingHorizontal: 5,
+                                borderRadius: 4,
+                              }
+                            ]}
+                          >
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  )
                 ))
               ))}
             </View>
@@ -4517,6 +4784,7 @@ export default function MeScreen() {
                               { text: 'Cancel', style: 'cancel' },
                               { text: 'Delete', style: 'destructive', onPress: async () => handleDeleteCharacter() }
                             ]);
+                            setCharacterModalVisible(false);
                           }}
                         >
                           <Ionicons name="trash-bin" size={24} color="white" />
@@ -4563,6 +4831,7 @@ export default function MeScreen() {
                               handleRaceAndClassBonus(updatedStatsData);
                             }
                             setCharacterModalVisible(false);
+                            setNewCharacterCreated(true);
                           }}
                         >
                           <Text style={styles.submitButtonText}>Create</Text>
@@ -5060,6 +5329,24 @@ export default function MeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* All Feats Modal */}
+      <Modal animationType="fade" transparent={true} visible={allFeatsModalVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>All Feats</Text>
+            <Text>Long press to pin a feat</Text>
+            <ScrollView style={{ flex: 1, marginBottom: 60, marginTop: 20 }}>
+              {renderInteractiveFeatList()}
+            </ScrollView>
+          </View>
+          <View style={styles.modalButtons}>
+            <Button title="Close" onPress={() => {
+              setAllFeatsModalVisible(false);
+            }} />
+          </View>
+        </View>
+      </Modal>
 
 
 

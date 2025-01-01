@@ -167,8 +167,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     };
 
     const getAbilityPointsFromLevel = (level: number): number => {
-        // Base ability points at level 1 is 24 for all classes
-        let totalPoints = 24;
+        // Base ability points at level 1 for all classes
+        let totalPoints = 27;
 
         // If not level 1, check class tables for ability score improvements
         if (level > 1) {
@@ -221,7 +221,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     return totalPoints + (level - 1) * 2;
             }
 
-            // Add 2 points for each level that has Ability Score Improvement
+            // Add 2 points for each level that has Ability Score Improvement as a feature
             classLevels.forEach(levelData => {
                 if (levelData.features && levelData.features.some(feature =>
                     feature.toLowerCase() === 'ability score improvement'
@@ -277,6 +277,33 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     };
     const proficiencyBonus = getProficiencyBonus(level);
 
+    // Function to handle XP changes
+    const handleXpChange = () => {
+        const changeValue = parseInt(inputValue) || 0;
+        let newXp = xp;
+        newXp = xp + changeValue;
+        // Update level based on new XP
+        const newLevel = getLevelFromXp(newXp);
+
+        // If level changes, initialize allocations for new level
+        let newAllocationsPerLevel = { ...allocationsPerLevel };
+        if (newLevel !== level) {
+            newAllocationsPerLevel = {
+                ...allocationsPerLevel,
+                [newLevel]: {},
+            };
+        }
+        // Update statsData
+        updateStatsData({
+            ...statsData,
+            xp: newXp,
+            level: newLevel,
+            allocationsPerLevel: newAllocationsPerLevel,
+        });
+
+        setInputValue('');
+        setModalVisible(false);
+    };
 
     // Calculate Available Ability Points
     const getAvailableAbilityPoints = (): number => {
@@ -287,7 +314,21 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             if (primalChampionEnabled && (ability.name === 'Strength' || ability.name === 'Constitution')) {
                 abilityValue = Math.max(8, abilityValue - 4); // Subtract the Primal Champion bonus
             }
-            return acc + (abilityValue - 8);
+
+            // Calculate points used for this ability
+            const basePoints = abilityValue - 8;
+            let abilityPoints = 0;
+
+            // For level 1, points above 5 cost double
+            if (level === 1) {
+                const regularPoints = Math.min(5, basePoints);
+                const doublePoints = Math.max(0, basePoints - 5) * 2;
+                abilityPoints = regularPoints + doublePoints;
+            } else {
+                abilityPoints = basePoints;
+            }
+
+            return acc + abilityPoints;
         }, 0);
         return totalPoints - usedPoints;
     };
@@ -308,40 +349,11 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         }
     }, [statsData.level, statsData.abilities, allocationsPerLevel, level]);
 
-
-    // Function to handle XP changes
-    const handleXpChange = () => {
-        const changeValue = parseInt(inputValue) || 0;
-        let newXp = xp;
-        newXp = xp + changeValue;
-        // Update level based on new XP
-        const newLevel = getLevelFromXp(newXp);
-
-        // If level changes, initialize allocations for new level
-        let newAllocationsPerLevel = { ...allocationsPerLevel };
-        if (newLevel !== level) {
-            newAllocationsPerLevel = {
-                ...allocationsPerLevel,
-                [newLevel]: {},
-            };
-        }
-
-
-        // Update statsData
-        updateStatsData({
-            ...statsData,
-            xp: newXp,
-            level: newLevel,
-            allocationsPerLevel: newAllocationsPerLevel,
-        });
-
-        setInputValue('');
-        setModalVisible(false);
-    };
-
     // Function to handle ability increment
     const incrementAbility = () => {
         if (!selectedAbility) return;
+
+        const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
 
         // Fetch the latest ability details from context
         const currentAbility = statsData.abilities.find((a) => a.id === selectedAbility.id);
@@ -355,9 +367,21 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             (currentAbility.name === 'Strength' || currentAbility.name === 'Constitution');
         const maxAllowed = isPrimalChamp ? 24 : 20;
 
-        // Check if ability points available is 0
-        if (availableAbilityPoints <= 0) {
-            Alert.alert('No More Ability Points', 'Gain XP to level up and get more ability points.');
+        // Calculate how many points this increment will cost
+        let pointCost = 1;
+        if (currentAllocation >= 5 && level === 1) {
+            pointCost = 2;
+        }
+
+        // Check if at level 1 and would exceed 9 allocations
+        if (level === 1 && currentAllocation >= 9) {
+            Alert.alert('Maximum Allocations Reached', 'Cannot exceed 9 allocations at level 1.');
+            return;
+        }
+
+        // Check if ability points available is less than point cost
+        if (availableAbilityPoints < pointCost) {
+            Alert.alert('Not Enough Ability Points', 'Gain XP to level up and get more ability points.');
             return;
         }
 
@@ -367,24 +391,16 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return;
         }
 
-        // Check level 1 maximum of 15
-        if (level === 1 && currentAbility.value >= 15) {
-            Alert.alert('Level 1 Maximum Reached', 'Abilities cannot exceed 15 at level 1.');
-            return;
-        }
-
-        const currentAllocation = allocationsPerLevel[level]?.[selectedAbility.id] || 0;
-
         // Update allocations
         const updatedAllocations = {
             ...allocationsPerLevel,
             [level]: {
                 ...allocationsPerLevel[level],
-                [selectedAbility.id]: currentAllocation + 1,
+                [selectedAbility.id]: currentAllocation + pointCost,
             },
         };
 
-        // Update abilities
+        // Update abilities (value goes up by +1, not by point cost)
         const updatedAbilities = statsData.abilities.map((ability) => {
             if (ability.id === selectedAbility.id) {
                 return { ...ability, value: ability.value + 1 };
@@ -399,7 +415,6 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             allocationsPerLevel: updatedAllocations,
         });
     };
-
 
     // Function to handle ability decrement (undo increment)
     const decrementAbility = () => {
@@ -435,12 +450,18 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             return;
         }
 
+        // Calculate how many points to return based on level and current allocation
+        let pointsToReturn = 1;
+        if (level === 1 && allocatedThisLevel > 5) {
+            pointsToReturn = 2;
+        }
+
         // Update allocations
         const updatedAllocations = {
             ...allocationsPerLevel,
             [level]: {
                 ...allocationsPerLevel[level],
-                [selectedAbility.id]: allocatedThisLevel - 1,
+                [selectedAbility.id]: allocatedThisLevel - pointsToReturn,
             },
         };
 
@@ -885,6 +906,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         >
                             <View style={{
                                 flexDirection: 'row',
+                                gap: 5
                             }}>
                                 <MaterialCommunityIcons name="sword-cross" size={20} color="white" />
                                 <Text style={styles.firstRowText}>

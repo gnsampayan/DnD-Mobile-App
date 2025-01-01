@@ -7,9 +7,9 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 50,
+        padding: 10,
     },
     topButton: {
         height: 40,
