@@ -62,10 +62,12 @@ export default function TabLayout() {
           ),
         }}
       />
+      {/* Conditionally hide the Stats tab button if no character is created */}
       <Tabs.Screen
         name="stats"
         options={{
           title: 'Stats',
+          href: statsData.class ? undefined : null,
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart-outline'} color={color} />
           ),

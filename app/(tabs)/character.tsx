@@ -5335,7 +5335,7 @@ export default function MeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>All Feats</Text>
-            <Text>Long press to pin a feat</Text>
+            <Text>Long press to pin or unpin a feat</Text>
             <ScrollView style={{ flex: 1, marginBottom: 60, marginTop: 20 }}>
               {renderInteractiveFeatList()}
             </ScrollView>

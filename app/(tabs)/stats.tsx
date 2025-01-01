@@ -237,7 +237,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     // Check if there are unfilled HP increases
     useEffect(() => {
         const unfilledLevels = Array.from({ length: statsData.level - 1 }, (_, index) => index + 2).filter(
-            (lvl) => statsData.hpIncreases[lvl] === undefined || statsData.hpIncreases[lvl] === null || statsData.hpIncreases[lvl] === 0
+            (lvl) => statsData.hpIncreases[lvl] === undefined || statsData.hpIncreases[lvl] === null
         );
         setHasUnfilledHpIncreases(unfilledLevels.length > 0);
         const constitutionAbility = statsData.abilities.find(ability => ability.name === 'Constitution');
@@ -307,29 +307,27 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
 
     // Calculate Available Ability Points
     const getAvailableAbilityPoints = (): number => {
-        const totalPoints = getAbilityPointsFromLevel(level) + getRaceBonusTotal(statsData.race || '');
-        const usedPoints = abilities.reduce((acc, ability) => {
-            // Don't count the +4 from Primal Champion in Str/Con when calculating used points
-            let abilityValue = ability.value;
-            if (primalChampionEnabled && (ability.name === 'Strength' || ability.name === 'Constitution')) {
-                abilityValue = Math.max(8, abilityValue - 4); // Subtract the Primal Champion bonus
-            }
+        const totalPoints = getAbilityPointsFromLevel(level);
 
-            // Calculate points used for this ability
-            const basePoints = abilityValue - 8;
-            let abilityPoints = 0;
-
-            // For level 1, points above 5 cost double
-            if (level === 1) {
-                const regularPoints = Math.min(5, basePoints);
-                const doublePoints = Math.max(0, basePoints - 5) * 2;
-                abilityPoints = regularPoints + doublePoints;
-            } else {
-                abilityPoints = basePoints;
-            }
-
-            return acc + abilityPoints;
+        // Calculate total used points across all levels
+        const usedPoints = Object.entries(allocationsPerLevel).reduce((totalAcc, [levelKey, allocations]) => {
+            // For each level, sum up the allocations
+            return totalAcc + Object.values(allocations).reduce((levelAcc: number, allocation: unknown) => {
+                const allocationNum = Number(allocation);
+                // For level 1, points above 5 cost double
+                if (parseInt(levelKey) === 1) {
+                    if (allocationNum <= 5) {
+                        return levelAcc + allocationNum;
+                    } else {
+                        const regularPoints = 5;
+                        const doublePoints = (allocationNum - 5);
+                        return levelAcc + regularPoints + doublePoints;
+                    }
+                }
+                return levelAcc + allocationNum;
+            }, 0 as number);
         }, 0);
+
         return totalPoints - usedPoints;
     };
 
@@ -708,11 +706,8 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     };
 
     const saveAbilityAllocations = () => {
-        // Reset allocations
-        const resetAllocations: AllocationHistory = {};
         updateStatsData({
-            ...statsData,
-            allocationsPerLevel: resetAllocations,
+            ...statsData
         });
         setAbilityAllocationsSaveVisible(false);
     }
