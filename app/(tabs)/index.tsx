@@ -103,6 +103,10 @@ import kiFueledAttackImage from '@actions/ki-fueled-attack-image.png';
 import slowFallImage from '@actions/slow-fall-image.png';
 import quickenedHealingImage from '@actions/quickened-healing-image.png';
 import stunningStrikeImage from '@actions/stunning-strike-image.png';
+import focusAimImage from '@actions/focus-aim-image.png';
+import stillnessOfMindImage from '@actions/stillness-of-mind-image.png';
+import emptyBodyImage from '@actions/empty-body-image.png';
+import perfectSelfImage from '@actions/perfect-self-image.png';
 
 // Cantrip images
 import acidSplashImage from '@images/cantrips/acid-splash.png';
@@ -1176,6 +1180,14 @@ export default function ActionsScreen() {
       if (item.name.toLowerCase() === 'ranged attack') {
         affordable = affordable && rangedHandWeaponEquipped !== null && rangedHandWeaponEquipped !== undefined;
       }
+      // Check for Empty Body
+      if (item.name.toLowerCase() === 'empty body') {
+        affordable = affordable && currentKiPoints >= 4;
+      }
+      // Check for Perfect Self
+      if (item.name.toLowerCase() === 'perfect self') {
+        affordable = affordable && currentKiPoints === 0;
+      }
       return affordable;
     }
     return false;
@@ -1970,6 +1982,28 @@ export default function ActionsScreen() {
           type: 'feature',
           source: 'class',
         } as ActionBlock);
+        // Add Focused Aim action
+        classActions.push({
+          id: 'class-focused-aim',
+          name: 'Focused Aim',
+          cost: { actions: 0, bonus: 0 },
+          details: 'When you miss with an attack roll, you can spend 1 to 3 ki points to increase your attack roll by 2 for each of these ki points you spend, potentially turning the miss into a hit.',
+          image: focusAimImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 7) {
+        // Add Stillness of Mind action
+        classActions.push({
+          id: 'class-stillness-of-mind',
+          name: 'Stillness of Mind',
+          cost: { actions: 1, bonus: 0 },
+          details: 'End one effect on yourself that is causing you to be charmed or frightened.',
+          image: stillnessOfMindImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
       }
       if (statsData.level >= 9) {
         // Add Unarmored Movement passive
@@ -1979,6 +2013,30 @@ export default function ActionsScreen() {
           cost: { actions: 0, bonus: 0 },
           details: 'While you are not wearing any armor and not wielding a shield, you gain the ability to move along vertical surfaces and across liquids.',
           image: unarmoredMovementImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 18) {
+        //Add EmptyBody action
+        classActions.push({
+          id: 'class-empty-body',
+          name: 'Empty Body',
+          cost: { actions: 1, bonus: 0 },
+          details: 'Use your action and 4 ki points to turn invisible. \nAdditionally, you can spend 8 ki points to cast the Astral Projection spell without needing material components. When you do so, you can\'t take any other creatures with you.',
+          image: emptyBodyImage as ImageSourcePropType,
+          type: 'feature',
+          source: 'class',
+        } as ActionBlock);
+      }
+      if (statsData.level >= 20) {
+        // Add Perfect Self action
+        classActions.push({
+          id: 'class-perfect-self',
+          name: 'Perfect Self',
+          cost: { actions: 0, bonus: 0 },
+          details: 'When rolling for initiative, and you have 0 ki points, regain 4 ki points.',
+          image: perfectSelfImage as ImageSourcePropType,
           type: 'feature',
           source: 'class',
         } as ActionBlock);
@@ -2671,7 +2729,7 @@ export default function ActionsScreen() {
     );
   };
 
-  const renderSpellDetails = (spellName: string) => {
+  const renderSpellDetails = (spellName: string, textColor: string = 'black') => {
     if (!spellName) return null;
 
     // Convert spellName to lowercase for case-insensitive comparison
@@ -2686,34 +2744,34 @@ export default function ActionsScreen() {
         return (
           <View key={spell.id}>
             {spell.level && (
-              <Text>Level: {spell.level}</Text>
+              <Text style={{ color: textColor }}>Level: {spell.level}</Text>
             )}
             {spell.school && (
-              <Text>School: {spell.school}</Text>
+              <Text style={{ color: textColor }}>School: {spell.school}</Text>
             )}
             {spell.castingTime && (
-              <Text>Casting Time: {spell.castingTime}</Text>
+              <Text style={{ color: textColor }}>Casting Time: {spell.castingTime}</Text>
             )}
             {spell.range && (
-              <Text>Range: {spell.range}</Text>
+              <Text style={{ color: textColor }}>Range: {spell.range}</Text>
             )}
             {spell.components && (
-              <Text>Components: {spell.components.join(', ')}</Text>
+              <Text style={{ color: textColor }}>Components: {spell.components.join(', ')}</Text>
             )}
             {spell.duration && (
-              <Text>Duration: {spell.duration}</Text>
+              <Text style={{ color: textColor }}>Duration: {spell.duration}</Text>
             )}
 
             {/* Description */}
             {spell.description && (
-              <Text>{spell.description}</Text>
+              <Text style={{ color: textColor }}>{spell.description}</Text>
             )}
 
             {/* Features */}
             {spell.features && typeof spell.features === 'object' && (
               <View>
-                <Text>Features:</Text>
-                {renderSpellFeatures(spell.features)}
+                <Text style={{ color: textColor }}>Features:</Text>
+                {renderSpellFeatures(spell.features, textColor)}
               </View>
             )}
 
@@ -2725,7 +2783,7 @@ export default function ActionsScreen() {
   };
 
   // Add this utility function to handle rendering spell features
-  const renderSpellFeatures = (features: any) => {
+  const renderSpellFeatures = (features: any, textColor: string = 'black') => {
     if (Array.isArray(features)) {
       return features.map((feature, index) => (
         <View key={index} style={{ marginLeft: 10, marginBottom: 5 }}>
@@ -2733,37 +2791,37 @@ export default function ActionsScreen() {
             <View>
               {Object.entries(feature).map(([key, value]) => (
                 <View key={key} style={{ marginBottom: 5 }}>
-                  <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                  <Text style={{ fontWeight: 'bold', marginBottom: 2, color: textColor }}>
                     {key.charAt(0).toUpperCase() + key.slice(1)}:
                   </Text>
                   {typeof value === 'object' ? (
-                    renderSpellFeatures(value)
+                    renderSpellFeatures(value, textColor)
                   ) : (
-                    <Text style={{ marginLeft: 5 }}>{String(value)}</Text>
+                    <Text style={{ marginLeft: 5, color: textColor }}>{String(value)}</Text>
                   )}
                 </View>
               ))}
             </View>
           ) : (
-            <Text style={{ marginLeft: 5 }}>{feature}</Text>
+            <Text style={{ marginLeft: 5, color: textColor }}>{feature}</Text>
           )}
         </View>
       ));
     } else if (typeof features === 'object') {
       return Object.entries(features).map(([key, value]) => (
         <View key={key} style={{ marginLeft: 10, marginBottom: 5 }}>
-          <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+          <Text style={{ fontWeight: 'bold', marginBottom: 2, color: textColor }}>
             {key.charAt(0).toUpperCase() + key.slice(1)}:
           </Text>
           {typeof value === 'object' ? (
-            renderSpellFeatures(value)
+            renderSpellFeatures(value, textColor)
           ) : (
-            <Text style={{ marginLeft: 5 }}>{String(value)}</Text>
+            <Text style={{ marginLeft: 5, color: textColor }}>{String(value)}</Text>
           )}
         </View>
       ));
     } else {
-      return <Text style={{ marginLeft: 5 }}>{features}</Text>;
+      return <Text style={{ marginLeft: 5, color: textColor }}>{features}</Text>;
     }
   };
 
@@ -3240,15 +3298,18 @@ export default function ActionsScreen() {
               <TouchableOpacity
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                 onPress={() => {
-                  // Focused Aim Feature
-                  if (statsData.level >= 5) {
+                  if (statsData.level >= 14) {
                     Alert.alert(
                       'Ki Points',
-                      'You can use your Ki Points to fuel your Ki Powers.\n\nFocused Aim:\nWhen you miss an attack roll, you can spend key points (up to 3) to increase your attack roll by 2 per Ki point used.',
+                      'You can use your Ki Points to fuel your Ki Powers. \n\nDiamond Soul:\nAt level 14, you can spend 1 ki point to reroll a failed saving throw.',
                       [
                         {
-                          text: '-1 Ki',
-                          onPress: () => setCurrentKiPoints(prev => Math.max(0, prev - 1))
+                          text: 'Spend 1 Ki Point',
+                          onPress: () => {
+                            if (currentKiPoints > 0) {
+                              setCurrentKiPoints(currentKiPoints - 1);
+                            }
+                          }
                         },
                         {
                           text: 'Cancel',
@@ -3699,11 +3760,12 @@ export default function ActionsScreen() {
                             selectedAction.name.toLowerCase() === 'patient defense' ||
                             selectedAction.name.toLowerCase() === 'step of the wind' ||
                             selectedAction.name.toLowerCase() === 'quickened healing' ||
-                            selectedAction.name.toLowerCase() === 'stunning strike'
+                            selectedAction.name.toLowerCase() === 'stunning strike' ||
+                            selectedAction.name.toLowerCase() === 'empty body'
                           ) && (
                               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                 <Text style={{ color: 'black' }}>
-                                  {selectedAction.name.toLowerCase() !== 'stunning strike' ? ',' : ''} {kiCost(selectedAction.name)}
+                                  {selectedAction.name.toLowerCase() !== 'stunning strike' ? ',' : ''} {selectedAction.name.toLowerCase() === 'empty body' ? '4(+8)' : kiCost(selectedAction.name)}
                                 </Text>
                                 <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
                               </View>
@@ -3751,10 +3813,13 @@ export default function ActionsScreen() {
 
                         {/* Conditional Actions Group */}
                         {(
-                          selectedAction.name === 'Reaction' ||
-                          selectedAction.name === 'Deflect Missiles' ||
-                          selectedAction.name === 'Hellish Rebuke' ||
-                          selectedAction.name === 'Stunning Strike'
+                          selectedAction.name.toLowerCase() === 'reaction' ||
+                          selectedAction.name.toLowerCase() === 'deflect missiles' ||
+                          selectedAction.name.toLowerCase() === 'hellish rebuke' ||
+                          selectedAction.name.toLowerCase() === 'stunning strike' ||
+                          selectedAction.name.toLowerCase() === 'focused aim' ||
+                          selectedAction.name.toLowerCase() === 'stillness of mind' ||
+                          selectedAction.name.toLowerCase() === 'perfect self'
                         ) && (
                             <Text style={{ fontStyle: 'italic', marginBottom: 5, color: 'black' }}>
                               (Conditional)
@@ -4274,6 +4339,21 @@ export default function ActionsScreen() {
                       </View>
                     )}
 
+                    {/* Monk Empty Body */}
+                    {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'empty body' && (
+                      <TouchableOpacity
+                        style={[styles.modalWeaponProperty, { padding: 5, margin: 0, marginLeft: 5 }]}
+                        onPress={() => {
+                          setActionModalVisible(false);
+                          setDarkModalVisible(true);
+                        }}
+                      >
+                        <Text style={{ color: 'blue', textDecorationLine: 'underline' }}>
+                          Astral Projection Spell Description
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+
                     {/* ADD MORE HERE */}
 
                     {/* Modal Buttons */}
@@ -4371,7 +4451,51 @@ export default function ActionsScreen() {
                         </TouchableOpacity>
                       )}
 
-                      {/* Commit Button */}
+                      {/* Focused Aim Buttons */}
+                      {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'focused aim' && (
+                        <>
+                          <TouchableOpacity style={styles.modalButtonCommit}
+                            onPress={() => {
+                              setCurrentKiPoints(prev => Math.max(0, prev - 3));
+                              commitAction();
+                            }}
+                          >
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text>-3</Text>
+                              <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
+                            </View>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.modalButtonCommit}
+                            onPress={() => {
+                              setCurrentKiPoints(prev => Math.max(0, prev - 2));
+                              commitAction();
+                            }}
+                          >
+                            <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                              <Text>-2</Text>
+                              <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
+                            </View>
+                          </TouchableOpacity>
+                        </>
+                      )}
+
+                      {/* Empty Body -- Astral Projection Button --- Monk Action */}
+                      {statsData.class?.toLowerCase() === 'monk' && selectedAction.name.toLowerCase() === 'empty body' && (
+                        <TouchableOpacity
+                          style={[styles.modalButtonCommit, { opacity: currentKiPoints >= 8 ? 1 : 0.2 }]}
+                          onPress={() => {
+                            setCurrentKiPoints(prev => Math.max(0, prev - 8));
+                            commitAction();
+                          }}
+                          disabled={currentKiPoints < 8}
+                        >
+                          <Text>Astral Projection</Text>
+                        </TouchableOpacity>
+                      )}
+
+                      {/* Add other buttons here */}
+
+                      {/* Main Commit Button */}
                       <TouchableOpacity
                         style={[
                           styles.modalButtonCommit,
@@ -4533,6 +4657,15 @@ export default function ActionsScreen() {
                             case 'stunning strike':
                               setCurrentKiPoints(prev => Math.max(0, prev - 1));
                               break;
+                            case 'focused aim':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 1));
+                              break;
+                            case 'empty body':
+                              setCurrentKiPoints(prev => Math.max(0, prev - 4));
+                              break;
+                            case 'perfect self':
+                              setCurrentKiPoints(prev => Math.max(0, prev + 4));
+                              break;
                           }
 
                           // Default commit action
@@ -4544,7 +4677,12 @@ export default function ActionsScreen() {
 
                           {selectedAction.name.toLowerCase() !== 'rest' ? (
                             <Text>
-                              {selectedAction.name}
+                              {selectedAction.name.toLowerCase() === 'focused aim' ? (
+                                <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                                  <Text>-1</Text>
+                                  <MaterialCommunityIcons name="yin-yang" size={16} color="black" />
+                                </View>
+                              ) : selectedAction.name}
                             </Text>
                           ) :
                             <View style={styles.costTextContainer}>
@@ -4579,6 +4717,9 @@ export default function ActionsScreen() {
       >
         {renderInfusionDetails()}
         {renderChannelDivinityDetails()}
+        <ScrollView>
+          {selectedAction?.name.toLowerCase() === 'empty body' && renderSpellDetails("Astral Projection", 'white')}
+        </ScrollView>
         <View style={styles.modalButtons}>
           <TouchableOpacity style={styles.modalButton} onPress={() => {
             setDarkModalVisible(false);

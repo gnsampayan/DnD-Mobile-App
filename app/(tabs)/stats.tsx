@@ -84,6 +84,29 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
     const [selectedAbility, setSelectedAbility] = useState<Ability | null>(null);
     const [levelModalVisible, setLevelModalVisible] = useState<boolean>(false);
 
+    const [incrementOrDecrementPressed, setIncrementOrDecrementPressed] = useState<boolean>(false);
+    const INCREMENT_OR_DECREMENT_PRESSED_KEY = 'incrementOrDecrementPressed';
+    // save increment or decrement pressed to async storage when it changes
+    useEffect(() => {
+        try {
+            AsyncStorage.setItem(INCREMENT_OR_DECREMENT_PRESSED_KEY, incrementOrDecrementPressed.toString());
+        } catch (error) {
+            console.error('Error saving increment or decrement pressed to async storage:', error);
+        }
+    }, [incrementOrDecrementPressed]);
+    // load increment or decrement pressed from async storage
+    useEffect(() => {
+        try {
+            AsyncStorage.getItem(INCREMENT_OR_DECREMENT_PRESSED_KEY).then((value) => {
+                if (value !== null) {
+                    setIncrementOrDecrementPressed(value === 'true');
+                }
+            });
+        } catch (error) {
+            console.error('Error loading increment or decrement pressed from async storage:', error);
+        }
+    }, []);
+
     // Ref to track if the primal champion boost has been applied
     const primalChampionApplied = useRef(false);
 
@@ -341,7 +364,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
         const hasAllocationsForCurrentLevel = currentLevelAllocations && Object.keys(currentLevelAllocations).length > 0;
 
         // Only show save button if points were allocated this level, available points are 0, and abilityEditFinished is false
-        if (availablePoints === 0 && hasAllocationsForCurrentLevel) {
+        if (availablePoints === 0 && hasAllocationsForCurrentLevel && incrementOrDecrementPressed) {
             setAbilityAllocationsSaveVisible(true);
         }
     }, [statsData.level, statsData.abilities, allocationsPerLevel, level]);
@@ -414,6 +437,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             abilities: updatedAbilities,
             allocationsPerLevel: updatedAllocations,
         });
+        setIncrementOrDecrementPressed(true);
     };
 
     // Function to handle ability decrement (undo increment)
@@ -479,6 +503,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             abilities: updatedAbilities,
             allocationsPerLevel: updatedAllocations,
         });
+        setIncrementOrDecrementPressed(true);
     };
 
 
@@ -521,7 +546,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                 ]}
                 onPress={() => {
                     if (hasUnfilledHpIncreases) { //if level 1 hp increase is not set, don't allow ability point allocation
-                        Alert.alert(`Level ${level} HP Increase Not Set`, 'Set the Level 1 HP Increase before allocating ability points.');
+                        Alert.alert(`You Leveled Up!`, `Click "Level: ${level}" button to set the hit dice rolls before spending ability points.`);
                     } else {
                         openAbilityModal(item);
                     }
@@ -712,6 +737,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
             ...statsData
         });
         setAbilityAllocationsSaveVisible(false);
+        setIncrementOrDecrementPressed(false);
     }
 
     const renderLevelModal = () => {
@@ -931,8 +957,15 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                     {abilities.map((ability) => {
                         const modifier = Math.floor((ability.value - 10) / 2);
 
+                        // Diamond Soul Feat for Monk - at level 14+ monks gain proficiency in all saving throws
+                        const isMonkWithDiamondSoul = statsData.class?.toLowerCase() === 'monk' && statsData.level >= 14;
+
                         // Check if the class grants proficiency in this saving throw ability
-                        const isProficient = statsData.class && classBonuses.find(c => c.value === statsData.class)?.savingThrowProficiency.includes(ability.name);
+                        const hasClassProficiency = statsData.class && classBonuses.find(c => c.value === statsData.class)?.savingThrowProficiency.includes(ability.name);
+
+                        // Proficient if either has class proficiency or is monk level 14+
+                        const isProficient = hasClassProficiency || isMonkWithDiamondSoul;
+
                         const savingThrow = isProficient ? modifier + proficiencyBonus : modifier;
                         return (
                             <View key={ability.id} style={[
@@ -958,7 +991,7 @@ const CharacterStatsScreen: React.FC<CharacterStatsScreenProps> = () => {
                         <MaterialCommunityIcons name="lightning-bolt" size={24} color="lightgrey" />
                         <Text style={styles.characterStatsTitle}>Abilities</Text>
                     </View>
-                    {abilityAllocationsSaveVisible &&
+                    {abilityAllocationsSaveVisible && incrementOrDecrementPressed &&
                         <TouchableOpacity
                             onPress={() => {
                                 saveAbilityAllocations()
